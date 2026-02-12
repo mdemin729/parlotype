@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Parlotype.Core/Parlotype.Core.csproj" />
+    <Project Path="src/Parlotype.Desktop/Parlotype.Desktop.csproj" />
+    <Project Path="src/Parlotype.Platform/Parlotype.Platform.csproj" />
+    <Project Path="src/Parlotype.Tests/Parlotype.Tests.csproj" />
+  </Folder>
+</Solution>
