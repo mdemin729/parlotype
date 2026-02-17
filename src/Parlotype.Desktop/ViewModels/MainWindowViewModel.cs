@@ -17,17 +17,23 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isHintVisible;
 
+    public SettingsViewModel Settings { get; }
+
+    public MainWindowViewModel(SettingsViewModel settings)
+    {
+        Settings = settings;
+    }
+
+    // Parameterless constructor for designer support
+    public MainWindowViewModel() : this(new SettingsViewModel())
+    {
+    }
+
     [RelayCommand]
     private void ToggleRecording()
     {
         IsRecording = !IsRecording;
         StatusText = IsRecording ? "Recording..." : "Ready";
-    }
-
-    [RelayCommand]
-    private void ToggleSettings()
-    {
-        IsSettingsOpen = !IsSettingsOpen;
     }
 
     [RelayCommand]
