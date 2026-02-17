@@ -90,8 +90,8 @@ public sealed class AudioPipelineService : IAudioPipeline
 
     private void OnAudioDataAvailable(object? sender, AudioDataEventArgs e)
     {
-        // Convert 16-bit PCM bytes to float samples
-        var floatSamples = ConvertPcmToFloat(e.Buffer.Span);
+        // Convert 16-bit PCM bytes to mono float samples
+        var floatSamples = ConvertPcmToMonoFloat(e.Buffer.Span, e.Format.Channels);
 
         lock (_sampleBuffer)
         {
@@ -241,18 +241,25 @@ public sealed class AudioPipelineService : IAudioPipeline
         return result.ToArray();
     }
 
-    private static float[] ConvertPcmToFloat(ReadOnlySpan<byte> pcmBytes)
+    private static float[] ConvertPcmToMonoFloat(ReadOnlySpan<byte> pcmBytes, int channels)
     {
-        int sampleCount = pcmBytes.Length / 2;
-        var samples = new float[sampleCount];
+        int totalSamples = pcmBytes.Length / 2;
+        int framesCount = totalSamples / channels;
+        var monoSamples = new float[framesCount];
 
-        for (int i = 0; i < sampleCount; i++)
+        for (int frame = 0; frame < framesCount; frame++)
         {
-            short sample = (short)(pcmBytes[i * 2] | (pcmBytes[i * 2 + 1] << 8));
-            samples[i] = sample / (float)short.MaxValue;
+            float sum = 0;
+            for (int ch = 0; ch < channels; ch++)
+            {
+                int byteIndex = (frame * channels + ch) * 2;
+                short sample = (short)(pcmBytes[byteIndex] | (pcmBytes[byteIndex + 1] << 8));
+                sum += sample / (float)short.MaxValue;
+            }
+            monoSamples[frame] = sum / channels;
         }
 
-        return samples;
+        return monoSamples;
     }
 
     private static byte[] ConvertFloatToPcm(float[] samples)

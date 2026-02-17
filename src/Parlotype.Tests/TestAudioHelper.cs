@@ -1,4 +1,5 @@
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace Parlotype.Tests;
 
@@ -16,28 +17,64 @@ internal static class TestAudioHelper
         return path;
     }
 
-    /// <summary>Loads a WAV file as 16-bit PCM bytes (skipping the WAV header).</summary>
+    /// <summary>Loads a WAV file as 16-bit mono PCM bytes, converting from stereo if needed.</summary>
     public static byte[] LoadWavAsPcmBytes(string fileName)
     {
         using var reader = new WaveFileReader(GetWavPath(fileName));
-        using var ms = new MemoryStream();
-        reader.CopyTo(ms);
-        return ms.ToArray();
-    }
+        var sampleProvider = reader.ToSampleProvider();
 
-    /// <summary>Loads a WAV file as float samples normalized to [-1, 1].</summary>
-    public static float[] LoadWavAsFloatSamples(string fileName)
-    {
-        var pcmBytes = LoadWavAsPcmBytes(fileName);
-        int sampleCount = pcmBytes.Length / 2;
-        var samples = new float[sampleCount];
+        // Convert to mono if stereo
+        if (sampleProvider.WaveFormat.Channels > 1)
+            sampleProvider = sampleProvider.ToMono();
 
-        for (int i = 0; i < sampleCount; i++)
+        // Resample to 16kHz if needed
+        ISampleProvider finalProvider = sampleProvider.WaveFormat.SampleRate != 16_000
+            ? new WdlResamplingSampleProvider(sampleProvider, 16_000)
+            : sampleProvider;
+
+        // Read all float samples
+        var floatSamples = ReadAllSamples(finalProvider);
+
+        // Convert to 16-bit PCM bytes
+        var pcmBytes = new byte[floatSamples.Length * 2];
+        for (int i = 0; i < floatSamples.Length; i++)
         {
-            short sample = (short)(pcmBytes[i * 2] | (pcmBytes[i * 2 + 1] << 8));
-            samples[i] = sample / (float)short.MaxValue;
+            var clamped = Math.Clamp(floatSamples[i], -1.0f, 1.0f);
+            short shortSample = (short)(clamped * short.MaxValue);
+            pcmBytes[i * 2] = (byte)(shortSample & 0xFF);
+            pcmBytes[i * 2 + 1] = (byte)((shortSample >> 8) & 0xFF);
         }
 
-        return samples;
+        return pcmBytes;
+    }
+
+    /// <summary>Loads a WAV file as mono float samples normalized to [-1, 1].</summary>
+    public static float[] LoadWavAsFloatSamples(string fileName)
+    {
+        using var reader = new WaveFileReader(GetWavPath(fileName));
+        var sampleProvider = reader.ToSampleProvider();
+
+        // Convert to mono if stereo
+        if (sampleProvider.WaveFormat.Channels > 1)
+            sampleProvider = sampleProvider.ToMono();
+
+        // Resample to 16kHz if needed
+        ISampleProvider finalProvider = sampleProvider.WaveFormat.SampleRate != 16_000
+            ? new WdlResamplingSampleProvider(sampleProvider, 16_000)
+            : sampleProvider;
+
+        return ReadAllSamples(finalProvider);
+    }
+
+    private static float[] ReadAllSamples(ISampleProvider provider)
+    {
+        var samples = new List<float>();
+        var buffer = new float[4096];
+        int read;
+        while ((read = provider.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            samples.AddRange(buffer.AsSpan(0, read).ToArray());
+        }
+        return samples.ToArray();
     }
 }
