@@ -19,6 +19,7 @@ public class App : Application
     {
         var services = new ServiceCollection();
         services.AddPlatformServices();
+        services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindowViewModel>();
 
         var provider = services.BuildServiceProvider();
