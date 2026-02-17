@@ -3,25 +3,94 @@
         xmlns:vm="using:Parlotype.Desktop.ViewModels"
         x:Class="Parlotype.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        x:CompileBindings="True"
         Title="Parlotype"
-        Width="500" Height="350"
-        WindowStartupLocation="CenterScreen">
+        Width="280" Height="140"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        SystemDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        ExtendClientAreaToDecorationsHint="True">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-        <TextBlock Text="Parlotype"
-                   FontSize="28" FontWeight="Bold"
-                   HorizontalAlignment="Center" />
-        <TextBlock Text="Speak freely. Type privately."
-                   FontSize="14" Opacity="0.7"
-                   HorizontalAlignment="Center" />
-        <TextBlock Text="{Binding StatusText}"
-                   FontSize="16"
-                   HorizontalAlignment="Center"
-                   Margin="0,20,0,0" />
-    </StackPanel>
+    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+            CornerRadius="12"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+            BorderThickness="1"
+            Padding="16,8">
+        <Grid RowDefinitions="Auto,*">
 
+            <!-- Top bar: drag handle + close button -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,*"
+                  Margin="0,0,0,4">
+                <Border Grid.Column="1"
+                        Name="DragHandle"
+                        Width="40" Height="5"
+                        CornerRadius="3"
+                        Background="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                        VerticalAlignment="Center"
+                        Cursor="Hand" />
+                <Button Grid.Column="2"
+                        Name="CloseButton"
+                        Content="✕"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="Transparent"
+                        FontSize="14"
+                        Padding="6,2"
+                        Cursor="Hand" />
+            </Grid>
+
+            <!-- Main toolbar: Settings, Microphone, Help -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,*"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+
+                <!-- Settings button -->
+                <Button Grid.Column="0"
+                        Name="SettingsButton"
+                        Command="{Binding ToggleSettingsCommand}"
+                        Width="44" Height="44"
+                        Background="Transparent"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        CornerRadius="22"
+                        Padding="0">
+                    <PathIcon Width="22" Height="22"
+                              Data="M12.012 2.25c.734.008 1.465.093 2.182.253a.75.75 0 0 1 .582.649l.17 1.527a1.384 1.384 0 0 0 1.927 1.116l1.401-.615a.75.75 0 0 1 .85.174 9.792 9.792 0 0 1 2.204 3.792.75.75 0 0 1-.271.825l-1.242.916a1.381 1.381 0 0 0 0 2.226l1.243.915a.75.75 0 0 1 .272.826 9.797 9.797 0 0 1-2.21 3.79.75.75 0 0 1-.848.175l-1.407-.617a1.38 1.38 0 0 0-1.926 1.114l-.169 1.526a.75.75 0 0 1-.572.647 9.518 9.518 0 0 1-4.406 0 .75.75 0 0 1-.572-.647l-.168-1.524a1.382 1.382 0 0 0-1.926-1.11l-1.406.616a.75.75 0 0 1-.849-.175 9.798 9.798 0 0 1-2.21-3.796.75.75 0 0 1 .272-.826l1.243-.916a1.38 1.38 0 0 0 0-2.226l-1.243-.914a.75.75 0 0 1-.271-.826 9.793 9.793 0 0 1 2.21-3.792.75.75 0 0 1 .849-.174l1.4.615a1.387 1.387 0 0 0 1.93-1.118l.17-1.526a.75.75 0 0 1 .583-.65c.717-.159 1.45-.243 2.201-.252Zm0 1.5a9.135 9.135 0 0 0-1.354.117l-.115 1.038a2.882 2.882 0 0 1-4.01 2.32l-.952-.418a8.293 8.293 0 0 0-1.29 2.22l.845.622a2.882 2.882 0 0 1 0 4.63l-.846.623a8.285 8.285 0 0 0 1.29 2.22l.952-.418a2.882 2.882 0 0 1 4.01 2.32l.116 1.04c.45.05.905.076 1.354.078a8.99 8.99 0 0 0 1.353-.078l.115-1.038a2.882 2.882 0 0 1 4.009-2.322l.953.419a8.293 8.293 0 0 0 1.291-2.22l-.846-.622a2.882 2.882 0 0 1 0-4.63l.845-.624a8.293 8.293 0 0 0-1.29-2.22l-.952.42a2.882 2.882 0 0 1-4.01-2.322l-.116-1.038a9.079 9.079 0 0 0-1.353-.117ZM12 8.25a3.75 3.75 0 1 1 0 7.5 3.75 3.75 0 0 1 0-7.5Zm0 1.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+                </Button>
+
+                <!-- Microphone button (large, center) -->
+                <Button Grid.Column="1"
+                        Command="{Binding ToggleRecordingCommand}"
+                        Width="64" Height="64"
+                        Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        CornerRadius="32"
+                        Margin="16,0"
+                        Padding="0">
+                    <PathIcon Width="28" Height="28"
+                              Data="M12 2a3.5 3.5 0 0 1 3.5 3.5v5a3.5 3.5 0 0 1-7 0v-5A3.5 3.5 0 0 1 12 2Zm0 1.5a2 2 0 0 0-2 2v5a2 2 0 0 0 4 0v-5a2 2 0 0 0-2-2ZM6.25 9a.75.75 0 0 1 .75.75v.75a5 5 0 0 0 10 0v-.75a.75.75 0 0 1 1.5 0v.75a6.5 6.5 0 0 1-5.75 6.45v2.3a.75.75 0 0 1-1.5 0v-2.3A6.5 6.5 0 0 1 5.5 10.5v-.75a.75.75 0 0 1 .75-.75Z" />
+                </Button>
+
+                <!-- Help button -->
+                <Button Grid.Column="2"
+                        Command="{Binding ToggleHelpCommand}"
+                        Width="44" Height="44"
+                        Background="Transparent"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        CornerRadius="22"
+                        Padding="0">
+                    <PathIcon Width="22" Height="22"
+                              Data="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Zm0 1.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Zm0 4a3.5 3.5 0 0 0-3.5 3.5.75.75 0 0 0 1.5 0 2 2 0 1 1 3.578 1.236c-.425.51-.828.855-1.12 1.104a5.417 5.417 0 0 0-.458.44.75.75 0 0 0-.25.559V15.5a.75.75 0 0 0 1.5 0v-.667l.097-.09c.254-.228.599-.537.977-.99A3.5 3.5 0 0 0 12 7.5Zm0 10a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" />
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>
