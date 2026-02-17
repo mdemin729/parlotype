@@ -14,7 +14,9 @@ public static class PlatformServiceExtensions
     public static IServiceCollection AddPlatformServices(this IServiceCollection services)
     {
         services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
+        services.AddSingleton<IVadService, SileroVadService>();
         services.AddSingleton<ISpeechRecognizer, WhisperSpeechRecognizer>();
+        services.AddSingleton<IAudioPipeline, AudioPipelineService>();
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
         return services;
     }
