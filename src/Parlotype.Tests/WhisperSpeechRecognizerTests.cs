@@ -31,7 +31,7 @@ public class WhisperSpeechRecognizerTests
     [Fact]
     public async Task TranscribeAsync_WithSilence_ReturnsEmptyOrMinimalText()
     {
-        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.Tiny);
+        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.BaseEn);
         await recognizer.InitializeAsync();
 
         // 1 second of silence as 16-bit PCM bytes

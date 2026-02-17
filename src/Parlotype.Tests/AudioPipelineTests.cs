@@ -15,7 +15,7 @@ public class AudioPipelineTests
         // Arrange: create a mock capture service that feeds the WAV file
         var capture = new TestAudioCaptureService();
         await using var vad = new SileroVadService();
-        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.Tiny);
+        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.BaseEn);
 
         await using var pipeline = new AudioPipelineService(capture, vad, recognizer);
 
