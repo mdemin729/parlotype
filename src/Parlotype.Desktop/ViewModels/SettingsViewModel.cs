@@ -29,21 +29,22 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isMicrophonePickerOpen;
 
-    public ObservableCollection<MicrophoneInfo> AvailableMicrophones { get; } =
-    [
-        new("mic-1", "Default - Microphone Array (Realtek)", true),
-        new("mic-2", "Headset Microphone (USB Audio)", false),
-        new("mic-3", "Webcam Microphone (HD Pro)", false)
-    ];
+    public ObservableCollection<MicrophoneDisplayItem> AvailableMicrophones { get; } = [];
 
-    public WaitTimeDisplayItem[] WaitTimeOptions { get; } =
-        Enum.GetValues<WaitTimeOption>()
-            .Select(o => new WaitTimeDisplayItem(o))
-            .ToArray();
+    public WaitTimeDisplayItem[] WaitTimeOptions { get; private set; } = [];
 
     public SettingsViewModel()
     {
-        SelectedMicrophone = AvailableMicrophones[0];
+        WaitTimeOptions = Enum.GetValues<WaitTimeOption>()
+            .Select(o => new WaitTimeDisplayItem(o, SelectWaitTimeCommand))
+            .ToArray();
+
+        AvailableMicrophones =
+        [
+            new(new MicrophoneInfo("mic-1", "Default - Microphone Array (Realtek)", true), SelectMicrophoneCommand),
+            new(new MicrophoneInfo("mic-2", "Headset Microphone (USB Audio)", false), SelectMicrophoneCommand),
+            new(new MicrophoneInfo("mic-3", "Webcam Microphone (HD Pro)", false), SelectMicrophoneCommand)
+        ];
     }
 
     [RelayCommand]
@@ -66,9 +67,9 @@ public partial class SettingsViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SelectMicrophone(MicrophoneInfo mic)
+    private void SelectMicrophone(MicrophoneDisplayItem item)
     {
-        SelectedMicrophone = mic;
+        SelectedMicrophone = item.Info;
         IsMicrophonePickerOpen = false;
     }
 
