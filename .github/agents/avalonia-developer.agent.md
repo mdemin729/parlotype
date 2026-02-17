@@ -22,6 +22,7 @@ You are a senior .NET desktop developer with deep expertise in **Avalonia UI** a
 ## Reference Documentation
 
 - **Avalonia docs:** `docs/avalonia_full_context.md`
+- **CommunityToolkit.Mvvm docs:** `docs/dotnet-community-toolkit-mvvm.md`
 
 Always search this file using `read` or `search` tools before using `web` for Avalonia-related questions. Only use `web` if the local documentation doesn't cover the topic.
 
