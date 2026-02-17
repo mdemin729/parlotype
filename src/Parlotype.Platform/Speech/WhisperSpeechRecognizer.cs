@@ -7,6 +7,7 @@ namespace Parlotype.Platform.Speech;
 /// <summary>Speech recognition using Whisper.net with automatic model download.</summary>
 public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 {
+    private static readonly SemaphoreSlim ModelDownloadLock = new(1, 1);
     private readonly GgmlType _modelType;
     private WhisperFactory? _factory;
     private WhisperProcessor? _processor;
@@ -92,10 +93,26 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 
         if (!File.Exists(modelPath))
         {
-            using var modelStream = await WhisperGgmlDownloader.Default
-                .GetGgmlModelAsync(modelType, cancellationToken: cancellationToken);
-            using var fileStream = File.Create(modelPath);
-            await modelStream.CopyToAsync(fileStream, cancellationToken);
+            await ModelDownloadLock.WaitAsync(cancellationToken);
+            try
+            {
+                // Double-check after acquiring lock
+                if (!File.Exists(modelPath))
+                {
+                    var tempPath = modelPath + ".tmp";
+                    using var modelStream = await WhisperGgmlDownloader.Default
+                        .GetGgmlModelAsync(modelType, cancellationToken: cancellationToken);
+                    using (var fileStream = File.Create(tempPath))
+                    {
+                        await modelStream.CopyToAsync(fileStream, cancellationToken);
+                    }
+                    File.Move(tempPath, modelPath);
+                }
+            }
+            finally
+            {
+                ModelDownloadLock.Release();
+            }
         }
 
         return modelPath;
