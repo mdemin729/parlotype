@@ -9,7 +9,7 @@ public class SileroVadServiceTests
     public async Task DetectSpeech_WithSpeechAudio_ReturnsSpeechSegments()
     {
         await using var vad = new SileroVadService();
-        var samples = TestAudioHelper.LoadWavAsFloatSamples("one-small-step.wav");
+        var samples = TestAudioHelper.LoadWavAsFloatSamples("kennedy.wav");
 
         var segments = vad.DetectSpeech(samples);
 

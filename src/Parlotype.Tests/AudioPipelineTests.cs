@@ -31,7 +31,7 @@ public class AudioPipelineTests
         // Act: start pipeline and feed audio
         await pipeline.StartAsync(PipelineMode.Batch);
 
-        var pcmBytes = TestAudioHelper.LoadWavAsPcmBytes("one-small-step.wav");
+        var pcmBytes = TestAudioHelper.LoadWavAsPcmBytes("kennedy.wav");
         capture.SimulateAudioData(pcmBytes);
 
         // Add silence to trigger end-of-speech detection
@@ -50,6 +50,8 @@ public class AudioPipelineTests
         Assert.False(string.IsNullOrWhiteSpace(result.Text));
         Assert.True(result.Text.Trim().Length > 5,
             $"Expected meaningful transcription but got: '{result.Text}'");
+        Assert.True(result.Text.Contains("I believe"),
+            $"Expected transcription to start with but \"I believe\" got: '{result.Text}'");
     }
 }
 

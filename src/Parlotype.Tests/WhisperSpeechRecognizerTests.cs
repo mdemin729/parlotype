@@ -9,12 +9,12 @@ public class WhisperSpeechRecognizerTests
     [Fact]
     public async Task TranscribeAsync_WithSpeechAudio_ReturnsTranscription()
     {
-        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.Tiny);
+        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.BaseEn);
         await recognizer.InitializeAsync();
 
         Assert.True(recognizer.IsReady);
 
-        var pcmBytes = TestAudioHelper.LoadWavAsPcmBytes("one-small-step.wav");
+        var pcmBytes = TestAudioHelper.LoadWavAsPcmBytes("kennedy.wav");
         var result = await recognizer.TranscribeAsync(pcmBytes);
 
         Assert.NotNull(result);
@@ -24,6 +24,8 @@ public class WhisperSpeechRecognizerTests
         // verify we get meaningful output (not blank/empty)
         Assert.True(result.Text.Trim().Length > 5,
             $"Expected meaningful transcription but got: '{result.Text}'");
+        Assert.True(result.Text.Contains("I believe"),
+            $"Expected transcription to start with but \"I believe\" got: '{result.Text}'");
     }
 
     [Fact]
