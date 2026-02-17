@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:core="using:Parlotype.Core.Audio"
              x:Class="Parlotype.Desktop.Views.SettingsFlyoutView"
              x:DataType="vm:SettingsViewModel"
              x:CompileBindings="True"
@@ -64,8 +65,49 @@
             <Button Background="Transparent"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Command="{Binding OpenWaitTimePickerCommand}"
                     Padding="16,10" CornerRadius="0">
+                <Button.Flyout>
+                    <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                CornerRadius="8"
+                                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                BorderThickness="1"
+                                Padding="4" MinWidth="220">
+                            <ItemsControl ItemsSource="{Binding WaitTimeOptions}"
+                                          x:CompileBindings="True"
+                                          x:DataType="vm:SettingsViewModel">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:WaitTimeDisplayItem">
+                                        <Button Background="Transparent"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Stretch"
+                                                Padding="12,8" CornerRadius="4"
+                                                x:CompileBindings="False"
+                                                Command="{Binding $parent[ItemsControl].((vm:SettingsViewModel)DataContext).SelectWaitTimeCommand}"
+                                                CommandParameter="{Binding Option}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding DisplayName}"
+                                                           FontSize="14"
+                                                           VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding SecondsText}"
+                                                           FontSize="13" Opacity="0.5"
+                                                           VerticalAlignment="Center"
+                                                           Margin="24,0,0,0" />
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </Flyout>
+                </Button.Flyout>
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
                               VerticalAlignment="Center"
@@ -83,8 +125,71 @@
             <Button Background="Transparent"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Command="{Binding OpenMicrophonePickerCommand}"
                     Padding="16,10" CornerRadius="0">
+                <Button.Flyout>
+                    <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                CornerRadius="8"
+                                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                BorderThickness="1"
+                                Padding="4" MinWidth="280">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding AvailableMicrophones}"
+                                              x:CompileBindings="True"
+                                              x:DataType="vm:SettingsViewModel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="core:MicrophoneInfo">
+                                            <Button Background="Transparent"
+                                                    HorizontalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Padding="12,8" CornerRadius="4"
+                                                    x:CompileBindings="False"
+                                                    Command="{Binding $parent[ItemsControl].((vm:SettingsViewModel)DataContext).SelectMicrophoneCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <Border Grid.Column="0"
+                                                            Width="3" Height="16"
+                                                            CornerRadius="1.5"
+                                                            Margin="0,0,8,0"
+                                                            VerticalAlignment="Center"
+                                                            Background="{DynamicResource SystemAccentColor}"
+                                                            IsVisible="{Binding IsDefault}" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding Name}"
+                                                               FontSize="14"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Separator Margin="4,4" />
+
+                                <Button Background="Transparent"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Stretch"
+                                        Command="{Binding AddNewMicrophoneCommand}"
+                                        Padding="12,8" CornerRadius="4">
+                                    <TextBlock Text="Add new microphone" FontSize="14" />
+                                </Button>
+
+                                <Button Background="Transparent"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Stretch"
+                                        Command="{Binding ManageMicrophoneSettingsCommand}"
+                                        Padding="12,8" CornerRadius="4">
+                                    <TextBlock Text="Manage microphone settings" FontSize="14" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Flyout>
+                </Button.Flyout>
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
                               VerticalAlignment="Center"

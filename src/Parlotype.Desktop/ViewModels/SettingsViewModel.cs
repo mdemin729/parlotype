@@ -36,6 +36,11 @@ public partial class SettingsViewModel : ViewModelBase
         new("mic-3", "Webcam Microphone (HD Pro)", false)
     ];
 
+    public WaitTimeDisplayItem[] WaitTimeOptions { get; } =
+        Enum.GetValues<WaitTimeOption>()
+            .Select(o => new WaitTimeDisplayItem(o))
+            .ToArray();
+
     public SettingsViewModel()
     {
         SelectedMicrophone = AvailableMicrophones[0];
@@ -69,6 +74,18 @@ public partial class SettingsViewModel : ViewModelBase
 
     [RelayCommand]
     private void GiveFeedback()
+    {
+        // Stub
+    }
+
+    [RelayCommand]
+    private void AddNewMicrophone()
+    {
+        // Stub
+    }
+
+    [RelayCommand]
+    private void ManageMicrophoneSettings()
     {
         // Stub
     }
