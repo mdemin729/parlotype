@@ -12,7 +12,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         throw new NotImplementedException();
     }
 
-    public Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
+    public Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<byte> pcmData, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
