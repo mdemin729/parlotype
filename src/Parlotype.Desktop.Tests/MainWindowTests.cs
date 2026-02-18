@@ -184,3 +184,95 @@ public class MainWindowTests
         enumerator.Dispose();
     }
 }
+
+public class MicrophoneSettingsViewTests
+{
+    private static readonly MicrophoneInfo Mic1 = new("mic-1", "Microphone Array (Realtek)", true);
+    private static readonly MicrophoneInfo Mic2 = new("mic-2", "Headset Microphone (USB)", false);
+
+    [AvaloniaFact]
+    public async Task MicrophoneSettingsView_Renders_With_Correct_DataContext()
+    {
+        var enumerator = new MockMicrophoneEnumerator(Mic1, Mic2);
+        var settings = new MockSettingsService();
+        var settingsVm = new SettingsViewModel(enumerator, settings);
+
+        var view = new MicrophoneSettingsView { DataContext = settingsVm };
+        var window = new Window { Content = view };
+        window.Show();
+
+        await Task.Delay(100);
+        Dispatcher.UIThread.RunJobs();
+
+        // The view should be in the visual tree
+        var micView = window.GetVisualDescendants().OfType<MicrophoneSettingsView>().FirstOrDefault();
+        Assert.NotNull(micView);
+        Assert.Same(settingsVm, micView!.DataContext);
+
+        // Verify the ItemsControl has the correct number of items
+        var itemsControl = micView.GetVisualDescendants().OfType<ItemsControl>().FirstOrDefault();
+        Assert.NotNull(itemsControl);
+        Assert.Equal(2, itemsControl!.ItemCount);
+
+        window.Close();
+        enumerator.Dispose();
+    }
+
+    [AvaloniaFact]
+    public async Task MicrophoneSettingsView_Updates_When_Device_Added()
+    {
+        var enumerator = new MockMicrophoneEnumerator(Mic1);
+        var settings = new MockSettingsService();
+        var settingsVm = new SettingsViewModel(enumerator, settings);
+
+        var view = new MicrophoneSettingsView { DataContext = settingsVm };
+        var window = new Window { Content = view };
+        window.Show();
+
+        await Task.Delay(100);
+        Dispatcher.UIThread.RunJobs();
+
+        var itemsControl = view.GetVisualDescendants().OfType<ItemsControl>().First();
+        Assert.Equal(1, itemsControl.ItemCount);
+
+        // Add a device
+        enumerator.AddDevice(Mic2);
+
+        await Task.Delay(200);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(2, itemsControl.ItemCount);
+
+        window.Close();
+        enumerator.Dispose();
+    }
+
+    [AvaloniaFact]
+    public async Task MicrophoneSettingsView_Updates_When_Device_Removed()
+    {
+        var enumerator = new MockMicrophoneEnumerator(Mic1, Mic2);
+        var settings = new MockSettingsService();
+        var settingsVm = new SettingsViewModel(enumerator, settings);
+
+        var view = new MicrophoneSettingsView { DataContext = settingsVm };
+        var window = new Window { Content = view };
+        window.Show();
+
+        await Task.Delay(100);
+        Dispatcher.UIThread.RunJobs();
+
+        var itemsControl = view.GetVisualDescendants().OfType<ItemsControl>().First();
+        Assert.Equal(2, itemsControl.ItemCount);
+
+        // Remove mic-2
+        enumerator.RemoveDevice("mic-2");
+
+        await Task.Delay(400);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(1, itemsControl.ItemCount);
+
+        window.Close();
+        enumerator.Dispose();
+    }
+}
