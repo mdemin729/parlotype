@@ -1,0 +1,65 @@
+﻿# Microphone Selection Implementation Plan
+
+## Problem
+Allow users to select the default microphone from the list of available system microphones. The list should refresh automatically when microphones are added or removed. Persist the selection across app restarts.
+
+## Approach
+- Create `IMicrophoneEnumerator` in Core for listing devices and receiving change notifications
+- Implement `WasapiMicrophoneEnumerator` in Platform using NAudio's `MMDeviceEnumerator` + `IMMNotificationClient`
+- Update `IAudioCaptureService.StartAsync` to accept a `MicrophoneInfo?` parameter for device selection
+- Create `ISettingsService` in Core + `JsonSettingsService` in Platform for persisting settings
+- Update `SettingsViewModel` to use real device enumeration instead of hardcoded list
+- Update the microphone picker UI to show real devices with auto-refresh
+
+## Workplan
+
+### Phase 1: Core Interfaces
+- [ ] Create `IMicrophoneEnumerator` in `Parlotype.Core/Audio/` — GetAvailableMicrophones(), GetDefaultMicrophone(), DevicesChanged event
+- [ ] Update `IAudioCaptureService.StartAsync` to accept optional `MicrophoneInfo?` parameter
+- [ ] Create `ISettingsService` in `Parlotype.Core/Settings/` — GetAsync<T>, SetAsync<T>
+- [ ] Create `AppSettings` record in `Parlotype.Core/Settings/` — SelectedMicrophoneId property
+- [ ] Git commit
+
+### Phase 2: Platform — MicrophoneEnumerator
+- [ ] Create `WasapiMicrophoneEnumerator` in Platform/Audio implementing `IMicrophoneEnumerator`
+- [ ] Use `MMDeviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active)` for listing
+- [ ] Implement `IMMNotificationClient` for device add/remove/state change notifications
+- [ ] Map `MMDevice` → `MicrophoneInfo` (ID, FriendlyName, IsDefault)
+- [ ] Fire `DevicesChanged` event on any device change (marshalled to be thread-safe)
+- [ ] Git commit
+
+### Phase 3: Platform — Settings Persistence
+- [ ] Create `JsonSettingsService` in `Parlotype.Platform/Settings/`
+- [ ] Store settings in `AppData/Local/parlotype/settings.json`
+- [ ] Implement read/write with file locking
+- [ ] Git commit
+
+### Phase 4: Platform — Update WasapiAudioCaptureService
+- [ ] Update `StartAsync` to accept `MicrophoneInfo?` and use specified device or default
+- [ ] Look up device by ID from `MMDeviceEnumerator`
+- [ ] Git commit
+
+### Phase 5: Desktop — ViewModel Integration
+- [ ] Update `SettingsViewModel` to inject `IMicrophoneEnumerator` and `ISettingsService`
+- [ ] Replace hardcoded microphone list with real enumeration
+- [ ] Subscribe to `DevicesChanged` to auto-refresh the list
+- [ ] Persist selected microphone via `ISettingsService`
+- [ ] Load persisted selection on startup
+- [ ] Update `MicrophoneDisplayItem` if needed
+- [ ] Register new services in DI (`App.axaml.cs` + `PlatformServiceExtensions.cs`)
+- [ ] Git commit
+
+### Phase 6: Build & Test
+- [ ] Verify full solution builds with zero warnings
+- [ ] Run all existing tests
+- [ ] Git commit (if any fixes needed)
+
+## Notes
+- `IMMNotificationClient` callbacks come on a COM thread — must marshal to UI thread via `Dispatcher` or use thread-safe event raising
+- Settings file location: `Environment.GetFolderPath(SpecialFolder.LocalApplicationData)/parlotype/settings.json`
+- `MicrophoneInfo.IsDefault` should reflect whether the device is the system default, not the user's selection
+
+## Fallback & Auto-Select Behavior
+- **Device removed:** If the currently selected microphone is removed, automatically fall back to the first available microphone in the list. Update the persisted setting accordingly.
+- **Device added:** When a new microphone is added to the system, automatically select it as the active microphone and persist the selection.
+- Both behaviors should be handled in `SettingsViewModel` when reacting to `DevicesChanged` events.
