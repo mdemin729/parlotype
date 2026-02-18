@@ -97,22 +97,14 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
                 AvailableMicrophones.Remove(item);
         }
 
-        // Animated addition of new items
+        // Add new items (no animation — appear immediately to avoid empty-slot delay)
         var toAdd = currentDevices.Where(d => !existingIds.Contains(d.Id)).ToList();
         var addedItems = new List<MicrophoneDisplayItem>();
         foreach (var mic in toAdd)
         {
-            var displayItem = new MicrophoneDisplayItem(mic, SelectMicrophoneCommand) { ItemOpacity = 0.0 };
+            var displayItem = new MicrophoneDisplayItem(mic, SelectMicrophoneCommand);
             AvailableMicrophones.Add(displayItem);
             addedItems.Add(displayItem);
-        }
-
-        if (addedItems.Count > 0)
-        {
-            // Wait one frame so the transition system registers the initial opacity
-            await Task.Delay(16);
-            foreach (var item in addedItems)
-                item.ItemOpacity = 1.0;
         }
 
         // Selection logic

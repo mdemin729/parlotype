@@ -93,3 +93,42 @@ When a microphone is added or removed, the list flickers because `RefreshMicroph
 
 ---
 
+# Fix Add Animation Delay + Add Headless UI Tests
+
+## Problem
+1. When a new microphone is added, the item appears as empty space (opacity 0, taking layout space) for ~16ms + transition time before becoming visible. The delay is noticeable.
+2. No headless UI tests exist for the application.
+
+## Approach
+
+### Animation Fix
+Remove the fade-in animation for added items — just add them with full opacity immediately. The diff-based update already prevents flickering for unchanged items, so fading in new ones isn't needed. Keep the fade-out animation for removals since that's smooth and useful.
+
+### Headless Tests
+Create a new test project `Parlotype.Desktop.Tests` using Avalonia.Headless with xUnit:
+- Mock `IMicrophoneEnumerator` and `ISettingsService` for controllable testing
+- Tests: open main window, open settings flyout, open mic picker, verify mic add/remove behavior
+
+## Workplan
+
+### Phase 1: Fix animation delay
+- [ ] Remove opacity animation for added items — add with `ItemOpacity = 1.0` directly
+- [ ] Keep fade-out for removals (opacity → 0, delay, remove)
+- [ ] Build, test existing tests, commit
+
+### Phase 2: Create Desktop.Tests project
+- [ ] Create `src/Parlotype.Desktop.Tests/` project with Avalonia.Headless.XUnit
+- [ ] Add project reference to Desktop project
+- [ ] Create `MockMicrophoneEnumerator` with controllable device list and `DevicesChanged` event
+- [ ] Create `MockSettingsService` (in-memory dictionary)
+- [ ] Create `TestAppBuilder` helper to bootstrap headless Avalonia app with mock services
+- [ ] Build, commit
+
+### Phase 3: Write headless UI tests
+- [ ] Test: MainWindow opens and renders
+- [ ] Test: Settings flyout opens when button clicked
+- [ ] Test: Microphone picker flyout opens
+- [ ] Test: Microphone list shows correct items from mock enumerator
+- [ ] Test: Adding a microphone updates the list
+- [ ] Test: Removing a microphone updates the list and falls back selection
+- [ ] Build, run all tests, commit
