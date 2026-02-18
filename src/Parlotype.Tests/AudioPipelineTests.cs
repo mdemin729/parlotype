@@ -62,7 +62,7 @@ internal sealed class TestAudioCaptureService : IAudioCaptureService
 
     public event EventHandler<AudioDataEventArgs>? DataAvailable;
 
-    public Task StartAsync(CancellationToken cancellationToken = default)
+    public Task StartAsync(MicrophoneInfo? device = null, CancellationToken cancellationToken = default)
     {
         IsCapturing = true;
         return Task.CompletedTask;

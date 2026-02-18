@@ -56,7 +56,7 @@ public sealed class AudioPipelineService : IAudioPipeline
         _capture.DataAvailable += OnAudioDataAvailable;
         _processingTask = Task.Run(() => ProcessQueueAsync(_cts.Token), _cts.Token);
 
-        await _capture.StartAsync(cancellationToken);
+        await _capture.StartAsync(null, cancellationToken);
         IsRunning = true;
     }
 

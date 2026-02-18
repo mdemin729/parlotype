@@ -19,7 +19,7 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
 
     public event EventHandler<AudioDataEventArgs>? DataAvailable;
 
-    public Task StartAsync(CancellationToken cancellationToken = default)
+    public Task StartAsync(MicrophoneInfo? device = null, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -27,9 +27,26 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
             return Task.CompletedTask;
 
         var enumerator = new MMDeviceEnumerator();
-        var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+        MMDevice mmDevice;
 
-        _capture = new WasapiCapture(device);
+        if (device is not null)
+        {
+            try
+            {
+                mmDevice = enumerator.GetDevice(device.Id);
+            }
+            catch
+            {
+                // Fallback to default if specified device is unavailable
+                mmDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+            }
+        }
+        else
+        {
+            mmDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+        }
+
+        _capture = new WasapiCapture(mmDevice);
         _capture.DataAvailable += OnCaptureDataAvailable;
         _capture.RecordingStopped += OnRecordingStopped;
 

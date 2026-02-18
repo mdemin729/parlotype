@@ -1,0 +1,7 @@
+namespace Parlotype.Core.Settings;
+
+/// <summary>Well-known settings keys.</summary>
+public static class SettingsKeys
+{
+    public const string SelectedMicrophoneId = "SelectedMicrophoneId";
+}

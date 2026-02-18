@@ -5,8 +5,8 @@ namespace Parlotype.Core.Audio;
 /// </summary>
 public interface IAudioCaptureService : IAsyncDisposable
 {
-    /// <summary>Starts capturing audio from the default input device.</summary>
-    Task StartAsync(CancellationToken cancellationToken = default);
+    /// <summary>Starts capturing audio from the specified device, or the default device if null.</summary>
+    Task StartAsync(MicrophoneInfo? device = null, CancellationToken cancellationToken = default);
 
     /// <summary>Stops capturing audio.</summary>
     Task StopAsync(CancellationToken cancellationToken = default);
