@@ -132,3 +132,22 @@ Create a new test project `Parlotype.Desktop.Tests` using Avalonia.Headless with
 - [ ] Test: Adding a microphone updates the list
 - [ ] Test: Removing a microphone updates the list and falls back selection
 - [ ] Build, run all tests, commit
+
+---
+
+# Extract Microphone Settings to Separate View
+
+## Problem
+The microphone picker UI (device list, add/manage buttons, flyout with animations) is embedded inline in `SettingsFlyoutView.axaml` (lines 120–201). Extracting it to a dedicated `MicrophoneSettingsView` improves maintainability and reusability.
+
+## Approach
+Extract the flyout content (ItemsControl + action buttons) into a new `MicrophoneSettingsView` UserControl. The trigger button with the mic icon stays in `SettingsFlyoutView` and the flyout references the new component. Both share the same `SettingsViewModel` DataContext.
+
+## Workplan
+
+- [ ] Create `MicrophoneSettingsView.axaml` + `.axaml.cs` with the mic list, transitions, and action buttons
+- [ ] Replace inline flyout content in `SettingsFlyoutView.axaml` with `<v:MicrophoneSettingsView />`
+- [ ] Update headless UI tests to verify the extracted component
+- [ ] Build with 0 warnings
+- [ ] Run all tests (13+)
+- [ ] Commit
