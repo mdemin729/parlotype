@@ -92,7 +92,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 
         if (toRemove.Count > 0)
         {
-            await Task.Delay(200); // wait for fade-out animation
+            await Task.Delay(150); // match transition duration for fade-out
             foreach (var item in toRemove)
                 AvailableMicrophones.Remove(item);
         }
@@ -109,8 +109,8 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 
         if (addedItems.Count > 0)
         {
-            // Let the UI render the items first, then trigger animation
-            await Task.Yield();
+            // Wait one frame so the transition system registers the initial opacity
+            await Task.Delay(16);
             foreach (var item in addedItems)
                 item.ItemOpacity = 1.0;
         }
