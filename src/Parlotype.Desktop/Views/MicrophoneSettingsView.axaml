@@ -30,14 +30,15 @@
                                 <DoubleTransition Property="Opacity" Duration="0:0:0.400" Easing="CubicEaseOut" />
                             </Transitions>
                         </Button.Transitions>
-                        <Grid ColumnDefinitions="Auto,*">
-                            <Border Grid.Column="0"
-                                    Width="3" Height="16"
-                                    CornerRadius="1.5"
-                                    Margin="0,0,8,0"
-                                    VerticalAlignment="Center"
-                                    Background="{DynamicResource SystemAccentColor}"
-                                    IsVisible="{Binding IsSelected}" />
+                        <Grid ColumnDefinitions="11,*">
+                            <Grid Grid.Column="0" Width="11" VerticalAlignment="Center">
+                                <Border Width="3" Height="16"
+                                        CornerRadius="1.5"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Left"
+                                        Background="{DynamicResource SystemAccentColor}"
+                                        IsVisible="{Binding IsSelected}" />
+                            </Grid>
                             <TextBlock Grid.Column="1"
                                        Text="{Binding Name}"
                                        FontSize="14"
