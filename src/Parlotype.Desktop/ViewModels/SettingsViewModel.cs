@@ -205,7 +205,11 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
     private sealed class DesignMicrophoneEnumerator : IMicrophoneEnumerator
     {
         public IReadOnlyList<MicrophoneInfo> GetAvailableMicrophones() =>
-            [new("mic-1", "Microphone Array (Realtek)", true)];
+        [
+            new("mic-1", "Microphone Array (Realtek)", true),
+            new("mic-2", "Headset Microphone (USB Audio)", false),
+            new("mic-3", "Webcam Microphone (HD Pro)", false)
+        ];
         public MicrophoneInfo? GetDefaultMicrophone() => GetAvailableMicrophones()[0];
         public event EventHandler? DevicesChanged { add { } remove { } }
         public void Dispose() { }
