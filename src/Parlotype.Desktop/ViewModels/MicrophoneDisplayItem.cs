@@ -1,12 +1,17 @@
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Parlotype.Core.Audio;
 
 namespace Parlotype.Desktop.ViewModels;
 
-public sealed class MicrophoneDisplayItem(MicrophoneInfo info, ICommand selectCommand)
+public sealed partial class MicrophoneDisplayItem(MicrophoneInfo info, ICommand selectCommand)
+    : ObservableObject
 {
     public MicrophoneInfo Info { get; } = info;
     public string Name { get; } = info.Name;
-    public bool IsDefault { get; } = info.IsDefault;
+    public bool IsSystemDefault { get; } = info.IsDefault;
     public ICommand SelectCommand { get; } = selectCommand;
+
+    [ObservableProperty]
+    private bool _isSelected;
 }

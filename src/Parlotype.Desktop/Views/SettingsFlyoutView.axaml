@@ -151,7 +151,7 @@
                                                             Margin="0,0,8,0"
                                                             VerticalAlignment="Center"
                                                             Background="{DynamicResource SystemAccentColor}"
-                                                            IsVisible="{Binding IsDefault}" />
+                                                            IsVisible="{Binding IsSelected}" />
                                                     <TextBlock Grid.Column="1"
                                                                Text="{Binding Name}"
                                                                FontSize="14"

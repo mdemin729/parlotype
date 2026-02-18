@@ -24,11 +24,6 @@ public partial class MainWindowViewModel : ViewModelBase
         Settings = settings;
     }
 
-    // Parameterless constructor for designer support
-    public MainWindowViewModel() : this(new SettingsViewModel())
-    {
-    }
-
     [RelayCommand]
     private void ToggleRecording()
     {

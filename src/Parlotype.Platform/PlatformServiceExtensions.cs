@@ -1,9 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Hotkeys;
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Platform.Audio;
 using Parlotype.Platform.Hotkeys;
+using Parlotype.Platform.Settings;
 using Parlotype.Platform.Speech;
 
 namespace Parlotype.Platform;
@@ -18,6 +20,8 @@ public static class PlatformServiceExtensions
         services.AddSingleton<ISpeechRecognizer, WhisperSpeechRecognizer>();
         services.AddSingleton<IAudioPipeline, AudioPipelineService>();
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
+        services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
+        services.AddSingleton<ISettingsService, JsonSettingsService>();
         return services;
     }
 }
