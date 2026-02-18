@@ -90,3 +90,6 @@ When a microphone is added or removed, the list flickers because `RefreshMicroph
 - For list add: new items get Opacity transition from 0→1.
 - For list remove: animate Opacity 1→0 via IsVisible=false before actually removing from collection (delayed remove pattern).
 - `IMMNotificationClient` fires on COM thread — must use Dispatcher.UIThread for ObservableCollection mutations.
+
+---
+

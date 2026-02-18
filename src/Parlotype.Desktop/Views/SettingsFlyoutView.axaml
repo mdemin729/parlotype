@@ -147,7 +147,7 @@
                                                     Opacity="{Binding ItemOpacity}">
                                                 <Button.Transitions>
                                                     <Transitions>
-                                                        <DoubleTransition Property="Opacity" Duration="0:0:0.2" Easing="CubicEaseInOut" />
+                                                        <DoubleTransition Property="Opacity" Duration="0:0:0.15" Easing="CubicEaseOut" />
                                                     </Transitions>
                                                 </Button.Transitions>
                                                 <Grid ColumnDefinitions="Auto,*">
