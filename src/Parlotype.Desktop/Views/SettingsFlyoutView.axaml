@@ -143,7 +143,13 @@
                                                     HorizontalContentAlignment="Stretch"
                                                     Padding="12,8" CornerRadius="4"
                                                     Command="{Binding SelectCommand}"
-                                                    CommandParameter="{Binding}">
+                                                    CommandParameter="{Binding}"
+                                                    Opacity="{Binding ItemOpacity}">
+                                                <Button.Transitions>
+                                                    <Transitions>
+                                                        <DoubleTransition Property="Opacity" Duration="0:0:0.2" Easing="CubicEaseInOut" />
+                                                    </Transitions>
+                                                </Button.Transitions>
                                                 <Grid ColumnDefinitions="Auto,*">
                                                     <Border Grid.Column="0"
                                                             Width="3" Height="16"

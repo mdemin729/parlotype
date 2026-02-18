@@ -14,4 +14,7 @@ public sealed partial class MicrophoneDisplayItem(MicrophoneInfo info, ICommand 
 
     [ObservableProperty]
     private bool _isSelected;
+
+    [ObservableProperty]
+    private double _itemOpacity = 1.0;
 }

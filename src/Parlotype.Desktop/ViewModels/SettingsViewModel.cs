@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Parlotype.Core.Audio;
@@ -58,7 +59,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
     private async Task InitializeMicrophonesAsync()
     {
         var savedId = await _settings.GetAsync<string>(SettingsKeys.SelectedMicrophoneId);
-        RefreshMicrophoneList();
+        PopulateMicrophoneList();
 
         // Restore persisted selection or fall back to default/first
         var match = AvailableMicrophones.FirstOrDefault(m => m.Info.Id == savedId);
@@ -74,27 +75,56 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 
     private void OnDevicesChanged(object? sender, EventArgs e)
     {
-        // Capture the current IDs before refresh
-        var previousIds = AvailableMicrophones.Select(m => m.Info.Id).ToHashSet();
+        Dispatcher.UIThread.InvokeAsync(() => UpdateMicrophoneListAsync());
+    }
+
+    private async Task UpdateMicrophoneListAsync()
+    {
+        var currentDevices = _enumerator.GetAvailableMicrophones();
+        var currentIds = currentDevices.Select(d => d.Id).ToHashSet();
+        var existingIds = AvailableMicrophones.Select(m => m.Info.Id).ToHashSet();
         var previousSelectedId = SelectedMicrophone?.Id;
 
-        RefreshMicrophoneList();
+        // Animated removal of items no longer present
+        var toRemove = AvailableMicrophones.Where(m => !currentIds.Contains(m.Info.Id)).ToList();
+        foreach (var item in toRemove)
+            item.ItemOpacity = 0.0;
 
-        var currentIds = AvailableMicrophones.Select(m => m.Info.Id).ToHashSet();
-
-        // Check for newly added devices
-        var addedIds = currentIds.Except(previousIds).ToList();
-        if (addedIds.Count > 0)
+        if (toRemove.Count > 0)
         {
-            var newItem = AvailableMicrophones.First(m => addedIds.Contains(m.Info.Id));
-            ApplySelection(newItem);
-            _ = PersistSelectionAsync(newItem.Info.Id);
-            return;
+            await Task.Delay(200); // wait for fade-out animation
+            foreach (var item in toRemove)
+                AvailableMicrophones.Remove(item);
         }
 
-        // Check if selected device was removed → fallback to first available
-        if (previousSelectedId is not null && !currentIds.Contains(previousSelectedId))
+        // Animated addition of new items
+        var toAdd = currentDevices.Where(d => !existingIds.Contains(d.Id)).ToList();
+        var addedItems = new List<MicrophoneDisplayItem>();
+        foreach (var mic in toAdd)
         {
+            var displayItem = new MicrophoneDisplayItem(mic, SelectMicrophoneCommand) { ItemOpacity = 0.0 };
+            AvailableMicrophones.Add(displayItem);
+            addedItems.Add(displayItem);
+        }
+
+        if (addedItems.Count > 0)
+        {
+            // Let the UI render the items first, then trigger animation
+            await Task.Yield();
+            foreach (var item in addedItems)
+                item.ItemOpacity = 1.0;
+        }
+
+        // Selection logic
+        if (addedItems.Count > 0)
+        {
+            // Auto-select newly added device
+            ApplySelection(addedItems[0]);
+            _ = PersistSelectionAsync(addedItems[0].Info.Id);
+        }
+        else if (toRemove.Count > 0 && previousSelectedId is not null && toRemove.Any(r => r.Info.Id == previousSelectedId))
+        {
+            // Selected device was removed → fallback
             if (AvailableMicrophones.Count > 0)
             {
                 ApplySelection(AvailableMicrophones[0]);
@@ -104,18 +134,10 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
             {
                 SelectedMicrophone = null;
             }
-            return;
-        }
-
-        // Re-apply selection marker if device still present
-        var still = AvailableMicrophones.FirstOrDefault(m => m.Info.Id == previousSelectedId);
-        if (still is not null)
-        {
-            ApplySelection(still);
         }
     }
 
-    private void RefreshMicrophoneList()
+    private void PopulateMicrophoneList()
     {
         AvailableMicrophones.Clear();
         foreach (var mic in _enumerator.GetAvailableMicrophones())
