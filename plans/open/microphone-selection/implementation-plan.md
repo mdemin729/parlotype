@@ -63,3 +63,30 @@ Allow users to select the default microphone from the list of available system m
 - **Device removed:** If the currently selected microphone is removed, automatically fall back to the first available microphone in the list. Update the persisted setting accordingly.
 - **Device added:** When a new microphone is added to the system, automatically select it as the active microphone and persist the selection.
 - Both behaviors should be handled in `SettingsViewModel` when reacting to `DevicesChanged` events.
+
+---
+
+# Fix Microphone List Flickering + Add Animations
+
+## Problem
+When a microphone is added or removed, the list flickers because `RefreshMicrophoneList()` calls `AvailableMicrophones.Clear()` and re-adds all items. This destroys and recreates every UI element. Additionally, `IMMNotificationClient` callbacks come on a COM thread but the `ObservableCollection` is modified without dispatching to the UI thread.
+
+## Approach
+1. **Diff-based update** — Instead of clear-and-rebuild, compare old vs new device lists and perform surgical Add/Remove so unchanged items stay untouched.
+2. **UI thread dispatch** — Marshal `DevicesChanged` handling to the Avalonia UI thread via `Dispatcher.UIThread`.
+3. **Item animations** — Add opacity + translate transitions on the microphone DataTemplate items for smooth add/remove appearance.
+
+## Workplan
+
+- [ ] **SettingsViewModel**: Replace `RefreshMicrophoneList()` clear-and-rebuild with diff-based Add/Remove that only touches changed items
+- [ ] **SettingsViewModel**: Dispatch `OnDevicesChanged` to Avalonia UI thread via `Dispatcher.UIThread.InvokeAsync`
+- [ ] **MicrophoneDisplayItem**: Add `IsVisible` property with animation support (for delayed removal)
+- [ ] **SettingsFlyoutView.axaml**: Add `Transitions` (opacity + translate) on the microphone item Button inside the DataTemplate
+- [ ] **Build & test**: Verify 0 warnings, all tests pass
+- [ ] **Commit**
+
+## Notes
+- Avalonia 11.3.0 supports `Transitions` on controls for property-based animations.
+- For list add: new items get Opacity transition from 0→1.
+- For list remove: animate Opacity 1→0 via IsVisible=false before actually removing from collection (delayed remove pattern).
+- `IMMNotificationClient` fires on COM thread — must use Dispatcher.UIThread for ObservableCollection mutations.
