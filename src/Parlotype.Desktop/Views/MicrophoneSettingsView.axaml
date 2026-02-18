@@ -5,6 +5,10 @@
              x:DataType="vm:SettingsViewModel"
              x:CompileBindings="True">
 
+    <Design.DataContext>
+        <vm:SettingsViewModel />
+    </Design.DataContext>
+
     <StackPanel>
         <ItemsControl ItemsSource="{Binding AvailableMicrophones}">
             <ItemsControl.ItemsPanel>
@@ -23,7 +27,7 @@
                             Opacity="{Binding ItemOpacity}">
                         <Button.Transitions>
                             <Transitions>
-                                <DoubleTransition Property="Opacity" Duration="0:0:0.15" Easing="CubicEaseOut" />
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.400" Easing="CubicEaseOut" />
                             </Transitions>
                         </Button.Transitions>
                         <Grid ColumnDefinitions="Auto,*">
