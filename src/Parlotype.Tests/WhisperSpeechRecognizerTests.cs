@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Platform.Speech;
 using Whisper.net.Ggml;
 using Xunit;
@@ -9,7 +10,7 @@ public class WhisperSpeechRecognizerTests
     [Fact]
     public async Task TranscribeAsync_WithSpeechAudio_ReturnsTranscription()
     {
-        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.BaseEn);
+        await using var recognizer = new WhisperSpeechRecognizer(NullLogger<WhisperSpeechRecognizer>.Instance, GgmlType.BaseEn);
         await recognizer.InitializeAsync();
 
         Assert.True(recognizer.IsReady);
@@ -31,7 +32,7 @@ public class WhisperSpeechRecognizerTests
     [Fact]
     public async Task TranscribeAsync_WithSilence_ReturnsEmptyOrMinimalText()
     {
-        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.BaseEn);
+        await using var recognizer = new WhisperSpeechRecognizer(NullLogger<WhisperSpeechRecognizer>.Instance, GgmlType.BaseEn);
         await recognizer.InitializeAsync();
 
         // 1 second of silence as 16-bit PCM bytes

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Speech;
 using Parlotype.Platform.Audio;
@@ -14,10 +15,10 @@ public class AudioPipelineTests
     {
         // Arrange: create a mock capture service that feeds the WAV file
         var capture = new TestAudioCaptureService();
-        await using var vad = new SileroVadService();
-        await using var recognizer = new WhisperSpeechRecognizer(GgmlType.BaseEn);
+        await using var vad = new SileroVadService(NullLogger<SileroVadService>.Instance);
+        await using var recognizer = new WhisperSpeechRecognizer(NullLogger<WhisperSpeechRecognizer>.Instance, GgmlType.BaseEn);
 
-        await using var pipeline = new AudioPipelineService(capture, vad, recognizer);
+        await using var pipeline = new AudioPipelineService(capture, vad, recognizer, NullLogger<AudioPipelineService>.Instance);
 
         TranscriptionResult? transcription = null;
         var transcriptionReceived = new TaskCompletionSource<TranscriptionResult>();

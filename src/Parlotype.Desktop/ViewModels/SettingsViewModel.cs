@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
@@ -12,6 +14,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 {
     private readonly IMicrophoneEnumerator _enumerator;
     private readonly ISettingsService _settings;
+    private readonly ILogger<SettingsViewModel> _logger;
 
     [ObservableProperty]
     private bool _voiceTypingLauncherEnabled;
@@ -38,10 +41,11 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public WaitTimeDisplayItem[] WaitTimeOptions { get; }
 
-    public SettingsViewModel(IMicrophoneEnumerator enumerator, ISettingsService settings)
+    public SettingsViewModel(IMicrophoneEnumerator enumerator, ISettingsService settings, ILogger<SettingsViewModel>? logger = null)
     {
         _enumerator = enumerator;
         _settings = settings;
+        _logger = logger ?? NullLogger<SettingsViewModel>.Instance;
 
         WaitTimeOptions = Enum.GetValues<WaitTimeOption>()
             .Select(o => new WaitTimeDisplayItem(o, SelectWaitTimeCommand))
@@ -60,6 +64,8 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
     {
         var savedId = await _settings.GetAsync<string>(SettingsKeys.SelectedMicrophoneId);
         PopulateMicrophoneList();
+        _logger.LogDebug("Initialized with {Count} microphones, saved selection: {SavedId}",
+            AvailableMicrophones.Count, savedId);
 
         // Restore persisted selection or fall back to default/first
         var match = AvailableMicrophones.FirstOrDefault(m => m.Info.Id == savedId);
@@ -92,6 +98,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 
         if (toRemove.Count > 0)
         {
+            _logger.LogInformation("Removing {Count} microphone(s)", toRemove.Count);
             await Task.Delay(150); // match transition duration for fade-out
             foreach (var item in toRemove)
                 AvailableMicrophones.Remove(item);
@@ -111,6 +118,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
         if (addedItems.Count > 0)
         {
             // Auto-select newly added device
+            _logger.LogInformation("Auto-selecting newly added microphone: {MicName}", addedItems[0].Name);
             ApplySelection(addedItems[0]);
             _ = PersistSelectionAsync(addedItems[0].Info.Id);
         }
@@ -119,6 +127,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
             // Selected device was removed → fallback
             if (AvailableMicrophones.Count > 0)
             {
+                _logger.LogInformation("Selected device removed, falling back to: {MicName}", AvailableMicrophones[0].Name);
                 ApplySelection(AvailableMicrophones[0]);
                 _ = PersistSelectionAsync(AvailableMicrophones[0].Info.Id);
             }
@@ -172,6 +181,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void SelectMicrophone(MicrophoneDisplayItem item)
     {
+        _logger.LogInformation("Microphone selected: {MicName}", item.Name);
         ApplySelection(item);
         IsMicrophonePickerOpen = false;
         _ = PersistSelectionAsync(item.Info.Id);
