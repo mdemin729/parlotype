@@ -6,7 +6,8 @@
         x:DataType="vm:MainWindowViewModel"
         x:CompileBindings="True"
         Title="Parlotype"
-        Width="280" Height="240"
+        Width="280"
+        SizeToContent="WidthAndHeight"
         CanResize="False"
         WindowStartupLocation="CenterScreen"
         SystemDecorations="None"
@@ -19,68 +20,48 @@
     </Design.DataContext>
 
     <Panel>
-        <!-- Hint popup (above the toolbar) -->
-        <Border IsVisible="{Binding IsHintVisible}"
-                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                CornerRadius="8"
-                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-                BorderThickness="1"
-                Padding="16,12"
-                MaxWidth="300"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Margin="0,0,0,8">
-            <StackPanel Spacing="8">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <PathIcon Width="16" Height="16"
-                              Foreground="Orange"
-                              Data="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 5a.75.75 0 0 1 .75.75v5a.75.75 0 0 1-1.5 0v-5A.75.75 0 0 1 12 8.5Zm0 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z" />
-                    <TextBlock Text="To use voice typing, select a text box then try again."
-                               FontSize="13" TextWrapping="Wrap"
-                               VerticalAlignment="Center" />
-                </StackPanel>
-                <Button Content="Got it"
-                        Command="{Binding DismissHintCommand}"
-                        HorizontalAlignment="Right"
-                        Padding="16,4"
-                        FontSize="12" />
-            </StackPanel>
-        </Border>
 
         <!-- Main toolbar -->
         <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                 CornerRadius="12"
                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
                 BorderThickness="1"
-                Padding="16,8"
+                Padding="0"
                 VerticalAlignment="Bottom">
-        <Grid RowDefinitions="Auto,*">
+        <Grid RowDefinitions="28,*">
 
-            <!-- Top bar: drag handle + close button -->
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,*"
-                  Margin="0,0,0,4">
-                <Border Grid.Column="1"
-                        Name="DragHandle"
-                        Width="40" Height="5"
-                        CornerRadius="3"
-                        Background="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-                        VerticalAlignment="Center"
-                        Cursor="Hand" />
-                <Button Grid.Column="2"
-                        Name="CloseButton"
-                        Content="✕"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        Background="Transparent"
-                        FontSize="14"
-                        Padding="6,2"
-                        Cursor="Hand" />
-            </Grid>
+            <!-- Top bar: drag area + close button -->
+            <Border Grid.Row="0"
+                    Name="DragHandle"
+                    Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="10,10,0,0"
+                    Margin="0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Border Grid.ColumnSpan="2"
+                            Width="40" Height="5"
+                            CornerRadius="3"
+                            Background="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center" />
+                    <Button Grid.Column="1"
+                            Name="CloseButton"
+                            Content="✕"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            FontSize="14"
+                            Padding="6,2"
+                            Cursor="Hand" />
+                </Grid>
+            </Border>
 
             <!-- Main toolbar: Settings, Microphone, Help -->
             <Grid Grid.Row="1" ColumnDefinitions="*,Auto,*"
                   HorizontalAlignment="Center"
-                  VerticalAlignment="Center">
+                  VerticalAlignment="Center"
+                  Margin="0, 8">
 
                 <!-- Settings button -->
                 <Button Grid.Column="0"

@@ -24,6 +24,10 @@ public partial class MainWindowViewModel : ViewModelBase
         Settings = settings;
     }
 
+    public MainWindowViewModel() : this(new SettingsViewModel())
+    {
+    }
+
     [RelayCommand]
     private void ToggleRecording()
     {
