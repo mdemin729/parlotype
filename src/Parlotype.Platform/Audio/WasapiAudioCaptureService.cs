@@ -62,7 +62,8 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
         // Create a buffered provider that accepts the capture's native format
         _bufferedProvider = new BufferedWaveProvider(_capture.WaveFormat)
         {
-            DiscardOnBufferOverflow = true
+            DiscardOnBufferOverflow = true,
+            ReadFully = false // Only return actual audio data, don't pad with silence
         };
 
         // Resample to 16kHz mono
