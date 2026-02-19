@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Speech;
 
@@ -12,6 +13,7 @@ public sealed class AudioPipelineService : IAudioPipeline
     private readonly IAudioCaptureService _capture;
     private readonly IVadService _vad;
     private readonly ISpeechRecognizer _recognizer;
+    private readonly ILogger<AudioPipelineService> _logger;
 
     private PipelineMode _mode;
     private readonly List<float> _sampleBuffer = [];
@@ -33,11 +35,13 @@ public sealed class AudioPipelineService : IAudioPipeline
     public AudioPipelineService(
         IAudioCaptureService capture,
         IVadService vad,
-        ISpeechRecognizer recognizer)
+        ISpeechRecognizer recognizer,
+        ILogger<AudioPipelineService> logger)
     {
         _capture = capture;
         _vad = vad;
         _recognizer = recognizer;
+        _logger = logger;
     }
 
     public async Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default)
@@ -58,6 +62,7 @@ public sealed class AudioPipelineService : IAudioPipeline
 
         await _capture.StartAsync(null, cancellationToken);
         IsRunning = true;
+        _logger.LogInformation("Pipeline starting in {Mode} mode", _mode);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -86,6 +91,7 @@ public sealed class AudioPipelineService : IAudioPipeline
         }
 
         IsRunning = false;
+        _logger.LogInformation("Pipeline stopped");
     }
 
     private void OnAudioDataAvailable(object? sender, AudioDataEventArgs e)
@@ -128,6 +134,7 @@ public sealed class AudioPipelineService : IAudioPipeline
         // Check if the last segment ends well before the buffer end (silence detected after speech)
         if (segments.Count > 0)
         {
+            _logger.LogDebug("VAD detected {Count} speech segments", segments.Count);
             var lastSegment = segments[^1];
             int silenceAfterSpeech = _sampleBuffer.Count - lastSegment.EndSample;
 
@@ -178,6 +185,7 @@ public sealed class AudioPipelineService : IAudioPipeline
                 return;
             }
 
+            _logger.LogDebug("Flushing buffer with {Count} samples", _sampleBuffer.Count);
             var segments = _vad.DetectSpeech(_sampleBuffer.ToArray());
             if (segments.Count > 0)
             {
@@ -203,6 +211,7 @@ public sealed class AudioPipelineService : IAudioPipeline
 
                     if (!string.IsNullOrWhiteSpace(result.Text))
                     {
+                        _logger.LogDebug("Transcription result: {Text}", result.Text);
                         TranscriptionAvailable?.Invoke(this, new TranscriptionEventArgs
                         {
                             Result = result
@@ -212,6 +221,10 @@ public sealed class AudioPipelineService : IAudioPipeline
                 catch (OperationCanceledException)
                 {
                     break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error during transcription");
                 }
             }
             else

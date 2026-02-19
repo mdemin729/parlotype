@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
 using Parlotype.Core.Audio;
@@ -9,15 +10,18 @@ namespace Parlotype.Platform.Audio;
 /// </summary>
 public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator, IMMNotificationClient
 {
+    private readonly ILogger<WasapiMicrophoneEnumerator> _logger;
     private readonly MMDeviceEnumerator _enumerator;
     private bool _disposed;
 
     public event EventHandler? DevicesChanged;
 
-    public WasapiMicrophoneEnumerator()
+    public WasapiMicrophoneEnumerator(ILogger<WasapiMicrophoneEnumerator> logger)
     {
+        _logger = logger;
         _enumerator = new MMDeviceEnumerator();
         _enumerator.RegisterEndpointNotificationCallback(this);
+        _logger.LogInformation("Microphone enumerator initialized");
     }
 
     public IReadOnlyList<MicrophoneInfo> GetAvailableMicrophones()
@@ -27,9 +31,13 @@ public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator, IMMNotif
         var defaultId = GetDefaultDeviceId();
         var devices = _enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
 
-        return devices
+        var microphones = devices
             .Select(d => new MicrophoneInfo(d.ID, d.FriendlyName, d.ID == defaultId))
             .ToList();
+
+        _logger.LogDebug("Enumerating microphones, found {Count} devices", microphones.Count);
+
+        return microphones;
     }
 
     public MicrophoneInfo? GetDefaultMicrophone()
@@ -63,16 +71,19 @@ public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator, IMMNotif
 
     void IMMNotificationClient.OnDeviceAdded(string pwstrDeviceId)
     {
+        _logger.LogInformation("Device added: {DeviceId}", pwstrDeviceId);
         DevicesChanged?.Invoke(this, EventArgs.Empty);
     }
 
     void IMMNotificationClient.OnDeviceRemoved(string deviceId)
     {
+        _logger.LogInformation("Device removed: {DeviceId}", deviceId);
         DevicesChanged?.Invoke(this, EventArgs.Empty);
     }
 
     void IMMNotificationClient.OnDeviceStateChanged(string deviceId, DeviceState newState)
     {
+        _logger.LogInformation("Device state changed: {DeviceId} → {NewState}", deviceId, newState);
         DevicesChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -80,6 +91,7 @@ public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator, IMMNotif
     {
         if (flow == DataFlow.Capture)
         {
+            _logger.LogInformation("Default capture device changed: {DeviceId}", defaultDeviceId);
             DevicesChanged?.Invoke(this, EventArgs.Empty);
         }
     }

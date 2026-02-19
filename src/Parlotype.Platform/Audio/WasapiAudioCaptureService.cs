@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -10,6 +11,7 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
 {
     private static readonly AudioFormat TargetFormat = AudioFormat.Whisper;
 
+    private readonly ILogger<WasapiAudioCaptureService> _logger;
     private WasapiCapture? _capture;
     private BufferedWaveProvider? _bufferedProvider;
     private ISampleProvider? _resampler;
@@ -18,6 +20,11 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
     public bool IsCapturing { get; private set; }
 
     public event EventHandler<AudioDataEventArgs>? DataAvailable;
+
+    public WasapiAudioCaptureService(ILogger<WasapiAudioCaptureService> logger)
+    {
+        _logger = logger;
+    }
 
     public Task StartAsync(MicrophoneInfo? device = null, CancellationToken cancellationToken = default)
     {
@@ -37,6 +44,7 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
             }
             catch
             {
+                _logger.LogWarning("Specified device {DeviceId} unavailable, falling back to default", device.Id);
                 // Fallback to default if specified device is unavailable
                 mmDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
             }
@@ -47,6 +55,7 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
         }
 
         _capture = new WasapiCapture(mmDevice);
+        _logger.LogInformation("Starting audio capture on device: {DeviceName}", mmDevice.FriendlyName);
         _capture.DataAvailable += OnCaptureDataAvailable;
         _capture.RecordingStopped += OnRecordingStopped;
 
@@ -64,6 +73,8 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
             _resampler = _resampler.ToMono();
         }
 
+        _logger.LogDebug("Capture format: {Format}, resampling to {TargetRate}Hz mono", _capture.WaveFormat, TargetFormat.SampleRate);
+
         _capture.StartRecording();
         IsCapturing = true;
 
@@ -77,6 +88,7 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
 
         _capture?.StopRecording();
         IsCapturing = false;
+        _logger.LogInformation("Audio capture stopped");
 
         return Task.CompletedTask;
     }

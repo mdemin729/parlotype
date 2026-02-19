@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 
 namespace Parlotype.Platform.Settings;
@@ -19,11 +20,19 @@ public sealed class JsonSettingsService : ISettingsService
         WriteIndented = true
     };
 
+    private readonly ILogger<JsonSettingsService> _logger;
+
+    public JsonSettingsService(ILogger<JsonSettingsService> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         await Lock.WaitAsync(cancellationToken);
         try
         {
+            _logger.LogDebug("Reading setting: {Key}", key);
             var dict = await LoadAsync(cancellationToken);
             if (dict.TryGetValue(key, out var element) && element is JsonElement jsonElement)
             {
@@ -42,6 +51,7 @@ public sealed class JsonSettingsService : ISettingsService
         await Lock.WaitAsync(cancellationToken);
         try
         {
+            _logger.LogDebug("Writing setting: {Key}", key);
             var dict = await LoadAsync(cancellationToken);
             dict[key] = JsonSerializer.SerializeToElement(value, JsonOptions);
             await SaveAsync(dict, cancellationToken);
@@ -52,14 +62,22 @@ public sealed class JsonSettingsService : ISettingsService
         }
     }
 
-    private static async Task<Dictionary<string, object>> LoadAsync(CancellationToken cancellationToken)
+    private async Task<Dictionary<string, object>> LoadAsync(CancellationToken cancellationToken)
     {
         if (!File.Exists(SettingsPath))
             return new Dictionary<string, object>();
 
-        var json = await File.ReadAllTextAsync(SettingsPath, cancellationToken);
-        return JsonSerializer.Deserialize<Dictionary<string, object>>(json, JsonOptions)
-               ?? new Dictionary<string, object>();
+        try
+        {
+            var json = await File.ReadAllTextAsync(SettingsPath, cancellationToken);
+            return JsonSerializer.Deserialize<Dictionary<string, object>>(json, JsonOptions)
+                   ?? new Dictionary<string, object>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to load settings file");
+            return new Dictionary<string, object>();
+        }
     }
 
     private static async Task SaveAsync(Dictionary<string, object> dict, CancellationToken cancellationToken)
