@@ -78,12 +78,17 @@ public sealed class AudioPipelineService : IAudioPipeline
 
         if (_cts is not null)
         {
+            // Signal processing loop to drain remaining items then exit
             await _cts.CancelAsync();
 
             if (_processingTask is not null)
             {
-                try { await _processingTask; }
-                catch (OperationCanceledException) { }
+                // Wait for queue drain with a generous timeout for Whisper processing
+                var completed = await Task.WhenAny(
+                    _processingTask,
+                    Task.Delay(TimeSpan.FromSeconds(30), cancellationToken));
+                if (completed != _processingTask)
+                    _logger.LogWarning("Processing queue drain timed out after 30s");
             }
 
             _cts.Dispose();
@@ -199,15 +204,17 @@ public sealed class AudioPipelineService : IAudioPipeline
 
     private async Task ProcessQueueAsync(CancellationToken cancellationToken)
     {
-        while (!cancellationToken.IsCancellationRequested)
+        while (true)
         {
             if (_processingQueue.TryDequeue(out var samples))
             {
                 try
                 {
-                    // Convert float samples to 16-bit PCM bytes for the recognizer
+                    _logger.LogDebug("Sending {SampleCount} samples ({Duration:F1}s) to speech recognizer",
+                        samples.Length, samples.Length / 16_000.0);
                     var pcmBytes = ConvertFloatToPcm(samples);
-                    var result = await _recognizer.TranscribeAsync(pcmBytes, cancellationToken);
+                    // Use CancellationToken.None so in-flight transcription completes even during shutdown
+                    var result = await _recognizer.TranscribeAsync(pcmBytes, CancellationToken.None);
 
                     if (!string.IsNullOrWhiteSpace(result.Text))
                     {
@@ -217,19 +224,31 @@ public sealed class AudioPipelineService : IAudioPipeline
                             Result = result
                         });
                     }
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
+                    else
+                    {
+                        _logger.LogDebug("Transcription returned empty text");
+                    }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error during transcription");
                 }
             }
+            else if (cancellationToken.IsCancellationRequested)
+            {
+                // Queue is empty and we've been asked to stop — exit
+                break;
+            }
             else
             {
-                await Task.Delay(50, cancellationToken);
+                try
+                {
+                    await Task.Delay(50, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancellation requested — loop back to drain remaining items
+                }
             }
         }
     }
