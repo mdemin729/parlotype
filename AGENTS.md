@@ -4,14 +4,15 @@ Instructions for AI agents working on this codebase.
 
 ## Architecture
 
-Parlotype is a local-first voice-to-text desktop app with four projects:
+Parlotype is a local-first voice-to-text desktop app with five projects:
 
-- **Parlotype.Core** — Domain interfaces and models. Zero external dependencies. All contracts live here.
-- **Parlotype.Platform** — Implements Core interfaces with real libraries (Whisper.net, NAudio, SharpHook).
-- **Parlotype.Desktop** — Avalonia UI app. Entry point. Wires DI, hosts views/viewmodels.
-- **Parlotype.Tests** — xUnit tests referencing Core and Platform.
+- **Parlotype.Core** — Domain interfaces and models. Zero external dependencies. All contracts live here. Subfolders: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`, `TextProcessing/`.
+- **Parlotype.Platform** — Implements Core interfaces with real libraries (Whisper.net, NAudio, SileroVad, SharpHook). Subfolders mirror Core: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`.
+- **Parlotype.Desktop** — Avalonia UI app (11.3.0, Fluent theme). Entry point. Wires DI, hosts views/viewmodels.
+- **Parlotype.Tests** — xUnit tests for Core and Platform (audio pipeline, VAD, Whisper).
+- **Parlotype.Desktop.Tests** — Avalonia headless UI tests using `Avalonia.Headless.XUnit`. Uses `[AvaloniaFact]` instead of `[Fact]`. Mock services in `Mocks/` folder.
 
-**Dependency direction:** Desktop → Platform → Core. Tests → Core, Platform.
+**Dependency direction:** Desktop → Platform → Core. Tests → Core, Platform. Desktop.Tests → Desktop, Core.
 
 ## Coding Conventions
 
@@ -22,18 +23,26 @@ Parlotype is a local-first voice-to-text desktop app with four projects:
 - **MVVM pattern:** Use `CommunityToolkit.Mvvm` with source generators (`[ObservableProperty]`, `[RelayCommand]`)
 - **DI:** `Microsoft.Extensions.DependencyInjection` — register services in `PlatformServiceExtensions.cs`
 - **Interfaces in Core, implementations in Platform** — never add platform-specific packages to Core
+- **AXAML:** Always use `x:CompileBindings="True"` and `x:DataType` on all AXAML files
+- **Design-time data:** Use `<Design.DataContext>` with parameterless ViewModel constructors backed by design stubs
+- **Flyout bindings:** Flyouts are disconnected from the visual tree — embed commands directly in display item wrappers (e.g. `MicrophoneDisplayItem`, `WaitTimeDisplayItem`) instead of using `$parent` traversal bindings
 
 ## Build & Test
 
 ```bash
-dotnet build Parlotype.sln      # Must compile with zero warnings
-dotnet test                      # All tests must pass
+dotnet build Parlotype.slnx      # Must compile with zero warnings
+dotnet test                       # All tests must pass (platform + headless UI)
 dotnet run --project src/Parlotype.Desktop  # Launch the app
 ```
+
+**Note:** File lock errors from running `.NET Host` processes are common. Kill the locking process by PID before rebuilding.
 
 ## Key Patterns
 
 - New domain contracts → add interface to `Parlotype.Core` in the appropriate subfolder
 - New platform implementations → add to `Parlotype.Platform` and register in `PlatformServiceExtensions.cs`
-- New UI features → add ViewModels and Views to `Parlotype.Desktop`
+- New UI features → add ViewModels to `Parlotype.Desktop/ViewModels/` and Views to `Parlotype.Desktop/Views/`
+- Extract reusable UI components into separate UserControls (e.g. `MicrophoneSettingsView`)
 - Always write tests for logic in Core and Platform
+- Write headless UI tests in `Parlotype.Desktop.Tests` for view/viewmodel integration — use `MockMicrophoneEnumerator` and `MockSettingsService` for controllable testing
+- `ObservableCollection` mutations from background threads must dispatch to `Avalonia.Threading.Dispatcher.UIThread`
