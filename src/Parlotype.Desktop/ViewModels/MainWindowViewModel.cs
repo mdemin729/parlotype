@@ -1,10 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Parlotype.Desktop.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    private readonly ILogger<MainWindowViewModel> _logger;
+
     [ObservableProperty]
     private string _statusText = "Ready";
 
@@ -19,9 +23,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public SettingsViewModel Settings { get; }
 
-    public MainWindowViewModel(SettingsViewModel settings)
+    public MainWindowViewModel(SettingsViewModel settings, ILogger<MainWindowViewModel>? logger = null)
     {
         Settings = settings;
+        _logger = logger ?? NullLogger<MainWindowViewModel>.Instance;
     }
 
     public MainWindowViewModel() : this(new SettingsViewModel())
@@ -33,6 +38,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IsRecording = !IsRecording;
         StatusText = IsRecording ? "Recording..." : "Ready";
+        _logger.LogInformation("Recording toggled: {IsRecording}", IsRecording);
     }
 
     [RelayCommand]
