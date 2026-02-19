@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Parlotype.Core.Speech;
 using Whisper.net;
 using Whisper.net.Ggml;
@@ -9,14 +10,16 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 {
     private static readonly SemaphoreSlim ModelDownloadLock = new(1, 1);
     private readonly GgmlType _modelType;
+    private readonly ILogger<WhisperSpeechRecognizer> _logger;
     private WhisperFactory? _factory;
     private WhisperProcessor? _processor;
     private bool _disposed;
 
     public bool IsReady { get; private set; }
 
-    public WhisperSpeechRecognizer(GgmlType modelType = GgmlType.Base)
+    public WhisperSpeechRecognizer(ILogger<WhisperSpeechRecognizer> logger, GgmlType modelType = GgmlType.Base)
     {
+        _logger = logger;
         _modelType = modelType;
     }
 
@@ -27,7 +30,8 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         if (IsReady)
             return;
 
-        var modelPath = await EnsureModelAsync(_modelType, cancellationToken);
+        _logger.LogInformation("Initializing Whisper with model type: {ModelType}", _modelType);
+        var modelPath = await EnsureModelAsync(_modelType, _logger, cancellationToken);
 
         _factory = WhisperFactory.FromPath(modelPath);
         _processor = _factory.CreateBuilder()
@@ -35,6 +39,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             .Build();
 
         IsReady = true;
+        _logger.LogInformation("Whisper model loaded successfully");
     }
 
     public async Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<byte> pcmData, CancellationToken cancellationToken = default)
@@ -59,6 +64,8 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             : 0.0;
         var language = segments.FirstOrDefault()?.Language;
 
+        _logger.LogDebug("Transcription completed: {SegmentCount} segments, confidence: {Confidence:F2}", segments.Count, avgConfidence);
+
         return new TranscriptionResult
         {
             Text = text,
@@ -81,7 +88,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         return samples;
     }
 
-    private static async Task<string> EnsureModelAsync(GgmlType modelType, CancellationToken cancellationToken)
+    private static async Task<string> EnsureModelAsync(GgmlType modelType, ILogger<WhisperSpeechRecognizer> logger, CancellationToken cancellationToken)
     {
         var cacheDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -99,6 +106,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
                 // Double-check after acquiring lock
                 if (!File.Exists(modelPath))
                 {
+                    logger.LogInformation("Downloading Whisper model {ModelType}...", modelType);
                     var tempPath = modelPath + ".tmp";
                     using var modelStream = await WhisperGgmlDownloader.Default
                         .GetGgmlModelAsync(modelType, cancellationToken: cancellationToken);
