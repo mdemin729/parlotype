@@ -6,10 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Core.TextInjection;
 using Parlotype.Desktop.Services;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.Views;
 using Parlotype.Platform;
+using Parlotype.Platform.TextInjection;
 using ZLogger;
 
 namespace Parlotype.Desktop;
@@ -66,6 +68,13 @@ public class App : Application
 
         services.AddPlatformServices();
         services.AddSingleton<IModelDownloadService, ModelDownloadDialogService>();
+
+        services.AddSingleton<ITargetWindowTracker, Win32TargetWindowTracker>();
+        if (Program.TextInjectionMode == TextInjectionMode.SharpHook)
+            services.AddSingleton<ITextInjectionService, SharpHookTextInjectionService>();
+        else
+            services.AddSingleton<ITextInjectionService, ClipboardTextInjectionService>();
+
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindowViewModel>();
 
