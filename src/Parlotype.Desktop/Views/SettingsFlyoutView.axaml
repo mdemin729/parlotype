@@ -167,7 +167,8 @@
             <Button Background="Transparent"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Padding="16,10" CornerRadius="0">
+                    Padding="16,10" CornerRadius="0"
+                    Name="ModelPickerButton">
                 <Button.Flyout>
                     <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
                         <Flyout.FlyoutPresenterTheme>
