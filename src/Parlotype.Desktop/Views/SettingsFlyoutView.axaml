@@ -163,6 +163,63 @@
 
             <Separator Margin="16,0" />
 
+            <!-- Theme -->
+            <Button Background="Transparent"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Padding="16,10" CornerRadius="0">
+                <Button.Flyout>
+                    <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
+                        <Flyout.FlyoutPresenterTheme>
+                            <ControlTheme TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="CornerRadius" Value="0" />
+                            </ControlTheme>
+                        </Flyout.FlyoutPresenterTheme>
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                CornerRadius="8"
+                                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                BorderThickness="1"
+                                Padding="4" MinWidth="200">
+                            <ItemsControl ItemsSource="{Binding ThemeOptions}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ThemeDisplayItem">
+                                        <Button Background="Transparent"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Stretch"
+                                                Padding="12,8" CornerRadius="4"
+                                                Command="{Binding SelectCommand}"
+                                                CommandParameter="{Binding Theme}">
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       FontSize="14"
+                                                       VerticalAlignment="Center" />
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </Flyout>
+                </Button.Flyout>
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              Data="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 1.5V12l-6.5 6.5A8.5 8.5 0 0 1 12 3.5Z" />
+                    <TextBlock Grid.Column="1" Text="Theme"
+                               VerticalAlignment="Center" FontSize="14" />
+                    <TextBlock Grid.Column="2" Text="›" FontSize="18"
+                               VerticalAlignment="Center" Opacity="0.5" />
+                </Grid>
+            </Button>
+
+            <Separator Margin="16,0" />
+
             <!-- Give feedback -->
             <Button Background="Transparent"
                     HorizontalAlignment="Stretch"

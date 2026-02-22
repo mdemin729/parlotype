@@ -37,9 +37,17 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private bool _isMicrophonePickerOpen;
 
+    [ObservableProperty]
+    private AppTheme _selectedTheme;
+
     public ObservableCollection<MicrophoneDisplayItem> AvailableMicrophones { get; } = [];
 
     public WaitTimeDisplayItem[] WaitTimeOptions { get; }
+
+    public ThemeDisplayItem[] ThemeOptions { get; }
+
+    /// <summary>Raised when the user changes the theme.</summary>
+    public event EventHandler<AppTheme>? ThemeChanged;
 
     public SettingsViewModel(IMicrophoneEnumerator enumerator, ISettingsService settings, ILogger<SettingsViewModel>? logger = null)
     {
@@ -51,8 +59,15 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
             .Select(o => new WaitTimeDisplayItem(o, SelectWaitTimeCommand))
             .ToArray();
 
+        ThemeOptions =
+        [
+            new(AppTheme.Default, "Default (system)", SelectThemeCommand),
+            new(AppTheme.Light, "Light", SelectThemeCommand),
+            new(AppTheme.Dark, "Dark", SelectThemeCommand),
+        ];
+
         _enumerator.DevicesChanged += OnDevicesChanged;
-        _ = InitializeMicrophonesAsync();
+        _ = InitializeAsync();
     }
 
     /// <summary>Parameterless constructor for designer support only.</summary>
@@ -60,8 +75,12 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
     {
     }
 
-    private async Task InitializeMicrophonesAsync()
+    private async Task InitializeAsync()
     {
+        var savedTheme = await _settings.GetAsync<string>(SettingsKeys.SelectedTheme);
+        if (Enum.TryParse<AppTheme>(savedTheme, out var theme))
+            SelectedTheme = theme;
+
         var savedId = await _settings.GetAsync<string>(SettingsKeys.SelectedMicrophoneId);
         PopulateMicrophoneList();
         _logger.LogDebug("Initialized with {Count} microphones, saved selection: {SavedId}",
@@ -185,6 +204,15 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
         ApplySelection(item);
         IsMicrophonePickerOpen = false;
         _ = PersistSelectionAsync(item.Info.Id);
+    }
+
+    [RelayCommand]
+    private void SelectTheme(AppTheme theme)
+    {
+        _logger.LogInformation("Theme selected: {Theme}", theme);
+        SelectedTheme = theme;
+        ThemeChanged?.Invoke(this, theme);
+        _ = _settings.SetAsync(SettingsKeys.SelectedTheme, theme.ToString());
     }
 
     [RelayCommand]

@@ -1,7 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Parlotype.Desktop.App"
-             RequestedThemeVariant="Dark">
+             x:Class="Parlotype.Desktop.App">
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
