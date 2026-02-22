@@ -4,12 +4,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Speech;
+using Parlotype.Core.TextInjection;
 
 namespace Parlotype.Desktop.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly IAudioPipeline? _pipeline;
+    private readonly ITextInjectionService? _textInjectionService;
     private readonly ILogger<MainWindowViewModel> _logger;
 
     [ObservableProperty]
@@ -29,10 +31,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         SettingsViewModel settings,
         IAudioPipeline? pipeline = null,
+        ITextInjectionService? textInjectionService = null,
         ILogger<MainWindowViewModel>? logger = null)
     {
         Settings = settings;
         _pipeline = pipeline;
+        _textInjectionService = textInjectionService;
         _logger = logger ?? NullLogger<MainWindowViewModel>.Instance;
     }
 
@@ -100,10 +104,22 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void OnTranscriptionAvailable(object? sender, TranscriptionEventArgs e)
+    private async void OnTranscriptionAvailable(object? sender, TranscriptionEventArgs e)
     {
         _logger.LogDebug("Transcription result: {Text} (confidence: {Confidence:F2}, language: {Language})",
             e.Result.Text, e.Result.Confidence, e.Result.DetectedLanguage);
+
+        if (_textInjectionService is null || string.IsNullOrWhiteSpace(e.Result.Text))
+            return;
+
+        try
+        {
+            await _textInjectionService.InjectTextAsync(e.Result.Text);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to inject transcribed text");
+        }
     }
 
     [RelayCommand]
