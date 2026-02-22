@@ -68,6 +68,14 @@
                     Padding="16,10" CornerRadius="0">
                 <Button.Flyout>
                     <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
+                        <Flyout.FlyoutPresenterTheme>
+                            <ControlTheme TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="CornerRadius" Value="0" />
+                            </ControlTheme>
+                        </Flyout.FlyoutPresenterTheme>
                         <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                                 CornerRadius="8"
                                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
@@ -125,6 +133,14 @@
                     Padding="16,10" CornerRadius="0">
                 <Button.Flyout>
                     <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
+                        <Flyout.FlyoutPresenterTheme>
+                            <ControlTheme TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="CornerRadius" Value="0" />
+                            </ControlTheme>
+                        </Flyout.FlyoutPresenterTheme>
                         <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                                 CornerRadius="8"
                                 BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
