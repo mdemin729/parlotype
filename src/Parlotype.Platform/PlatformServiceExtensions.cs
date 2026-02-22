@@ -22,6 +22,8 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
         services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
+        services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromHours(1) });
+        services.AddSingleton<HttpModelDownloadService>();
         return services;
     }
 }

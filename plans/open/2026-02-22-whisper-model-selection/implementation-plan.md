@@ -75,3 +75,103 @@ Follow the existing settings patterns (WaitTime picker, Theme picker, Microphone
 - The model is read from settings at `InitializeAsync` time. Changing the model in settings while recording is active will take effect on next pipeline restart
 - Model disk sizes from user-provided table are static metadata; no runtime size detection needed
 - SHA hashes stored for future integrity verification (custom downloader feature)
+
+---
+
+# Plan: Model Download Confirmation Dialog with Progress
+
+## Problem
+When a Whisper model is not cached locally, `WhisperSpeechRecognizer.EnsureModelAsync` silently downloads it (75 MiB – 2.9 GiB). The user gets no confirmation prompt, no progress feedback, and no way to cancel. We need a modal dialog that:
+1. Asks confirmation before downloading (showing model name + size)
+2. Shows a progress bar during download
+3. Allows cancellation via a Cancel button
+4. Blocks other UI interaction while downloading (modal)
+
+## Approach
+
+### Architecture
+Introduce a **Core-level service interface** `IModelDownloadService` that abstracts model downloading with progress reporting. Platform implements it using `HttpClient` (replacing `WhisperGgmlDownloader`). Desktop provides a modal dialog window that drives the interaction.
+
+The flow when a model is needed but not cached:
+1. `WhisperSpeechRecognizer.EnsureModelAsync` checks if model file exists → if not, it calls `IModelDownloadService.EnsureModelAsync(...)` instead of `WhisperGgmlDownloader`
+2. The Desktop-layer implementation of `IModelDownloadService` shows a confirmation dialog → if user confirms, starts download with progress → if user cancels, throws `OperationCanceledException`
+3. The Platform-layer provides an `HttpModelDownloadService` that does the actual HTTP download with `IProgress<double>` reporting — Desktop wraps this with UI
+
+**Key design decision:** Split responsibilities:
+- `IModelDownloadService` (Core) — interface with `Task<string> EnsureModelAsync(WhisperModelType, CancellationToken)`
+- `HttpModelDownloadService` (Platform) — HTTP download with progress, no UI knowledge
+- `ModelDownloadDialogService` (Desktop) — wraps `HttpModelDownloadService`, shows modal dialog
+
+This way Platform remains UI-free, and Desktop handles the dialog.
+
+### Download URLs
+Whisper.net's `WhisperGgmlDownloader` downloads from Hugging Face. We'll use the same URLs by extracting them from the library's source. The URL pattern is:
+`https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-{model}.bin`
+
+## Todos
+
+### 1. `core-download-iface` — Add IModelDownloadService to Core
+- File: `src/Parlotype.Core/Speech/IModelDownloadService.cs`
+- Interface with:
+    - `Task<string> EnsureModelAsync(WhisperModelType type, CancellationToken ct)` — returns path to cached model, may prompt user
+    - `bool IsModelCached(WhisperModelType type)` — checks if model file exists locally
+
+### 2. `core-download-progress` — Add ModelDownloadProgress record to Core
+- File: `src/Parlotype.Core/Speech/ModelDownloadProgress.cs`
+- Record: `long BytesReceived`, `long? TotalBytes`, `double? ProgressFraction`
+
+### 3. `platform-http-download` — Implement HttpModelDownloadService in Platform
+- File: `src/Parlotype.Platform/Speech/HttpModelDownloadService.cs`
+- Downloads from Hugging Face GGML CDN using `HttpClient` with streaming
+- Reports progress via `IProgress<ModelDownloadProgress>`
+- Writes to temp file, moves on completion
+- Uses model cache directory: `%LOCALAPPDATA%/parlotype/models/`
+- Public method: `Task DownloadModelAsync(WhisperModelType, IProgress<ModelDownloadProgress>, CancellationToken)`
+- Public method: `string GetModelPath(WhisperModelType)` — returns expected file path
+- Public method: `bool IsModelCached(WhisperModelType)` — checks if file exists
+
+### 4. `platform-recognizer-update` — Update WhisperSpeechRecognizer to use IModelDownloadService
+- File: `src/Parlotype.Platform/Speech/WhisperSpeechRecognizer.cs`
+- Replace internal `EnsureModelAsync` with call to `IModelDownloadService.EnsureModelAsync`
+- Remove `WhisperGgmlDownloader` usage entirely
+- Remove `ModelDownloadLock` (download service handles this)
+
+### 5. `desktop-download-vm` — Add ModelDownloadViewModel
+- File: `src/Parlotype.Desktop/ViewModels/ModelDownloadViewModel.cs`
+- Properties: `string ModelName`, `string ModelSize`, `double ProgressValue` (0–100), `string StatusText`, `bool IsDownloading`, `bool IsConfirming`
+- Commands: `DownloadCommand`, `CancelCommand`
+- States: Confirmation → Downloading → Done / Cancelled
+
+### 6. `desktop-download-dialog` — Add ModelDownloadDialog window
+- File: `src/Parlotype.Desktop/Views/ModelDownloadDialog.axaml` + `.axaml.cs`
+- Modal `Window` with:
+    - Confirmation state: "Download {ModelName} ({Size})?" with Download/Cancel buttons
+    - Downloading state: progress bar + percentage text + Cancel button
+    - Styled consistently with existing app (Fluent theme, same border/corner radius patterns)
+- `ShowAsync(Window owner)` returns `bool` (true = downloaded, false = cancelled)
+
+### 7. `desktop-download-service` — Implement ModelDownloadDialogService in Desktop
+- File: `src/Parlotype.Desktop/Services/ModelDownloadDialogService.cs`
+- Implements `IModelDownloadService` from Core
+- `EnsureModelAsync`: checks if cached → if not, shows dialog on UI thread → calls `HttpModelDownloadService` → returns path
+- `IsModelCached`: delegates to `HttpModelDownloadService`
+- Needs reference to main window (for modal owner) — passed via constructor or service locator
+
+### 8. `desktop-di-update` — Update DI registration
+- File: `src/Parlotype.Platform/PlatformServiceExtensions.cs` — register `HttpModelDownloadService`
+- File: `src/Parlotype.Desktop/App.axaml.cs` — register `ModelDownloadDialogService` as `IModelDownloadService`, pass window reference
+
+### 9. `tests-update-download` — Update tests
+- `src/Parlotype.Tests/WhisperSpeechRecognizerTests.cs` — provide mock `IModelDownloadService`
+- `src/Parlotype.Tests/AudioPipelineTests.cs` — same
+- Optionally: unit test `HttpModelDownloadService.IsModelCached`
+
+### 10. `docs-update-download` — Update documentation
+- `AGENTS.md` — document the download service pattern and dialog
+
+## Notes
+- The dialog must show on the UI thread. `ModelDownloadDialogService.EnsureModelAsync` dispatches to `Dispatcher.UIThread` when needed.
+- `WhisperGgmlDownloader` from Whisper.net is removed entirely — we use direct HTTP download for control over progress and cancellation.
+- The confirmation dialog shows the model's `DiskSize` from `WhisperModelInfo` (user-facing), not the raw byte count.
+- If the user cancels, `OperationCanceledException` propagates up, and the caller (pipeline start) should handle it gracefully.
+- The modal blocks only the main window — system tray or background services (if any) are unaffected.

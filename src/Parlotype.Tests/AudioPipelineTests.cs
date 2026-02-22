@@ -1,22 +1,55 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Audio;
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Platform.Audio;
 using Parlotype.Platform.Speech;
-using Whisper.net.Ggml;
 using Xunit;
 
 namespace Parlotype.Tests;
 
 public class AudioPipelineTests
 {
+    private sealed class FakeSettingsService : ISettingsService
+    {
+        private readonly Dictionary<string, object?> _store = new();
+
+        public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
+            => Task.FromResult(_store.TryGetValue(key, out var v) ? (T?)v : default);
+
+        public Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default)
+        {
+            _store[key] = value;
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class HeadlessModelDownloadService : IModelDownloadService
+    {
+        private readonly HttpModelDownloadService _http = new(
+            new HttpClient { Timeout = TimeSpan.FromHours(1) },
+            NullLogger<HttpModelDownloadService>.Instance);
+
+        public bool IsModelCached(WhisperModelType modelType) => _http.IsModelCached(modelType);
+
+        public async Task<string> EnsureModelAsync(WhisperModelType modelType, CancellationToken cancellationToken = default)
+        {
+            if (!_http.IsModelCached(modelType))
+                await _http.DownloadModelAsync(modelType, null, cancellationToken);
+            return _http.GetModelPath(modelType);
+        }
+    }
+
     [Fact]
     public async Task Pipeline_WithVadAndWhisper_ProducesTranscription()
     {
         // Arrange: create a mock capture service that feeds the WAV file
         var capture = new TestAudioCaptureService();
         await using var vad = new SileroVadService(NullLogger<SileroVadService>.Instance);
-        await using var recognizer = new WhisperSpeechRecognizer(NullLogger<WhisperSpeechRecognizer>.Instance, GgmlType.BaseEn);
+
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
+        await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
 
         await using var pipeline = new AudioPipelineService(capture, vad, recognizer, NullLogger<AudioPipelineService>.Instance);
 

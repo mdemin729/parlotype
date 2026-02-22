@@ -14,6 +14,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 {
     private readonly IMicrophoneEnumerator _enumerator;
     private readonly ISettingsService _settings;
+    private readonly IModelDownloadService? _downloadService;
     private readonly ILogger<SettingsViewModel> _logger;
 
     [ObservableProperty]
@@ -40,19 +41,25 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private AppTheme _selectedTheme;
 
+    [ObservableProperty]
+    private WhisperModelType _selectedWhisperModel = WhisperModelType.Base;
+
     public ObservableCollection<MicrophoneDisplayItem> AvailableMicrophones { get; } = [];
 
     public WaitTimeDisplayItem[] WaitTimeOptions { get; }
 
     public ThemeDisplayItem[] ThemeOptions { get; }
 
+    public WhisperModelDisplayItem[] ModelOptions { get; }
+
     /// <summary>Raised when the user changes the theme.</summary>
     public event EventHandler<AppTheme>? ThemeChanged;
 
-    public SettingsViewModel(IMicrophoneEnumerator enumerator, ISettingsService settings, ILogger<SettingsViewModel>? logger = null)
+    public SettingsViewModel(IMicrophoneEnumerator enumerator, ISettingsService settings, IModelDownloadService? downloadService = null, ILogger<SettingsViewModel>? logger = null)
     {
         _enumerator = enumerator;
         _settings = settings;
+        _downloadService = downloadService;
         _logger = logger ?? NullLogger<SettingsViewModel>.Instance;
 
         WaitTimeOptions = Enum.GetValues<WaitTimeOption>()
@@ -65,6 +72,10 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
             new(AppTheme.Light, "Light", SelectThemeCommand),
             new(AppTheme.Dark, "Dark", SelectThemeCommand),
         ];
+
+        ModelOptions = WhisperModelInfo.GetAll()
+            .Select(m => new WhisperModelDisplayItem(m, _downloadService?.IsModelCached(m.Type) ?? false, SelectWhisperModelCommand))
+            .ToArray();
 
         _enumerator.DevicesChanged += OnDevicesChanged;
         _ = InitializeAsync();
@@ -80,6 +91,12 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
         var savedTheme = await _settings.GetAsync<string>(SettingsKeys.SelectedTheme);
         if (Enum.TryParse<AppTheme>(savedTheme, out var theme))
             SelectedTheme = theme;
+
+        var savedModel = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel);
+        var modelType = Enum.TryParse<WhisperModelType>(savedModel, out var model)
+            ? model
+            : WhisperModelType.Base;
+        ApplyModelSelection(modelType);
 
         var savedId = await _settings.GetAsync<string>(SettingsKeys.SelectedMicrophoneId);
         PopulateMicrophoneList();
@@ -213,6 +230,31 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
         SelectedTheme = theme;
         ThemeChanged?.Invoke(this, theme);
         _ = _settings.SetAsync(SettingsKeys.SelectedTheme, theme.ToString());
+    }
+
+    [RelayCommand]
+    private void SelectWhisperModel(WhisperModelType model)
+    {
+        _logger.LogInformation("Whisper model selected: {Model}", model);
+        ApplyModelSelection(model);
+        RefreshModelCacheStatus();
+        _ = _settings.SetAsync(SettingsKeys.SelectedWhisperModel, model.ToString());
+    }
+
+    private void ApplyModelSelection(WhisperModelType model)
+    {
+        SelectedWhisperModel = model;
+        foreach (var item in ModelOptions)
+            item.IsSelected = item.Type == model;
+    }
+
+    private void RefreshModelCacheStatus()
+    {
+        if (_downloadService is null)
+            return;
+
+        foreach (var item in ModelOptions)
+            item.IsCached = _downloadService.IsModelCached(item.Type);
     }
 
     [RelayCommand]

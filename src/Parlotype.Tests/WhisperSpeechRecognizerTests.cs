@@ -1,16 +1,51 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Parlotype.Core.Settings;
+using Parlotype.Core.Speech;
 using Parlotype.Platform.Speech;
-using Whisper.net.Ggml;
 using Xunit;
 
 namespace Parlotype.Tests;
 
 public class WhisperSpeechRecognizerTests
 {
+    private sealed class FakeSettingsService : ISettingsService
+    {
+        private readonly Dictionary<string, object?> _store = new();
+
+        public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
+            => Task.FromResult(_store.TryGetValue(key, out var v) ? (T?)v : default);
+
+        public Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default)
+        {
+            _store[key] = value;
+            return Task.CompletedTask;
+        }
+    }
+
+    /// <summary>Headless download service that downloads without showing UI.</summary>
+    private sealed class HeadlessModelDownloadService : IModelDownloadService
+    {
+        private readonly HttpModelDownloadService _http = new(
+            new HttpClient { Timeout = TimeSpan.FromHours(1) },
+            NullLogger<HttpModelDownloadService>.Instance);
+
+        public bool IsModelCached(WhisperModelType modelType) => _http.IsModelCached(modelType);
+
+        public async Task<string> EnsureModelAsync(WhisperModelType modelType, CancellationToken cancellationToken = default)
+        {
+            if (!_http.IsModelCached(modelType))
+                await _http.DownloadModelAsync(modelType, null, cancellationToken);
+            return _http.GetModelPath(modelType);
+        }
+    }
+
     [Fact]
     public async Task TranscribeAsync_WithSpeechAudio_ReturnsTranscription()
     {
-        await using var recognizer = new WhisperSpeechRecognizer(NullLogger<WhisperSpeechRecognizer>.Instance, GgmlType.BaseEn);
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
+
+        await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
         await recognizer.InitializeAsync();
 
         Assert.True(recognizer.IsReady);
@@ -32,7 +67,10 @@ public class WhisperSpeechRecognizerTests
     [Fact]
     public async Task TranscribeAsync_WithSilence_ReturnsEmptyOrMinimalText()
     {
-        await using var recognizer = new WhisperSpeechRecognizer(NullLogger<WhisperSpeechRecognizer>.Instance, GgmlType.BaseEn);
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
+
+        await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
         await recognizer.InitializeAsync();
 
         // 1 second of silence as 16-bit PCM bytes
