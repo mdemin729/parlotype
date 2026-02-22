@@ -14,118 +14,6 @@
             Padding="0">
         <StackPanel>
 
-            <!-- Voice typing launcher -->
-            <StackPanel Margin="16,12,16,8">
-                <Grid ColumnDefinitions="Auto,*,Auto">
-                    <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              Data="M12 2a3.5 3.5 0 0 1 3.5 3.5v5a3.5 3.5 0 0 1-7 0v-5A3.5 3.5 0 0 1 12 2Zm0 1.5a2 2 0 0 0-2 2v5a2 2 0 0 0 4 0v-5a2 2 0 0 0-2-2Z" />
-                    <TextBlock Grid.Column="1" Text="Voice typing launcher"
-                               VerticalAlignment="Center" FontSize="14" />
-                    <ToggleSwitch Grid.Column="2" IsChecked="{Binding VoiceTypingLauncherEnabled}"
-                                  HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  OnContent="" OffContent="" />
-                </Grid>
-                <TextBlock Text="The voice typing launcher lets you quickly access voice typing when you're in a text box."
-                           FontSize="12" Opacity="0.6" TextWrapping="Wrap"
-                           Margin="26,0,0,0" />
-            </StackPanel>
-
-            <Separator Margin="16,0" />
-
-            <!-- Automatic punctuation -->
-            <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,8">
-                <TextBlock Grid.Column="0" Text="°," FontSize="16" FontWeight="Bold"
-                           Margin="0,0,10,0" VerticalAlignment="Center" Width="16"
-                           HorizontalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="Automatic punctuation"
-                           VerticalAlignment="Center" FontSize="14" />
-                <ToggleSwitch Grid.Column="2" IsChecked="{Binding AutomaticPunctuationEnabled}"
-                              HorizontalAlignment="Right" VerticalAlignment="Center"
-                              OnContent="" OffContent="" />
-            </Grid>
-
-            <Separator Margin="16,0" />
-
-            <!-- Filter profanity -->
-            <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,8">
-                <TextBlock Grid.Column="0" Text="✱" FontSize="14"
-                           Margin="0,0,10,0" VerticalAlignment="Center" Width="16"
-                           HorizontalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="Filter profanity"
-                           VerticalAlignment="Center" FontSize="14" />
-                <ToggleSwitch Grid.Column="2" IsChecked="{Binding FilterProfanityEnabled}"
-                              HorizontalAlignment="Right" VerticalAlignment="Center"
-                              OnContent="" OffContent="" />
-            </Grid>
-
-            <Separator Margin="16,0" />
-
-            <!-- Wait time before acting -->
-            <Button Background="Transparent"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Padding="16,10" CornerRadius="0">
-                <Button.Flyout>
-                    <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
-                        <Flyout.FlyoutPresenterTheme>
-                            <ControlTheme TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="CornerRadius" Value="0" />
-                            </ControlTheme>
-                        </Flyout.FlyoutPresenterTheme>
-                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                                CornerRadius="8"
-                                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-                                BorderThickness="1"
-                                Padding="4" MinWidth="220">
-                            <ItemsControl ItemsSource="{Binding WaitTimeOptions}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:WaitTimeDisplayItem">
-                                        <Button Background="Transparent"
-                                                HorizontalAlignment="Stretch"
-                                                HorizontalContentAlignment="Stretch"
-                                                Padding="12,8" CornerRadius="4"
-                                                Command="{Binding SelectCommand}"
-                                                CommandParameter="{Binding Option}">
-                                            <Grid ColumnDefinitions="Auto,*,Auto">
-                                                <TextBlock Grid.Column="0"
-                                                           Text="{Binding DisplayName}"
-                                                           FontSize="14"
-                                                           VerticalAlignment="Center" />
-                                                <TextBlock Grid.Column="2"
-                                                           Text="{Binding SecondsText}"
-                                                           FontSize="13" Opacity="0.5"
-                                                           VerticalAlignment="Center"
-                                                           Margin="24,0,0,0" />
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </Border>
-                    </Flyout>
-                </Button.Flyout>
-                <Grid ColumnDefinitions="Auto,*,Auto">
-                    <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              Data="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17ZM12 5a.75.75 0 0 1 .75.75v5.69l3.28 3.28a.75.75 0 1 1-1.06 1.06l-3.5-3.5a.75.75 0 0 1-.22-.53V5.75A.75.75 0 0 1 12 5Z" />
-                    <TextBlock Grid.Column="1" Text="Wait time before acting"
-                               VerticalAlignment="Center" FontSize="14" />
-                    <TextBlock Grid.Column="2" Text="›" FontSize="18"
-                               VerticalAlignment="Center" Opacity="0.5" />
-                </Grid>
-            </Button>
-
-            <Separator Margin="16,0" />
-
             <!-- Select default microphone -->
             <Button Background="Transparent"
                     HorizontalAlignment="Stretch"
@@ -298,56 +186,11 @@
                 </Grid>
             </Button>
 
-            <Separator Margin="16,0" />
-
-            <!-- Give feedback -->
-            <Button Background="Transparent"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Command="{Binding GiveFeedbackCommand}"
-                    Padding="16,10" CornerRadius="0">
-                <Grid ColumnDefinitions="Auto,*">
-                    <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              Data="M5.25 18A3.25 3.25 0 0 1 2 14.75v-8.5A3.25 3.25 0 0 1 5.25 3h13.5A3.25 3.25 0 0 1 22 6.25v8.5A3.25 3.25 0 0 1 18.75 18h-4.836l-4.397 3.298a.75.75 0 0 1-1.267-.548V18H5.25Zm0-1.5h3.5a.75.75 0 0 1 .75.75v2.418L13.214 16.5h5.536a1.75 1.75 0 0 0 1.75-1.75v-8.5a1.75 1.75 0 0 0-1.75-1.75H5.25a1.75 1.75 0 0 0-1.75 1.75v8.5c0 .966.784 1.75 1.75 1.75Z" />
-                    <TextBlock Grid.Column="1" Text="Give feedback"
-                               VerticalAlignment="Center" FontSize="14" />
-                </Grid>
-            </Button>
-
-            <Separator Margin="16,0" />
-
-            <!-- Help us improve voice typing -->
-            <StackPanel Margin="16,12,16,8">
-                <Grid ColumnDefinitions="Auto,*">
-                    <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              Data="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 4a3.5 3.5 0 0 0-3.5 3.5.75.75 0 0 0 1.5 0 2 2 0 1 1 3.578 1.236c-.425.51-.828.855-1.12 1.104a5.417 5.417 0 0 0-.458.44.75.75 0 0 0-.25.559V15.5a.75.75 0 0 0 1.5 0v-.667l.097-.09c.254-.228.599-.537.977-.99A3.5 3.5 0 0 0 12 7.5Zm0 10a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" />
-                    <TextBlock Grid.Column="1" Text="Help us improve voice typing"
-                               FontWeight="SemiBold" FontSize="14"
-                               VerticalAlignment="Center" />
-                </Grid>
-                <TextBlock Text="Contributing voice clips helps us teach our speech technologies how people really talk."
-                           FontSize="12" Opacity="0.6" TextWrapping="Wrap"
-                           Margin="26,4,0,0" />
-                <TextBlock Text="Learn how to start contributing voice clips"
-                           FontSize="12" Foreground="{DynamicResource SystemAccentColor}"
-                           Margin="26,4,0,0" Cursor="Hand">
-                    <TextBlock.TextDecorations>
-                        <TextDecorationCollection>
-                            <TextDecoration Location="Underline" />
-                        </TextDecorationCollection>
-                    </TextBlock.TextDecorations>
-                </TextBlock>
-            </StackPanel>
-
-            <Separator Margin="16,0" />
-
             <!-- Footer -->
             <TextBlock Text="Powered by Whisper"
                        FontSize="11" Opacity="0.4"
                        HorizontalAlignment="Center"
-                       Margin="16,8,16,12" />
+                       Margin="16,0,16,12" />
 
         </StackPanel>
     </Border>
