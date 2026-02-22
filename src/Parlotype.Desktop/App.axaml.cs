@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Parlotype.Core.Settings;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.Views;
 using Parlotype.Platform;
@@ -66,6 +68,10 @@ public class App : Application
 
         var provider = services.BuildServiceProvider();
 
+        var settingsVm = provider.GetRequiredService<SettingsViewModel>();
+        ApplyTheme(settingsVm.SelectedTheme);
+        settingsVm.ThemeChanged += (_, theme) => ApplyTheme(theme);
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow
@@ -75,5 +81,15 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void ApplyTheme(AppTheme theme)
+    {
+        RequestedThemeVariant = theme switch
+        {
+            AppTheme.Light => ThemeVariant.Light,
+            AppTheme.Dark => ThemeVariant.Dark,
+            _ => ThemeVariant.Default,
+        };
     }
 }

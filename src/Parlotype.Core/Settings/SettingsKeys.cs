@@ -4,4 +4,5 @@ namespace Parlotype.Core.Settings;
 public static class SettingsKeys
 {
     public const string SelectedMicrophoneId = "SelectedMicrophoneId";
+    public const string SelectedTheme = "SelectedTheme";
 }
