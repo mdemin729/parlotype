@@ -28,6 +28,8 @@ Parlotype is a local-first voice-to-text desktop app with five projects:
 - **Flyout bindings:** Flyouts are disconnected from the visual tree — embed commands directly in display item wrappers (e.g. `MicrophoneDisplayItem`, `WaitTimeDisplayItem`, `WhisperModelDisplayItem`) instead of using `$parent` traversal bindings
 - **Whisper model selection:** `WhisperModelType` enum in Core maps to `GgmlType` in Platform via `WhisperModelTypeExtensions`. `WhisperModelInfo` holds static metadata (display name, disk size, SHA). Model choice is persisted via `SettingsKeys.SelectedWhisperModel` and read by `WhisperSpeechRecognizer` at initialization.
 - **Model download:** `IModelDownloadService` (Core) → `HttpModelDownloadService` (Platform, HTTP with progress) → `ModelDownloadDialogService` (Desktop, modal confirmation dialog + progress bar). Tests use a `HeadlessModelDownloadService` that downloads without UI.
+- **Conditional CSS classes:** Use `Classes.xxx="{Binding Property}"` with `<Window.Styles>` for visual state changes (e.g. `Classes.recording="{Binding IsRecording}"` on the microphone button)
+- **Flyout lifecycle:** Avalonia flyouts lack MVVM-friendly lifecycle bindings — use code-behind to hook `PopupFlyoutBase.Opening` for refreshing ViewModel data when flyouts open (see `SettingsFlyoutView.axaml.cs`)
 
 ## Build & Test
 
