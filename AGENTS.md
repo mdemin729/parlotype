@@ -25,7 +25,9 @@ Parlotype is a local-first voice-to-text desktop app with five projects:
 - **Interfaces in Core, implementations in Platform** — never add platform-specific packages to Core
 - **AXAML:** Always use `x:CompileBindings="True"` and `x:DataType` on all AXAML files
 - **Design-time data:** Use `<Design.DataContext>` with parameterless ViewModel constructors backed by design stubs
-- **Flyout bindings:** Flyouts are disconnected from the visual tree — embed commands directly in display item wrappers (e.g. `MicrophoneDisplayItem`, `WaitTimeDisplayItem`) instead of using `$parent` traversal bindings
+- **Flyout bindings:** Flyouts are disconnected from the visual tree — embed commands directly in display item wrappers (e.g. `MicrophoneDisplayItem`, `WaitTimeDisplayItem`, `WhisperModelDisplayItem`) instead of using `$parent` traversal bindings
+- **Whisper model selection:** `WhisperModelType` enum in Core maps to `GgmlType` in Platform via `WhisperModelTypeExtensions`. `WhisperModelInfo` holds static metadata (display name, disk size, SHA). Model choice is persisted via `SettingsKeys.SelectedWhisperModel` and read by `WhisperSpeechRecognizer` at initialization.
+- **Model download:** `IModelDownloadService` (Core) → `HttpModelDownloadService` (Platform, HTTP with progress) → `ModelDownloadDialogService` (Desktop, modal confirmation dialog + progress bar). Tests use a `HeadlessModelDownloadService` that downloads without UI.
 
 ## Build & Test
 

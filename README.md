@@ -46,6 +46,7 @@ src/
 - **Platform** implements those interfaces with real dependencies
 - **Desktop** wires everything via dependency injection and provides the UI
 - Clean separation ensures Core has no UI or platform dependencies
+- Users can select from all available Whisper GGML models (Tiny through Large v3 Turbo) in the settings menu
 
 ## License
 

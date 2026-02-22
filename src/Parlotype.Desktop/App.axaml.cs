@@ -5,6 +5,8 @@ using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
+using Parlotype.Core.Speech;
+using Parlotype.Desktop.Services;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.Views;
 using Parlotype.Platform;
@@ -63,6 +65,7 @@ public class App : Application
         });
 
         services.AddPlatformServices();
+        services.AddSingleton<IModelDownloadService, ModelDownloadDialogService>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindowViewModel>();
 

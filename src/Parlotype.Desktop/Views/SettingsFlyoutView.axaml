@@ -163,6 +163,85 @@
 
             <Separator Margin="16,0" />
 
+            <!-- Select Whisper model -->
+            <Button Background="Transparent"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Padding="16,10" CornerRadius="0">
+                <Button.Flyout>
+                    <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
+                        <Flyout.FlyoutPresenterTheme>
+                            <ControlTheme TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="CornerRadius" Value="0" />
+                            </ControlTheme>
+                        </Flyout.FlyoutPresenterTheme>
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                CornerRadius="8"
+                                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                BorderThickness="1"
+                                Padding="4" MinWidth="260">
+                            <ItemsControl ItemsSource="{Binding ModelOptions}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:WhisperModelDisplayItem">
+                                        <Button Background="Transparent"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Stretch"
+                                                Padding="12,8" CornerRadius="4"
+                                                Command="{Binding SelectCommand}"
+                                                CommandParameter="{Binding Type}">
+                                            <Grid ColumnDefinitions="11,*,Auto,Auto">
+                                                <Grid Grid.Column="0" Width="11" VerticalAlignment="Center">
+                                                    <Border Width="3" Height="16"
+                                                            CornerRadius="1.5"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Left"
+                                                            Background="{DynamicResource SystemAccentColor}"
+                                                            IsVisible="{Binding IsSelected}" />
+                                                </Grid>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding DisplayName}"
+                                                           FontSize="14"
+                                                           VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding DiskSize}"
+                                                           FontSize="13" Opacity="0.5"
+                                                           VerticalAlignment="Center"
+                                                           Margin="24,0,0,0" />
+                                                <TextBlock Grid.Column="3"
+                                                           Text="⬇"
+                                                           FontSize="12" Opacity="0.5"
+                                                           VerticalAlignment="Center"
+                                                           Margin="6,0,0,0"
+                                                           IsVisible="{Binding !IsCached}" />
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+                    </Flyout>
+                </Button.Flyout>
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm0 2c2.87 0 5.39 1.52 6.8 3.8L13.5 11H19c.06.33.1.66.1 1 0 3.87-2.73 7.1-6.36 7.86L15 14.5l-4.5 2.6L8 14l-4.12 2.38A7.964 7.964 0 0 1 4 12c0-4.42 3.58-8 8-8Z" />
+                    <TextBlock Grid.Column="1" Text="Whisper model"
+                               VerticalAlignment="Center" FontSize="14" />
+                    <TextBlock Grid.Column="2" Text="›" FontSize="18"
+                               VerticalAlignment="Center" Opacity="0.5" />
+                </Grid>
+            </Button>
+
+            <Separator Margin="16,0" />
+
             <!-- Theme -->
             <Button Background="Transparent"
                     HorizontalAlignment="Stretch"
