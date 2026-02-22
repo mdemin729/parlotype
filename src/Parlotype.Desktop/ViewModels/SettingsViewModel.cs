@@ -248,7 +248,7 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
             item.IsSelected = item.Type == model;
     }
 
-    private void RefreshModelCacheStatus()
+    public void RefreshModelCacheStatus()
     {
         if (_downloadService is null)
             return;
