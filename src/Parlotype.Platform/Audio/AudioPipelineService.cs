@@ -101,12 +101,12 @@ public sealed class AudioPipelineService : IAudioPipeline
 
     private void OnAudioDataAvailable(object? sender, AudioDataEventArgs e)
     {
-        // Convert 16-bit PCM bytes to mono float samples
-        var floatSamples = ConvertPcmToMonoFloat(e.Buffer.Span, e.Format.Channels);
+        var floatSamples = e.Buffer.Span;
 
         lock (_sampleBuffer)
         {
-            _sampleBuffer.AddRange(floatSamples);
+            foreach (var s in floatSamples)
+                _sampleBuffer.Add(s);
 
             switch (_mode)
             {
@@ -212,9 +212,8 @@ public sealed class AudioPipelineService : IAudioPipeline
                 {
                     _logger.LogDebug("Sending {SampleCount} samples ({Duration:F1}s) to speech recognizer",
                         samples.Length, samples.Length / 16_000.0);
-                    var pcmBytes = ConvertFloatToPcm(samples);
                     // Use CancellationToken.None so in-flight transcription completes even during shutdown
-                    var result = await _recognizer.TranscribeAsync(pcmBytes, CancellationToken.None);
+                    var result = await _recognizer.TranscribeAsync(samples, CancellationToken.None);
 
                     if (!string.IsNullOrWhiteSpace(result.Text))
                     {
@@ -271,40 +270,6 @@ public sealed class AudioPipelineService : IAudioPipeline
             }
         }
         return result.ToArray();
-    }
-
-    private static float[] ConvertPcmToMonoFloat(ReadOnlySpan<byte> pcmBytes, int channels)
-    {
-        int totalSamples = pcmBytes.Length / 2;
-        int framesCount = totalSamples / channels;
-        var monoSamples = new float[framesCount];
-
-        for (int frame = 0; frame < framesCount; frame++)
-        {
-            float sum = 0;
-            for (int ch = 0; ch < channels; ch++)
-            {
-                int byteIndex = (frame * channels + ch) * 2;
-                short sample = (short)(pcmBytes[byteIndex] | (pcmBytes[byteIndex + 1] << 8));
-                sum += sample / (float)short.MaxValue;
-            }
-            monoSamples[frame] = sum / channels;
-        }
-
-        return monoSamples;
-    }
-
-    private static byte[] ConvertFloatToPcm(float[] samples)
-    {
-        var pcmBytes = new byte[samples.Length * 2];
-        for (int i = 0; i < samples.Length; i++)
-        {
-            var clamped = Math.Clamp(samples[i], -1.0f, 1.0f);
-            short shortSample = (short)(clamped * short.MaxValue);
-            pcmBytes[i * 2] = (byte)(shortSample & 0xFF);
-            pcmBytes[i * 2 + 1] = (byte)((shortSample >> 8) & 0xFF);
-        }
-        return pcmBytes;
     }
 
     public async ValueTask DisposeAsync()

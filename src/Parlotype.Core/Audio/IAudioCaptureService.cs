@@ -1,7 +1,7 @@
 namespace Parlotype.Core.Audio;
 
 /// <summary>
-/// Captures audio from the system microphone and provides PCM data for speech recognition.
+/// Captures audio from the system microphone and provides float sample data for speech recognition.
 /// </summary>
 public interface IAudioCaptureService : IAsyncDisposable
 {
@@ -18,9 +18,12 @@ public interface IAudioCaptureService : IAsyncDisposable
     event EventHandler<AudioDataEventArgs> DataAvailable;
 }
 
-/// <summary>Carries a chunk of captured PCM audio data.</summary>
+/// <summary>Carries a chunk of captured audio as normalised float samples.</summary>
 public sealed class AudioDataEventArgs : EventArgs
 {
-    public required ReadOnlyMemory<byte> Buffer { get; init; }
-    public required AudioFormat Format { get; init; }
+    /// <summary>Mono float samples in the range [-1, 1].</summary>
+    public required ReadOnlyMemory<float> Buffer { get; init; }
+
+    /// <summary>Sample rate of the audio data (e.g. 16 000 Hz).</summary>
+    public required int SampleRate { get; init; }
 }

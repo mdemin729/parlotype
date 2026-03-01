@@ -50,8 +50,8 @@ public class WhisperSpeechRecognizerTests
 
         Assert.True(recognizer.IsReady);
 
-        var pcmBytes = TestAudioHelper.LoadWavAsPcmBytes("kennedy.wav");
-        var result = await recognizer.TranscribeAsync(pcmBytes);
+        var floatSamples = TestAudioHelper.LoadWavAsFloatSamples("kennedy.wav");
+        var result = await recognizer.TranscribeAsync(floatSamples);
 
         Assert.NotNull(result);
         Assert.False(string.IsNullOrWhiteSpace(result.Text));
@@ -73,9 +73,9 @@ public class WhisperSpeechRecognizerTests
         await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
         await recognizer.InitializeAsync();
 
-        // 1 second of silence as 16-bit PCM bytes
-        var silenceBytes = new byte[16_000 * 2];
-        var result = await recognizer.TranscribeAsync(silenceBytes);
+        // 1 second of silence as float samples
+        var silenceSamples = new float[16_000];
+        var result = await recognizer.TranscribeAsync(silenceSamples);
 
         Assert.NotNull(result);
         // Silence may produce empty text or Whisper special tokens like [BLANK_AUDIO]
