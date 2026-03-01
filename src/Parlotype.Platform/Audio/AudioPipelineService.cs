@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Speech;
@@ -21,6 +22,13 @@ public sealed class AudioPipelineService : IAudioPipeline
     private CancellationTokenSource? _cts;
     private Task? _processingTask;
     private bool _disposed;
+
+    // Incremental VAD state for batch mode
+    private int _vadProcessedUpTo;
+    private readonly List<VadSpeechSegment> _accumulatedSegments = [];
+
+    /// <summary>Merge tolerance: segments closer than this are joined (1024 samples ≈ 64ms at 16kHz).</summary>
+    private const int SegmentMergeTolerance = 1024;
 
     /// <summary>Window size for streaming mode (3 seconds at 16kHz).</summary>
     private const int StreamingWindowSamples = 16_000 * 3;
@@ -122,34 +130,46 @@ public sealed class AudioPipelineService : IAudioPipeline
 
     private void ProcessBatch()
     {
-        // In batch mode, run VAD on the accumulated buffer
-        // When silence is detected at the end, send the speech segments to Whisper
-        if (_sampleBuffer.Count < 1024)
+        // Only process samples that arrived since the last VAD call
+        int newSamplesCount = _sampleBuffer.Count - _vadProcessedUpTo;
+        if (newSamplesCount < 1024)
             return;
 
-        var segments = _vad.DetectSpeech(_sampleBuffer.ToArray());
+        var bufferSpan = CollectionsMarshal.AsSpan(_sampleBuffer);
+        var newSegments = _vad.DetectSpeech(bufferSpan[_vadProcessedUpTo..]);
 
-        if (segments.Count == 0 && _sampleBuffer.Count > MaxBatchBufferSamples)
+        foreach (var seg in newSegments)
+        {
+            var adjusted = new VadSpeechSegment(
+                seg.StartSample + _vadProcessedUpTo,
+                seg.EndSample + _vadProcessedUpTo);
+            MergeOrAddSegment(_accumulatedSegments, adjusted);
+        }
+
+        _vadProcessedUpTo = _sampleBuffer.Count;
+
+        if (_accumulatedSegments.Count == 0 && _sampleBuffer.Count > MaxBatchBufferSamples)
         {
             // No speech found and buffer is too large, discard
-            _sampleBuffer.Clear();
+            ClearBufferState();
             return;
         }
 
         // Check if the last segment ends well before the buffer end (silence detected after speech)
-        if (segments.Count > 0)
+        if (_accumulatedSegments.Count > 0)
         {
-            _logger.LogDebug("VAD detected {Count} speech segments", segments.Count);
-            var lastSegment = segments[^1];
+            _logger.LogDebug("VAD detected {Count} speech segments", _accumulatedSegments.Count);
+            var lastSegment = _accumulatedSegments[^1];
             int silenceAfterSpeech = _sampleBuffer.Count - lastSegment.EndSample;
 
             // At least 500ms of silence after last speech (8000 samples at 16kHz)
             if (silenceAfterSpeech >= 8_000)
             {
                 // Extract all speech samples and queue for transcription
-                var speechSamples = ExtractSpeechSamples(_sampleBuffer, segments);
+                var speechSamples = ExtractSpeechSamples(
+                    CollectionsMarshal.AsSpan(_sampleBuffer), _accumulatedSegments);
                 _processingQueue.Enqueue(speechSamples);
-                _sampleBuffer.Clear();
+                ClearBufferState();
             }
         }
 
@@ -158,7 +178,7 @@ public sealed class AudioPipelineService : IAudioPipeline
         {
             var allSamples = _sampleBuffer.ToArray();
             _processingQueue.Enqueue(allSamples);
-            _sampleBuffer.Clear();
+            ClearBufferState();
         }
     }
 
@@ -186,20 +206,64 @@ public sealed class AudioPipelineService : IAudioPipeline
         {
             if (_sampleBuffer.Count < 1024)
             {
-                _sampleBuffer.Clear();
+                ClearBufferState();
                 return;
             }
 
             _logger.LogDebug("Flushing buffer with {Count} samples", _sampleBuffer.Count);
-            var segments = _vad.DetectSpeech(_sampleBuffer.ToArray());
-            if (segments.Count > 0)
+
+            // Process any samples not yet seen by VAD
+            if (_vadProcessedUpTo < _sampleBuffer.Count)
             {
-                var speechSamples = ExtractSpeechSamples(_sampleBuffer, segments);
+                var bufferSpan = CollectionsMarshal.AsSpan(_sampleBuffer);
+                var newSegments = _vad.DetectSpeech(bufferSpan[_vadProcessedUpTo..]);
+                foreach (var seg in newSegments)
+                {
+                    var adjusted = new VadSpeechSegment(
+                        seg.StartSample + _vadProcessedUpTo,
+                        seg.EndSample + _vadProcessedUpTo);
+                    MergeOrAddSegment(_accumulatedSegments, adjusted);
+                }
+            }
+
+            if (_accumulatedSegments.Count > 0)
+            {
+                var speechSamples = ExtractSpeechSamples(
+                    CollectionsMarshal.AsSpan(_sampleBuffer), _accumulatedSegments);
                 _processingQueue.Enqueue(speechSamples);
             }
 
-            _sampleBuffer.Clear();
+            ClearBufferState();
         }
+    }
+
+    /// <summary>Resets sample buffer and incremental VAD state.</summary>
+    private void ClearBufferState()
+    {
+        _sampleBuffer.Clear();
+        _vadProcessedUpTo = 0;
+        _accumulatedSegments.Clear();
+    }
+
+    /// <summary>
+    /// Merges <paramref name="segment"/> with the last accumulated segment if they are
+    /// adjacent or overlapping (gap ≤ <see cref="SegmentMergeTolerance"/>), otherwise appends.
+    /// </summary>
+    private static void MergeOrAddSegment(List<VadSpeechSegment> segments, VadSpeechSegment segment)
+    {
+        if (segments.Count > 0)
+        {
+            var last = segments[^1];
+            if (segment.StartSample <= last.EndSample + SegmentMergeTolerance)
+            {
+                segments[^1] = new VadSpeechSegment(
+                    last.StartSample,
+                    Math.Max(last.EndSample, segment.EndSample));
+                return;
+            }
+        }
+
+        segments.Add(segment);
     }
 
     private async Task ProcessQueueAsync(CancellationToken cancellationToken)
@@ -252,12 +316,7 @@ public sealed class AudioPipelineService : IAudioPipeline
         }
     }
 
-    private static float[] ExtractSpeechSamples(List<float> buffer, List<VadSpeechSegment> segments)
-    {
-        return ExtractSpeechSamples(buffer.ToArray(), segments);
-    }
-
-    private static float[] ExtractSpeechSamples(float[] buffer, List<VadSpeechSegment> segments)
+    private static float[] ExtractSpeechSamples(ReadOnlySpan<float> buffer, List<VadSpeechSegment> segments)
     {
         var result = new List<float>();
         foreach (var segment in segments)
@@ -266,10 +325,15 @@ public sealed class AudioPipelineService : IAudioPipeline
             int end = Math.Min(buffer.Length, segment.EndSample);
             if (end > start)
             {
-                result.AddRange(buffer[start..end]);
+                result.AddRange(buffer[start..end].ToArray());
             }
         }
         return result.ToArray();
+    }
+
+    private static float[] ExtractSpeechSamples(float[] buffer, List<VadSpeechSegment> segments)
+    {
+        return ExtractSpeechSamples(buffer.AsSpan(), segments);
     }
 
     public async ValueTask DisposeAsync()

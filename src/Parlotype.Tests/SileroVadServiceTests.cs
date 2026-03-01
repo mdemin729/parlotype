@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Parlotype.Core.Audio;
 using Parlotype.Platform.Audio;
 using Xunit;
 
@@ -32,5 +33,64 @@ public class SileroVadServiceTests
         var segments = vad.DetectSpeech(silence);
 
         Assert.Empty(segments);
+    }
+
+    [Fact]
+    public async Task DetectSpeech_Chunked_CoversSameRegionsAsBatch()
+    {
+        await using var vad = new SileroVadService(NullLogger<SileroVadService>.Instance);
+        var samples = TestAudioHelper.LoadWavAsFloatSamples("kennedy.wav");
+
+        // Reference: whole-buffer VAD
+        var batchSegments = vad.DetectSpeech(samples);
+        Assert.NotEmpty(batchSegments);
+
+        int batchSpeechSamples = batchSegments.Sum(s => s.EndSample - s.StartSample);
+
+        // Incremental: process in 8000-sample chunks (~500ms), accumulate with merge
+        const int chunkSize = 8_000;
+        const int mergeTolerance = 1024;
+        var accumulated = new List<VadSpeechSegment>();
+        int processed = 0;
+
+        while (processed < samples.Length)
+        {
+            int remaining = Math.Min(chunkSize, samples.Length - processed);
+            var chunk = samples.AsSpan(processed, remaining);
+
+            var chunkSegments = vad.DetectSpeech(chunk);
+            foreach (var seg in chunkSegments)
+            {
+                var adjusted = new VadSpeechSegment(
+                    seg.StartSample + processed,
+                    seg.EndSample + processed);
+
+                if (accumulated.Count > 0)
+                {
+                    var last = accumulated[^1];
+                    if (adjusted.StartSample <= last.EndSample + mergeTolerance)
+                    {
+                        accumulated[^1] = new VadSpeechSegment(
+                            last.StartSample,
+                            Math.Max(last.EndSample, adjusted.EndSample));
+                        continue;
+                    }
+                }
+
+                accumulated.Add(adjusted);
+            }
+
+            processed += remaining;
+        }
+
+        Assert.NotEmpty(accumulated);
+
+        // Incremental detection should find at least 50% of the speech that batch finds.
+        // Exact match is not expected because chunking loses cross-boundary context.
+        int incrementalSpeechSamples = accumulated.Sum(s => s.EndSample - s.StartSample);
+        double coverageRatio = (double)incrementalSpeechSamples / batchSpeechSamples;
+
+        Assert.True(coverageRatio >= 0.5,
+            $"Incremental VAD covered only {coverageRatio:P0} of batch speech ({incrementalSpeechSamples} vs {batchSpeechSamples} samples)");
     }
 }
