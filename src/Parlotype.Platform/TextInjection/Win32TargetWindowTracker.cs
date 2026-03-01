@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.TextInjection;
@@ -77,7 +78,26 @@ public sealed class Win32TargetWindowTracker : ITargetWindowTracker
         if (pid == (uint)_ownProcessId)
             return;
 
+        var previous = Volatile.Read(ref _targetWindow);
+        if (previous == hwnd)
+            return;
+
         Volatile.Write(ref _targetWindow, hwnd);
+        var processName = TryGetProcessName(pid);
+        _logger.LogInformation("Target window set to {Handle} (PID {Pid}, Name {Name})", hwnd, pid, processName);
+    }
+
+    private static string TryGetProcessName(uint pid)
+    {
+        try
+        {
+            using var process = Process.GetProcessById((int)pid);
+            return process.ProcessName;
+        }
+        catch
+        {
+            return "unknown";
+        }
     }
 
     public void Dispose()
