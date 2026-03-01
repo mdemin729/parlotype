@@ -221,7 +221,7 @@ any detected speech before the processing loop is cancelled.
 
 ## 6 Performance & Memory Improvement Suggestions
 
-### 6.1 Eliminate the redundant float ↔ PCM round-trip
+### 6.1 Eliminate the redundant float ↔ PCM round-trip - **DONE**
 
 The most impactful single change. The pipeline currently does:
 
