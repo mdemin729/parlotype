@@ -65,11 +65,11 @@ public class AudioPipelineTests
         // Act: start pipeline and feed audio
         await pipeline.StartAsync(PipelineMode.Batch);
 
-        var pcmBytes = TestAudioHelper.LoadWavAsPcmBytes("kennedy.wav");
-        capture.SimulateAudioData(pcmBytes);
+        var floatSamples = TestAudioHelper.LoadWavAsFloatSamples("kennedy.wav");
+        capture.SimulateAudioData(floatSamples);
 
         // Add silence to trigger end-of-speech detection
-        capture.SimulateAudioData(new byte[16_000 * 2]); // 1 second silence
+        capture.SimulateAudioData(new float[16_000]); // 1 second silence
 
         // Wait for transcription (timeout after 60 seconds)
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
@@ -109,12 +109,12 @@ internal sealed class TestAudioCaptureService : IAudioCaptureService
     }
 
     /// <summary>Simulates audio data arriving from a microphone.</summary>
-    public void SimulateAudioData(byte[] pcmBytes)
+    public void SimulateAudioData(float[] samples)
     {
         DataAvailable?.Invoke(this, new AudioDataEventArgs
         {
-            Buffer = pcmBytes,
-            Format = AudioFormat.Whisper
+            Buffer = samples,
+            SampleRate = 16_000
         });
     }
 

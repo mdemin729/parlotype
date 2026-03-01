@@ -101,27 +101,17 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
 
         _bufferedProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
 
-        // Read resampled float samples and convert to 16-bit PCM bytes
+        // Read resampled float samples directly — no PCM conversion needed
         var floatBuffer = new float[e.BytesRecorded]; // oversize is fine
         int samplesRead = _resampler.Read(floatBuffer, 0, floatBuffer.Length);
 
         if (samplesRead <= 0)
             return;
 
-        // Convert float samples to 16-bit PCM bytes
-        var pcmBytes = new byte[samplesRead * 2];
-        for (int i = 0; i < samplesRead; i++)
-        {
-            var sample = Math.Clamp(floatBuffer[i], -1.0f, 1.0f);
-            short shortSample = (short)(sample * short.MaxValue);
-            pcmBytes[i * 2] = (byte)(shortSample & 0xFF);
-            pcmBytes[i * 2 + 1] = (byte)((shortSample >> 8) & 0xFF);
-        }
-
         DataAvailable?.Invoke(this, new AudioDataEventArgs
         {
-            Buffer = pcmBytes,
-            Format = TargetFormat
+            Buffer = floatBuffer.AsMemory(0, samplesRead),
+            SampleRate = TargetFormat.SampleRate
         });
     }
 

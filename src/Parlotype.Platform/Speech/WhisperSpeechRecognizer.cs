@@ -48,15 +48,12 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         _logger.LogInformation("Whisper model loaded successfully");
     }
 
-    public async Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<byte> pcmData, CancellationToken cancellationToken = default)
+    public async Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         if (!IsReady || _processor is null)
             throw new InvalidOperationException("Speech recognizer is not initialized. Call InitializeAsync first.");
-
-        // Convert 16-bit PCM bytes to float samples
-        var samples = ConvertPcmToFloat(pcmData.Span);
 
         var segments = new List<SegmentData>();
         await foreach (var segment in _processor.ProcessAsync(samples, cancellationToken))
@@ -78,20 +75,6 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             Confidence = avgConfidence,
             DetectedLanguage = language
         };
-    }
-
-    private static float[] ConvertPcmToFloat(ReadOnlySpan<byte> pcmBytes)
-    {
-        int sampleCount = pcmBytes.Length / 2;
-        var samples = new float[sampleCount];
-
-        for (int i = 0; i < sampleCount; i++)
-        {
-            short sample = (short)(pcmBytes[i * 2] | (pcmBytes[i * 2 + 1] << 8));
-            samples[i] = sample / (float)short.MaxValue;
-        }
-
-        return samples;
     }
 
     public async ValueTask DisposeAsync()
