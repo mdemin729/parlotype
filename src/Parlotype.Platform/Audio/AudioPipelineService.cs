@@ -44,7 +44,7 @@ public sealed class AudioPipelineService : IAudioPipeline
         _logger = logger;
     }
 
-    public async Task StartAsync(PipelineMode mode = PipelineMode.Streaming, CancellationToken cancellationToken = default)
+    public async Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
