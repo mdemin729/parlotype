@@ -4,18 +4,18 @@
   "language": "en",
   "samples": [
     {
-      "id": "kennedy",
-      "file": "samples/kennedy.wav",
-      "referenceText": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+      "id": "61-70968-0000.flac",
+      "file": "samples/61-70968-0000.flac",
+      "referenceText": "He began a confused complaint against the wizard, who  had vanished behind the curtain on the left.",
       "language": "en",
-      "tags": ["clean", "english", "speech"]
+      "tags": ["clean", "English", "speech",  "short"]
     },
     {
-      "id": "one-small-step",
-      "file": "samples/one-small-step.wav",
-      "referenceText": "That's one small step for man one giant leap for mankind",
+      "id": "237-126133-0000.flac",
+      "file": "samples/237-126133-0000.flac",
+      "referenceText": "Here she would stay, comforted and soothed among the lovely plants and rich exotics, rejoicing  the heart of old Turner the Gardener, who since Polly's first rapturous entrance, had  taken her into his good graces for all time.",
       "language": "en",
-      "tags": ["clean", "english", "speech", "short"]
+      "tags": ["clean", "English", "speech", "medium"]
     }
   ]
 }
