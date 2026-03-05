@@ -42,12 +42,25 @@ dotnet test                       # All tests must pass (platform + headless UI 
 dotnet run --project src/Parlotype.Desktop  # Launch the app
 ```
 
+```powershell
+dotnet build Parlotype.slnx      # Must compile with zero warnings
+dotnet test                       # All tests must pass (platform + headless UI + benchmark)
+dotnet run --project src\Parlotype.Desktop  # Launch the app
+```
+
 ### Benchmark
 
 ```bash
 dotnet run --project src/Parlotype.Benchmark -- run \
   --config datasets/smoke-test-config.json \
   --datasets datasets \
+  --output results
+```
+
+```powershell
+dotnet run --project src\Parlotype.Benchmark -- run `
+  --config datasets\smoke-test-config.json `
+  --datasets datasets `
   --output results
 ```
 

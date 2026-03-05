@@ -25,9 +25,18 @@ dotnet build Parlotype.slnx
 dotnet run --project src/Parlotype.Desktop
 ```
 
+```powershell
+dotnet build Parlotype.slnx
+dotnet run --project src\Parlotype.Desktop
+```
+
 ## Run Tests
 
 ```bash
+dotnet test
+```
+
+```powershell
 dotnet test
 ```
 
@@ -39,6 +48,13 @@ Evaluate speech recognition quality with the built-in benchmark tool:
 dotnet run --project src/Parlotype.Benchmark -- run \
   --config datasets/smoke-test-config.json \
   --datasets datasets \
+  --output results
+```
+
+```powershell
+dotnet run --project src\Parlotype.Benchmark -- run `
+  --config datasets\smoke-test-config.json `
+  --datasets datasets `
   --output results
 ```
 
