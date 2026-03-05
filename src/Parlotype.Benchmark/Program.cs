@@ -76,6 +76,7 @@ runCommand.SetAction(async parseResult =>
     // Set up DI
     var services = new ServiceCollection();
     services.AddPlatformServices();
+    services.AddSingleton<IModelDownloadService, HeadlessModelDownloadService>();
     services.AddLogging(builder =>
     {
         builder.SetMinimumLevel(verbose ? LogLevel.Debug : LogLevel.Warning);
