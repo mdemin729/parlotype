@@ -45,20 +45,50 @@ dotnet test
 Evaluate speech recognition quality with the built-in benchmark tool:
 
 ```bash
+# Run a benchmark
 dotnet run --project src/Parlotype.Benchmark -- run \
   --config datasets/smoke-test-config.json \
   --datasets datasets \
   --output results
+
+# List historical benchmark runs
+dotnet run --project src/Parlotype.Benchmark -- list --output results
+
+# Compare two runs side by side
+dotnet run --project src/Parlotype.Benchmark -- compare \
+  --run-a <run-id-a> --run-b <run-id-b> --output results
+
+# Export a run as CSV, Markdown, or JSON
+dotnet run --project src/Parlotype.Benchmark -- export \
+  --run-id <run-id> --format markdown --output results
+
+# Rebuild SQLite index from existing JSON result files
+dotnet run --project src/Parlotype.Benchmark -- import --output results
 ```
 
 ```powershell
+# Run a benchmark
 dotnet run --project src\Parlotype.Benchmark -- run `
   --config datasets\smoke-test-config.json `
   --datasets datasets `
   --output results
+
+# List historical benchmark runs
+dotnet run --project src\Parlotype.Benchmark -- list --output results
+
+# Compare two runs side by side
+dotnet run --project src\Parlotype.Benchmark -- compare `
+  --run-a <run-id-a> --run-b <run-id-b> --output results
+
+# Export a run as CSV, Markdown, or JSON
+dotnet run --project src\Parlotype.Benchmark -- export `
+  --run-id <run-id> --format markdown --output results
+
+# Rebuild SQLite index from existing JSON result files
+dotnet run --project src\Parlotype.Benchmark -- import --output results
 ```
 
-The benchmark computes **WER** (Word Error Rate), **CER** (Character Error Rate), and **RTF** (Real-Time Factor) against WAV datasets with ground-truth transcriptions. Results are saved as JSON and displayed as rich console tables.
+The benchmark computes **WER** (Word Error Rate), **CER** (Character Error Rate), and **RTF** (Real-Time Factor) against WAV/FLAC datasets with ground-truth transcriptions. Results are saved as JSON and auto-indexed into SQLite for historical queries. Supports tag/sample filtering (`--tags`, `--samples`), side-by-side comparison with delta metrics, and export to CSV, Markdown, or JSON.
 
 ## Project Structure
 
@@ -67,7 +97,8 @@ src/
 ├── Parlotype.Core/        # Domain interfaces and models (zero external deps)
 ├── Parlotype.Platform/    # Platform-specific implementations (Whisper, NAudio, SharpHook)
 ├── Parlotype.Desktop/     # Avalonia UI application (entry point)
-├── Parlotype.Benchmark/   # CLI benchmark tool (WER/CER/RTF metrics)
+├── Parlotype.Benchmark/   # CLI benchmark tool (WER/CER/RTF, compare, export)
+├── Parlotype.Benchmark.Tests/ # Benchmark unit tests
 └── Parlotype.Tests/       # Unit tests (xUnit)
 
 datasets/
