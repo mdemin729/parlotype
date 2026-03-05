@@ -9,10 +9,10 @@ Parlotype is a local-first voice-to-text desktop app with seven projects:
 - **Parlotype.Core** — Domain interfaces and models. Zero external dependencies. All contracts live here. Subfolders: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`, `TextProcessing/`.
 - **Parlotype.Platform** — Implements Core interfaces with real libraries (Whisper.net, NAudio, SileroVad, SharpHook). Subfolders mirror Core: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`.
 - **Parlotype.Desktop** — Avalonia UI app (11.3.0, Fluent theme). Entry point. Wires DI, hosts views/viewmodels.
-- **Parlotype.Benchmark** — Console app for evaluating speech recognition quality. Runs Whisper against WAV datasets, computes WER/CER/RTF metrics, outputs JSON results with Spectre.Console tables. Uses `System.CommandLine` for CLI. Subfolders: `Configuration/`, `Metrics/`, `Pipeline/`, `Results/`, `Reporting/`.
+- **Parlotype.Benchmark** — Console app for evaluating speech recognition quality. Runs Whisper against WAV/FLAC datasets, computes WER/CER/RTF metrics, outputs JSON results with Spectre.Console tables. Includes SQLite index for historical run queries, comparison engine with delta metrics, and export to CSV/Markdown/JSON. Uses `System.CommandLine` for CLI (`run`, `import`, `list`, `compare`, `export` commands). Subfolders: `Configuration/`, `Metrics/`, `Pipeline/`, `Results/`, `Reporting/`.
 - **Parlotype.Tests** — xUnit tests for Core and Platform (audio pipeline, VAD, Whisper).
 - **Parlotype.Desktop.Tests** — Avalonia headless UI tests using `Avalonia.Headless.XUnit`. Uses `[AvaloniaFact]` instead of `[Fact]`. Mock services in `Mocks/` folder.
-- **Parlotype.Benchmark.Tests** — xUnit tests for benchmark metrics (WER/CER calculation, text normalization, config deserialization).
+- **Parlotype.Benchmark.Tests** — xUnit tests for benchmark metrics (WER/CER calculation, text normalization, config deserialization), comparison engine, CSV/Markdown formatters, and SQLite index.
 
 **Dependency direction:** Desktop → Platform → Core. Benchmark → Platform → Core. Tests → Core, Platform. Desktop.Tests → Desktop, Core. Benchmark.Tests → Benchmark, Core.
 
@@ -51,17 +51,61 @@ dotnet run --project src\Parlotype.Desktop  # Launch the app
 ### Benchmark
 
 ```bash
+# Run a benchmark
 dotnet run --project src/Parlotype.Benchmark -- run \
   --config datasets/smoke-test-config.json \
   --datasets datasets \
   --output results
+
+# Run with tag/sample filtering
+dotnet run --project src/Parlotype.Benchmark -- run \
+  --config datasets/smoke-test-config.json \
+  --datasets datasets \
+  --output results \
+  --tags clean,short --samples kennedy
+
+# List historical runs
+dotnet run --project src/Parlotype.Benchmark -- list --output results
+
+# Compare two runs
+dotnet run --project src/Parlotype.Benchmark -- compare \
+  --run-a <run-id-a> --run-b <run-id-b> --output results
+
+# Export a run (csv, markdown, json)
+dotnet run --project src/Parlotype.Benchmark -- export \
+  --run-id <run-id> --format markdown --output results
+
+# Rebuild SQLite index from JSON files
+dotnet run --project src/Parlotype.Benchmark -- import --output results
 ```
 
 ```powershell
+# Run a benchmark
 dotnet run --project src\Parlotype.Benchmark -- run `
   --config datasets\smoke-test-config.json `
   --datasets datasets `
   --output results
+
+# Run with tag/sample filtering
+dotnet run --project src\Parlotype.Benchmark -- run `
+  --config datasets\smoke-test-config.json `
+  --datasets datasets `
+  --output results `
+  --tags clean,short --samples kennedy
+
+# List historical runs
+dotnet run --project src\Parlotype.Benchmark -- list --output results
+
+# Compare two runs
+dotnet run --project src\Parlotype.Benchmark -- compare `
+  --run-a <run-id-a> --run-b <run-id-b> --output results
+
+# Export a run (csv, markdown, json)
+dotnet run --project src\Parlotype.Benchmark -- export `
+  --run-id <run-id> --format markdown --output results
+
+# Rebuild SQLite index from JSON files
+dotnet run --project src\Parlotype.Benchmark -- import --output results
 ```
 
 **Note:** File lock errors from running `.NET Host` processes are common. Kill the locking process by PID before rebuilding.
@@ -73,6 +117,7 @@ dotnet run --project src\Parlotype.Benchmark -- run `
 - New UI features → add ViewModels to `Parlotype.Desktop/ViewModels/` and Views to `Parlotype.Desktop/Views/`
 - Extract reusable UI components into separate UserControls (e.g. `MicrophoneSettingsView`)
 - Always write tests for logic in Core and Platform
-- Write benchmark metrics tests in `Parlotype.Benchmark.Tests` for WER/CER calculators and text normalization
+- Write benchmark metrics tests in `Parlotype.Benchmark.Tests` for WER/CER calculators, text normalization, comparison engine, formatters, and SQLite index
+- Benchmark results are auto-indexed into SQLite (`benchmarks.db`) after each run for historical queries
 - Write headless UI tests in `Parlotype.Desktop.Tests` for view/viewmodel integration — use `MockMicrophoneEnumerator` and `MockSettingsService` for controllable testing
 - `ObservableCollection` mutations from background threads must dispatch to `Avalonia.Threading.Dispatcher.UIThread`
