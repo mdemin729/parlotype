@@ -17,4 +17,7 @@ public sealed record WhisperOptions
 
     /// <summary>Initial prompt for context hints.</summary>
     public string? InitialPrompt { get; init; }
+
+    /// <summary>Number of CPU threads for inference. null = Whisper default.</summary>
+    public int? Threads { get; init; }
 }

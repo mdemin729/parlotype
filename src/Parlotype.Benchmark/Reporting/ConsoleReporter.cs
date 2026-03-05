@@ -175,19 +175,43 @@ public static class ConsoleReporter
         table.AddRow("Total Time", $"{summary.TotalProcessingTimeMs:F0} ms");
         table.AddRow("Peak RAM", $"{summary.PeakRamMb:F0} MB");
 
+        if (summary.Repetitions > 1)
+        {
+            table.AddRow("Repetitions", summary.Repetitions.ToString());
+            table.AddRow("WER σ", $"{summary.WerStdDev:F2}%");
+            table.AddRow("CER σ", $"{summary.CerStdDev:F2}%");
+            table.AddRow("WER CoV", $"{summary.WerCoeffOfVariation:F1}%");
+        }
+
+        if (summary.AvgRamDeltaMb > 0 || summary.TotalGcAllocatedBytes > 0)
+        {
+            table.AddRow("Avg RAM Δ", $"{summary.AvgRamDeltaMb:F1} MB");
+            table.AddRow("GC Allocated", FormatBytes(summary.TotalGcAllocatedBytes));
+            table.AddRow("GC Collections", $"Gen0: {summary.GcGen0Collections}, Gen1: {summary.GcGen1Collections}, Gen2: {summary.GcGen2Collections}");
+        }
+
         AnsiConsole.Write(table);
     }
 
     private static void DisplaySampleTable(BenchmarkResult result)
     {
+        var hasReps = result.Summary.Repetitions > 1;
+
         var table = new Table()
             .Border(TableBorder.Rounded)
             .Title("[bold]Per-Sample Results[/]")
             .AddColumn("[bold]Sample[/]")
             .AddColumn("[bold]WER %[/]", c => c.RightAligned())
-            .AddColumn("[bold]CER %[/]", c => c.RightAligned())
-            .AddColumn("[bold]RTF[/]", c => c.RightAligned())
-            .AddColumn("[bold]Time (ms)[/]", c => c.RightAligned());
+            .AddColumn("[bold]CER %[/]", c => c.RightAligned());
+
+        if (hasReps)
+        {
+            table.AddColumn("[bold]WER σ[/]", c => c.RightAligned());
+            table.AddColumn("[bold]CER σ[/]", c => c.RightAligned());
+        }
+
+        table.AddColumn("[bold]RTF[/]", c => c.RightAligned())
+             .AddColumn("[bold]Time (ms)[/]", c => c.RightAligned());
 
         foreach (var sample in result.Samples)
         {
@@ -198,12 +222,67 @@ public static class ConsoleReporter
                 _ => "red"
             };
 
-            table.AddRow(
+            var columns = new List<string>
+            {
                 Markup.Escape(sample.Id),
                 $"[{werColor}]{sample.Wer:F1}[/]",
                 $"{sample.Cer:F1}",
-                $"{sample.Rtf:F3}",
-                $"{sample.ProcessingTimeMs:F0}");
+            };
+
+            if (hasReps)
+            {
+                columns.Add($"{sample.WerStdDev:F2}");
+                columns.Add($"{sample.CerStdDev:F2}");
+            }
+
+            columns.Add($"{sample.Rtf:F3}");
+            columns.Add($"{sample.ProcessingTimeMs:F0}");
+
+            table.AddRow(columns.ToArray());
+        }
+
+        AnsiConsole.Write(table);
+    }
+
+    /// <summary>Displays a summary table comparing all sweep configuration results.</summary>
+    public static void DisplaySweepSummary(List<BenchmarkResult> results)
+    {
+        if (results.Count == 0)
+            return;
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule("[bold blue]Sweep Summary[/]").RuleStyle("grey"));
+        AnsiConsole.WriteLine();
+
+        var table = new Table()
+            .Border(TableBorder.Rounded)
+            .AddColumn("[bold]Config[/]")
+            .AddColumn("[bold]Model[/]")
+            .AddColumn("[bold]Beam[/]", c => c.RightAligned())
+            .AddColumn("[bold]VAD[/]")
+            .AddColumn("[bold]WER %[/]", c => c.RightAligned())
+            .AddColumn("[bold]CER %[/]", c => c.RightAligned())
+            .AddColumn("[bold]RTF[/]", c => c.RightAligned())
+            .AddColumn("[bold]Time (ms)[/]", c => c.RightAligned())
+            .AddColumn("[bold]RAM (MB)[/]", c => c.RightAligned());
+
+        // Find best WER for highlighting
+        var bestWer = results.Min(r => r.Summary.AverageWer);
+
+        foreach (var result in results)
+        {
+            var werColor = result.Summary.AverageWer == bestWer ? "green" : "white";
+
+            table.AddRow(
+                Markup.Escape(result.Configuration.Name),
+                result.Configuration.Whisper.Model.ToString(),
+                result.Configuration.Whisper.BeamSize.ToString(),
+                result.Configuration.Vad.Enabled ? "✓" : "✗",
+                $"[{werColor}]{result.Summary.AverageWer:F1}[/]",
+                $"{result.Summary.AverageCer:F1}",
+                $"{result.Summary.AverageRtf:F3}",
+                $"{result.Summary.TotalProcessingTimeMs:F0}",
+                $"{result.Summary.PeakRamMb:F0}");
         }
 
         AnsiConsole.Write(table);
@@ -216,5 +295,16 @@ public static class ConsoleReporter
         AnsiConsole.MarkupLine($"  [grey]Arch:[/] {Markup.Escape(env.Architecture)}");
         AnsiConsole.MarkupLine($"  [grey].NET:[/] {Markup.Escape(env.DotnetVersion)}");
         AnsiConsole.MarkupLine($"  [grey]CPUs:[/] {env.ProcessorCount}");
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        return bytes switch
+        {
+            >= 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024.0 * 1024.0):F1} GB",
+            >= 1024 * 1024 => $"{bytes / (1024.0 * 1024.0):F1} MB",
+            >= 1024 => $"{bytes / 1024.0:F1} KB",
+            _ => $"{bytes} B",
+        };
     }
 }

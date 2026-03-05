@@ -47,4 +47,31 @@ public sealed class BenchmarkSummary
 
     [JsonPropertyName("peakRamMb")]
     public required double PeakRamMb { get; init; }
+
+    [JsonPropertyName("avgRamDeltaMb")]
+    public double AvgRamDeltaMb { get; init; }
+
+    [JsonPropertyName("totalGcAllocatedBytes")]
+    public long TotalGcAllocatedBytes { get; init; }
+
+    [JsonPropertyName("gcGen0Collections")]
+    public int GcGen0Collections { get; init; }
+
+    [JsonPropertyName("gcGen1Collections")]
+    public int GcGen1Collections { get; init; }
+
+    [JsonPropertyName("gcGen2Collections")]
+    public int GcGen2Collections { get; init; }
+
+    [JsonPropertyName("repetitions")]
+    public int Repetitions { get; init; }
+
+    [JsonPropertyName("werStdDev")]
+    public double WerStdDev { get; init; }
+
+    [JsonPropertyName("cerStdDev")]
+    public double CerStdDev { get; init; }
+
+    [JsonPropertyName("werCoeffOfVariation")]
+    public double WerCoeffOfVariation { get; init; }
 }

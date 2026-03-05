@@ -1,0 +1,63 @@
+name: Benchmark Regression Check
+
+on:
+  pull_request:
+    paths:
+      - 'src/Parlotype.Core/**'
+      - 'src/Parlotype.Platform/**'
+      - 'src/Parlotype.Benchmark/**'
+  workflow_dispatch:
+    inputs:
+      baseline_run_id:
+        description: 'Baseline run ID to compare against (or "latest")'
+        required: false
+        default: 'latest'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Parlotype.slnx
+
+      - name: Build
+        run: dotnet build Parlotype.slnx --no-restore
+
+      - name: Run tests
+        run: dotnet test --no-build
+
+      - name: Run benchmark
+        run: |
+          dotnet run --project src/Parlotype.Benchmark --no-build -- run \
+            --config datasets/smoke-test-config.json \
+            --datasets datasets \
+            --output results
+
+      - name: Check for regressions
+        if: inputs.baseline_run_id != ''
+        run: |
+          dotnet run --project src/Parlotype.Benchmark --no-build -- check \
+            --baseline ${{ inputs.baseline_run_id || 'latest' }} \
+            --current latest \
+            --output results \
+            --max-wer-delta 2.0 \
+            --max-cer-delta 1.0 \
+            --max-rtf-delta 0.1
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: results/
+          retention-days: 30

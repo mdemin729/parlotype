@@ -25,4 +25,20 @@ public sealed class SampleResult
 
     [JsonPropertyName("rtf")]
     public required double Rtf { get; init; }
+
+    [JsonPropertyName("ramDeltaMb")]
+    public double RamDeltaMb { get; set; }
+
+    [JsonPropertyName("gcAllocatedBytes")]
+    public long GcAllocatedBytes { get; set; }
+
+    [JsonPropertyName("repetitions")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<RepetitionDetail>? Repetitions { get; init; }
+
+    [JsonPropertyName("werStdDev")]
+    public double WerStdDev { get; init; }
+
+    [JsonPropertyName("cerStdDev")]
+    public double CerStdDev { get; init; }
 }
