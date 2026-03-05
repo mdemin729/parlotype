@@ -64,6 +64,17 @@ dotnet run --project src/Parlotype.Benchmark -- export \
 
 # Rebuild SQLite index from existing JSON result files
 dotnet run --project src/Parlotype.Benchmark -- import --output results
+
+# Run a parameter sweep across configurations
+dotnet run --project src/Parlotype.Benchmark -- sweep \
+  --config datasets/sweep-config.json \
+  --datasets datasets \
+  --output results
+
+# Check for regressions against a baseline (for CI)
+dotnet run --project src/Parlotype.Benchmark -- check \
+  --baseline <run-id> --current latest \
+  --output results --max-wer-delta 2.0
 ```
 
 ```powershell
@@ -86,9 +97,20 @@ dotnet run --project src\Parlotype.Benchmark -- export `
 
 # Rebuild SQLite index from existing JSON result files
 dotnet run --project src\Parlotype.Benchmark -- import --output results
+
+# Run a parameter sweep across configurations
+dotnet run --project src\Parlotype.Benchmark -- sweep `
+  --config datasets\sweep-config.json `
+  --datasets datasets `
+  --output results
+
+# Check for regressions against a baseline (for CI)
+dotnet run --project src\Parlotype.Benchmark -- check `
+  --baseline <run-id> --current latest `
+  --output results --max-wer-delta 2.0
 ```
 
-The benchmark computes **WER** (Word Error Rate), **CER** (Character Error Rate), and **RTF** (Real-Time Factor) against WAV/FLAC datasets with ground-truth transcriptions. Results are saved as JSON and auto-indexed into SQLite for historical queries. Supports tag/sample filtering (`--tags`, `--samples`), side-by-side comparison with delta metrics, and export to CSV, Markdown, or JSON.
+The benchmarkcomputes **WER** (Word Error Rate), **CER** (Character Error Rate), and **RTF** (Real-Time Factor) against WAV/FLAC datasets with ground-truth transcriptions. Results are saved as JSON and auto-indexed into SQLite for historical queries. Supports tag/sample filtering (`--tags`, `--samples`), side-by-side comparison with delta metrics, and export to CSV, Markdown, or JSON.
 
 ## Project Structure
 
@@ -97,7 +119,7 @@ src/
 ├── Parlotype.Core/        # Domain interfaces and models (zero external deps)
 ├── Parlotype.Platform/    # Platform-specific implementations (Whisper, NAudio, SharpHook)
 ├── Parlotype.Desktop/     # Avalonia UI application (entry point)
-├── Parlotype.Benchmark/   # CLI benchmark tool (WER/CER/RTF, compare, export)
+├── Parlotype.Benchmark/   # CLI benchmark tool (WER/CER/RTF, sweep, compare, CI check)
 ├── Parlotype.Benchmark.Tests/ # Benchmark unit tests
 └── Parlotype.Tests/       # Unit tests (xUnit)
 
@@ -112,7 +134,7 @@ datasets/
 - **Desktop** wires everything via dependency injection and provides the UI
 - Clean separation ensures Core has no UI or platform dependencies
 - Users can select from all available Whisper GGML models (Tiny through Large v3 Turbo) in the settings menu
-- Configurable Whisper parameters (language, beam size, temperature) via `WhisperOptions` for benchmarking
+- Configurable Whisper parameters (language, beam size, temperature, thread count) via `WhisperOptions` for benchmarking
 
 ## License
 
