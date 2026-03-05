@@ -48,6 +48,42 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         _logger.LogInformation("Whisper model loaded successfully");
     }
 
+    public async Task InitializeAsync(WhisperOptions options, CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (IsReady)
+            return;
+
+        _logger.LogInformation(
+            "Initializing Whisper with model: {Model}, language: {Language}, beamSize: {BeamSize}, temperature: {Temperature}",
+            options.Model, options.Language, options.BeamSize, options.Temperature);
+
+        var modelPath = await _downloadService.EnsureModelAsync(options.Model, cancellationToken);
+
+        _factory = WhisperFactory.FromPath(modelPath);
+        var builder = _factory.CreateBuilder()
+            .WithLanguage(options.Language)
+            .WithTemperature(options.Temperature);
+
+        if (options.BeamSize > 1)
+        {
+            var beamStrategy = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();
+            beamStrategy.WithBeamSize(options.BeamSize);
+        }
+        else
+        {
+            builder.WithGreedySamplingStrategy();
+        }
+
+        if (!string.IsNullOrEmpty(options.InitialPrompt))
+            builder.WithPrompt(options.InitialPrompt);
+
+        _processor = builder.Build();
+        IsReady = true;
+        _logger.LogInformation("Whisper model loaded successfully");
+    }
+
     public async Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);

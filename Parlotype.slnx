@@ -5,5 +5,7 @@
     <Project Path="src/Parlotype.Platform/Parlotype.Platform.csproj" />
     <Project Path="src/Parlotype.Tests/Parlotype.Tests.csproj" />
     <Project Path="src/Parlotype.Desktop.Tests/Parlotype.Desktop.Tests.csproj" />
+    <Project Path="src/Parlotype.Benchmark/Parlotype.Benchmark.csproj" />
+    <Project Path="src/Parlotype.Benchmark.Tests/Parlotype.Benchmark.Tests.csproj" />
   </Folder>
 </Solution>
