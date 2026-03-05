@@ -8,6 +8,10 @@ public interface ISpeechRecognizer : IAsyncDisposable
     /// <summary>Loads the speech recognition model.</summary>
     Task InitializeAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>Loads the speech recognition model with explicit options.</summary>
+    Task InitializeAsync(WhisperOptions options, CancellationToken cancellationToken = default)
+        => InitializeAsync(cancellationToken);
+
     /// <summary>Transcribes the provided audio samples (mono float in [-1, 1]) into text.</summary>
     Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default);
 

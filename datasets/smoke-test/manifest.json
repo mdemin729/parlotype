@@ -1,0 +1,21 @@
+{
+  "name": "smoke-test",
+  "description": "Minimal smoke test dataset for verifying benchmark functionality",
+  "language": "en",
+  "samples": [
+    {
+      "id": "kennedy",
+      "file": "samples/kennedy.wav",
+      "referenceText": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+      "language": "en",
+      "tags": ["clean", "english", "speech"]
+    },
+    {
+      "id": "one-small-step",
+      "file": "samples/one-small-step.wav",
+      "referenceText": "That's one small step for man one giant leap for mankind",
+      "language": "en",
+      "tags": ["clean", "english", "speech", "short"]
+    }
+  ]
+}
