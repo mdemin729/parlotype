@@ -415,11 +415,277 @@ exportCommand.SetAction(async parseResult =>
     }
 });
 
+// --- check command ---
+var checkBaselineOption = new Option<string>("--baseline")
+{
+    Description = "Run ID of the baseline to compare against, or 'latest' for most recent",
+    Required = true,
+};
+
+var checkCurrentOption = new Option<string>("--current")
+{
+    Description = "Run ID of the current run to check, or 'latest' for most recent",
+    Required = true,
+};
+
+var checkOutputDirOption = new Option<DirectoryInfo>("--output")
+{
+    Description = "Directory containing result files and benchmarks.db",
+    DefaultValueFactory = _ => new DirectoryInfo("./results"),
+};
+
+var checkMaxWerOption = new Option<double>("--max-wer-delta")
+{
+    Description = "Maximum allowed WER increase (percentage points)",
+    DefaultValueFactory = _ => 2.0,
+};
+
+var checkMaxCerOption = new Option<double>("--max-cer-delta")
+{
+    Description = "Maximum allowed CER increase (percentage points)",
+    DefaultValueFactory = _ => 1.0,
+};
+
+var checkMaxRtfOption = new Option<double>("--max-rtf-delta")
+{
+    Description = "Maximum allowed RTF increase",
+    DefaultValueFactory = _ => 0.1,
+};
+
+var checkCommand = new Command("check", "Check for regressions against a baseline run (exits with code 1 on failure)")
+{
+    checkBaselineOption,
+    checkCurrentOption,
+    checkOutputDirOption,
+    checkMaxWerOption,
+    checkMaxCerOption,
+    checkMaxRtfOption,
+};
+
+checkCommand.SetAction(async parseResult =>
+{
+    var baselineId = parseResult.GetValue(checkBaselineOption)!;
+    var currentId = parseResult.GetValue(checkCurrentOption)!;
+    var outputDir = parseResult.GetValue(checkOutputDirOption)!;
+    var maxWerDelta = parseResult.GetValue(checkMaxWerOption);
+    var maxCerDelta = parseResult.GetValue(checkMaxCerOption);
+    var maxRtfDelta = parseResult.GetValue(checkMaxRtfOption);
+
+    var dbPath = Path.Combine(outputDir.FullName, "benchmarks.db");
+    if (!File.Exists(dbPath))
+    {
+        AnsiConsole.MarkupLine($"[red]No benchmark database found at {Markup.Escape(dbPath)}.[/]");
+        parseResult.Configuration.Output.Write("FAIL: No benchmark database found.\n");
+        Environment.ExitCode = 1;
+        return;
+    }
+
+    using var index = new SqliteResultIndex(dbPath);
+
+    // Resolve 'latest' alias
+    var resolvedBaseline = ResolveRunId(index, baselineId);
+    var resolvedCurrent = ResolveRunId(index, currentId);
+
+    if (resolvedBaseline is null)
+    {
+        AnsiConsole.MarkupLine($"[red]Baseline run not found:[/] {Markup.Escape(baselineId)}");
+        Environment.ExitCode = 1;
+        return;
+    }
+
+    if (resolvedCurrent is null)
+    {
+        AnsiConsole.MarkupLine($"[red]Current run not found:[/] {Markup.Escape(currentId)}");
+        Environment.ExitCode = 1;
+        return;
+    }
+
+    // Load results
+    var baselineJsonPath = index.GetJsonPath(resolvedBaseline) ?? FindJsonByRunId(outputDir.FullName, resolvedBaseline);
+    var currentJsonPath = index.GetJsonPath(resolvedCurrent) ?? FindJsonByRunId(outputDir.FullName, resolvedCurrent);
+
+    if (baselineJsonPath is null || currentJsonPath is null)
+    {
+        AnsiConsole.MarkupLine("[red]Could not locate JSON result files for the specified runs.[/]");
+        Environment.ExitCode = 1;
+        return;
+    }
+
+    var baselineResult = await JsonResultStore.LoadAsync(baselineJsonPath);
+    var currentResult = await JsonResultStore.LoadAsync(currentJsonPath);
+    var comparison = ResultComparer.Compare(baselineResult, currentResult);
+
+    // Check thresholds
+    var failures = new List<string>();
+
+    if (comparison.WerDelta.Absolute > maxWerDelta)
+        failures.Add($"WER: +{comparison.WerDelta.Absolute:F2}% (max allowed: +{maxWerDelta:F2}%)");
+
+    if (comparison.CerDelta.Absolute > maxCerDelta)
+        failures.Add($"CER: +{comparison.CerDelta.Absolute:F2}% (max allowed: +{maxCerDelta:F2}%)");
+
+    if (comparison.RtfDelta.Absolute > maxRtfDelta)
+        failures.Add($"RTF: +{comparison.RtfDelta.Absolute:F4} (max allowed: +{maxRtfDelta:F4})");
+
+    // Display results
+    AnsiConsole.MarkupLine($"[bold]Regression Check[/]");
+    AnsiConsole.MarkupLine($"  Baseline: {Markup.Escape(resolvedBaseline)}");
+    AnsiConsole.MarkupLine($"  Current:  {Markup.Escape(resolvedCurrent)}");
+    AnsiConsole.WriteLine();
+
+    AnsiConsole.MarkupLine($"  WER: {comparison.WerDelta.ValueA:F1}% → {comparison.WerDelta.ValueB:F1}% (Δ {comparison.WerDelta.Absolute:+0.0;-0.0}%)");
+    AnsiConsole.MarkupLine($"  CER: {comparison.CerDelta.ValueA:F1}% → {comparison.CerDelta.ValueB:F1}% (Δ {comparison.CerDelta.Absolute:+0.0;-0.0}%)");
+    AnsiConsole.MarkupLine($"  RTF: {comparison.RtfDelta.ValueA:F3} → {comparison.RtfDelta.ValueB:F3} (Δ {comparison.RtfDelta.Absolute:+0.000;-0.000})");
+    AnsiConsole.WriteLine();
+
+    if (failures.Count == 0)
+    {
+        AnsiConsole.MarkupLine("[green bold]✅ PASS — No regressions detected.[/]");
+        Environment.ExitCode = 0;
+    }
+    else
+    {
+        AnsiConsole.MarkupLine("[red bold]❌ FAIL — Regressions detected:[/]");
+        foreach (var failure in failures)
+        {
+            AnsiConsole.MarkupLine($"  [red]• {Markup.Escape(failure)}[/]");
+        }
+        Environment.ExitCode = 1;
+    }
+});
+
+// --- sweep command ---
+var sweepConfigOption = new Option<FileInfo>("--config")
+{
+    Description = "Path to sweep configuration JSON file",
+    Required = true,
+};
+
+var sweepDatasetsOption = new Option<DirectoryInfo>("--datasets")
+{
+    Description = "Root directory containing dataset folders",
+    Required = true,
+};
+
+var sweepOutputOption = new Option<DirectoryInfo>("--output")
+{
+    Description = "Output directory for result files",
+    DefaultValueFactory = _ => new DirectoryInfo("./results"),
+};
+
+var sweepVerboseOption = new Option<bool>("--verbose", "-v")
+{
+    Description = "Enable verbose logging",
+};
+
+var sweepCommand = new Command("sweep", "Run a parameter sweep across multiple configurations")
+{
+    sweepConfigOption,
+    sweepDatasetsOption,
+    sweepOutputOption,
+    sweepVerboseOption,
+};
+
+sweepCommand.SetAction(async parseResult =>
+{
+    var configFile = parseResult.GetValue(sweepConfigOption)!;
+    var datasetsDir = parseResult.GetValue(sweepDatasetsOption)!;
+    var outputDir = parseResult.GetValue(sweepOutputOption)!;
+    var verbose = parseResult.GetValue(sweepVerboseOption);
+
+    if (!configFile.Exists)
+    {
+        AnsiConsole.MarkupLine($"[red]Config file not found:[/] {Markup.Escape(configFile.FullName)}");
+        return;
+    }
+
+    if (!datasetsDir.Exists)
+    {
+        AnsiConsole.MarkupLine($"[red]Datasets directory not found:[/] {Markup.Escape(datasetsDir.FullName)}");
+        return;
+    }
+
+    // Load sweep configuration
+    var configJson = await File.ReadAllTextAsync(configFile.FullName);
+    var sweepConfig = JsonSerializer.Deserialize<SweepConfig>(configJson,
+        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        ?? throw new InvalidOperationException("Failed to deserialize sweep configuration.");
+
+    // Expand into individual configs
+    var configs = SweepExpander.Expand(sweepConfig);
+
+    AnsiConsole.MarkupLine($"[bold blue]Parlotype Benchmark — Sweep:[/] {Markup.Escape(sweepConfig.Name)}");
+    AnsiConsole.MarkupLine($"  [grey]Configurations: {configs.Count}[/]");
+    AnsiConsole.MarkupLine($"  [grey]Repetitions per config: {sweepConfig.Repetitions}[/]");
+    AnsiConsole.WriteLine();
+
+    var allResults = new List<BenchmarkResult>();
+    var dbPath = Path.Combine(outputDir.FullName, "benchmarks.db");
+
+    for (int c = 0; c < configs.Count; c++)
+    {
+        var benchmarkConfig = configs[c];
+        AnsiConsole.MarkupLine($"[bold]Configuration {c + 1}/{configs.Count}:[/] {Markup.Escape(benchmarkConfig.Name)}");
+
+        // Create a fresh DI container for each config (to reinitialize the Whisper model)
+        var services = new ServiceCollection();
+        services.AddPlatformServices();
+        services.AddSingleton<IModelDownloadService, HeadlessModelDownloadService>();
+        services.AddLogging(builder =>
+        {
+            builder.SetMinimumLevel(verbose ? LogLevel.Debug : LogLevel.Warning);
+            builder.AddZLoggerConsole();
+        });
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        var recognizer = serviceProvider.GetRequiredService<ISpeechRecognizer>();
+        var vadService = benchmarkConfig.Vad.Enabled
+            ? serviceProvider.GetRequiredService<IVadService>()
+            : null;
+        var logger = serviceProvider.GetRequiredService<ILogger<BenchmarkRunner>>();
+
+        var runner = new BenchmarkRunner(recognizer, vadService, logger);
+
+        BenchmarkResult? result = null;
+        await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync($"Running {benchmarkConfig.Name}...", async ctx =>
+            {
+                var progress = new Progress<string>(msg => ctx.Status(msg));
+                result = await runner.RunAsync(benchmarkConfig, datasetsDir.FullName, progress);
+            });
+
+        if (result is null)
+            throw new InvalidOperationException($"Sweep config '{benchmarkConfig.Name}' produced no result.");
+
+        allResults.Add(result);
+
+        // Save and index
+        var savedPath = await JsonResultStore.SaveAsync(result, outputDir.FullName);
+        using (var index = new SqliteResultIndex(dbPath))
+        {
+            index.Index(result, savedPath);
+        }
+
+        AnsiConsole.MarkupLine($"  [green]✓[/] WER={result.Summary.AverageWer:F1}%, RTF={result.Summary.AverageRtf:F3}");
+        AnsiConsole.WriteLine();
+    }
+
+    // Display sweep summary
+    ConsoleReporter.DisplaySweepSummary(allResults);
+
+    AnsiConsole.WriteLine();
+    AnsiConsole.MarkupLine($"[green]All {configs.Count} configurations complete. Results in {Markup.Escape(outputDir.FullName)}[/]");
+});
+
 rootCommand.Add(runCommand);
 rootCommand.Add(importCommand);
 rootCommand.Add(listCommand);
 rootCommand.Add(compareCommand);
 rootCommand.Add(exportCommand);
+rootCommand.Add(checkCommand);
+rootCommand.Add(sweepCommand);
 
 var configuration = new CommandLineConfiguration(rootCommand);
 return await configuration.InvokeAsync(args);
@@ -438,4 +704,21 @@ static string? FindJsonByRunId(string directory, string runId)
     // Partial match — run ID is embedded in filename
     return Directory.GetFiles(directory, "*.json")
         .FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Contains(runId, StringComparison.OrdinalIgnoreCase));
+}
+
+/// <summary>Resolves a run ID, supporting 'latest' alias and partial matching.</summary>
+static string? ResolveRunId(SqliteResultIndex index, string runId)
+{
+    if (runId.Equals("latest", StringComparison.OrdinalIgnoreCase))
+    {
+        var runs = index.ListRuns(limit: 1);
+        return runs.Count > 0 ? runs[0].RunId : null;
+    }
+
+    if (index.Contains(runId))
+        return runId;
+
+    // Try partial match
+    var allRuns = index.ListRuns();
+    return allRuns.FirstOrDefault(r => r.RunId.Contains(runId, StringComparison.OrdinalIgnoreCase))?.RunId;
 }

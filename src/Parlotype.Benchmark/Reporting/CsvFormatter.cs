@@ -11,7 +11,13 @@ public static class CsvFormatter
     public static string FormatResult(BenchmarkResult result)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("SampleId,ReferenceText,HypothesisText,WER,CER,RTF,ProcessingTimeMs");
+        var hasReps = result.Summary.Repetitions > 1;
+
+        // Header
+        sb.Append("SampleId,ReferenceText,HypothesisText,WER,CER");
+        if (hasReps) sb.Append(",WER_StdDev,CER_StdDev");
+        sb.Append(",RTF,ProcessingTimeMs,RamDeltaMb,GcAllocatedBytes");
+        sb.AppendLine();
 
         foreach (var sample in result.Samples)
         {
@@ -19,9 +25,40 @@ public static class CsvFormatter
             sb.Append(Escape(sample.ReferenceText)).Append(',');
             sb.Append(Escape(sample.HypothesisText)).Append(',');
             sb.Append(sample.Wer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');
-            sb.Append(sample.Cer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');
-            sb.Append(sample.Rtf.ToString("F4", CultureInfo.InvariantCulture)).Append(',');
-            sb.AppendLine(sample.ProcessingTimeMs.ToString("F0", CultureInfo.InvariantCulture));
+            sb.Append(sample.Cer.ToString("F2", CultureInfo.InvariantCulture));
+            if (hasReps)
+            {
+                sb.Append(',').Append(sample.WerStdDev.ToString("F3", CultureInfo.InvariantCulture));
+                sb.Append(',').Append(sample.CerStdDev.ToString("F3", CultureInfo.InvariantCulture));
+            }
+            sb.Append(',').Append(sample.Rtf.ToString("F4", CultureInfo.InvariantCulture));
+            sb.Append(',').Append(sample.ProcessingTimeMs.ToString("F0", CultureInfo.InvariantCulture));
+            sb.Append(',').Append(sample.RamDeltaMb.ToString("F2", CultureInfo.InvariantCulture));
+            sb.Append(',').Append(sample.GcAllocatedBytes.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine();
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>Formats a sweep summary table as CSV.</summary>
+    public static string FormatSweepSummary(List<BenchmarkResult> results)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Config,Model,BeamSize,VAD,AvgWER,AvgCER,AvgRTF,TotalTimeMs,PeakRamMb,ModelLoadMs");
+
+        foreach (var result in results)
+        {
+            sb.Append(Escape(result.Configuration.Name)).Append(',');
+            sb.Append(result.Configuration.Whisper.Model.ToString()).Append(',');
+            sb.Append(result.Configuration.Whisper.BeamSize.ToString(CultureInfo.InvariantCulture)).Append(',');
+            sb.Append(result.Configuration.Vad.Enabled ? "true" : "false").Append(',');
+            sb.Append(result.Summary.AverageWer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');
+            sb.Append(result.Summary.AverageCer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');
+            sb.Append(result.Summary.AverageRtf.ToString("F4", CultureInfo.InvariantCulture)).Append(',');
+            sb.Append(result.Summary.TotalProcessingTimeMs.ToString("F0", CultureInfo.InvariantCulture)).Append(',');
+            sb.Append(result.Summary.PeakRamMb.ToString("F0", CultureInfo.InvariantCulture)).Append(',');
+            sb.AppendLine(result.Summary.ModelLoadTimeMs.ToString("F0", CultureInfo.InvariantCulture));
         }
 
         return sb.ToString();

@@ -66,6 +66,9 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             .WithLanguage(options.Language)
             .WithTemperature(options.Temperature);
 
+        if (options.Threads is not null)
+            builder.WithThreads(options.Threads.Value);
+
         if (options.BeamSize > 1)
         {
             var beamStrategy = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();

@@ -32,16 +32,46 @@ public static class MarkdownFormatter
         sb.AppendLine($"| Model Load | {Fmt(result.Summary.ModelLoadTimeMs, "F0")} ms |");
         sb.AppendLine($"| Total Time | {Fmt(result.Summary.TotalProcessingTimeMs, "F0")} ms |");
         sb.AppendLine($"| Peak RAM | {Fmt(result.Summary.PeakRamMb, "F0")} MB |");
+        if (result.Summary.Repetitions > 1)
+        {
+            sb.AppendLine($"| Repetitions | {result.Summary.Repetitions} |");
+            sb.AppendLine($"| WER σ | {Fmt(result.Summary.WerStdDev, "F2")}% |");
+            sb.AppendLine($"| CER σ | {Fmt(result.Summary.CerStdDev, "F2")}% |");
+            sb.AppendLine($"| WER CoV | {Fmt(result.Summary.WerCoeffOfVariation)}% |");
+        }
+
+        if (result.Summary.AvgRamDeltaMb > 0 || result.Summary.TotalGcAllocatedBytes > 0)
+        {
+            sb.AppendLine($"| Avg RAM Δ | {Fmt(result.Summary.AvgRamDeltaMb)} MB |");
+            sb.AppendLine($"| GC Allocated | {result.Summary.TotalGcAllocatedBytes:N0} bytes |");
+            sb.AppendLine($"| GC Gen0/1/2 | {result.Summary.GcGen0Collections}/{result.Summary.GcGen1Collections}/{result.Summary.GcGen2Collections} |");
+        }
         sb.AppendLine();
 
         sb.AppendLine("## Per-Sample Results");
         sb.AppendLine();
-        sb.AppendLine("| Sample | WER % | CER % | RTF | Time (ms) |");
-        sb.AppendLine("|--------|------:|------:|----:|----------:|");
+        var hasReps = result.Summary.Repetitions > 1;
+        if (hasReps)
+        {
+            sb.AppendLine("| Sample | WER % | WER σ | CER % | CER σ | RTF | Time (ms) |");
+            sb.AppendLine("|--------|------:|------:|------:|------:|----:|----------:|");
+        }
+        else
+        {
+            sb.AppendLine("| Sample | WER % | CER % | RTF | Time (ms) |");
+            sb.AppendLine("|--------|------:|------:|----:|----------:|");
+        }
 
         foreach (var sample in result.Samples)
         {
-            sb.AppendLine($"| {sample.Id} | {Fmt(sample.Wer)} | {Fmt(sample.Cer)} | {sample.Rtf.ToString("F3", CultureInfo.InvariantCulture)} | {Fmt(sample.ProcessingTimeMs, "F0")} |");
+            if (hasReps)
+            {
+                sb.AppendLine($"| {sample.Id} | {Fmt(sample.Wer)} | {Fmt(sample.WerStdDev, "F2")} | {Fmt(sample.Cer)} | {Fmt(sample.CerStdDev, "F2")} | {sample.Rtf.ToString("F3", CultureInfo.InvariantCulture)} | {Fmt(sample.ProcessingTimeMs, "F0")} |");
+            }
+            else
+            {
+                sb.AppendLine($"| {sample.Id} | {Fmt(sample.Wer)} | {Fmt(sample.Cer)} | {sample.Rtf.ToString("F3", CultureInfo.InvariantCulture)} | {Fmt(sample.ProcessingTimeMs, "F0")} |");
+            }
         }
 
         return sb.ToString();
@@ -97,6 +127,25 @@ public static class MarkdownFormatter
             : $"{delta.Absolute.ToString(format, CultureInfo.InvariantCulture)}{suffix}";
 
         sb.AppendLine($"| {label} | {delta.ValueA.ToString(format, CultureInfo.InvariantCulture)}{suffix} | {delta.ValueB.ToString(format, CultureInfo.InvariantCulture)}{suffix} | {deltaStr} | {indicator} |");
+    }
+
+    /// <summary>Formats a sweep summary as a Markdown report.</summary>
+    public static string FormatSweepSummary(List<BenchmarkResult> results)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("# Sweep Summary");
+        sb.AppendLine();
+        sb.AppendLine($"**Configurations:** {results.Count}  ");
+        sb.AppendLine();
+        sb.AppendLine("| Config | Model | Beam | VAD | WER % | CER % | RTF | Time (ms) | RAM (MB) |");
+        sb.AppendLine("|--------|-------|-----:|-----|------:|------:|----:|----------:|---------:|");
+
+        foreach (var result in results)
+        {
+            sb.AppendLine($"| {result.Configuration.Name} | {result.Configuration.Whisper.Model} | {result.Configuration.Whisper.BeamSize} | {(result.Configuration.Vad.Enabled ? "✓" : "✗")} | {Fmt(result.Summary.AverageWer)} | {Fmt(result.Summary.AverageCer)} | {result.Summary.AverageRtf.ToString("F3", CultureInfo.InvariantCulture)} | {Fmt(result.Summary.TotalProcessingTimeMs, "F0")} | {Fmt(result.Summary.PeakRamMb, "F0")} |");
+        }
+
+        return sb.ToString();
     }
 
     private static string Fmt(double value, string format = "F1")

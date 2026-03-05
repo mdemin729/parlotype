@@ -42,6 +42,7 @@ public sealed class BenchmarkRunner
             BeamSize = config.Whisper.BeamSize,
             Temperature = config.Whisper.Temperature,
             InitialPrompt = config.Whisper.InitialPrompt,
+            Threads = config.Whisper.Threads,
         };
 
         progress?.Report("Loading Whisper model...");
@@ -108,6 +109,10 @@ public sealed class BenchmarkRunner
         var sampleResults = new List<SampleResult>();
         double peakRamMb = 0;
 
+        var gcGen0Before = GC.CollectionCount(0);
+        var gcGen1Before = GC.CollectionCount(1);
+        var gcGen2Before = GC.CollectionCount(2);
+
         for (int i = 0; i < allSamples.Count; i++)
         {
             var (sampleInfo, audioPath) = allSamples[i];
@@ -116,7 +121,14 @@ public sealed class BenchmarkRunner
             progress?.Report($"Processing sample {i + 1}/{allSamples.Count}: {sampleInfo.Id}");
             _logger.LogInformation("Processing sample {Index}/{Total}: {SampleId}", i + 1, allSamples.Count, sampleInfo.Id);
 
-            var result = await ProcessSampleAsync(sampleInfo, audioPath, config.Vad.Enabled, cancellationToken);
+            var ramBefore = Process.GetCurrentProcess().WorkingSet64;
+            var gcBefore = GC.GetAllocatedBytesForCurrentThread();
+
+            var result = await ProcessSampleAsync(sampleInfo, audioPath, config.Vad.Enabled, config.Repetitions, cancellationToken);
+
+            result.RamDeltaMb = (Process.GetCurrentProcess().WorkingSet64 - ramBefore) / (1024.0 * 1024.0);
+            result.GcAllocatedBytes = GC.GetAllocatedBytesForCurrentThread() - gcBefore;
+
             sampleResults.Add(result);
 
             // Track peak RAM (process-wide approximation)
@@ -135,6 +147,16 @@ public sealed class BenchmarkRunner
             TotalProcessingTimeMs = sampleResults.Sum(s => s.ProcessingTimeMs),
             ModelLoadTimeMs = modelLoadTimeMs,
             PeakRamMb = peakRamMb,
+            AvgRamDeltaMb = sampleResults.Count > 0 ? sampleResults.Average(s => s.RamDeltaMb) : 0,
+            TotalGcAllocatedBytes = sampleResults.Sum(s => s.GcAllocatedBytes),
+            GcGen0Collections = GC.CollectionCount(0) - gcGen0Before,
+            GcGen1Collections = GC.CollectionCount(1) - gcGen1Before,
+            GcGen2Collections = GC.CollectionCount(2) - gcGen2Before,
+            Repetitions = config.Repetitions,
+            WerStdDev = sampleResults.Count > 0 ? sampleResults.Average(s => s.WerStdDev) : 0,
+            CerStdDev = sampleResults.Count > 0 ? sampleResults.Average(s => s.CerStdDev) : 0,
+            WerCoeffOfVariation = sampleResults.Count > 0 && sampleResults.Average(s => s.Wer) > 0
+                ? sampleResults.Average(s => s.WerStdDev) / sampleResults.Average(s => s.Wer) * 100 : 0,
         };
 
         return new BenchmarkResult
@@ -149,12 +171,12 @@ public sealed class BenchmarkRunner
     }
 
     private async Task<SampleResult> ProcessSampleAsync(
-        SampleInfo sampleInfo, string audioPath, bool vadEnabled, CancellationToken cancellationToken)
+        SampleInfo sampleInfo, string audioPath, bool vadEnabled, int repetitions, CancellationToken cancellationToken)
     {
-        // Load and resample audio
+        // Load and resample audio (once)
         var (samples, durationSeconds) = AudioFileLoader.Load(audioPath);
 
-        // Optional VAD preprocessing
+        // Optional VAD preprocessing (once)
         float[] audioForRecognition;
         if (vadEnabled && _vadService is not null)
         {
@@ -167,7 +189,6 @@ public sealed class BenchmarkRunner
             }
             else
             {
-                // No speech detected — feed entire audio
                 audioForRecognition = samples;
                 _logger.LogDebug("VAD: no speech detected, using full audio");
             }
@@ -177,32 +198,75 @@ public sealed class BenchmarkRunner
             audioForRecognition = samples;
         }
 
-        // Transcribe with timing
-        var sw = Stopwatch.StartNew();
-        var transcription = await _recognizer.TranscribeAsync(audioForRecognition.AsMemory(), cancellationToken);
-        sw.Stop();
+        var repetitionDetails = new List<RepetitionDetail>();
+        string representativeHypothesis = "";
 
-        var processingTimeMs = sw.Elapsed.TotalMilliseconds;
-        var rtf = durationSeconds > 0 ? processingTimeMs / 1000.0 / durationSeconds : 0;
+        for (int rep = 0; rep < repetitions; rep++)
+        {
+            var sw = Stopwatch.StartNew();
+            var transcription = await _recognizer.TranscribeAsync(audioForRecognition.AsMemory(), cancellationToken);
+            sw.Stop();
 
-        // Compute metrics
-        var wer = EditDistanceCalculator.ComputeWer(sampleInfo.ReferenceText, transcription.Text);
-        var cer = EditDistanceCalculator.ComputeCer(sampleInfo.ReferenceText, transcription.Text);
+            var processingTimeMs = sw.Elapsed.TotalMilliseconds;
+            var rtf = durationSeconds > 0 ? processingTimeMs / 1000.0 / durationSeconds : 0;
+            var wer = EditDistanceCalculator.ComputeWer(sampleInfo.ReferenceText, transcription.Text);
+            var cer = EditDistanceCalculator.ComputeCer(sampleInfo.ReferenceText, transcription.Text);
+
+            if (rep == 0)
+                representativeHypothesis = transcription.Text;
+
+            repetitionDetails.Add(new RepetitionDetail
+            {
+                Repetition = rep + 1,
+                ProcessingTimeMs = processingTimeMs,
+                Rtf = rtf,
+                Wer = wer,
+                Cer = cer,
+                HypothesisText = transcription.Text,
+            });
+
+            if (repetitions > 1)
+                _logger.LogDebug("Sample {Id} rep {Rep}/{Total}: WER={Wer:F1}%, Time={Time:F0}ms",
+                    sampleInfo.Id, rep + 1, repetitions, wer, processingTimeMs);
+        }
+
+        // Compute aggregates
+        var meanWer = repetitionDetails.Average(r => r.Wer);
+        var meanCer = repetitionDetails.Average(r => r.Cer);
+        var meanRtf = repetitionDetails.Average(r => r.Rtf);
+        var meanProcessingTime = repetitionDetails.Average(r => r.ProcessingTimeMs);
+
+        var werStdDev = repetitions > 1 ? ComputeStdDev(repetitionDetails.Select(r => r.Wer)) : 0.0;
+        var cerStdDev = repetitions > 1 ? ComputeStdDev(repetitionDetails.Select(r => r.Cer)) : 0.0;
 
         _logger.LogInformation(
-            "Sample {Id}: WER={Wer:F1}%, CER={Cer:F1}%, RTF={Rtf:F3}, Time={Time:F0}ms",
-            sampleInfo.Id, wer, cer, rtf, processingTimeMs);
+            "Sample {Id}: WER={Wer:F1}%{StdDev}, CER={Cer:F1}%, RTF={Rtf:F3}, Time={Time:F0}ms",
+            sampleInfo.Id, meanWer,
+            repetitions > 1 ? $" (σ={werStdDev:F2})" : "",
+            meanCer, meanRtf, meanProcessingTime);
 
         return new SampleResult
         {
             Id = sampleInfo.Id,
             ReferenceText = sampleInfo.ReferenceText,
-            HypothesisText = transcription.Text,
-            Wer = wer,
-            Cer = cer,
-            ProcessingTimeMs = processingTimeMs,
-            Rtf = rtf,
+            HypothesisText = representativeHypothesis,
+            Wer = meanWer,
+            Cer = meanCer,
+            ProcessingTimeMs = meanProcessingTime,
+            Rtf = meanRtf,
+            WerStdDev = werStdDev,
+            CerStdDev = cerStdDev,
+            Repetitions = repetitions > 1 ? repetitionDetails : null,
         };
+    }
+
+    private static double ComputeStdDev(IEnumerable<double> values)
+    {
+        var list = values.ToList();
+        if (list.Count <= 1) return 0.0;
+        var mean = list.Average();
+        var sumSquares = list.Sum(v => (v - mean) * (v - mean));
+        return Math.Sqrt(sumSquares / (list.Count - 1));
     }
 
     private static float[] ExtractSpeechSegments(float[] samples, List<VadSpeechSegment> segments)

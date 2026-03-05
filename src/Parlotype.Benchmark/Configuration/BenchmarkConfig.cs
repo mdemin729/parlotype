@@ -42,6 +42,9 @@ public sealed class WhisperConfig
 
     [JsonPropertyName("initialPrompt")]
     public string? InitialPrompt { get; init; }
+
+    [JsonPropertyName("threads")]
+    public int? Threads { get; init; }
 }
 
 public sealed class VadConfig
