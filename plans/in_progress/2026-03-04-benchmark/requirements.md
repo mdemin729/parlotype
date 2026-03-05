@@ -15,8 +15,9 @@ Build a **console benchmark application** (`Parlotype.Benchmark`) for objective,
 
 ### 2.1 Audio Format
 
-- **WAV only** (16-bit PCM). No MP3, OGG, or FLAC support needed.
-- The benchmark must handle WAV files at various sample rates (8kHz, 16kHz, 44.1kHz, 48kHz) — resampling to 16kHz mono internally, matching the existing `AudioFormat.Whisper` pipeline.
+- **WAV** (16-bit PCM) — loaded natively via NAudio.
+- **FLAC** — converted to WAV at runtime via FFmpeg (`ffmpeg` must be on PATH). Converted files are cached in a `.cache` directory next to the source. No MP3 or OGG support.
+- The benchmark must handle audio files at various sample rates (8kHz, 16kHz, 44.1kHz, 48kHz) — resampling to 16kHz mono internally, matching the existing `AudioFormat.Whisper` pipeline.
 
 ### 2.2 Dataset Structure
 
