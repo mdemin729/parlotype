@@ -126,7 +126,7 @@ public sealed class BenchmarkRunner
         SampleInfo sampleInfo, string audioPath, bool vadEnabled, CancellationToken cancellationToken)
     {
         // Load and resample audio
-        var (samples, durationSeconds) = AudioFileLoader.LoadWav(audioPath);
+        var (samples, durationSeconds) = AudioFileLoader.Load(audioPath);
 
         // Optional VAD preprocessing
         float[] audioForRecognition;

@@ -1,0 +1,57 @@
+{
+  "runId": "20260305-002151-smoke-test-baseline",
+  "timestamp": "2026-03-05T00:21:51.4861129+00:00",
+  "configuration": {
+    "name": "smoke-test-baseline",
+    "description": "Quick smoke test with Base model and default settings",
+    "datasets": [
+      "smoke-test"
+    ],
+    "repetitions": 1,
+    "whisper": {
+      "model": "Base",
+      "language": "auto",
+      "beamSize": 1,
+      "temperature": 0,
+      "initialPrompt": null
+    },
+    "vad": {
+      "enabled": false
+    }
+  },
+  "environment": {
+    "os": "Microsoft Windows 10.0.26100",
+    "architecture": "X64",
+    "dotnetVersion": "10.0.3",
+    "processorCount": 32
+  },
+  "summary": {
+    "totalSamples": 2,
+    "averageWer": 159.84848484848487,
+    "averageCer": 133.4478021978022,
+    "averageRtf": 0.09809147993586217,
+    "totalProcessingTimeMs": 2485.2641,
+    "modelLoadTimeMs": 219.8058,
+    "peakRamMb": 395.41796875
+  },
+  "samples": [
+    {
+      "id": "kennedy",
+      "referenceText": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+      "hypothesisText": "I believe that this nation should commit itself to achieving the goal before this decade is out  of landing a man on the moon and returning him safely to the earth.  No single space project in this period will be more impressive to mankind or more important for the long range exploration of space.",
+      "wer": 236.36363636363637,
+      "cer": 224.03846153846155,
+      "processingTimeMs": 1310.0889,
+      "rtf": 0.06241230534696624
+    },
+    {
+      "id": "one-small-step",
+      "referenceText": "That\u0027s one small step for man one giant leap for mankind",
+      "hypothesisText": "At one small step per land, one by a fleet per land time.",
+      "wer": 83.33333333333334,
+      "cer": 42.857142857142854,
+      "processingTimeMs": 1175.1752,
+      "rtf": 0.13377065452475811
+    }
+  ]
+}
