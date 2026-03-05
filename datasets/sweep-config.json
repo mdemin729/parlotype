@@ -1,0 +1,16 @@
+{
+  "name": "model-beam-sweep",
+  "description": "Sweep across Whisper models, beam sizes, and temperatures to find optimal accuracy/speed tradeoff",
+  "datasets": ["smoke-test"],
+  "repetitions": 2,
+  "sweep": {
+    "whisper.model": ["Base", "Small"],
+    "whisper.beamSize": [1, 5],
+    "whisper.temperature": [0.0, 0.2],
+    "whisper.language": ["auto"],
+    "vad.enabled": [false, true]
+  },
+  "vad": {
+    "enabled": false
+  }
+}
