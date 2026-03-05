@@ -27,6 +27,8 @@ public sealed class BenchmarkRunner
         BenchmarkConfig config,
         string datasetsDir,
         IProgress<string>? progress = null,
+        string? tagsFilter = null,
+        string? samplesFilter = null,
         CancellationToken cancellationToken = default)
     {
         var timestamp = DateTimeOffset.UtcNow;
@@ -74,6 +76,30 @@ public sealed class BenchmarkRunner
 
         if (allSamples.Count == 0)
             throw new InvalidOperationException("No samples found in the specified datasets.");
+
+        // Apply tag filter (AND logic: sample must have ALL specified tags)
+        if (!string.IsNullOrEmpty(tagsFilter))
+        {
+            var requiredTags = tagsFilter.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            allSamples = allSamples
+                .Where(s => requiredTags.All(tag => s.Info.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase)))
+                .ToList();
+            _logger.LogInformation("Tag filter '{Tags}' applied: {Count} samples remaining", tagsFilter, allSamples.Count);
+        }
+
+        // Apply sample ID filter
+        if (!string.IsNullOrEmpty(samplesFilter))
+        {
+            var sampleIds = samplesFilter.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var idSet = new HashSet<string>(sampleIds, StringComparer.OrdinalIgnoreCase);
+            allSamples = allSamples
+                .Where(s => idSet.Contains(s.Info.Id))
+                .ToList();
+            _logger.LogInformation("Sample filter '{Samples}' applied: {Count} samples remaining", samplesFilter, allSamples.Count);
+        }
+
+        if (allSamples.Count == 0)
+            throw new InvalidOperationException("No samples remaining after applying filters.");
 
         _logger.LogInformation("Found {SampleCount} samples across {DatasetCount} dataset(s)",
             allSamples.Count, config.Datasets.Length);
