@@ -37,3 +37,10 @@ Desktop.ini
 
 # Test results
 TestResults/
+
+# Cached WAV files converted from FLAC
+datasets/**/.cache/*.wav
+
+# Benchmark results
+results/*
+
