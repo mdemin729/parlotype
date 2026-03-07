@@ -128,25 +128,33 @@ public sealed class AudioPipelineService : IAudioPipeline
         }
     }
 
+    /// <summary>Minimum new samples before running VAD (8000 samples = 500ms at 16kHz).
+    /// Chunks smaller than this don't give GetSpeechTimestamps enough context
+    /// for its min_silence/speech_pad post-processing.</summary>
+    private const int VadMinChunkSamples = 8_000;
+
     private void ProcessBatch()
     {
-        // Only process samples that arrived since the last VAD call
+        // Run VAD only when enough new samples have accumulated
         int newSamplesCount = _sampleBuffer.Count - _vadProcessedUpTo;
-        if (newSamplesCount < 1024)
-            return;
-
-        var bufferSpan = CollectionsMarshal.AsSpan(_sampleBuffer);
-        var newSegments = _vad.DetectSpeech(bufferSpan[_vadProcessedUpTo..]);
-
-        foreach (var seg in newSegments)
+        if (newSamplesCount >= VadMinChunkSamples)
         {
-            var adjusted = new VadSpeechSegment(
-                seg.StartSample + _vadProcessedUpTo,
-                seg.EndSample + _vadProcessedUpTo);
-            MergeOrAddSegment(_accumulatedSegments, adjusted);
+            var bufferSpan = CollectionsMarshal.AsSpan(_sampleBuffer);
+            var newSegments = _vad.DetectSpeech(bufferSpan[_vadProcessedUpTo..]);
+
+            foreach (var seg in newSegments)
+            {
+                var adjusted = new VadSpeechSegment(
+                    seg.StartSample + _vadProcessedUpTo,
+                    seg.EndSample + _vadProcessedUpTo);
+                MergeOrAddSegment(_accumulatedSegments, adjusted);
+            }
+
+            _vadProcessedUpTo = _sampleBuffer.Count;
         }
 
-        _vadProcessedUpTo = _sampleBuffer.Count;
+        // Silence-after-speech and overflow checks run on every callback
+        // so end-of-utterance is detected promptly.
 
         if (_accumulatedSegments.Count == 0 && _sampleBuffer.Count > MaxBatchBufferSamples)
         {
@@ -170,6 +178,7 @@ public sealed class AudioPipelineService : IAudioPipeline
                     CollectionsMarshal.AsSpan(_sampleBuffer), _accumulatedSegments);
                 _processingQueue.Enqueue(speechSamples);
                 ClearBufferState();
+                return;
             }
         }
 
@@ -212,24 +221,13 @@ public sealed class AudioPipelineService : IAudioPipeline
 
             _logger.LogDebug("Flushing buffer with {Count} samples", _sampleBuffer.Count);
 
-            // Process any samples not yet seen by VAD
-            if (_vadProcessedUpTo < _sampleBuffer.Count)
-            {
-                var bufferSpan = CollectionsMarshal.AsSpan(_sampleBuffer);
-                var newSegments = _vad.DetectSpeech(bufferSpan[_vadProcessedUpTo..]);
-                foreach (var seg in newSegments)
-                {
-                    var adjusted = new VadSpeechSegment(
-                        seg.StartSample + _vadProcessedUpTo,
-                        seg.EndSample + _vadProcessedUpTo);
-                    MergeOrAddSegment(_accumulatedSegments, adjusted);
-                }
-            }
-
-            if (_accumulatedSegments.Count > 0)
+            // Final flush: run VAD on the entire buffer for complete detection.
+            // This runs once at shutdown so O(n) cost is acceptable.
+            var segments = _vad.DetectSpeech(CollectionsMarshal.AsSpan(_sampleBuffer));
+            if (segments.Count > 0)
             {
                 var speechSamples = ExtractSpeechSamples(
-                    CollectionsMarshal.AsSpan(_sampleBuffer), _accumulatedSegments);
+                    CollectionsMarshal.AsSpan(_sampleBuffer), segments);
                 _processingQueue.Enqueue(speechSamples);
             }
 
