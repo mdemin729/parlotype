@@ -1,0 +1,15 @@
+{
+  "name": "smoke-test-baseline",
+  "description": "Quick smoke test with Base model and default settings",
+  "datasets": ["smoke-test"],
+  "repetitions": 1,
+  "whisper": {
+    "model": "Base",
+    "language": "auto",
+    "beamSize": 1,
+    "temperature": 0.0
+  },
+  "vad": {
+    "enabled": false
+  }
+}
