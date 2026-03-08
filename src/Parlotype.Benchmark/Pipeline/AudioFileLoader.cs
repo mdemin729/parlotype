@@ -109,8 +109,12 @@ public static class AudioFileLoader
         catch (Exception ex)
         {
             throw new InvalidOperationException(
-                "FFmpeg is required for FLAC support but was not found on PATH. " +
-                "Install FFmpeg: https://ffmpeg.org/download.html", ex);
+                "FFmpeg is required for FLAC support but was not found on PATH.\n" +
+                "Install FFmpeg with one of:\n" +
+                "  Windows:  winget install ffmpeg\n" +
+                "  macOS:    brew install ffmpeg\n" +
+                "  Linux:    sudo apt install ffmpeg\n" +
+                "Or download from https://ffmpeg.org/download.html", ex);
         }
     }
 
