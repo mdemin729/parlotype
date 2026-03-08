@@ -51,7 +51,8 @@ completed:               # date when finished
 
 1. Update frontmatter: `status: completed`, set `completed: YYYY-MM-DD`
 2. Remove row from `plans/INDEX.md`
-3. Do NOT move the folder — it stays in `plans/`
+3. Create an ADR (`docs/decisions/NNN-title.md`) capturing significant architectural decisions made during implementation — see [Creating an ADR](#creating-an-adr)
+4. Do NOT move the folder — it stays in `plans/`
 
 ### Abandoning a Plan
 
