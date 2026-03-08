@@ -1,0 +1,12 @@
+{
+  "name": "vad-tuning",
+  "description": "Sweep VAD parameters to find optimal accuracy with VAD enabled",
+  "datasets": ["smoke-test"],
+  "repetitions": 1,
+  "sweep": {
+    "vad.enabled": [true],
+    "vad.minSilenceDurationMs": [500, 1000, 2000],
+    "vad.speechPadMs": [200, 400],
+    "vad.interSegmentSilenceMs": [0, 160, 300]
+  }
+}

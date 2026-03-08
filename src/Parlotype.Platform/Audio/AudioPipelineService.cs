@@ -316,22 +316,7 @@ public sealed class AudioPipelineService : IAudioPipeline
 
     private static float[] ExtractSpeechSamples(ReadOnlySpan<float> buffer, List<VadSpeechSegment> segments)
     {
-        var result = new List<float>();
-        foreach (var segment in segments)
-        {
-            int start = Math.Max(0, segment.StartSample);
-            int end = Math.Min(buffer.Length, segment.EndSample);
-            if (end > start)
-            {
-                result.AddRange(buffer[start..end].ToArray());
-            }
-        }
-        return result.ToArray();
-    }
-
-    private static float[] ExtractSpeechSamples(float[] buffer, List<VadSpeechSegment> segments)
-    {
-        return ExtractSpeechSamples(buffer.AsSpan(), segments);
+        return SpeechSegmentExtractor.Extract(buffer, segments);
     }
 
     public async ValueTask DisposeAsync()

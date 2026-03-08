@@ -1,0 +1,13 @@
+{
+  "name": "vad-sweep",
+  "description": "Sweep across enabled and disabled VAD to find optimal accuracy/speed tradeoff",
+  "datasets": ["smoke-test"],
+  "repetitions": 1,
+  "sweep": {
+    "whisper.model": ["Base"],
+    "whisper.beamSize": [1],
+    "whisper.temperature": [0.0],
+    "whisper.language": ["auto"],
+    "vad.enabled": [false, true]
+  }
+}

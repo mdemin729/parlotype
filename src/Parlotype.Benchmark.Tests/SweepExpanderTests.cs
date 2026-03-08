@@ -197,4 +197,91 @@ public class SweepExpanderTests
         Assert.Equal(0.0f, configs[0].Whisper.Temperature);
         Assert.Equal(0.5f, configs[1].Whisper.Temperature);
     }
+
+    [Fact]
+    public void Expand_VadThresholdAxis_ProducesCorrectValues()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["vad.threshold"] = ToElements(0.3f, 0.5f, 0.7f),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.Equal(3, configs.Count);
+        Assert.Equal(0.3f, configs[0].Vad.Threshold, 0.01f);
+        Assert.Equal(0.5f, configs[1].Vad.Threshold, 0.01f);
+        Assert.Equal(0.7f, configs[2].Vad.Threshold, 0.01f);
+    }
+
+    [Fact]
+    public void Expand_VadInterSegmentSilenceAxis_ProducesCorrectValues()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["vad.interSegmentSilenceMs"] = ToElements(0, 100, 160, 300),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.Equal(4, configs.Count);
+        Assert.Equal(0, configs[0].Vad.InterSegmentSilenceMs);
+        Assert.Equal(100, configs[1].Vad.InterSegmentSilenceMs);
+        Assert.Equal(160, configs[2].Vad.InterSegmentSilenceMs);
+        Assert.Equal(300, configs[3].Vad.InterSegmentSilenceMs);
+    }
+
+    [Fact]
+    public void Expand_VadSpeechPadAxis_ProducesCorrectValues()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["vad.speechPadMs"] = ToElements(100, 200, 300),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.Equal(3, configs.Count);
+        Assert.Equal(100, configs[0].Vad.SpeechPadMs);
+        Assert.Equal(200, configs[1].Vad.SpeechPadMs);
+        Assert.Equal(300, configs[2].Vad.SpeechPadMs);
+        Assert.Contains("pad100", configs[0].Name);
+        Assert.Contains("pad300", configs[2].Name);
+    }
+
+    [Fact]
+    public void Expand_VadMinSilenceDurationAxis_ProducesCorrectValues()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["vad.minSilenceDurationMs"] = ToElements(300, 500, 800),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.Equal(3, configs.Count);
+        Assert.Equal(300, configs[0].Vad.MinSilenceDurationMs);
+        Assert.Equal(500, configs[1].Vad.MinSilenceDurationMs);
+        Assert.Equal(800, configs[2].Vad.MinSilenceDurationMs);
+    }
 }

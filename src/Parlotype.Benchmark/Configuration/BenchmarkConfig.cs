@@ -47,8 +47,23 @@ public sealed class WhisperConfig
     public int? Threads { get; init; }
 }
 
-public sealed class VadConfig
+public sealed record VadConfig
 {
     [JsonPropertyName("enabled")]
     public bool Enabled { get; init; } = true;
+
+    [JsonPropertyName("threshold")]
+    public float Threshold { get; init; } = 0.5f;
+
+    [JsonPropertyName("speechPadMs")]
+    public int SpeechPadMs { get; init; } = 400;
+
+    [JsonPropertyName("minSilenceDurationMs")]
+    public int MinSilenceDurationMs { get; init; } = 500;
+
+    [JsonPropertyName("minSpeechDurationMs")]
+    public int MinSpeechDurationMs { get; init; } = 50;
+
+    [JsonPropertyName("interSegmentSilenceMs")]
+    public int InterSegmentSilenceMs { get; init; } = 160;
 }
