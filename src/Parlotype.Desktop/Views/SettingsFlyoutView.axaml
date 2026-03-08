@@ -131,6 +131,43 @@
 
             <Separator Margin="16,0" />
 
+            <!-- Global hotkey -->
+            <Button Background="Transparent"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Padding="16,10" CornerRadius="0">
+                <Button.Flyout>
+                    <Flyout Placement="RightEdgeAlignedTop" ShowMode="Transient">
+                        <Flyout.FlyoutPresenterTheme>
+                            <ControlTheme TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="CornerRadius" Value="0" />
+                            </ControlTheme>
+                        </Flyout.FlyoutPresenterTheme>
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                CornerRadius="8"
+                                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                                BorderThickness="1"
+                                Padding="12" MinWidth="260">
+                            <v:HotkeyRecorderView DataContext="{Binding HotkeyRecorder}" />
+                        </Border>
+                    </Flyout>
+                </Button.Flyout>
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <PathIcon Grid.Column="0" Width="16" Height="16" Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              Data="M17.5 2.5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5ZM3 8.5l4-4.5 3 3-2 2h2.5l3-3L17 9.5l-3 3V15l2-2 3 3L14.5 21l-3-3 3-3v-2.5l-3 3L8 12l2-2-3-3Z" />
+                    <TextBlock Grid.Column="1" Text="Global hotkey"
+                               VerticalAlignment="Center" FontSize="14" />
+                    <TextBlock Grid.Column="2" Text="›" FontSize="18"
+                               VerticalAlignment="Center" Opacity="0.5" />
+                </Grid>
+            </Button>
+
+            <Separator Margin="16,0" />
+
             <!-- Theme -->
             <Button Background="Transparent"
                     HorizontalAlignment="Stretch"

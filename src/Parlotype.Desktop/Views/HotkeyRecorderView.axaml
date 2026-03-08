@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             x:Class="Parlotype.Desktop.Views.HotkeyRecorderView"
+             x:DataType="vm:HotkeyRecorderViewModel"
+             x:CompileBindings="True">
+
+    <StackPanel Spacing="8">
+
+        <!-- Current hotkey display / recorder button -->
+        <Button Name="RecorderButton"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                Padding="12,8" CornerRadius="4"
+                Command="{Binding StartRecordingCommand}">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding DisplayText}"
+                           FontSize="14"
+                           VerticalAlignment="Center" />
+                <PathIcon Grid.Column="1"
+                          Width="14" Height="14"
+                          VerticalAlignment="Center"
+                          Opacity="0.5"
+                          Data="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 1 1 3.536 3.536L6.5 21.036H3v-3.572L16.732 3.732Z" />
+            </Grid>
+        </Button>
+
+        <!-- Conflict warning -->
+        <TextBlock Text="{Binding ConflictWarning}"
+                   IsVisible="{Binding ConflictWarning, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                   Foreground="Orange"
+                   FontSize="12"
+                   TextWrapping="Wrap"
+                   Margin="4,0" />
+
+        <!-- Activation mode selector -->
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="4,4,0,0">
+            <RadioButton Content="Push to Talk"
+                         IsChecked="{Binding IsPushToTalk}"
+                         GroupName="ActivationMode"
+                         FontSize="13" />
+            <RadioButton Content="Toggle"
+                         IsChecked="{Binding IsToggle}"
+                         GroupName="ActivationMode"
+                         FontSize="13" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
