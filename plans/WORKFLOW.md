@@ -53,6 +53,7 @@ completed:               # date when finished
 2. Remove row from `plans/INDEX.md`
 3. Create an ADR (`docs/decisions/NNN-title.md`) capturing significant architectural decisions made during implementation — see [Creating an ADR](#creating-an-adr)
 4. Do NOT move the folder — it stays in `plans/`
+5. Review any `store_memory` calls made during the session. If a fact is durable and broadly useful (architecture, conventions, subsystem descriptions), add it to the appropriate section of `CLAUDE.md` rather than relying solely on `store_memory` (which is server-side, not version-controlled, and subject to a retention window)
 
 ### Abandoning a Plan
 
