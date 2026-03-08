@@ -1,9 +1,9 @@
 ﻿---
 title: Incremental VAD
-status: in_progress
+status: completed
 created: 2026-03-01
 started: 2026-03-01
-completed:
+completed: 2026-03-07
 ---
 
 ## Run VAD outside the lock / off the WASAPI thread
