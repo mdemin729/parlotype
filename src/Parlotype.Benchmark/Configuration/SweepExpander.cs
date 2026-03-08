@@ -128,14 +128,36 @@ public static class SweepExpander
 
             case "vad.enabled":
                 var vadEnabled = value.GetBoolean();
-                return (whisper, new VadConfig { Enabled = vadEnabled },
+                return (whisper, vad with { Enabled = vadEnabled },
                     vadEnabled ? "vad" : "novad");
+
+            case "vad.threshold":
+                var threshold = value.GetSingle();
+                return (whisper, vad with { Threshold = threshold }, $"thr{threshold:F2}");
+
+            case "vad.speechpadms":
+                var padMs = value.GetInt32();
+                return (whisper, vad with { SpeechPadMs = padMs }, $"pad{padMs}");
+
+            case "vad.minsilencedurationms":
+                var silMs = value.GetInt32();
+                return (whisper, vad with { MinSilenceDurationMs = silMs }, $"sil{silMs}");
+
+            case "vad.minspeechdurationms":
+                var speechMs = value.GetInt32();
+                return (whisper, vad with { MinSpeechDurationMs = speechMs }, $"spch{speechMs}");
+
+            case "vad.intersegmentsilencems":
+                var gapMs = value.GetInt32();
+                return (whisper, vad with { InterSegmentSilenceMs = gapMs }, $"gap{gapMs}");
 
             default:
                 throw new InvalidOperationException(
                     $"Unknown sweep parameter path: '{path}'. " +
                     $"Valid paths: whisper.model, whisper.beamSize, whisper.temperature, " +
-                    $"whisper.language, whisper.threads, whisper.initialPrompt, vad.enabled");
+                    $"whisper.language, whisper.threads, whisper.initialPrompt, " +
+                    $"vad.enabled, vad.threshold, vad.speechPadMs, vad.minSilenceDurationMs, " +
+                    $"vad.minSpeechDurationMs, vad.interSegmentSilenceMs");
         }
     }
 

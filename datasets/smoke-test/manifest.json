@@ -16,6 +16,13 @@
       "referenceText": "Here she would stay, comforted and soothed among the lovely plants and rich exotics, rejoicing  the heart of old Turner the Gardener, who since Polly's first rapturous entrance, had  taken her into his good graces for all time.",
       "language": "en",
       "tags": ["clean", "English", "speech", "medium"]
+    },
+    {
+      "id": "Russian-accent--with-pauses-001",
+      "file": "samples/Russian-accent--with-pauses-001.flac",
+      "referenceText": "Hello. How are you doing today? What are your plans for this evening? Can we meet tomorrow? Goodbye.",
+      "language": "en",
+      "tags": ["accent", "Russian", "speech", "pauses", "short"]
     }
   ]
 }

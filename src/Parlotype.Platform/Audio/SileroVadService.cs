@@ -19,22 +19,27 @@ public sealed class SileroVadService : IVadService
     }
 
     public List<VadSpeechSegment> DetectSpeech(ReadOnlySpan<float> samples)
+        => DetectSpeech(samples, new VadOptions());
+
+    public List<VadSpeechSegment> DetectSpeech(ReadOnlySpan<float> samples, VadOptions options)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         var timestamps = Vad.GetSpeechTimestamps(
             audio: samples,
-            threshold: 0.5f,
-            min_speech_duration_ms: 50,
-            min_silence_duration_ms: 300,
+            threshold: options.Threshold,
+            min_speech_duration_ms: options.MinSpeechDurationMs,
+            min_silence_duration_ms: options.MinSilenceDurationMs,
             window_size_samples: 1024,
-            speech_pad_ms: 100);
+            speech_pad_ms: options.SpeechPadMs);
 
         var segments = timestamps
             .Select(t => new VadSpeechSegment(t.Start, t.End))
             .ToList();
 
-        _logger.LogDebug("VAD processing {SampleCount} samples, detected {SegmentCount} segments", samples.Length, segments.Count);
+        _logger.LogDebug("VAD ({Threshold}/{SilenceMs}/{PadMs}) processing {SampleCount} samples, detected {SegmentCount} segments",
+            options.Threshold, options.MinSilenceDurationMs, options.SpeechPadMs,
+            samples.Length, segments.Count);
 
         return segments;
     }

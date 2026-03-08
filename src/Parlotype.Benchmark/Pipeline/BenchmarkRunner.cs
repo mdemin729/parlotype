@@ -124,7 +124,7 @@ public sealed class BenchmarkRunner
             var ramBefore = Process.GetCurrentProcess().WorkingSet64;
             var gcBefore = GC.GetAllocatedBytesForCurrentThread();
 
-            var result = await ProcessSampleAsync(sampleInfo, audioPath, config.Vad.Enabled, config.Repetitions, cancellationToken);
+            var result = await ProcessSampleAsync(sampleInfo, audioPath, config.Vad, config.Repetitions, cancellationToken);
 
             result.RamDeltaMb = (Process.GetCurrentProcess().WorkingSet64 - ramBefore) / (1024.0 * 1024.0);
             result.GcAllocatedBytes = GC.GetAllocatedBytesForCurrentThread() - gcBefore;
@@ -171,19 +171,29 @@ public sealed class BenchmarkRunner
     }
 
     private async Task<SampleResult> ProcessSampleAsync(
-        SampleInfo sampleInfo, string audioPath, bool vadEnabled, int repetitions, CancellationToken cancellationToken)
+        SampleInfo sampleInfo, string audioPath, VadConfig vadConfig, int repetitions, CancellationToken cancellationToken)
     {
         // Load and resample audio (once)
         var (samples, durationSeconds) = AudioFileLoader.Load(audioPath);
 
         // Optional VAD preprocessing (once)
         float[] audioForRecognition;
-        if (vadEnabled && _vadService is not null)
+        if (vadConfig.Enabled && _vadService is not null)
         {
-            var speechSegments = _vadService.DetectSpeech(samples.AsSpan());
+            var vadOptions = new VadOptions
+            {
+                Threshold = vadConfig.Threshold,
+                SpeechPadMs = vadConfig.SpeechPadMs,
+                MinSilenceDurationMs = vadConfig.MinSilenceDurationMs,
+                MinSpeechDurationMs = vadConfig.MinSpeechDurationMs,
+                InterSegmentSilenceMs = vadConfig.InterSegmentSilenceMs,
+            };
+
+            var speechSegments = _vadService.DetectSpeech(samples.AsSpan(), vadOptions);
             if (speechSegments.Count > 0)
             {
-                audioForRecognition = ExtractSpeechSegments(samples, speechSegments);
+                audioForRecognition = SpeechSegmentExtractor.Extract(
+                    samples.AsSpan(), speechSegments, vadOptions.InterSegmentSilenceMs);
                 _logger.LogDebug("VAD: {SegmentCount} speech segments extracted from {Duration:F1}s audio",
                     speechSegments.Count, durationSeconds);
             }
@@ -269,21 +279,4 @@ public sealed class BenchmarkRunner
         return Math.Sqrt(sumSquares / (list.Count - 1));
     }
 
-    private static float[] ExtractSpeechSegments(float[] samples, List<VadSpeechSegment> segments)
-    {
-        var totalLength = segments.Sum(s => Math.Min(s.EndSample, samples.Length) - s.StartSample);
-        var result = new float[totalLength];
-        var offset = 0;
-
-        foreach (var segment in segments)
-        {
-            var start = segment.StartSample;
-            var end = Math.Min(segment.EndSample, samples.Length);
-            var length = end - start;
-            Array.Copy(samples, start, result, offset, length);
-            offset += length;
-        }
-
-        return result;
-    }
 }

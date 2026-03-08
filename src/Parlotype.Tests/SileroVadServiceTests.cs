@@ -93,4 +93,24 @@ public class SileroVadServiceTests
         Assert.True(coverageRatio >= 0.5,
             $"Incremental VAD covered only {coverageRatio:P0} of batch speech ({incrementalSpeechSamples} vs {batchSpeechSamples} samples)");
     }
+
+    [Fact]
+    public async Task DetectSpeech_WithOptions_RespectsParameters()
+    {
+        await using var vad = new SileroVadService(NullLogger<SileroVadService>.Instance);
+        var samples = TestAudioHelper.LoadWavAsFloatSamples("kennedy.wav");
+
+        var defaultSegments = vad.DetectSpeech(samples);
+        var lenientSegments = vad.DetectSpeech(samples, new VadOptions
+        {
+            MinSilenceDurationMs = 1000, // very lenient — fewer splits
+            SpeechPadMs = 300,
+        });
+
+        Assert.NotEmpty(defaultSegments);
+        Assert.NotEmpty(lenientSegments);
+        // Lenient settings should produce fewer or equal segments
+        Assert.True(lenientSegments.Count <= defaultSegments.Count,
+            $"Expected lenient ({lenientSegments.Count}) <= default ({defaultSegments.Count})");
+    }
 }
