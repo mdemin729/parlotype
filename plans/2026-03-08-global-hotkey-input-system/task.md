@@ -1,9 +1,9 @@
 ---
 title: Global Hotkey & Input System
-status: planned
+status: done
 created: 2026-03-08
-started:
-completed:
+started: 2026-03-08
+completed: 2026-03-08
 ---
 
 # Global Hotkey & Input System
