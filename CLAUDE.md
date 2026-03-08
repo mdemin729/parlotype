@@ -88,6 +88,7 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 ### Key Subsystems
 
 - **Text Injection:** `ClipboardTextInjectionService` (default, saves/restores clipboard around Ctrl+V) or `SharpHookTextInjectionService` (direct key simulation). `Win32TargetWindowTracker` tracks the last non-Parlotype foreground window.
+- **Global Hotkeys:** `IGlobalHotkeyService` (Core) → `SharpHookHotkeyService` (Platform, `TaskPoolGlobalHook` for non-blocking keyboard event dispatch). `HotkeyBinding` record (modifiers + key name string) in Core, mapped to SharpHook `KeyCode` via `KeyCodeMapper` in Platform. Supports Push-to-Talk (key-down → start, key-up → stop) and Toggle modes. Event suppression via `SuppressEvent` (Windows/macOS only). Config persisted via `JsonSettingsService` (`HotkeyModifiers`, `HotkeyKey`, `ActivationMode` keys). `HotkeyConflictDetector` warns on reserved OS shortcuts. `HotkeyRecorderView` captures key combos in the settings flyout.
 - **Settings:** `JsonSettingsService` persists to `%LOCALAPPDATA%/parlotype/settings.json`. Thread-safe via `SemaphoreSlim`.
 - **Logging:** ZLogger to console + rolling file in `%LOCALAPPDATA%/parlotype/logs/`.
 - **Model Management:** `IModelDownloadService` (Core) → `HttpModelDownloadService` (Platform, HTTP with progress) → `ModelDownloadDialogService` (Desktop, modal confirmation dialog + progress bar). Tests use a `HeadlessModelDownloadService` that downloads without UI.
