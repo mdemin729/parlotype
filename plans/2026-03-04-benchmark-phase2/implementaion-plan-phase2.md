@@ -1,3 +1,11 @@
+---
+title: "Benchmark phase 2: comparison & storage"
+status: in_progress
+created: 2026-03-04
+started: 2026-03-04
+completed:
+---
+
 # Phase 2 Implementation Plan — Comparison & Storage
 
 ## Problem Statement

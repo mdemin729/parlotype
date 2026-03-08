@@ -1,4 +1,12 @@
-﻿# Microphone Selection Implementation Plan
+﻿---
+title: Microphone selection
+status: completed
+created: 2026-02-18
+started: 2026-02-18
+completed: 2026-02-18
+---
+
+# Microphone Selection Implementation Plan
 
 ## Problem
 Allow users to select the default microphone from the list of available system microphones. The list should refresh automatically when microphones are added or removed. Persist the selection across app restarts.

@@ -1,4 +1,12 @@
-﻿# Plan: Whisper Model Selection in Settings
+﻿---
+title: Whisper model selection
+status: completed
+created: 2026-02-22
+started: 2026-02-22
+completed: 2026-02-22
+---
+
+# Plan: Whisper Model Selection in Settings
 
 ## Problem
 The Whisper model type is currently hardcoded (`GgmlType.Base` default) in `WhisperSpeechRecognizer`'s constructor. Users cannot choose which model to use. We need a settings UI to select from all available GGML model types, persist the choice, and wire it through to the speech recognizer.

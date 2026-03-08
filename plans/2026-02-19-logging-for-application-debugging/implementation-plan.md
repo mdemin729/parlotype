@@ -1,4 +1,12 @@
-﻿# Implement ZLogger Logging for Application Debugging
+﻿---
+title: ZLogger logging
+status: completed
+created: 2026-02-19
+started: 2026-02-19
+completed: 2026-02-19
+---
+
+# Implement ZLogger Logging for Application Debugging
 
 ## Problem
 No logging exists in the application. Need structured logging for debugging audio pipeline, transcription, device changes, and settings — using ZLogger v2 per research recommendation.

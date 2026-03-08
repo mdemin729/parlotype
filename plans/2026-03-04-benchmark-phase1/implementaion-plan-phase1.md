@@ -1,3 +1,11 @@
+---
+title: "Benchmark phase 1: MVP"
+status: in_progress
+created: 2026-03-04
+started: 2026-03-04
+completed:
+---
+
 # Phase 1 Implementation Plan — Parlotype Benchmark MVP
 
 ## Problem Statement

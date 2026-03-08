@@ -1,4 +1,12 @@
-﻿## Run VAD outside the lock / off the WASAPI thread
+﻿---
+title: Incremental VAD
+status: in_progress
+created: 2026-03-01
+started: 2026-03-01
+completed:
+---
+
+## Run VAD outside the lock / off the WASAPI thread
 
 ### Problem
 

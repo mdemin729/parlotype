@@ -122,3 +122,7 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 - Repetitions: set `repetitions > 1` in config to run samples N times and compute mean/stddev WER/CER for stability analysis
 - CI regression detection: `check` command compares against a baseline with configurable thresholds, returns exit code 0 (pass) or 1 (fail)
 - Write headless UI tests in `Parlotype.Desktop.Tests` for view/viewmodel integration — use `MockMicrophoneEnumerator` and `MockSettingsService` for controllable testing
+
+## Plans & Decisions
+
+See [plans/WORKFLOW.md](plans/WORKFLOW.md) for task tracking workflows, plan format, and ADR templates. Plans live in `plans/` (flat structure, status via YAML frontmatter). ADRs live in `docs/decisions/`.
