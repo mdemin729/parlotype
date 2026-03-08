@@ -10,3 +10,4 @@
 
 | Plan | Created | Description |
 |------|---------|-------------|
+| [2026-03-08-global-hotkey-input-system](2026-03-08-global-hotkey-input-system/) | 2026-03-08 | Global hotkey (PTT/toggle) for system-wide dictation with text injection |
