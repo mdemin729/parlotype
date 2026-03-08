@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Core.TextInjection;
@@ -86,10 +87,12 @@ public class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var mainVm = provider.GetRequiredService<MainWindowViewModel>();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = provider.GetRequiredService<MainWindowViewModel>()
+                DataContext = mainVm
             };
+            _ = mainVm.InitializeHotkeyServiceAsync();
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Audio;
+using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 
@@ -52,15 +53,19 @@ public partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public WhisperModelDisplayItem[] ModelOptions { get; }
 
+    public HotkeyRecorderViewModel HotkeyRecorder { get; }
+
     /// <summary>Raised when the user changes the theme.</summary>
     public event EventHandler<AppTheme>? ThemeChanged;
 
-    public SettingsViewModel(IMicrophoneEnumerator enumerator, ISettingsService settings, IModelDownloadService? downloadService = null, ILogger<SettingsViewModel>? logger = null)
+    public SettingsViewModel(IMicrophoneEnumerator enumerator, ISettingsService settings, IModelDownloadService? downloadService = null, IGlobalHotkeyService? hotkeyService = null, ILogger<SettingsViewModel>? logger = null)
     {
         _enumerator = enumerator;
         _settings = settings;
         _downloadService = downloadService;
         _logger = logger ?? NullLogger<SettingsViewModel>.Instance;
+
+        HotkeyRecorder = new HotkeyRecorderViewModel(hotkeyService, settings);
 
         WaitTimeOptions = Enum.GetValues<WaitTimeOption>()
             .Select(o => new WaitTimeDisplayItem(o, SelectWaitTimeCommand))

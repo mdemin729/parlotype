@@ -16,4 +16,13 @@ public interface IGlobalHotkeyService : IDisposable
 
     /// <summary>Raised when the push-to-talk hotkey is released.</summary>
     event EventHandler HotkeyReleased;
+
+    /// <summary>The currently configured hotkey binding.</summary>
+    HotkeyBinding CurrentBinding { get; }
+
+    /// <summary>Updates the hotkey binding at runtime.</summary>
+    void UpdateBinding(HotkeyBinding binding);
+
+    /// <summary>Current activation mode (PTT or Toggle).</summary>
+    ActivationMode Mode { get; set; }
 }
