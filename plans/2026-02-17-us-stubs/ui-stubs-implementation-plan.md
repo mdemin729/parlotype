@@ -1,3 +1,11 @@
+---
+title: UI stubs
+status: completed
+created: 2026-02-17
+started: 2026-02-17
+completed: 2026-02-17
+---
+
 # UI Stubs Implementation Plan
 
 ## Problem

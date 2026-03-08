@@ -1,3 +1,11 @@
+---
+title: Benchmark CLI
+status: in_progress
+created: 2026-03-04
+started: 2026-03-04
+completed:
+---
+
 # Parlotype Benchmark — Requirements
 
 ## 1. Goal

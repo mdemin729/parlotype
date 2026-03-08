@@ -1,3 +1,11 @@
+---
+title: Text injection (paste transcribed text)
+status: completed
+created: 2026-02-22
+started: 2026-02-22
+completed: 2026-02-22
+---
+
 ## Context
 
 1. Read @plans/open/2026-02-22-paste-transcibed-text/research.md

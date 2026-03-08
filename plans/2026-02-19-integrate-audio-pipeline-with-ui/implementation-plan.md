@@ -1,4 +1,12 @@
-﻿# Wire Recording to Audio Pipeline
+﻿---
+title: Integrate audio pipeline with UI
+status: completed
+created: 2026-02-19
+started: 2026-02-19
+completed: 2026-02-19
+---
+
+# Wire Recording to Audio Pipeline
 
 ## Problem
 `ToggleRecording` in `MainWindowViewModel` only toggles a boolean — it doesn't start/stop the audio pipeline. Need to connect it so recording actually captures audio, runs it through VAD + Whisper, and logs transcription results at Debug level.

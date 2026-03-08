@@ -1,4 +1,12 @@
-﻿## Task
+﻿---
+title: VAD + Whisper integration
+status: completed
+created: 2026-02-17
+started: 2026-02-17
+completed: 2026-02-17
+---
+
+## Task
 
 Implement Audio processing pipeline:
 

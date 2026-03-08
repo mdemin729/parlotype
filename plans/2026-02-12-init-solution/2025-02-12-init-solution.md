@@ -1,3 +1,11 @@
+---
+title: Solution initialization
+status: completed
+created: 2026-02-12
+started: 2026-02-12
+completed: 2026-02-12
+---
+
 # Parlotype — .NET 10 Solution Initialization Plan
 
 ## Context

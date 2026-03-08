@@ -1,3 +1,11 @@
+---
+title: "Benchmark phase 3: sweeps & regression checks"
+status: in_progress
+created: 2026-03-04
+started: 2026-03-04
+completed:
+---
+
 # Phase 3 Implementation Plan — Extended Metrics & Parameter Sweeps
 
 ## Problem Statement
