@@ -1,0 +1,15 @@
+{
+  "name": "libri-speech-test-other-baseline",
+  "description": "Benchmark run on 50-sample LibriSpeech test-other dataset with Base model",
+  "datasets": ["libri-speech-test-other"],
+  "repetitions": 1,
+  "whisper": {
+    "model": "Base",
+    "language": "auto",
+    "beamSize": 1,
+    "temperature": 0.0
+  },
+  "vad": {
+    "enabled": false
+  }
+}
