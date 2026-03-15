@@ -1,0 +1,457 @@
+{
+  "name": "libri-speech-test-other",
+  "description": "50-sample dataset from LibriSpeech test-other subset (challenging speech). Covers all 33 test-other speakers across diverse books and genres.",
+  "language": "en",
+  "samples": [
+    {
+      "id": "1688-142285-0000",
+      "file": "samples/1688-142285-0000.flac",
+      "referenceText": "THERE'S IRON THEY SAY IN ALL OUR BLOOD AND A GRAIN OR TWO PERHAPS IS GOOD BUT HIS HE MAKES ME HARSHLY FEEL HAS GOT A LITTLE TOO MUCH OF STEEL ANON",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "1688-142285-0010",
+      "file": "samples/1688-142285-0010.flac",
+      "referenceText": "HIS FATHER SPECULATED WILDLY FAILED AND THEN KILLED HIMSELF BECAUSE HE COULD NOT BEAR THE DISGRACE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "1998-15444-0000",
+      "file": "samples/1998-15444-0000.flac",
+      "referenceText": "IF CALLED TO A CASE SUPPOSED OR SUSPECTED TO BE ONE OF POISONING THE MEDICAL MAN HAS TWO DUTIES TO PERFORM TO SAVE THE PATIENT'S LIFE AND TO PLACE HIMSELF IN A POSITION TO GIVE EVIDENCE IF CALLED ON TO DO SO",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "1998-29454-0000",
+      "file": "samples/1998-29454-0000.flac",
+      "referenceText": "A THOUSAND BLESSINGS FROM A GRATEFUL HEART",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "2033-164914-0000",
+      "file": "samples/2033-164914-0000.flac",
+      "referenceText": "REPLIED HE OF A TRUTH I HEARD HIM NOT AND I WOT HIM NOT AND FOLKS ARE ALL SLEEPING",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "2033-164915-0000",
+      "file": "samples/2033-164915-0000.flac",
+      "referenceText": "AND ALSO THESE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "2414-128291-0000",
+      "file": "samples/2414-128291-0000.flac",
+      "referenceText": "WHAT HATH HAPPENED UNTO ME",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "2414-159411-0000",
+      "file": "samples/2414-159411-0000.flac",
+      "referenceText": "ONCE UPON A TIME A BRAHMAN WHO WAS WALKING ALONG THE ROAD CAME UPON AN IRON CAGE IN WHICH A GREAT TIGER HAD BEEN SHUT UP BY THE VILLAGERS WHO CAUGHT HIM",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "2609-156975-0000",
+      "file": "samples/2609-156975-0000.flac",
+      "referenceText": "THEN MOSES WAS AFRAID AND SAID SURELY THE THING IS KNOWN",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "2609-169640-0000",
+      "file": "samples/2609-169640-0000.flac",
+      "referenceText": "PROAS IN THAT QUARTER WERE USUALLY DISTRUSTED BY SHIPS IT IS TRUE BUT THE SEA IS FULL OF THEM AND FAR MORE ARE INNOCENT THAN ARE GUILTY OF ANY ACTS OF VIOLENCE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3005-163389-0000",
+      "file": "samples/3005-163389-0000.flac",
+      "referenceText": "THEY SWARMED UP IN FRONT OF SHERBURN'S PALINGS AS THICK AS THEY COULD JAM TOGETHER AND YOU COULDN'T HEAR YOURSELF THINK FOR THE NOISE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3005-163390-0000",
+      "file": "samples/3005-163390-0000.flac",
+      "referenceText": "ANDBUT NEVER MIND THE REST OF HIS OUTFIT IT WAS JUST WILD BUT IT WAS AWFUL FUNNY",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3080-5032-0000",
+      "file": "samples/3080-5032-0000.flac",
+      "referenceText": "BUT I AM HUGELY PLEASED THAT YOU HAVE SEEN MY LADY",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3080-5040-0000",
+      "file": "samples/3080-5040-0000.flac",
+      "referenceText": "WOULD IT WOULD LEAVE ME AND THEN I COULD BELIEVE I SHALL NOT ALWAYS HAVE OCCASION FOR IT",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3331-159605-0000",
+      "file": "samples/3331-159605-0000.flac",
+      "referenceText": "SHE PULLED HER HAIR DOWN TURNED HER SKIRT BACK PUT HER FEET ON THE FENDER AND TOOK PUTTEL INTO HER LAP ALL OF WHICH ARRANGEMENTS SIGNIFIED THAT SOMETHING VERY IMPORTANT HAD GOT TO BE THOUGHT OVER AND SETTLED",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3331-159609-0000",
+      "file": "samples/3331-159609-0000.flac",
+      "referenceText": "NEVER MIND WHAT THE BUSINESS WAS IT SUFFICES TO SAY THAT IT WAS A GOOD BEGINNING FOR A YOUNG MAN LIKE TOM WHO HAVING BEEN BORN AND BRED IN THE MOST CONSERVATIVE CLASS OF THE MOST CONCEITED CITY IN NEW ENGLAND NEEDED JUST THE HEALTHY HEARTY SOCIAL INFLUENCES OF THE WEST TO WIDEN HIS VIEWS AND MAKE A MAN OF HIM",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3528-168669-0000",
+      "file": "samples/3528-168669-0000.flac",
+      "referenceText": "THE PRIORESS RETURNED AND SEATED HERSELF ONCE MORE ON HER CHAIR",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3538-142836-0000",
+      "file": "samples/3538-142836-0000.flac",
+      "referenceText": "GENERAL OBSERVATIONS ON PRESERVES CONFECTIONARY ICES AND DESSERT DISHES",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3538-163622-0000",
+      "file": "samples/3538-163622-0000.flac",
+      "referenceText": "WILT THOU SERVE ME AND WATCH MY SEVEN FOALS ASKED THE KING",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "367-130732-0000",
+      "file": "samples/367-130732-0000.flac",
+      "referenceText": "LOBSTERS AND LOBSTERS",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "367-293981-0000",
+      "file": "samples/367-293981-0000.flac",
+      "referenceText": "I SWEAR IT ANSWERED SANCHO",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3764-168670-0000",
+      "file": "samples/3764-168670-0000.flac",
+      "referenceText": "THE STRIDES OF A LAME MAN ARE LIKE THE OGLING GLANCES OF A ONE EYED MAN THEY DO NOT REACH THEIR GOAL VERY PROMPTLY",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3764-168671-0000",
+      "file": "samples/3764-168671-0000.flac",
+      "referenceText": "ON THE FOLLOWING DAY AS THE SUN WAS DECLINING THE VERY RARE PASSERS BY ON THE BOULEVARD DU MAINE PULLED OFF THEIR HATS TO AN OLD FASHIONED HEARSE ORNAMENTED WITH SKULLS CROSS BONES AND TEARS",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3997-180294-0000",
+      "file": "samples/3997-180294-0000.flac",
+      "referenceText": "THE DUKE COMES EVERY MORNING THEY WILL TELL HIM WHEN HE COMES THAT I AM ASLEEP AND PERHAPS HE WILL WAIT UNTIL I WAKE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "3997-182399-0000",
+      "file": "samples/3997-182399-0000.flac",
+      "referenceText": "OL MISTAH BUZZARD GRINNED",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4198-12259-0000",
+      "file": "samples/4198-12259-0000.flac",
+      "referenceText": "DRAW REACH FILL MIX GIVE IT ME WITHOUT WATER",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4198-61336-0000",
+      "file": "samples/4198-61336-0000.flac",
+      "referenceText": "IT IS SIGNIFICANT TO NOTE IN THIS CONNECTION THAT THE NEW KING WAS AN UNSWERVING ADHERENT OF THE CULT OF ASHUR BY THE ADHERENTS OF WHICH HE WAS PROBABLY STRONGLY SUPPORTED",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4294-14317-0000",
+      "file": "samples/4294-14317-0000.flac",
+      "referenceText": "AS I THOUGHT THAT THIS WAS DUE TO SOME FAULT IN THE EARTH I WANTED TO MAKE THESE FIRST EXPERIMENTS BEFORE I UNDERTOOK MY PERSEUS",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4294-35475-0000",
+      "file": "samples/4294-35475-0000.flac",
+      "referenceText": "BUT THE MIDDLE SON WAS LITTLE AND LORN HE WAS NEITHER DARK NOR FAIR HE WAS NEITHER HANDSOME NOR STRONG",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4350-10919-0000",
+      "file": "samples/4350-10919-0000.flac",
+      "referenceText": "HE PERCEIVED THAT IT WAS NO GOOD TALKING TO THE OLD MAN AND THAT THE PRINCIPAL PERSON IN THE HOUSE WAS THE MOTHER",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4350-9170-0000",
+      "file": "samples/4350-9170-0000.flac",
+      "referenceText": "EDUCATED PEOPLE OF THE UPPER CLASSES ARE TRYING TO STIFLE THE EVER GROWING SENSE OF THE NECESSITY OF TRANSFORMING THE EXISTING SOCIAL ORDER",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4852-28311-0000",
+      "file": "samples/4852-28311-0000.flac",
+      "referenceText": "SAY YOU KNOW SUMTHIN",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "4852-28319-0000",
+      "file": "samples/4852-28319-0000.flac",
+      "referenceText": "THE LEARNING OF MAGIC WAS BY NO MEANS EASY",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "533-1066-0000",
+      "file": "samples/533-1066-0000.flac",
+      "referenceText": "WHEN CHURCHYARDS YAWN",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "533-131556-0000",
+      "file": "samples/533-131556-0000.flac",
+      "referenceText": "BUT HOW AM I TO GET OVER THE TEN OR TWELVE DAYS THAT MUST YET ELAPSE BEFORE THEY GO",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "5442-32873-0000",
+      "file": "samples/5442-32873-0000.flac",
+      "referenceText": "CAPTAIN LAKE DID NOT LOOK AT ALL LIKE A LONDON DANDY NOW",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "5484-24317-0000",
+      "file": "samples/5484-24317-0000.flac",
+      "referenceText": "WHEN HE CAME FROM THE BATH PROCLUS VISITED HIM AGAIN",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "5764-299665-0000",
+      "file": "samples/5764-299665-0000.flac",
+      "referenceText": "AFTERWARD IT WAS SUPPOSED THAT HE WAS SATISFIED WITH THE BLOOD OF OXEN LAMBS AND DOVES AND THAT IN EXCHANGE FOR OR ON ACCOUNT OF THESE SACRIFICES THIS GOD GAVE RAIN SUNSHINE AND HARVEST",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "6070-63485-0000",
+      "file": "samples/6070-63485-0000.flac",
+      "referenceText": "THEY'RE DONE FOR SAID THE SCHOOLMASTER IN A LOW KEY TO THE CHOUETTE OUT WITH YOUR VITRIOL AND MIND YOUR EYE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "6128-63240-0000",
+      "file": "samples/6128-63240-0000.flac",
+      "referenceText": "THE GENTLEMAN HAD NOT EVEN NEEDED TO SIT DOWN TO BECOME INTERESTED APPARENTLY HE HAD TAKEN UP THE VOLUME FROM A TABLE AS SOON AS HE CAME IN AND STANDING THERE AFTER A SINGLE GLANCE ROUND THE APARTMENT HAD LOST HIMSELF IN ITS PAGES",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "6432-63722-0000",
+      "file": "samples/6432-63722-0000.flac",
+      "referenceText": "BUT SCUSE ME DIDN'T YO FIGGER ON DOIN SOME DETECTIN AN GIVE UP FISHIN",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "6938-70848-0000",
+      "file": "samples/6938-70848-0000.flac",
+      "referenceText": "EVEN THE SUN CAME OUT PALE AND WATERY AT NOON",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "7018-75788-0000",
+      "file": "samples/7018-75788-0000.flac",
+      "referenceText": "THEN I TOOK UP A GREAT STONE FROM AMONG THE TREES AND COMING UP TO HIM SMOTE HIM THEREWITH ON THE HEAD WITH ALL MY MIGHT AND CRUSHED IN HIS SKULL AS HE LAY DEAD DRUNK",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "7105-2330-0000",
+      "file": "samples/7105-2330-0000.flac",
+      "referenceText": "UNFORTUNATELY THERE COULD BE NO DOUBT OR MISCONCEPTION AS TO PLATTERBAFF'S GUILT",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "7902-96591-0000",
+      "file": "samples/7902-96591-0000.flac",
+      "referenceText": "I AM FROM THE CUTTER LYING OFF THE COAST",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "7975-280057-0000",
+      "file": "samples/7975-280057-0000.flac",
+      "referenceText": "THESE HATREDS WERE SOON TO MAKE TROUBLE FOR ME OF WHICH I HAD NEVER DREAMED",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "8131-117016-0000",
+      "file": "samples/8131-117016-0000.flac",
+      "referenceText": "CAPTAIN MURDOCH",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "8188-269288-0000",
+      "file": "samples/8188-269288-0000.flac",
+      "referenceText": "ANNIE COLCHESTER HAD BEGUN TO MAKE FRIENDS WITH LESLIE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "8280-266249-0000",
+      "file": "samples/8280-266249-0000.flac",
+      "referenceText": "OLD MISTER DINSMORE HAD ACCEPTED A PRESSING INVITATION FROM HIS GRANDDAUGHTER AND HER HUSBAND TO JOIN THE PARTY AND WITH THE ADDITION OF SERVANTS IT WAS A LARGE ONE",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    },
+    {
+      "id": "8461-281231-0000",
+      "file": "samples/8461-281231-0000.flac",
+      "referenceText": "HIS FOLLOWERS RUSHED FORWARD TO WHERE HE LAY AND THEIR UNITED FORCE COMPELLING THE BLACK KNIGHT TO PAUSE THEY DRAGGED THEIR WOUNDED LEADER WITHIN THE WALLS",
+      "tags": [
+        "librispeech",
+        "test-other"
+      ]
+    }
+  ]
+}
