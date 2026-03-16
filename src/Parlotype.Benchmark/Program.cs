@@ -47,6 +47,12 @@ var samplesOption = new Option<string?>("--samples")
     Description = "Comma-separated sample IDs to include (e.g. 'kennedy,one-small-step')",
 };
 
+var gpuOption = new Option<bool>("--gpu")
+{
+    Description = "Enable GPU acceleration (CUDA). Use --gpu false to force CPU-only.",
+    DefaultValueFactory = _ => true,
+};
+
 var runCommand = new Command("run", "Execute a benchmark run")
 {
     configOption,
@@ -55,6 +61,7 @@ var runCommand = new Command("run", "Execute a benchmark run")
     verboseOption,
     tagsOption,
     samplesOption,
+    gpuOption,
 };
 
 runCommand.SetAction(async parseResult =>
@@ -65,6 +72,7 @@ runCommand.SetAction(async parseResult =>
     var verbose = parseResult.GetValue(verboseOption);
     var tagsFilter = parseResult.GetValue(tagsOption);
     var samplesFilter = parseResult.GetValue(samplesOption);
+    var gpu = parseResult.GetValue(gpuOption);
 
     if (!configFile.Exists)
     {
@@ -83,6 +91,30 @@ runCommand.SetAction(async parseResult =>
     var benchmarkConfig = JsonSerializer.Deserialize<BenchmarkConfig>(configJson,
         new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
         ?? throw new InvalidOperationException("Failed to deserialize benchmark configuration.");
+
+    // CLI --gpu flag overrides config: --gpu false forces CPU-only
+    if (!gpu)
+    {
+        var w = benchmarkConfig.Whisper;
+        benchmarkConfig = new BenchmarkConfig
+        {
+            Name = benchmarkConfig.Name,
+            Description = benchmarkConfig.Description,
+            Datasets = benchmarkConfig.Datasets,
+            Repetitions = benchmarkConfig.Repetitions,
+            Whisper = new WhisperConfig
+            {
+                Model = w.Model,
+                Language = w.Language,
+                BeamSize = w.BeamSize,
+                Temperature = w.Temperature,
+                InitialPrompt = w.InitialPrompt,
+                Threads = w.Threads,
+                RuntimePreference = RuntimePreference.Cpu,
+            },
+            Vad = benchmarkConfig.Vad,
+        };
+    }
 
     AnsiConsole.MarkupLine($"[bold blue]Parlotype Benchmark[/] — {Markup.Escape(benchmarkConfig.Name)}");
     AnsiConsole.WriteLine();
@@ -578,12 +610,19 @@ var sweepVerboseOption = new Option<bool>("--verbose", "-v")
     Description = "Enable verbose logging",
 };
 
+var sweepGpuOption = new Option<bool>("--gpu")
+{
+    Description = "Enable GPU acceleration (CUDA). Use --gpu false to force CPU-only.",
+    DefaultValueFactory = _ => true,
+};
+
 var sweepCommand = new Command("sweep", "Run a parameter sweep across multiple configurations")
 {
     sweepConfigOption,
     sweepDatasetsOption,
     sweepOutputOption,
     sweepVerboseOption,
+    sweepGpuOption,
 };
 
 sweepCommand.SetAction(async parseResult =>
@@ -592,6 +631,7 @@ sweepCommand.SetAction(async parseResult =>
     var datasetsDir = parseResult.GetValue(sweepDatasetsOption)!;
     var outputDir = parseResult.GetValue(sweepOutputOption)!;
     var verbose = parseResult.GetValue(sweepVerboseOption);
+    var gpu = parseResult.GetValue(sweepGpuOption);
 
     if (!configFile.Exists)
     {
@@ -613,6 +653,33 @@ sweepCommand.SetAction(async parseResult =>
 
     // Expand into individual configs
     var configs = SweepExpander.Expand(sweepConfig);
+
+    // CLI --gpu flag overrides config: --gpu false forces CPU-only
+    if (!gpu)
+    {
+        configs = configs.Select(cfg =>
+        {
+            var w = cfg.Whisper;
+            return new BenchmarkConfig
+            {
+                Name = cfg.Name,
+                Description = cfg.Description,
+                Datasets = cfg.Datasets,
+                Repetitions = cfg.Repetitions,
+                Whisper = new WhisperConfig
+                {
+                    Model = w.Model,
+                    Language = w.Language,
+                    BeamSize = w.BeamSize,
+                    Temperature = w.Temperature,
+                    InitialPrompt = w.InitialPrompt,
+                    Threads = w.Threads,
+                    RuntimePreference = RuntimePreference.Cpu,
+                },
+                Vad = cfg.Vad,
+            };
+        }).ToList();
+    }
 
     AnsiConsole.MarkupLine($"[bold blue]Parlotype Benchmark — Sweep:[/] {Markup.Escape(sweepConfig.Name)}");
     AnsiConsole.MarkupLine($"  [grey]Configurations: {configs.Count}[/]");

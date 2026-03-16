@@ -45,6 +45,10 @@ public sealed class WhisperConfig
 
     [JsonPropertyName("threads")]
     public int? Threads { get; init; }
+
+    [JsonPropertyName("runtimePreference")]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public RuntimePreference RuntimePreference { get; init; } = RuntimePreference.Auto;
 }
 
 public sealed record VadConfig

@@ -1,9 +1,9 @@
 ---
 title: NVIDIA GPU (CUDA) support for STT pipeline
-status: planned
+status: completed
 created: 2026-03-16
-started:
-completed:
+started: 2026-03-16
+completed: 2026-03-16
 ---
 
 # NVIDIA GPU (CUDA) Support for STT Pipeline

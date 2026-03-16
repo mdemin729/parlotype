@@ -9,4 +9,5 @@ public static class SettingsKeys
     public const string HotkeyModifiers = "HotkeyModifiers";
     public const string HotkeyKey = "HotkeyKey";
     public const string ActivationMode = "ActivationMode";
+    public const string RuntimePreference = "RuntimePreference";
 }

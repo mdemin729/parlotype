@@ -18,6 +18,17 @@ dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Run a single t
 dotnet run --project src/Parlotype.Desktop  # Launch the app
 ```
 
+### GPU / CUDA Builds
+
+The `Whisper.net.Runtime.Cuda` NuGet package (~350 MB) is included by default. To build without CUDA (faster CI, smaller output):
+
+```bash
+dotnet build Parlotype.slnx -p:EnableCuda=false   # CPU-only build
+dotnet test -p:EnableCuda=false                     # CPU-only tests
+```
+
+CUDA is auto-detected at runtime via `RuntimeOptions.RuntimeLibraryOrder`. If no NVIDIA GPU is available, Whisper.net falls back to CPU silently.
+
 **Note:** File lock errors from `.NET Host` processes are common on Windows. Kill the locking process by PID before rebuilding.
 
 ### Benchmark CLI

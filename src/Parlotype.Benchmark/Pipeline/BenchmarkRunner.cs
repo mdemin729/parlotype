@@ -43,6 +43,7 @@ public sealed class BenchmarkRunner
             Temperature = config.Whisper.Temperature,
             InitialPrompt = config.Whisper.InitialPrompt,
             Threads = config.Whisper.Threads,
+            RuntimePreference = config.Whisper.RuntimePreference,
         };
 
         progress?.Report("Loading Whisper model...");
