@@ -1,0 +1,13 @@
+{
+  "name": "decoding-params-sweep",
+  "description": "Sweep beam size, temperature, and language for top 4 models (Medium, BaseEn, Small, Base)",
+  "datasets": ["smoke-test"],
+  "repetitions": 2,
+  "sweep": {
+    "whisper.model": ["Medium", "BaseEn", "Small", "Base"],
+    "whisper.beamSize": [1, 3, 5],
+    "whisper.temperature": [0.0, 0.2, 0.4],
+    "whisper.language": ["auto", "en"],
+    "vad.enabled": [false]
+  }
+}

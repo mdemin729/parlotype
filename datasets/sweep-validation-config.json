@@ -1,0 +1,13 @@
+{
+  "name": "validation-librispeech",
+  "description": "Validate top pipeline configs on libri-speech-test-other (50 samples). Focused set of best configs from Phases 1-3.",
+  "datasets": ["libri-speech-test-other"],
+  "repetitions": 1,
+  "sweep": {
+    "whisper.model": ["Medium", "BaseEn", "Small"],
+    "whisper.beamSize": [1],
+    "whisper.temperature": [0.0],
+    "whisper.language": ["en"],
+    "vad.enabled": [false, true]
+  }
+}

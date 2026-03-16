@@ -1,0 +1,17 @@
+{
+  "name": "vad-optimization-baseen",
+  "description": "Sweep VAD parameters for BaseEn model (beam1, temp0, lang=en) - best speed/accuracy config",
+  "datasets": ["smoke-test"],
+  "repetitions": 2,
+  "sweep": {
+    "whisper.model": ["BaseEn"],
+    "whisper.beamSize": [1],
+    "whisper.temperature": [0.0],
+    "whisper.language": ["en"],
+    "vad.enabled": [true],
+    "vad.threshold": [0.3, 0.5, 0.7],
+    "vad.speechPadMs": [200, 400, 600],
+    "vad.minSilenceDurationMs": [300, 500, 1000],
+    "vad.interSegmentSilenceMs": [0, 160, 300]
+  }
+}

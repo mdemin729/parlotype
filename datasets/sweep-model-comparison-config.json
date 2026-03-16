@@ -1,0 +1,13 @@
+{
+  "name": "model-comparison-sweep",
+  "description": "Sweep across all model sizes (Tiny-Medium, incl English-only) to find best accuracy on smoke-test",
+  "datasets": ["smoke-test"],
+  "repetitions": 2,
+  "sweep": {
+    "whisper.model": ["Tiny", "TinyEn", "Base", "BaseEn", "Small", "SmallEn", "Medium", "MediumEn"],
+    "whisper.beamSize": [1],
+    "whisper.temperature": [0.0],
+    "whisper.language": ["auto"],
+    "vad.enabled": [false]
+  }
+}

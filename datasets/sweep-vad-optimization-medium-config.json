@@ -1,0 +1,17 @@
+{
+  "name": "vad-optimization-medium",
+  "description": "Sweep VAD parameters for Medium model (beam3, temp0.2, lang=en) - best accuracy config",
+  "datasets": ["smoke-test"],
+  "repetitions": 2,
+  "sweep": {
+    "whisper.model": ["Medium"],
+    "whisper.beamSize": [3],
+    "whisper.temperature": [0.2],
+    "whisper.language": ["en"],
+    "vad.enabled": [true],
+    "vad.threshold": [0.3, 0.5, 0.7],
+    "vad.speechPadMs": [200, 400, 600],
+    "vad.minSilenceDurationMs": [300, 500, 1000],
+    "vad.interSegmentSilenceMs": [0, 160, 300]
+  }
+}
