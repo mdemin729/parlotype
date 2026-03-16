@@ -18,6 +18,9 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
         services.AddSingleton<IVadService, SileroVadService>();
         services.AddSingleton<ISpeechRecognizer, WhisperSpeechRecognizer>();
+        // Whisper runtime bootstrap (CUDA vs CPU) is handled lazily inside
+        // WhisperSpeechRecognizer.InitializeAsync, before any WhisperFactory
+        // is created. No eager initialization is needed here.
         services.AddSingleton<IAudioPipeline, AudioPipelineService>();
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
         services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();

@@ -23,6 +23,12 @@ public sealed class ComparisonResult
     [JsonPropertyName("modelB")]
     public required string ModelB { get; init; }
 
+    [JsonPropertyName("runtimeA")]
+    public required string RuntimeA { get; init; }
+
+    [JsonPropertyName("runtimeB")]
+    public required string RuntimeB { get; init; }
+
     [JsonPropertyName("werDelta")]
     public required MetricDelta WerDelta { get; init; }
 

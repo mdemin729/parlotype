@@ -18,6 +18,8 @@ public static class ResultComparer
             ConfigNameB = runB.Configuration.Name,
             ModelA = runA.Configuration.Whisper.Model.ToString(),
             ModelB = runB.Configuration.Whisper.Model.ToString(),
+            RuntimeA = runA.Environment.WhisperRuntime,
+            RuntimeB = runB.Environment.WhisperRuntime,
             WerDelta = new MetricDelta(runA.Summary.AverageWer, runB.Summary.AverageWer),
             CerDelta = new MetricDelta(runA.Summary.AverageCer, runB.Summary.AverageCer),
             RtfDelta = new MetricDelta(runA.Summary.AverageRtf, runB.Summary.AverageRtf),

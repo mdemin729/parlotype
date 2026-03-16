@@ -37,7 +37,8 @@ public sealed class SqliteResultIndex : IDisposable
                 os TEXT,
                 architecture TEXT,
                 dotnet_version TEXT,
-                processor_count INTEGER
+                processor_count INTEGER,
+                whisper_runtime TEXT
             );
 
             CREATE TABLE IF NOT EXISTS sample_results (
@@ -69,11 +70,11 @@ public sealed class SqliteResultIndex : IDisposable
                 INSERT OR REPLACE INTO runs
                 (run_id, config_name, model, language, vad_enabled, timestamp,
                  avg_wer, avg_cer, avg_rtf, model_load_ms, total_time_ms, peak_ram_mb, total_samples,
-                 json_path, os, architecture, dotnet_version, processor_count)
+                 json_path, os, architecture, dotnet_version, processor_count, whisper_runtime)
                 VALUES
                 (@runId, @configName, @model, @language, @vadEnabled, @timestamp,
                  @avgWer, @avgCer, @avgRtf, @modelLoadMs, @totalTimeMs, @peakRamMb, @totalSamples,
-                 @jsonPath, @os, @arch, @dotnetVersion, @processorCount)
+                 @jsonPath, @os, @arch, @dotnetVersion, @processorCount, @whisperRuntime)
                 """;
 
             cmd.Parameters.AddWithValue("@runId", result.RunId);
@@ -94,6 +95,7 @@ public sealed class SqliteResultIndex : IDisposable
             cmd.Parameters.AddWithValue("@arch", result.Environment.Architecture);
             cmd.Parameters.AddWithValue("@dotnetVersion", result.Environment.DotnetVersion);
             cmd.Parameters.AddWithValue("@processorCount", result.Environment.ProcessorCount);
+            cmd.Parameters.AddWithValue("@whisperRuntime", result.Environment.WhisperRuntime);
 
             cmd.ExecuteNonQuery();
         }
@@ -139,7 +141,7 @@ public sealed class SqliteResultIndex : IDisposable
     public List<RunSummaryRow> ListRuns(string? modelFilter = null, string? configFilter = null, int? limit = null)
     {
         using var cmd = _connection.CreateCommand();
-        var sql = "SELECT run_id, config_name, model, timestamp, avg_wer, avg_cer, avg_rtf, total_samples FROM runs WHERE 1=1";
+        var sql = "SELECT run_id, config_name, model, timestamp, avg_wer, avg_cer, avg_rtf, total_samples, COALESCE(whisper_runtime, 'unknown') FROM runs WHERE 1=1";
 
         if (modelFilter is not null)
         {
@@ -175,7 +177,8 @@ public sealed class SqliteResultIndex : IDisposable
                 AvgWer: reader.GetDouble(4),
                 AvgCer: reader.GetDouble(5),
                 AvgRtf: reader.GetDouble(6),
-                TotalSamples: reader.GetInt32(7)));
+                TotalSamples: reader.GetInt32(7),
+                Runtime: reader.IsDBNull(8) ? "unknown" : reader.GetString(8)));
         }
 
         return rows;
@@ -223,4 +226,5 @@ public sealed record RunSummaryRow(
     double AvgWer,
     double AvgCer,
     double AvgRtf,
-    int TotalSamples);
+    int TotalSamples,
+    string Runtime = "unknown");

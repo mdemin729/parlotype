@@ -77,6 +77,8 @@ public class CsvFormatterTests
             ConfigNameB = "cb",
             ModelA = "Base",
             ModelB = "Small",
+            RuntimeA = "cpu",
+            RuntimeB = "cpu",
             WerDelta = new MetricDelta(10, 8),
             CerDelta = new MetricDelta(5, 4),
             RtfDelta = new MetricDelta(0.5, 0.4),

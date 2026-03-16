@@ -20,4 +20,7 @@ public sealed record WhisperOptions
 
     /// <summary>Number of CPU threads for inference. null = Whisper default.</summary>
     public int? Threads { get; init; }
+
+    /// <summary>Preferred runtime backend (Auto = try GPU first, Cpu = CPU only).</summary>
+    public RuntimePreference RuntimePreference { get; init; } = RuntimePreference.Auto;
 }

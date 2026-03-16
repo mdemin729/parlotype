@@ -64,6 +64,7 @@ public static class SweepExpander
                     Temperature = whisper.Temperature,
                     InitialPrompt = whisper.InitialPrompt,
                     Threads = whisper.Threads,
+                    RuntimePreference = whisper.RuntimePreference,
                 }, vad, model.ToString());
 
             case "whisper.beamsize":
@@ -76,6 +77,7 @@ public static class SweepExpander
                     Temperature = whisper.Temperature,
                     InitialPrompt = whisper.InitialPrompt,
                     Threads = whisper.Threads,
+                    RuntimePreference = whisper.RuntimePreference,
                 }, vad, $"beam{beamSize}");
 
             case "whisper.temperature":
@@ -88,6 +90,7 @@ public static class SweepExpander
                     Temperature = temp,
                     InitialPrompt = whisper.InitialPrompt,
                     Threads = whisper.Threads,
+                    RuntimePreference = whisper.RuntimePreference,
                 }, vad, $"temp{temp:F1}");
 
             case "whisper.language":
@@ -100,6 +103,7 @@ public static class SweepExpander
                     Temperature = whisper.Temperature,
                     InitialPrompt = whisper.InitialPrompt,
                     Threads = whisper.Threads,
+                    RuntimePreference = whisper.RuntimePreference,
                 }, vad, lang == "auto" ? null : lang);
 
             case "whisper.threads":
@@ -112,6 +116,7 @@ public static class SweepExpander
                     Temperature = whisper.Temperature,
                     InitialPrompt = whisper.InitialPrompt,
                     Threads = threads,
+                    RuntimePreference = whisper.RuntimePreference,
                 }, vad, $"t{threads}");
 
             case "whisper.initialprompt":
@@ -124,7 +129,21 @@ public static class SweepExpander
                     Temperature = whisper.Temperature,
                     InitialPrompt = prompt,
                     Threads = whisper.Threads,
+                    RuntimePreference = whisper.RuntimePreference,
                 }, vad, null);
+
+            case "whisper.runtimepreference":
+                var runtimePref = Enum.Parse<RuntimePreference>(value.GetString()!, ignoreCase: true);
+                return (new WhisperConfig
+                {
+                    Model = whisper.Model,
+                    Language = whisper.Language,
+                    BeamSize = whisper.BeamSize,
+                    Temperature = whisper.Temperature,
+                    InitialPrompt = whisper.InitialPrompt,
+                    Threads = whisper.Threads,
+                    RuntimePreference = runtimePref,
+                }, vad, runtimePref == RuntimePreference.Cpu ? "cpu" : "gpu");
 
             case "vad.enabled":
                 var vadEnabled = value.GetBoolean();
@@ -155,7 +174,7 @@ public static class SweepExpander
                 throw new InvalidOperationException(
                     $"Unknown sweep parameter path: '{path}'. " +
                     $"Valid paths: whisper.model, whisper.beamSize, whisper.temperature, " +
-                    $"whisper.language, whisper.threads, whisper.initialPrompt, " +
+                    $"whisper.language, whisper.threads, whisper.initialPrompt, whisper.runtimePreference, " +
                     $"vad.enabled, vad.threshold, vad.speechPadMs, vad.minSilenceDurationMs, " +
                     $"vad.minSpeechDurationMs, vad.interSegmentSilenceMs");
         }

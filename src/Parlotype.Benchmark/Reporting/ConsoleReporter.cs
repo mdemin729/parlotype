@@ -37,6 +37,7 @@ public static class ConsoleReporter
             .AddColumn("[bold][/]");
 
         AddDeltaRow(table, "Model", comparison.ModelA, comparison.ModelB);
+        AddDeltaRow(table, "Runtime", comparison.RuntimeA, comparison.RuntimeB);
         AddMetricRow(table, "Avg WER", comparison.WerDelta, "%");
         AddMetricRow(table, "Avg CER", comparison.CerDelta, "%");
         AddMetricRow(table, "Avg RTF", comparison.RtfDelta, "", "F3");
@@ -68,6 +69,7 @@ public static class ConsoleReporter
             .AddColumn("[bold]Run ID[/]")
             .AddColumn("[bold]Config[/]")
             .AddColumn("[bold]Model[/]")
+            .AddColumn("[bold]Runtime[/]")
             .AddColumn("[bold]Samples[/]", c => c.RightAligned())
             .AddColumn("[bold]WER %[/]", c => c.RightAligned())
             .AddColumn("[bold]CER %[/]", c => c.RightAligned())
@@ -87,6 +89,7 @@ public static class ConsoleReporter
                 Markup.Escape(run.RunId),
                 Markup.Escape(run.ConfigName),
                 Markup.Escape(run.Model),
+                Markup.Escape(run.Runtime),
                 run.TotalSamples.ToString(),
                 $"[{werColor}]{run.AvgWer:F1}[/]",
                 $"{run.AvgCer:F1}",
@@ -165,6 +168,7 @@ public static class ConsoleReporter
         var config = result.Configuration;
 
         table.AddRow("Model", config.Whisper.Model.ToString());
+        table.AddRow("Runtime", result.Environment.WhisperRuntime);
         table.AddRow("Language", config.Whisper.Language);
         table.AddRow("VAD", config.Vad.Enabled ? "Enabled" : "Disabled");
         table.AddRow("Samples", summary.TotalSamples.ToString());
@@ -295,6 +299,7 @@ public static class ConsoleReporter
         AnsiConsole.MarkupLine($"  [grey]Arch:[/] {Markup.Escape(env.Architecture)}");
         AnsiConsole.MarkupLine($"  [grey].NET:[/] {Markup.Escape(env.DotnetVersion)}");
         AnsiConsole.MarkupLine($"  [grey]CPUs:[/] {env.ProcessorCount}");
+        AnsiConsole.MarkupLine($"  [grey]Whisper Runtime:[/] {Markup.Escape(env.WhisperRuntime)}");
     }
 
     private static string FormatBytes(long bytes)

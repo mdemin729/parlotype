@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <EnableCuda Condition="'$(EnableCuda)' == ''">true</EnableCuda>
+  </PropertyGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Parlotype.Tests" />
   </ItemGroup>
@@ -12,6 +16,7 @@
     <PackageReference Include="SileroVad" Version="1.3.0" />
     <PackageReference Include="Whisper.net" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime.Cuda" Version="1.9.0" Condition="'$(EnableCuda)' != 'false'" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="SharpHook" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-preview.1.25080.5" />

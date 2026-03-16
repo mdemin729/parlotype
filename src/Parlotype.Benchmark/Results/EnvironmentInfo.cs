@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
+using Whisper.net.LibraryLoader;
 
 namespace Parlotype.Benchmark.Results;
 
@@ -18,5 +19,11 @@ public sealed class EnvironmentInfo
     [JsonPropertyName("processorCount")]
     public int ProcessorCount { get; init; } = Environment.ProcessorCount;
 
-    public static EnvironmentInfo Capture() => new();
+    [JsonPropertyName("whisperRuntime")]
+    public string WhisperRuntime { get; init; } = "unknown";
+
+    public static EnvironmentInfo Capture() => new()
+    {
+        WhisperRuntime = RuntimeOptions.LoadedLibrary?.ToString() ?? "unknown",
+    };
 }

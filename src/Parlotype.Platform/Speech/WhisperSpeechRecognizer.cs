@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Whisper.net;
+using Whisper.net.LibraryLoader;
 
 namespace Parlotype.Platform.Speech;
 
@@ -39,7 +40,11 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         _logger.LogInformation("Initializing Whisper with model type: {ModelType}", modelType);
         var modelPath = await _downloadService.EnsureModelAsync(modelType, cancellationToken);
 
+        await WhisperRuntimeBootstrap.EnsureInitializedAsync(_settings, _logger);
+
         _factory = WhisperFactory.FromPath(modelPath);
+        _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
+
         _processor = _factory.CreateBuilder()
             .WithLanguage("auto")
             .Build();
@@ -61,7 +66,11 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 
         var modelPath = await _downloadService.EnsureModelAsync(options.Model, cancellationToken);
 
+        WhisperRuntimeBootstrap.Initialize(options.RuntimePreference, _logger);
+
         _factory = WhisperFactory.FromPath(modelPath);
+        _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
+
         var builder = _factory.CreateBuilder()
             .WithLanguage(options.Language)
             .WithTemperature(options.Temperature);
