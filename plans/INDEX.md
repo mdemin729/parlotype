@@ -10,4 +10,5 @@
 
 | Plan | Created | Description |
 |------|---------|-------------|
+| [2026-03-16-cuda-gpu-support](2026-03-16-cuda-gpu-support/) | 2026-03-16 | NVIDIA GPU (CUDA) acceleration for Whisper STT pipeline |
 | [2026-03-08-global-hotkey-input-system](2026-03-08-global-hotkey-input-system/) | 2026-03-08 | Global hotkey (PTT/toggle) for system-wide dictation with text injection |
