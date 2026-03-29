@@ -135,6 +135,33 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 - CI regression detection: `check` command compares against a baseline with configurable thresholds, returns exit code 0 (pass) or 1 (fail)
 - Write headless UI tests in `Parlotype.Desktop.Tests` for view/viewmodel integration — use `MockMicrophoneEnumerator` and `MockSettingsService` for controllable testing
 
+## Memory Vault
+
+The `memory/` directory is an Obsidian vault serving as the persistent cognitive substrate for AI agents. It uses three-tier progressive disclosure:
+
+1. **Tier 1 (always loaded):** `memory/AGENTS.md` — lightweight router with navigation pointers
+2. **Tier 2 (on demand):** `memory/*/_index.md` — summary tables per directory
+3. **Tier 3 (when relevant):** Full documents — service profiles, architecture, conventions
+
+### Vault Structure
+- `memory/architecture/` — audio pipeline, dependency graph, subsystem docs
+- `memory/services/` — profiles for all 7 projects
+- `memory/conventions/` — .NET standards, Avalonia patterns, testing strategy
+- `memory/decisions/` — index linking to ADRs in `docs/decisions/`
+- `memory/sessions/` — session handoff notes (episodic memory)
+- `memory/knowledge/` — stable facts learned across sessions (semantic memory)
+- `memory/skills/` — agent skills (obsidian-markdown, debug-pipeline, implement-feature, session-management)
+
+### Agent Startup Protocol
+1. Read `memory/AGENTS.md` for orientation
+2. Check latest session in `memory/sessions/` for continuity
+3. Read relevant `_index.md` for the area of work
+4. Drill into specific documents as needed
+
+### Maintenance
+- `bash memory/scripts/generate-index.sh` — vault stats, orphan detection
+- `bash memory/scripts/check-staleness.sh [days]` — flag stale notes (default: 90 days)
+
 ## Plans & Decisions
 
 See [plans/WORKFLOW.md](plans/WORKFLOW.md) for task tracking workflows, plan format, and ADR templates. Plans live in `plans/` (flat structure, status via YAML frontmatter). ADRs live in `docs/decisions/`.
