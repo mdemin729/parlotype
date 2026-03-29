@@ -1,0 +1,30 @@
+---
+title: Architecture Decisions
+type: index
+status: active
+last_updated: 2026-03-28
+summary: Index of all Architecture Decision Records (ADRs) for Parlotype
+---
+
+# Architecture Decisions
+
+ADR source files live in `docs/decisions/`. This index provides a quick reference.
+
+| # | Decision | Status | Key Impact |
+|---|----------|--------|------------|
+| 001 | [[001-global-hotkey-sharphook\|Global Hotkey via SharpHook]] | Accepted | SharpHook for cross-platform global keyboard hooks |
+| 002 | [[002-solution-architecture\|Solution Architecture]] | Accepted | Core → Platform → Desktop layered architecture |
+| 003 | [[003-audio-pipeline\|Audio Pipeline]] | Accepted | WASAPI → 16kHz mono → VAD → Whisper pipeline |
+| 004 | [[004-json-settings-persistence\|JSON Settings Persistence]] | Accepted | `JsonSettingsService` with `SemaphoreSlim` thread safety |
+| 005 | [[005-zlogger-structured-logging\|ZLogger Structured Logging]] | Accepted | ZLogger for console + rolling file logging |
+| 006 | [[006-text-injection\|Text Injection: Clipboard vs SharpHook]] | Accepted | Clipboard-based injection as default |
+| 007 | [[007-whisper-model-selection\|Whisper Model Selection & Download]] | Accepted | Enum-based model selection with HTTP download + progress |
+| 008 | [[008-incremental-vad\|Incremental VAD Processing]] | Accepted | Incremental Silero VAD for lower latency |
+| 009 | [[009-benchmark-cli-design\|Benchmark CLI Design]] | Accepted | System.CommandLine + Spectre.Console + SQLite |
+| 010 | [[010-avalonia-headless-testing\|Avalonia Headless UI Testing]] | Accepted | Avalonia.Headless.XUnit for UI tests |
+| 011 | [[011-optimal-stt-pipeline\|Optimal STT Pipeline Settings]] | Accepted | Benchmark-driven optimal Whisper parameters |
+| 012 | [[012-cuda-gpu-acceleration\|CUDA GPU Acceleration]] | Accepted | Optional NVIDIA CUDA via Whisper.net.Runtime.Cuda |
+
+## Template
+
+New ADRs use `docs/decisions/_template.md`. Number sequentially (next: 013).

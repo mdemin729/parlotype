@@ -1,0 +1,11 @@
+# Obsidian workspace (user-specific, not shareable)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Obsidian plugin data (installed per-user)
+.obsidian/plugins/
+.obsidian/community-plugins.json
+
+# OS files
+.DS_Store
+Thumbs.db
