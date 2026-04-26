@@ -15,7 +15,9 @@ dotnet test src/Parlotype.Tests       # Run only core/platform tests
 dotnet test src/Parlotype.Desktop.Tests    # Run only Avalonia headless UI tests
 dotnet test src/Parlotype.Benchmark.Tests  # Run only benchmark tests
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Run a single test
-dotnet run --project src/Parlotype.Desktop  # Launch the app
+dotnet run --project src/Parlotype.Desktop  # Launch the Avalonia app
+dotnet build src/Parlotype.WinUI -p:Platform=x64 -p:EnableCuda=false  # Build WinUI app (x64)
+dotnet run --project src/Parlotype.WinUI -p:Platform=x64  # Launch the WinUI app
 ```
 
 ### GPU / CUDA Builds
@@ -72,15 +74,16 @@ dotnet run --project src/Parlotype.Benchmark -- check \
 
 ## Architecture
 
-**Solution:** `Parlotype.slnx` (modern .slnx format) with 7 projects.
+**Solution:** `Parlotype.slnx` (modern .slnx format) with 8 projects.
 
-**Dependency direction:** `Desktop → Platform → Core` and `Benchmark → Platform → Core`. Tests → Core, Platform. Desktop.Tests → Desktop, Core. Benchmark.Tests → Benchmark, Core.
+**Dependency direction:** `Desktop → Platform → Core`, `WinUI → Platform → Core`, and `Benchmark → Platform → Core`. Tests → Core, Platform. Desktop.Tests → Desktop, Core. Benchmark.Tests → Benchmark, Core.
 
 | Project | Purpose |
 |---------|---------|
 | **Parlotype.Core** | Domain interfaces and models. Zero external dependencies. All contracts live here. Subfolders: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`, `TextInjection/` |
 | **Parlotype.Platform** | Implements Core interfaces (Whisper.net, NAudio, SileroVad, SharpHook). Subfolders mirror Core: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`. Register new services in `PlatformServiceExtensions.cs` |
 | **Parlotype.Desktop** | Avalonia UI app (11.3.0, Fluent theme). Entry point. Wires DI, hosts views/viewmodels |
+| **Parlotype.WinUI** | WinUI 3 native Windows app (Windows App SDK 1.8). Tray-resident with TranscribeWindow and Settings NavigationView. Shares Core/Platform |
 | **Parlotype.Benchmark** | Console CLI for evaluating transcription quality (WER/CER/RTF). System.CommandLine + Spectre.Console + SQLite. Includes SQLite index for historical run queries, comparison engine with delta metrics, parameter sweep support, repetition-based stability analysis, per-sample memory/GC tracking, CI regression detection, and export to CSV/Markdown/JSON. CLI commands: `run`, `import`, `list`, `compare`, `export`, `check`, `sweep`. Subfolders: `Configuration/`, `Metrics/`, `Pipeline/`, `Results/`, `Reporting/` |
 | **Parlotype.Tests** | xUnit tests for Core and Platform (audio pipeline, VAD, Whisper) |
 | **Parlotype.Desktop.Tests** | Avalonia headless UI tests using `Avalonia.Headless.XUnit`. Uses `[AvaloniaFact]` instead of `[Fact]`. Mock services in `Mocks/` folder |
