@@ -3,7 +3,7 @@ title: Key Subsystems
 type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging]
-last_updated: 2026-03-28
+last_updated: 2026-04-28
 summary: Text injection, global hotkeys, settings, logging, and model management subsystems
 ---
 
@@ -50,3 +50,17 @@ Pipeline: `IModelDownloadService` (Core) → `HttpModelDownloadService` (Platfor
 - `WhisperModelInfo` holds static metadata (display name, disk size, SHA hash)
 - Model choice persisted via `SettingsKeys.SelectedWhisperModel`
 - Tests use `HeadlessModelDownloadService` (downloads without UI)
+
+## NVIDIA/CUDA Environment Detection
+
+First-party detection independent of Whisper.net — see [[decisions/_index|ADR-014]]. Provides startup diagnostics for why CUDA was/wasn't selected and a data source for a future diagnostics UI.
+
+- **Core**: `INvidiaEnvironmentProvider`, `NvidiaEnvironmentInfo`, `CudaRuntimeProbe` in `Parlotype.Core/Speech/`
+- **Platform (Windows)**: `WindowsNvidiaEnvironmentProvider` combines three failure-isolated sources:
+  1. `nvidia-smi` parsing → driver version + driver max CUDA version
+  2. Filesystem scan of `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v*` → installed toolkits
+  3. `cudart` P/Invoke probe via `NativeLibrary.TryLoad` + `cudaRuntimeGetVersion` / `cudaDriverGetVersion` → loadable runtimes with versions
+- **Platform (other OS)**: `NoOpNvidiaEnvironmentProvider` returns `NvidiaEnvironmentInfo.Empty`
+- **DI**: selection in `PlatformServiceExtensions` via `OperatingSystem.IsWindows()`
+- **Caching**: first call detects, result cached with `SemaphoreSlim`; `RefreshAsync` clears cache and re-runs
+- **Startup hook**: `App.axaml.cs` fires `Task.Run` after `BuildServiceProvider`, logs Information line summarising driver/toolkits/runtimes

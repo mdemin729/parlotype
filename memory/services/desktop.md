@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [desktop, avalonia, ui, mvvm]
 criticality: high
-last_updated: 2026-03-28
+last_updated: 2026-04-28
 summary: Avalonia UI application — entry point, DI wiring, views and viewmodels
 ---
 
@@ -32,6 +32,7 @@ dotnet run --project src/Parlotype.Desktop
 - Flyout bindings: embed commands in display item wrappers, not `$parent` traversal
 - Flyout lifecycle: code-behind hooks `PopupFlyoutBase.Opening` for refresh
 - `ObservableCollection` mutations from background threads → dispatch to `Dispatcher.UIThread`
+- `App.axaml.cs` runs a fire-and-forget `Task.Run` after `BuildServiceProvider` to call `INvidiaEnvironmentProvider.GetAsync` and log the result (driver, installed CUDA toolkits, loadable runtimes) at Information level — see [[decisions/_index|ADR-014]]
 
 ## Dependencies
 - [[platform]], [[core]]

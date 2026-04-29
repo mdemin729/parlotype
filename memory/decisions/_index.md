@@ -2,7 +2,7 @@
 title: Architecture Decisions
 type: index
 status: active
-last_updated: 2026-03-28
+last_updated: 2026-04-28
 summary: Index of all Architecture Decision Records (ADRs) for Parlotype
 ---
 
@@ -24,7 +24,8 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 010 | [[010-avalonia-headless-testing\|Avalonia Headless UI Testing]] | Accepted | Avalonia.Headless.XUnit for UI tests |
 | 011 | [[011-optimal-stt-pipeline\|Optimal STT Pipeline Settings]] | Accepted | Benchmark-driven optimal Whisper parameters |
 | 012 | [[012-cuda-gpu-acceleration\|CUDA GPU Acceleration]] | Accepted | Optional NVIDIA CUDA via Whisper.net.Runtime.Cuda |
+| 014 | [[014-nvidia-environment-detection\|NVIDIA/CUDA Environment Detection]] | Accepted | First-party provider logs driver/toolkit/runtime at startup |
 
 ## Template
 
-New ADRs use `docs/decisions/_template.md`. Number sequentially (next: 013).
+New ADRs use `docs/decisions/_template.md`. Number sequentially (next: 015).
