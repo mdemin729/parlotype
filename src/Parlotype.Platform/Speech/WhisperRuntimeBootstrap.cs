@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Whisper.net.LibraryLoader;
+using Whisper.net.Logger;
 
 namespace Parlotype.Platform.Speech;
 
@@ -34,6 +35,22 @@ internal static class WhisperRuntimeBootstrap
             logger.LogDebug("WhisperRuntimeBootstrap.Initialize called again — already initialized, skipping");
             return;
         }
+
+        // Bridge Whisper.net internal diagnostics (CUDA probing, DLL loading) to our logger.
+        // Note: Whisper.net 1.9.0 has an inverted GgmlLogLevel enum (Error=2 matches native INFO=2),
+        // so native informational messages arrive as WhisperLogLevel.Error. We remap accordingly.
+        LogProvider.AddLogger((level, message) =>
+        {
+            var logLevel = level switch
+            {
+                WhisperLogLevel.Error => LogLevel.Information,  // native INFO (ggml value 2) misclassified
+                WhisperLogLevel.Warning => LogLevel.Debug,      // native WARN (ggml value 1) misclassified
+                WhisperLogLevel.Info => LogLevel.Trace,          // native value 4 — not emitted by ggml
+                WhisperLogLevel.Debug => LogLevel.Debug,
+                _ => LogLevel.Trace,
+            };
+            logger.Log(logLevel, "[Whisper.net] {Message}", message);
+        });
 
         RuntimeOptions.RuntimeLibraryOrder = preference switch
         {
