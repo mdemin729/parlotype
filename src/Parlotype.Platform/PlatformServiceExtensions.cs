@@ -27,6 +27,12 @@ public static class PlatformServiceExtensions
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromHours(1) });
         services.AddSingleton<HttpModelDownloadService>();
+
+        if (OperatingSystem.IsWindows())
+            services.AddSingleton<INvidiaEnvironmentProvider, WindowsNvidiaEnvironmentProvider>();
+        else
+            services.AddSingleton<INvidiaEnvironmentProvider, NoOpNvidiaEnvironmentProvider>();
+
         return services;
     }
 }
