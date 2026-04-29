@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-03-28
+last_updated: 2026-04-28
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -22,7 +22,7 @@ This directory stores **stable facts** learned across sessions — things that a
 
 | Fact | Summary | Learned |
 |------|---------|---------|
-| _No entries yet_ | Knowledge accumulates as agents work on the project | — |
+| [[whisper-net-quirks]] | Whisper.net 1.9.0 NuGet `CudaHelper` differs from upstream master; `WhisperLogLevel` enum is inverted vs native ggml | 2026-04-28 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

@@ -2,7 +2,7 @@
 title: Parlotype Memory Vault
 type: router
 status: active
-last_updated: 2026-03-28
+last_updated: 2026-04-28
 summary: Root router for AI agent orientation in the Parlotype voice-to-text project
 ---
 

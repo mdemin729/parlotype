@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [core, contracts, domain]
 criticality: high
-last_updated: 2026-03-28
+last_updated: 2026-04-28
 summary: Domain interfaces and models — zero external dependencies, all contracts live here
 ---
 
@@ -15,7 +15,7 @@ Pure domain layer containing all interfaces, models, enums, and records. Zero ex
 
 ## Key Paths
 - `src/Parlotype.Core/Audio/` — `IAudioCaptureService`, `IMicrophoneEnumerator`, `IVoiceActivityDetector`
-- `src/Parlotype.Core/Speech/` — `ISpeechRecognizer`, `WhisperOptions`, `WhisperModelType`, `WhisperModelInfo`
+- `src/Parlotype.Core/Speech/` — `ISpeechRecognizer`, `WhisperOptions`, `WhisperModelType`, `WhisperModelInfo`, `INvidiaEnvironmentProvider`, `NvidiaEnvironmentInfo`
 - `src/Parlotype.Core/Hotkeys/` — `IGlobalHotkeyService`, `HotkeyBinding`, `HotkeyConflictDetector`
 - `src/Parlotype.Core/Settings/` — `ISettingsService`, `SettingsKeys`
 - `src/Parlotype.Core/TextInjection/` — `ITextInjectionService`, `ITargetWindowTracker`
@@ -31,3 +31,4 @@ None (by design).
 
 ## Related Decisions
 - [[decisions/_index|ADR-002]] Solution architecture
+- [[decisions/_index|ADR-014]] NVIDIA/CUDA environment detection (provider contract lives here)
