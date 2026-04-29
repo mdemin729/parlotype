@@ -54,3 +54,15 @@ Benchmark.Tests → Benchmark, Core
 - **Interfaces in Core, implementations in Platform**: never add platform packages to Core
 - **All services are singletons** registered in `PlatformServiceExtensions.cs`
 - **Whisper model lifecycle**: never load the model multiple times in a single run
+
+## Definition of Done
+
+A non-trivial change isn't finished when the build is green — it's finished when the next agent can find it. Before declaring complete:
+
+1. **Build/tests/behaviour verified** (zero warnings, tests pass, end-to-end exercised).
+2. **ADR required** if the change adds a Core interface, a `PlatformServiceExtensions` registration, a new `.csproj` dependency, an OS/build-flag-conditional behaviour, a new native/P-Invoke call, or touches audio/hotkey/settings/Whisper subsystems.
+3. **Vault updated** when public symbols/services/subsystems change: `memory/services/<project>.md`, `memory/decisions/_index.md`, and `memory/architecture/subsystems.md` as applicable.
+4. **Knowledge captured** for non-derivable facts (third-party quirks, environment gotchas) under `memory/knowledge/`.
+5. **Ask, don't prune silently** — if deferring (2)–(4), surface that to the user via `ask_user` before completing.
+
+Full rules and triggers: see "Definition of Done" section in `CLAUDE.md`.

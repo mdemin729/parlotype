@@ -3,7 +3,7 @@ title: Implement Feature Skill
 type: skill
 status: active
 tags: [skill, feature, development, workflow]
-last_updated: 2026-03-28
+last_updated: 2026-04-28
 summary: Step-by-step guide for adding new features to Parlotype
 ---
 
@@ -47,9 +47,19 @@ dotnet run --project src/Parlotype.Desktop  # Manual verification
 ```
 
 ### 6. Document
-- If architectural decision: create ADR in `docs/decisions/` (next: 013)
-- Update relevant service profiles in `memory/services/`
-- Record session in `memory/sessions/`
+Documentation is part of the workflow, not a follow-up. Decide each question explicitly:
+
+- **Did you add an interface, record, or enum to `Parlotype.Core`?** → Yes ⇒ ADR + `memory/services/core.md` update
+- **Did you add a registration to `PlatformServiceExtensions.cs`?** → Yes ⇒ ADR + `memory/services/platform.md` update
+- **Did you add a `.csproj` dependency or native library?** → Yes ⇒ ADR
+- **Does behaviour now differ by OS or build flag?** → Yes ⇒ ADR
+- **Did you touch audio pipeline / hotkeys / settings / Whisper / text injection?** → Yes ⇒ ADR + relevant subsystems.md section
+- **Did you add a UI surface?** → Yes ⇒ `memory/services/desktop.md` update
+- **Did you learn something non-derivable from code (third-party quirk, env gotcha)?** → Yes ⇒ `memory/knowledge/<topic>.md` + index row
+
+If any answer above is "yes" and you're choosing to defer the docs, **ask the user first** via `ask_user` — do not silently ship.
+
+ADRs go in `docs/decisions/` (use `_template.md`, sequential numbering — check the directory for the highest existing number, do not trust stale "next: NNN" hints in indexes). After writing the ADR, add a row to `memory/decisions/_index.md`.
 
 ## Checklist
 - [ ] Interface in Core
@@ -58,4 +68,10 @@ dotnet run --project src/Parlotype.Desktop  # Manual verification
 - [ ] ViewModel + View in Desktop (if UI)
 - [ ] Tests written and passing
 - [ ] Zero build warnings
-- [ ] ADR if needed
+- [ ] End-to-end behaviour verified (manual run / log line / integration test)
+- [ ] ADR written if any trigger fires (see Step 6)
+- [ ] `memory/services/*.md` updated for new symbols
+- [ ] `memory/decisions/_index.md` updated if new ADR
+- [ ] `memory/architecture/subsystems.md` updated for new subsystems
+- [ ] `memory/knowledge/` entry added for non-derivable facts
+- [ ] If deferring docs, asked the user first
