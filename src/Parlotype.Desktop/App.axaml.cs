@@ -95,7 +95,45 @@ public class App : Application
             _ = mainVm.InitializeHotkeyServiceAsync();
         }
 
+        _ = Task.Run(() => LogNvidiaEnvironmentAsync(provider));
+
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task LogNvidiaEnvironmentAsync(IServiceProvider provider)
+    {
+        var logger = provider.GetRequiredService<ILogger<App>>();
+        try
+        {
+            var nvidiaProvider = provider.GetRequiredService<INvidiaEnvironmentProvider>();
+            var info = await nvidiaProvider.GetAsync().ConfigureAwait(false);
+
+            if (!info.HasNvidia)
+            {
+                logger.LogInformation("No NVIDIA driver detected on this system");
+                return;
+            }
+
+            var toolkits = info.InstalledToolkitVersions.Count > 0
+                ? string.Join(", ", info.InstalledToolkitVersions)
+                : "(none)";
+
+            var runtimes = info.LoadableRuntimes.Count > 0
+                ? string.Join(", ", info.LoadableRuntimes
+                    .Select(r => $"{r.LibraryName} (runtime {r.RuntimeVersion}, driver {r.DriverVersion})"))
+                : "(none)";
+
+            logger.LogInformation(
+                "NVIDIA environment detected: Driver={Driver} (max CUDA: {MaxCuda}); Installed Toolkits=[{Toolkits}]; Loadable Runtimes=[{Runtimes}]",
+                info.DriverVersion ?? "unknown",
+                info.DriverMaxCudaVersion ?? "unknown",
+                toolkits,
+                runtimes);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to detect NVIDIA environment");
+        }
     }
 
     private void ApplyTheme(AppTheme theme)
