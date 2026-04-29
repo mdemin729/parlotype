@@ -165,3 +165,23 @@ The `memory/` directory is an Obsidian vault serving as the persistent cognitive
 ## Plans & Decisions
 
 See [plans/WORKFLOW.md](plans/WORKFLOW.md) for task tracking workflows, plan format, and ADR templates. Plans live in `plans/` (flat structure, status via YAML frontmatter). ADRs live in `docs/decisions/`.
+
+## Definition of Done
+
+A non-trivial change is **not done** until all of the following hold:
+
+1. **Build & tests** — `dotnet build Parlotype.slnx` is clean (zero warnings) and `dotnet test` passes.
+2. **Behaviour verified** — the original symptom is reproduced and shown gone, or the new feature is exercised end-to-end (manual run, log line, test, etc.).
+3. **ADR exists** if any of the following triggers fire:
+   - A new interface, record, or enum is added to `Parlotype.Core`
+   - A new entry is added to `PlatformServiceExtensions.cs`
+   - A new dependency is added to any `.csproj`
+   - Behaviour intentionally diverges by OS, build flag, or runtime
+   - A new external process, native library, or P/Invoke call is introduced
+   - The change touches the audio pipeline, hotkey, settings, or Whisper subsystems
+4. **Memory vault updated** when the change adds or renames public symbols, services, or subsystems:
+   - The relevant `memory/services/<project>.md` lists the new symbol(s)
+   - `memory/decisions/_index.md` references any new ADR
+   - For cross-cutting subsystems, `memory/architecture/subsystems.md` gains or updates a section
+5. **Knowledge captured** — facts learned along the way that are *not derivable from current code* (e.g. third-party quirks, environment gotchas) are recorded under `memory/knowledge/` with an index row.
+6. **Ask before scope-pruning** — if you choose to defer (3), (4), or (5), surface the choice via `ask_user` rather than silently shipping. The user may reasonably want docs in a follow-up commit, but the agent should not decide that unilaterally.

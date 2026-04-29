@@ -24,8 +24,9 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 010 | [[010-avalonia-headless-testing\|Avalonia Headless UI Testing]] | Accepted | Avalonia.Headless.XUnit for UI tests |
 | 011 | [[011-optimal-stt-pipeline\|Optimal STT Pipeline Settings]] | Accepted | Benchmark-driven optimal Whisper parameters |
 | 012 | [[012-cuda-gpu-acceleration\|CUDA GPU Acceleration]] | Accepted | Optional NVIDIA CUDA via Whisper.net.Runtime.Cuda |
+| 013 | [[013-obsidian-memory-vault\|Obsidian Memory Vault for AI Agents]] | Accepted | Persistent memory substrate for AI agents in `memory/` |
 | 014 | [[014-nvidia-environment-detection\|NVIDIA/CUDA Environment Detection]] | Accepted | First-party provider logs driver/toolkit/runtime at startup |
 
 ## Template
 
-New ADRs use `docs/decisions/_template.md`. Number sequentially (next: 015).
+New ADRs use `docs/decisions/_template.md`. Use the next sequential number — list `docs/decisions/` and pick `(highest existing number) + 1`. Do **not** rely on a hard-coded "next" hint here, it goes stale.
