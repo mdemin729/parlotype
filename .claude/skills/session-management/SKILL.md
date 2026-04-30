@@ -1,10 +1,6 @@
 ---
-title: Session Management Skill
-type: skill
-status: active
-tags: [skill, session, handoff, memory]
-last_updated: 2026-03-28
-summary: Protocols for session startup, handoff, and knowledge distillation
+name: session-management
+description: Use at the start or end of a working session, or when distilling learned facts into the memory vault. Defines the startup orientation protocol, end-of-session handoff note format, and knowledge pruning rules.
 ---
 
 # Session Management Skill
@@ -44,3 +40,6 @@ Periodically (weekly or when vault feels cluttered):
 - Remove knowledge entries that are now derivable from code
 - Update `last_updated` on any modified notes
 - Check for orphan notes (no incoming links)
+
+## See Also
+Canonical Obsidian version: `memory/skills/session-management.md`

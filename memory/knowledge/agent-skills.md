@@ -1,0 +1,57 @@
+---
+title: Agent Skills & Per-Session Protocols
+type: knowledge
+status: active
+tags: [agent, skills, claude, copilot, session-management]
+created: 2026-04-30
+summary: How Claude/Copilot skill auto-discovery actually behaves, and why per-session protocols belong in CLAUDE.md rather than description-triggered skills.
+---
+
+# Agent Skills & Per-Session Protocols
+
+## Skill discovery layout
+
+Claude/Copilot CLI discovers skills only when they live as
+`.claude/skills/<kebab-name>/SKILL.md` (directory per skill). A flat collection
+of `*.md` files (such as the Obsidian-friendly `memory/skills/*.md`) is **not**
+picked up by the runtime.
+
+Each `SKILL.md` must include YAML frontmatter with at minimum:
+
+```yaml
+---
+name: <kebab-name>          # must match the directory name
+description: Use when ...   # one-line trigger sentence
+---
+```
+
+The `description` is what the agent matches against to decide whether to
+auto-invoke the skill. Phrasing it as "Use when …" keeps the trigger
+behavioural and concrete.
+
+## When description-triggered skills fail
+
+Description-based auto-discovery only fires when the agent's *current
+reasoning* matches the trigger. It does **not** reliably activate at moments
+the agent does not explicitly think about — most notably session boundaries.
+The agent rarely reasons "I am starting a session" or "I am ending a session"
+unless prompted, so a session-lifecycle skill cannot be trusted to fire on its
+own.
+
+Consequence: **always-on per-session protocols belong in `CLAUDE.md`**, which
+is loaded unconditionally on every turn. Description-triggered skills work
+well for *topic*-driven activation (e.g. "I am debugging the audio pipeline")
+but not for *temporal* activation (e.g. "the session is starting / ending").
+
+## Recommended split
+
+| Where it lives | What goes there |
+|----------------|-----------------|
+| `CLAUDE.md` | Invariants and protocols that must apply every session/turn (Definition of Done, Session Lifecycle summary, hard architectural rules). |
+| `.claude/skills/<x>/SKILL.md` | Topic-triggered workflows the agent should auto-load when the user's request matches (debug-pipeline, implement-feature, obsidian-markdown). |
+| `memory/skills/<x>.md` | Canonical Obsidian-vault version, human-edited. The `.claude/skills/` copy is a discovery-friendly mirror; keep them in sync. |
+
+## See also
+- `.claude/skills/session-management/SKILL.md`
+- `CLAUDE.md` → "Session Lifecycle"
+- `memory/sessions/2026-04-30-0916-skills-scaffolding.md`
