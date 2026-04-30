@@ -30,6 +30,14 @@ dotnet build Parlotype.slnx
 dotnet run --project src\Parlotype.Desktop
 ```
 
+### Tray-based UI (preview, Avalonia 12)
+
+A second, parallel desktop frontend is available — `Parlotype.Desktop.V2`. It runs on Avalonia 12 and lives in the system tray: click the tray icon for an Open / Settings / Exit menu, or press the global hotkey to open the Transcribe window and start recording. See [ADR 015](docs/decisions/015-parlotype-desktop-v2-avalonia12.md).
+
+```bash
+dotnet run --project src/Parlotype.Desktop.V2
+```
+
 ## Run Tests
 
 ```bash

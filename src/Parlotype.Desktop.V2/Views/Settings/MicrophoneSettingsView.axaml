@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.V2.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.V2.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.V2.Views.Settings.MicrophoneSettingsView"
+             x:DataType="vms:MicrophoneSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Microphone" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Choose the input device used for transcription."
+                   Opacity="0.7" />
+
+        <ItemsControl ItemsSource="{Binding AvailableMicrophones}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:MicrophoneDisplayItem">
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            Padding="12,8"
+                            Margin="0,2"
+                            Command="{Binding SelectCommand}"
+                            CommandParameter="{Binding}">
+                        <Grid ColumnDefinitions="11,*,Auto">
+                            <Border Grid.Column="0"
+                                    Width="3" Height="16" CornerRadius="1.5"
+                                    Background="{DynamicResource SystemAccentColor}"
+                                    HorizontalAlignment="Left"
+                                    IsVisible="{Binding IsSelected}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       VerticalAlignment="Center"
+                                       FontSize="14" />
+                            <TextBlock Grid.Column="2"
+                                       Text="System default"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Opacity="0.5"
+                                       IsVisible="{Binding IsSystemDefault}" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>
