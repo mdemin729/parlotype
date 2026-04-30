@@ -24,6 +24,7 @@ This directory stores **stable facts** learned across sessions — things that a
 |------|---------|---------|
 | [[whisper-net-quirks]] | Whisper.net 1.9.0 NuGet `CudaHelper` differs from upstream master; `WhisperLogLevel` enum is inverted vs native ggml | 2026-04-28 |
 | [[agent-skills]] | Claude/Copilot skills require `.claude/skills/<name>/SKILL.md`; description-triggered discovery does not reliably fire at session boundaries, so per-session protocols belong in CLAUDE.md | 2026-04-30 |
+| [[avalonia-devtools]] | Classic `Avalonia.Diagnostics` retired in 12; replacement is `AvaloniaUI.DiagnosticsSupport` (in-app) + `AvaloniaUI.DeveloperTools` (`avdt` global tool); free Essentials tier needs portal signup; pre-existing build telemetry message is from base SDK, not DevTools | 2026-04-30 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

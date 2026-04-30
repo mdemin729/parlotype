@@ -38,6 +38,33 @@ A second, parallel desktop frontend is available — `Parlotype.Desktop.V2`. It 
 dotnet run --project src/Parlotype.Desktop.V2
 ```
 
+#### Visual inspector (V2, Debug builds)
+
+V2 supports the official Avalonia 12 Developer Tools (Essentials edition — free
+under AvaloniaUI's community licence for organisations under €1M revenue).
+Setup is per-developer:
+
+1. Install the standalone tool once:
+
+   ```bash
+   dotnet tool install --global AvaloniaUI.DeveloperTools
+   ```
+
+2. Launch it in a separate window:
+
+   ```bash
+   avdt
+   ```
+
+3. Run V2 in **Debug** configuration, give a Parlotype window focus, and press
+   **F12**. The inspector will connect and show the visual tree, properties,
+   layout, and styles.
+
+First-time activation requires a free [AvaloniaUI Portal](https://avaloniaui.net/)
+account. The `AvaloniaUI.DiagnosticsSupport` package is referenced with a
+`Configuration == Debug` condition, so Release builds carry no extra binaries.
+See [ADR 016](docs/decisions/016-avalonia12-developer-tools.md).
+
 ## Run Tests
 
 ```bash

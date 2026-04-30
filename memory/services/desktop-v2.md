@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [desktop, avalonia, avalonia12, tray, ui, mvvm]
 criticality: medium
-last_updated: 2026-05-12
+last_updated: 2026-04-30
 summary: Avalonia 12 tray-based desktop frontend — parallel to Parlotype.Desktop
 ---
 
@@ -36,7 +36,7 @@ App starts hidden — only the tray icon is visible. Click the tray icon to open
 
 ## Conventions
 
-- Avalonia 12.0.2 (GA). `Avalonia.Diagnostics` has no 12.x release — not referenced.
+- Avalonia 12.0.2 (GA). Classic `Avalonia.Diagnostics` is retired in Avalonia 12 — not referenced. The official replacement (`AvaloniaUI.DiagnosticsSupport` + `avdt` global tool) is wired in DEBUG builds; see Diagnostics section below.
 - `OnLostFocus(FocusChangedEventArgs)` is the Avalonia 12 signature (was `RoutedEventArgs` in 11).
 - `x:CompileBindings="True"` and `x:DataType` on all AXAML.
 - `[ObservableProperty]` / `[RelayCommand]` (CommunityToolkit.Mvvm) — ViewModels are `partial`.
@@ -47,6 +47,20 @@ App starts hidden — only the tray icon is visible. Click the tray icon to open
 ## Tests
 
 `Parlotype.Desktop.V2.Tests` — Avalonia.Headless.XUnit 12.0.2 + **xUnit v3** (3.2.2). Tests touching `Dispatcher.UIThread` must use `[AvaloniaFact]`. Async tests must thread `TestContext.Current.CancellationToken` to satisfy analyzer rule `xUnit1051`.
+
+## Diagnostics (Avalonia 12 DevTools)
+
+`Parlotype.Desktop.V2.csproj` references `AvaloniaUI.DiagnosticsSupport` 2.2.1 conditionally on `Configuration == Debug`. `App.Initialize()` calls `this.AttachDeveloperTools()` under `#if DEBUG`. Release builds carry no extra binaries.
+
+To use locally:
+
+```bash
+dotnet tool install --global AvaloniaUI.DeveloperTools   # one-time per developer
+avdt                                                      # launch separate inspector
+dotnet run --project src/Parlotype.Desktop.V2 -c Debug   # then F12 in the V2 window
+```
+
+First-time activation needs a free AvaloniaUI Portal account (Essentials edition is free for orgs under €1M revenue). See ADR [[016-avalonia12-developer-tools]].
 
 ## Differences from V1
 
