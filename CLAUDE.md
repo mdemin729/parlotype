@@ -152,11 +152,26 @@ The `memory/` directory is an Obsidian vault serving as the persistent cognitive
 - `memory/knowledge/` — stable facts learned across sessions (semantic memory)
 - `memory/skills/` — agent skills (obsidian-markdown, debug-pipeline, implement-feature, session-management)
 
-### Agent Startup Protocol
+### Session Lifecycle
+
+Apply this protocol every session. Full detail lives in
+`.claude/skills/session-management/SKILL.md` (canonical: `memory/skills/session-management.md`).
+
+**Start of session:**
 1. Read `memory/AGENTS.md` for orientation
-2. Check latest session in `memory/sessions/` for continuity
-3. Read relevant `_index.md` for the area of work
-4. Drill into specific documents as needed
+2. Read the latest note in `memory/sessions/` and pick up from its **Next Action**
+3. Read the relevant `_index.md` for the area of work, then drill into specific documents as needed
+4. Skim `memory/knowledge/_index.md` for recently learned facts
+
+**End of session:**
+1. Create `memory/sessions/YYYY-MM-DD-HHMM-<slug>.md` from `memory/sessions/_template.md`
+   (e.g. `2026-04-30-0916-skills-scaffolding.md`; `HHMM` = start time 24h, `<slug>` = short kebab-case topic)
+2. Fill in: Active Focus, Decisions Made, Facts Learned, Open Blockers, **Next Action**
+
+**Knowledge distillation:**
+- Stable, non-derivable facts → `memory/knowledge/<topic>.md` + index row
+- Updates to existing knowledge → edit the relevant file
+- Ephemeral facts → leave only in the session note
 
 ### Maintenance
 - `bash memory/scripts/generate-index.sh` — vault stats, orphan detection

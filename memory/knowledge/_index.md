@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-04-28
+last_updated: 2026-04-30
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -23,6 +23,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | Fact | Summary | Learned |
 |------|---------|---------|
 | [[whisper-net-quirks]] | Whisper.net 1.9.0 NuGet `CudaHelper` differs from upstream master; `WhisperLogLevel` enum is inverted vs native ggml | 2026-04-28 |
+| [[agent-skills]] | Claude/Copilot skills require `.claude/skills/<name>/SKILL.md`; description-triggered discovery does not reliably fire at session boundaries, so per-session protocols belong in CLAUDE.md | 2026-04-30 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history
