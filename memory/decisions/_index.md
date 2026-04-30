@@ -2,7 +2,7 @@
 title: Architecture Decisions
 type: index
 status: active
-last_updated: 2026-04-28
+last_updated: 2026-05-12
 summary: Index of all Architecture Decision Records (ADRs) for Parlotype
 ---
 
@@ -26,6 +26,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 012 | [[012-cuda-gpu-acceleration\|CUDA GPU Acceleration]] | Accepted | Optional NVIDIA CUDA via Whisper.net.Runtime.Cuda |
 | 013 | [[013-obsidian-memory-vault\|Obsidian Memory Vault for AI Agents]] | Accepted | Persistent memory substrate for AI agents in `memory/` |
 | 014 | [[014-nvidia-environment-detection\|NVIDIA/CUDA Environment Detection]] | Accepted | First-party provider logs driver/toolkit/runtime at startup |
+| 015 | [[015-parlotype-desktop-v2-avalonia12\|Parlotype.Desktop.V2 — Avalonia 12 Tray-Based UI]] | Accepted | Parallel tray-first frontend on Avalonia 12 with per-section settings VMs |
 
 ## Template
 
