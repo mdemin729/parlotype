@@ -50,7 +50,10 @@
         </SplitView.Pane>
 
         <Border Padding="24">
-            <ContentControl Content="{Binding SelectedSection}" />
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <ContentControl Content="{Binding SelectedSection}" />
+            </ScrollViewer>
         </Border>
     </SplitView>
 </Window>

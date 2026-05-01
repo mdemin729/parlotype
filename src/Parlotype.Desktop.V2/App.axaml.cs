@@ -96,7 +96,7 @@ public class App : Application
 
         services.AddPlatformServices();
 
-        services.AddSingleton<IModelDownloadService, SilentModelDownloadService>();
+        services.AddSingleton<IModelDownloadService, ModelDownloadDialogService>();
 
         services.AddSingleton<ITargetWindowTracker, Win32TargetWindowTracker>();
         if (Program.TextInjectionMode == TextInjectionMode.SharpHook)
