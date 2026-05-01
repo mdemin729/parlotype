@@ -125,12 +125,12 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         };
     }
 
-    public async ValueTask DisposeAsync()
+    public async Task UnloadAsync()
     {
-        if (_disposed)
-            return;
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
-        _disposed = true;
+        if (!IsReady)
+            return;
 
         if (_processor is not null)
         {
@@ -145,5 +145,16 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         }
 
         IsReady = false;
+        _logger.LogInformation("Whisper model unloaded");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+            return;
+
+        // Unload before setting _disposed so UnloadAsync doesn't throw
+        await UnloadAsync().ConfigureAwait(false);
+        _disposed = true;
     }
 }
