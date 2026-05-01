@@ -40,20 +40,40 @@ First-time activation of either edition requires a **free AvaloniaUI Portal
 account** per developer. This is enforced by the standalone tool, not the
 in-app library.
 
-## Privacy notes
+## Privacy notes — build-time telemetry (investigated 2026-04-30)
 
-The base Avalonia 12 SDK targets emit a build-time message for every project:
+The `Avalonia.BuildServices` NuGet package (v11.3.2, bundled with Avalonia 12)
+runs an MSBuild task (`AvaloniaStatsTask`) on **every build** that:
 
-```
-Avalonia Accelerate Community requires telemetry. To opt out, please upgrade
-to a paid tier.
-```
+1. Collects: SHA256-hashed project name, TFM, RID, Avalonia version, OS
+   description, CPU architecture, detected IDE, detected CI provider, and a
+   **DeviceUniqueId** (`SHA256(MachineName-UserName-OSPlatform)`).
+2. Writes a binary record to `%LOCALAPPDATA%/AvaloniaUI/BuildServices/`.
+3. Spawns a **background process** (`Avalonia.BuildServices.Collector.dll`)
+   that HTTP-POSTs the records to
+   `https://av-build-tel-api-v1.avaloniaui.net/api/usage`.
 
-This message appears **regardless of whether `AvaloniaUI.DiagnosticsSupport`
-is referenced** — confirmed empirically on 2026-04-30 by removing the package
-and rebuilding `Parlotype.Desktop.V2` clean. So the telemetry posture is a
-property of Avalonia 12 itself, not of DevTools wiring. Investigate / suppress
-separately if it matters to a privacy-first project.
+### Opt-out behaviour
+
+| Tier | `AVALONIA_TELEMETRY_OPTOUT` env var | Effect |
+|------|-------------------------------------|--------|
+| Community (free) | Ignored | Telemetry **always runs** |
+| Trial | Ignored | Telemetry **always runs** |
+| Indie / Business / Enterprise | Honoured | Telemetry **skipped** |
+
+The env var check is in `AvaloniaStatsTask.HasOptedOut()`. Community and Trial
+tiers bypass it — the build message is accurate.
+
+### No runtime telemetry
+
+Scan of all `Avalonia*.dll` in the Release output confirms **zero** telemetry
+types in the runtime assemblies. This is strictly build-time.
+
+### Current decision
+
+Accepted for now. The data collected is hashed / anonymised and build-only.
+**When upgrading to a paid Avalonia tier, set `AVALONIA_TELEMETRY_OPTOUT=1`**
+as a machine/CI environment variable to opt out.
 
 ## DEBUG-only wiring pattern
 
