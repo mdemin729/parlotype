@@ -32,3 +32,4 @@ None (by design).
 ## Related Decisions
 - [[decisions/_index|ADR-002]] Solution architecture
 - [[decisions/_index|ADR-014]] NVIDIA/CUDA environment detection (provider contract lives here)
+- [[decisions/_index|ADR-017]] Whisper model hot-swap (`ISpeechRecognizer.UnloadAsync`)

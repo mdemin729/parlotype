@@ -28,6 +28,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 014 | [[014-nvidia-environment-detection\|NVIDIA/CUDA Environment Detection]] | Accepted | First-party provider logs driver/toolkit/runtime at startup |
 | 015 | [[015-parlotype-desktop-v2-avalonia12\|Parlotype.Desktop.V2 — Avalonia 12 Tray-Based UI]] | Accepted | Parallel tray-first frontend on Avalonia 12 with per-section settings VMs |
 | 016 | [[016-avalonia12-developer-tools\|Avalonia 12 Developer Tools (V2)]] | Accepted | DEBUG-only `AvaloniaUI.DiagnosticsSupport` + `avdt` global tool replace retired classic `Avalonia.Diagnostics` in V2 |
+| 017 | [[017-whisper-model-hot-swap\|Whisper Model Hot-Swap via UnloadAsync]] | Accepted | `ISpeechRecognizer.UnloadAsync` enables model switching without app restart |
 
 ## Template
 

@@ -41,3 +41,4 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 - [[decisions/_index|ADR-008]] Incremental VAD
 - [[decisions/_index|ADR-012]] CUDA GPU acceleration
 - [[decisions/_index|ADR-014]] NVIDIA/CUDA environment detection
+- [[decisions/_index|ADR-017]] Whisper model hot-swap via `UnloadAsync`

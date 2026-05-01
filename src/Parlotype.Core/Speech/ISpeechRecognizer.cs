@@ -15,6 +15,14 @@ public interface ISpeechRecognizer : IAsyncDisposable
     /// <summary>Transcribes the provided audio samples (mono float in [-1, 1]) into text.</summary>
     Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Unloads the current model, releasing resources so the next
+    /// <see cref="InitializeAsync(CancellationToken)"/> call reloads from settings.
+    /// Unlike <see cref="IAsyncDisposable.DisposeAsync"/>, the recognizer remains
+    /// usable after unloading.
+    /// </summary>
+    Task UnloadAsync() => Task.CompletedTask;
+
     /// <summary>Whether the model has been loaded and is ready.</summary>
     bool IsReady { get; }
 }
