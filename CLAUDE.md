@@ -119,7 +119,7 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 - **Benchmark output:** Use Spectre.Console, not `Console.WriteLine`.
 - **Whisper model selection:** `WhisperModelType` enum in Core maps to `GgmlType` in Platform via `WhisperModelTypeExtensions`. `WhisperModelInfo` holds static metadata (display name, disk size, SHA). Model choice is persisted via `SettingsKeys.SelectedWhisperModel` and read by `WhisperSpeechRecognizer` at initialization.
 - **Whisper parameters:** `WhisperOptions` record in Core configures model, language, beam size, temperature, initial prompt, and CPU thread count. `ISpeechRecognizer.InitializeAsync(WhisperOptions)` overload applies these; the no-args overload reads from settings (desktop default). `WhisperSpeechRecognizer` uses greedy decoding for beam size 1, beam search for larger values, and `WithThreads()` when thread count is specified.
-- **Whisper model lifecycle:** Never load the Whisper model multiple times in a single run.
+- **Whisper model lifecycle:** Never load multiple Whisper models simultaneously. Sequential load→unload→load is supported via `ISpeechRecognizer.UnloadAsync()` (see ADR-017).
 
 ## Key Patterns
 

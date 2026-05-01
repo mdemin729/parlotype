@@ -53,7 +53,7 @@ Benchmark.Tests → Benchmark, Core
 - **Warnings as errors**: `TreatWarningsAsErrors=true` in `Directory.Build.props`
 - **Interfaces in Core, implementations in Platform**: never add platform packages to Core
 - **All services are singletons** registered in `PlatformServiceExtensions.cs`
-- **Whisper model lifecycle**: never load the model multiple times in a single run
+- **Whisper model lifecycle**: never load multiple models simultaneously; sequential load→unload→load is supported via `UnloadAsync()` (ADR-017)
 
 ## Definition of Done
 
