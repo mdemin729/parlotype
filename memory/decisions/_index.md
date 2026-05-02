@@ -26,7 +26,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 012 | [[012-cuda-gpu-acceleration\|CUDA GPU Acceleration]] | Accepted | Optional NVIDIA CUDA via Whisper.net.Runtime.Cuda |
 | 013 | [[013-obsidian-memory-vault\|Obsidian Memory Vault for AI Agents]] | Accepted | Persistent memory substrate for AI agents in `memory/` |
 | 014 | [[014-nvidia-environment-detection\|NVIDIA/CUDA Environment Detection]] | Accepted | First-party provider logs driver/toolkit/runtime at startup |
-| 015 | [[015-parlotype-desktop-v2-avalonia12\|Parlotype.Desktop.V2 — Avalonia 12 Tray-Based UI]] | Accepted | Parallel tray-first frontend on Avalonia 12 with per-section settings VMs |
+| 015 | [[015-parlotype-desktop-v2-avalonia12\|Parlotype.Desktop — Avalonia 12 Tray-Based UI]] | Accepted | Tray-first frontend on Avalonia 12 (originally Desktop.V2, renamed after V1 sunset) |
 | 016 | [[016-avalonia12-developer-tools\|Avalonia 12 Developer Tools (V2)]] | Accepted | DEBUG-only `AvaloniaUI.DiagnosticsSupport` + `avdt` global tool replace retired classic `Avalonia.Diagnostics` in V2 |
 | 017 | [[017-whisper-model-hot-swap\|Whisper Model Hot-Swap via UnloadAsync]] | Accepted | `ISpeechRecognizer.UnloadAsync` enables model switching without app restart |
 | 018 | [[018-v1-sunset-consolidation\|Sunset V1 — Consolidate on V2]] | Accepted | Removed `Parlotype.Desktop` (V1); implemented WaitTime, punctuation, profanity features in V2 end-to-end |
