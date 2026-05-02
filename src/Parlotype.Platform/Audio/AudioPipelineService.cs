@@ -342,8 +342,13 @@ public sealed class AudioPipelineService : IAudioPipeline
     {
         var savedWaitTime = await _settings.GetAsync<string>(SettingsKeys.WaitTime, ct);
         var waitTime = Enum.TryParse<WaitTimeOption>(savedWaitTime, out var wt) ? wt : WaitTimeOption.Medium;
-        _silenceThresholdSamples = (int)(waitTime.GetSeconds() * SampleRate);
-        _logger.LogInformation("Silence threshold: {WaitTime} ({Ms}ms)", waitTime, waitTime.GetSeconds() * 1000);
+        var rawSamples = (int)(waitTime.GetSeconds() * SampleRate);
+        // Silence threshold must be at least VadMinChunkSamples — the pipeline only
+        // refreshes VAD state in 500ms chunks, so a smaller threshold would mistake
+        // unprocessed audio for silence and flush mid-speech.
+        _silenceThresholdSamples = Math.Max(rawSamples, VadMinChunkSamples);
+        _logger.LogInformation("Silence threshold: {WaitTime} ({Ms}ms, clamped to {ActualMs}ms)",
+            waitTime, waitTime.GetSeconds() * 1000, _silenceThresholdSamples * 1000.0 / SampleRate);
 
         var punctuationStr = await _settings.GetAsync<string>(SettingsKeys.AutomaticPunctuation, ct);
         var punctuationEnabled = !bool.TryParse(punctuationStr, out var p) || p; // default true

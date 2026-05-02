@@ -36,6 +36,8 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
             .Select(o => new WaitTimeDisplayItem(o, SelectWaitTimeCommand))
             .ToArray();
 
+        UpdateWaitTimeSelection(SelectedWaitTime);
+
         _ = InitializeAsync();
     }
 
