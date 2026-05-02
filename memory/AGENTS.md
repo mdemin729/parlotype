@@ -40,10 +40,10 @@ dotnet run --project src/Parlotype.Desktop.V2   # Launch app
 ## Dependency Direction
 
 ```
-Desktop.V2 → Platform → Core
+Desktop → Platform → Core
 Benchmark → Platform → Core
 Tests → Core, Platform
-Desktop.V2.Tests → Desktop.V2, Core
+Desktop.Tests → Desktop, Core
 Benchmark.Tests → Benchmark, Core
 ```
 

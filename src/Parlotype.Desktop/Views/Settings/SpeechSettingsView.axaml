@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.SpeechSettingsView"
+             x:DataType="vms:SpeechSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="Speech" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Configure silence detection and transcription output."
+                   Opacity="0.7" />
+
+        <!-- Wait Time (silence detection) -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="Silence Timeout" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="How long to wait after speech ends before transcribing."
+                       Opacity="0.6" FontSize="12" />
+
+            <ItemsControl ItemsSource="{Binding WaitTimeOptions}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:WaitTimeDisplayItem">
+                        <Button HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Background="Transparent"
+                                Padding="12,8"
+                                Margin="0,2"
+                                Command="{Binding SelectCommand}"
+                                CommandParameter="{Binding Option}">
+                            <Grid ColumnDefinitions="11,*">
+                                <Border Grid.Column="0"
+                                        Width="3" Height="16" CornerRadius="1.5"
+                                        Background="{DynamicResource SystemAccentColor}"
+                                        HorizontalAlignment="Left"
+                                        IsVisible="{Binding IsSelected}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding DisplayName}"
+                                           VerticalAlignment="Center"
+                                           FontSize="14" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Automatic Punctuation -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding AutomaticPunctuationEnabled, Mode=TwoWay}"
+                          OnContent="Punctuation included in output"
+                          OffContent="Punctuation stripped from output" />
+            <TextBlock Text="When enabled, transcription includes commas, periods, and other punctuation."
+                       Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
+        </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Filter Profanity -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding FilterProfanityEnabled, Mode=TwoWay}"
+                          OnContent="Profanity masked with ****"
+                          OffContent="Profanity filter off" />
+            <TextBlock Text="When enabled, recognized profanity is replaced with asterisks."
+                       Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
