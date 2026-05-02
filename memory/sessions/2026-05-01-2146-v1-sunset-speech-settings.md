@@ -4,7 +4,7 @@ type: session
 status: complete
 tags: [desktop-v1, sunset, speech-settings, post-processing, adr-018]
 created: 2026-05-01
-summary: Removed Parlotype.Desktop (V1); implemented WaitTime, punctuation, and profanity features end-to-end in V2; ported NVIDIA logging; wrote ADR-018.
+summary: Removed Parlotype.Desktop (V1); implemented WaitTime, punctuation, and profanity features end-to-end in V2; ported NVIDIA logging; wrote ADR-018. Fixed silence threshold clamping from code review.
 ---
 
 # Session: 2026-05-01 — V1 Sunset & Speech Settings
@@ -39,6 +39,8 @@ summary: Removed Parlotype.Desktop (V1); implemented WaitTime, punctuation, and 
 - `AudioPipelineService` silence threshold was hardcoded to `8_000` samples (500ms at 16kHz) — now configurable via `WaitTimeOption`
 - `TranscriptionResult.Text` is `init`-only — use `result with { Text = ... }` for post-processing
 - Whisper.net 1.9.0 has `WithSuppressTokens()` for token-level filtering, but post-processing regex is more reliable for profanity (token IDs vary by model)
+- **VAD chunking constraint**: `AudioPipelineService` processes VAD in 500ms chunks (`VadMinChunkSamples = 8_000`). Silence threshold must be ≥ this value, otherwise unprocessed audio is mistaken for silence and the pipeline flushes mid-speech. Sub-500ms `WaitTimeOption` values are clamped up.
+- `JsonSettingsService.SetAsync` only logged the key, not the value — easy to miss when debugging settings flow
 
 ## Open Blockers
 - None
@@ -50,5 +52,7 @@ summary: Removed Parlotype.Desktop (V1); implemented WaitTime, punctuation, and 
 
 ## Next Action
 - Consider renaming `Parlotype.Desktop.V2` → `Parlotype.Desktop` (cosmetic but reduces confusion; involves namespace + test project rename)
-- Update `CLAUDE.md` dependency graph in the "Coding Conventions" section (still references `Desktop → Platform → Core`)
-- Add a `WinUI` project reference update if applicable (ADR-014 references `Parlotype.Desktop`)
+- Add pipeline-level integration tests for settings → transcription output (post-processing, wait-time behavior)
+- Broaden punctuation regex to handle delimiters: `(Hello.)`, `"Hi!"` — currently only strips before whitespace/end-of-string
+- Update `CLAUDE.md` dependency graph in the "Coding Conventions" section (still references `Desktop → Platform → Core` in some places)
+- Manual test: run V2 app, change each Speech setting, verify it persists and takes effect on next recording
