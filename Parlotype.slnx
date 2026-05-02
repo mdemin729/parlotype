@@ -1,10 +1,8 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Parlotype.Core/Parlotype.Core.csproj" />
-    <Project Path="src/Parlotype.Desktop/Parlotype.Desktop.csproj" />
     <Project Path="src/Parlotype.Platform/Parlotype.Platform.csproj" />
     <Project Path="src/Parlotype.Tests/Parlotype.Tests.csproj" />
-    <Project Path="src/Parlotype.Desktop.Tests/Parlotype.Desktop.Tests.csproj" />
     <Project Path="src/Parlotype.Benchmark/Parlotype.Benchmark.csproj" />
     <Project Path="src/Parlotype.Benchmark.Tests/Parlotype.Benchmark.Tests.csproj" />
     <Project Path="src/Parlotype.Desktop.V2/Parlotype.Desktop.V2.csproj" />

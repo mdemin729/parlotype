@@ -2,7 +2,9 @@ using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Audio;
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Platform.Speech;
 
 namespace Parlotype.Platform.Audio;
 
@@ -14,6 +16,7 @@ public sealed class AudioPipelineService : IAudioPipeline
     private readonly IAudioCaptureService _capture;
     private readonly IVadService _vad;
     private readonly ISpeechRecognizer _recognizer;
+    private readonly ISettingsService _settings;
     private readonly ILogger<AudioPipelineService> _logger;
 
     private PipelineMode _mode;
@@ -36,6 +39,14 @@ public sealed class AudioPipelineService : IAudioPipeline
     /// <summary>Maximum buffer before forced processing in batch mode (30 seconds at 16kHz).</summary>
     private const int MaxBatchBufferSamples = 16_000 * 30;
 
+    private const int SampleRate = 16_000;
+
+    /// <summary>Silence threshold in samples, cached at pipeline start from settings.</summary>
+    private int _silenceThresholdSamples = SampleRate / 2; // default 500ms
+
+    /// <summary>Post-processor for transcription text, built at pipeline start from settings.</summary>
+    private TranscriptionTextProcessor? _textProcessor;
+
     public bool IsRunning { get; private set; }
 
     public event EventHandler<TranscriptionEventArgs>? TranscriptionAvailable;
@@ -44,11 +55,13 @@ public sealed class AudioPipelineService : IAudioPipeline
         IAudioCaptureService capture,
         IVadService vad,
         ISpeechRecognizer recognizer,
+        ISettingsService settings,
         ILogger<AudioPipelineService> logger)
     {
         _capture = capture;
         _vad = vad;
         _recognizer = recognizer;
+        _settings = settings;
         _logger = logger;
     }
 
@@ -60,6 +73,9 @@ public sealed class AudioPipelineService : IAudioPipeline
             return;
 
         _mode = mode;
+
+        // Snapshot settings for this recording session
+        await CacheSettingsAsync(cancellationToken);
 
         if (!_recognizer.IsReady)
             await _recognizer.InitializeAsync(cancellationToken);
@@ -170,8 +186,8 @@ public sealed class AudioPipelineService : IAudioPipeline
             var lastSegment = _accumulatedSegments[^1];
             int silenceAfterSpeech = _sampleBuffer.Count - lastSegment.EndSample;
 
-            // At least 500ms of silence after last speech (8000 samples at 16kHz)
-            if (silenceAfterSpeech >= 8_000)
+            // Silence after last speech exceeds the configured threshold
+            if (silenceAfterSpeech >= _silenceThresholdSamples)
             {
                 // Extract all speech samples and queue for transcription
                 var speechSamples = ExtractSpeechSamples(
@@ -277,6 +293,9 @@ public sealed class AudioPipelineService : IAudioPipeline
                     // Use CancellationToken.None so in-flight transcription completes even during shutdown
                     var result = await _recognizer.TranscribeAsync(samples, CancellationToken.None);
 
+                    if (_textProcessor is not null)
+                        result = result with { Text = _textProcessor.Process(result.Text) };
+
                     if (!string.IsNullOrWhiteSpace(result.Text))
                     {
                         _logger.LogDebug("Transcription result: {Text}", result.Text);
@@ -317,6 +336,25 @@ public sealed class AudioPipelineService : IAudioPipeline
     private static float[] ExtractSpeechSamples(ReadOnlySpan<float> buffer, List<VadSpeechSegment> segments)
     {
         return SpeechSegmentExtractor.Extract(buffer, segments);
+    }
+
+    private async Task CacheSettingsAsync(CancellationToken ct)
+    {
+        var savedWaitTime = await _settings.GetAsync<string>(SettingsKeys.WaitTime, ct);
+        var waitTime = Enum.TryParse<WaitTimeOption>(savedWaitTime, out var wt) ? wt : WaitTimeOption.Medium;
+        _silenceThresholdSamples = (int)(waitTime.GetSeconds() * SampleRate);
+        _logger.LogInformation("Silence threshold: {WaitTime} ({Ms}ms)", waitTime, waitTime.GetSeconds() * 1000);
+
+        var punctuationStr = await _settings.GetAsync<string>(SettingsKeys.AutomaticPunctuation, ct);
+        var punctuationEnabled = !bool.TryParse(punctuationStr, out var p) || p; // default true
+
+        var profanityStr = await _settings.GetAsync<string>(SettingsKeys.FilterProfanity, ct);
+        var profanityEnabled = bool.TryParse(profanityStr, out var f) && f; // default false
+
+        var needsProcessor = !punctuationEnabled || profanityEnabled;
+        _textProcessor = needsProcessor
+            ? new TranscriptionTextProcessor(stripPunctuation: !punctuationEnabled, filterProfanity: profanityEnabled)
+            : null;
     }
 
     public async ValueTask DisposeAsync()

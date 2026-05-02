@@ -51,7 +51,7 @@ public class AudioPipelineTests
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
         await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
 
-        await using var pipeline = new AudioPipelineService(capture, vad, recognizer, NullLogger<AudioPipelineService>.Instance);
+        await using var pipeline = new AudioPipelineService(capture, vad, recognizer, settings, NullLogger<AudioPipelineService>.Instance);
 
         TranscriptionResult? transcription = null;
         var transcriptionReceived = new TaskCompletionSource<TranscriptionResult>();

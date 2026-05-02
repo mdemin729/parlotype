@@ -9,6 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\profanity-words.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Parlotype.Core\Parlotype.Core.csproj" />
   </ItemGroup>
 

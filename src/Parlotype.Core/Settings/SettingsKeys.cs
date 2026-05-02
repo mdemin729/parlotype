@@ -10,4 +10,7 @@ public static class SettingsKeys
     public const string HotkeyKey = "HotkeyKey";
     public const string ActivationMode = "ActivationMode";
     public const string RuntimePreference = "RuntimePreference";
+    public const string WaitTime = "WaitTime";
+    public const string AutomaticPunctuation = "AutomaticPunctuation";
+    public const string FilterProfanity = "FilterProfanity";
 }

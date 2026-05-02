@@ -12,6 +12,7 @@ using Parlotype.Desktop.V2.Services;
 using Parlotype.Desktop.V2.ViewModels;
 using Parlotype.Desktop.V2.ViewModels.Settings;
 using Parlotype.Platform;
+using Parlotype.Platform.Speech;
 using Parlotype.Platform.TextInjection;
 using ZLogger;
 
@@ -54,7 +55,45 @@ public class App : Application
         _hotkeyCoordinator = _services.GetRequiredService<HotkeyCoordinator>();
         _ = _hotkeyCoordinator.StartAsync();
 
+        _ = Task.Run(() => LogNvidiaEnvironmentAsync(_services));
+
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task LogNvidiaEnvironmentAsync(IServiceProvider provider)
+    {
+        var logger = provider.GetRequiredService<ILogger<App>>();
+        try
+        {
+            var nvidiaProvider = provider.GetRequiredService<INvidiaEnvironmentProvider>();
+            var info = await nvidiaProvider.GetAsync().ConfigureAwait(false);
+
+            if (!info.HasNvidia)
+            {
+                logger.LogInformation("No NVIDIA driver detected on this system");
+                return;
+            }
+
+            var toolkits = info.InstalledToolkitVersions.Count > 0
+                ? string.Join(", ", info.InstalledToolkitVersions)
+                : "(none)";
+
+            var runtimes = info.LoadableRuntimes.Count > 0
+                ? string.Join(", ", info.LoadableRuntimes
+                    .Select(r => $"{r.LibraryName} (runtime {r.RuntimeVersion}, driver {r.DriverVersion})"))
+                : "(none)";
+
+            logger.LogInformation(
+                "NVIDIA environment detected: Driver={Driver} (max CUDA: {MaxCuda}); Installed Toolkits=[{Toolkits}]; Loadable Runtimes=[{Runtimes}]",
+                info.DriverVersion ?? "unknown",
+                info.DriverMaxCudaVersion ?? "unknown",
+                toolkits,
+                runtimes);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to detect NVIDIA environment");
+        }
     }
 
     private static IServiceProvider BuildServiceProvider()
@@ -107,6 +146,7 @@ public class App : Application
         services.AddSingleton<MicrophoneSettingsViewModel>();
         services.AddSingleton<WhisperModelSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
+        services.AddSingleton<SpeechSettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();
         services.AddSingleton<SettingsWindowViewModel>();
         services.AddSingleton<TranscribeViewModel>();

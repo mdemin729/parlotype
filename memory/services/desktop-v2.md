@@ -21,7 +21,7 @@ Tray-first desktop frontend on Avalonia 12.0.2 (GA). Coexists with V1 (`Parlotyp
 - `src/Parlotype.Desktop.V2/Services/HotkeyCoordinator.cs` — bridges `IGlobalHotkeyService` → `ShowTranscribe()` + `StartRecordingAsync()`
 - `src/Parlotype.Desktop.V2/Services/SilentModelDownloadService.cs` — `IModelDownloadService` impl that downloads Whisper models silently in the background (no dialog; V2 has no always-visible main window)
 - `src/Parlotype.Desktop.V2/ViewModels/AppViewModel.cs` — tray menu commands (Open / Settings / Exit), bound from `Application.DataContext`
-- `src/Parlotype.Desktop.V2/ViewModels/Settings/` — `MicrophoneSettingsViewModel`, `WhisperModelSettingsViewModel` (coordinates model hot-swap: stops recording + unloads model), `HotkeySettingsViewModel`, `ThemeSettingsViewModel`
+- `src/Parlotype.Desktop.V2/ViewModels/Settings/` — `MicrophoneSettingsViewModel`, `WhisperModelSettingsViewModel` (coordinates model hot-swap: stops recording + unloads model), `HotkeySettingsViewModel`, `SpeechSettingsViewModel` (wait time, punctuation, profanity), `ThemeSettingsViewModel`
 - `src/Parlotype.Desktop.V2/Views/SettingsWindow.axaml` — `SplitView` + `ListBox` + `ContentControl` with `Window.DataTemplates` mapping each section VM type to its `UserControl`
 - `src/Parlotype.Desktop.V2/Views/Settings/` — per-section UserControls
 - `src/Parlotype.Desktop.V2/Assets/parlotype.ico` — tray icon
@@ -64,11 +64,13 @@ First-time activation needs a free AvaloniaUI Portal account (Essentials edition
 
 ## Differences from V1
 
-| Aspect | V1 (Parlotype.Desktop) | V2 (Parlotype.Desktop.V2) |
-|---|---|---|
-| Avalonia | 11.3.0 | 12.0.2 |
-| Primary UX | Single floating toolbar | Tray menu + Transcribe window |
-| Settings | One monolithic `SettingsViewModel` + flyout | Per-section VMs in dedicated window with `SplitView` nav |
-| Lifetime | Default (close last window → exit) | `OnExplicitShutdown` (close hides; exit only via tray) |
-| Hotkey behaviour | Toggle/PTT recording | Same + opens Transcribe window |
-| Test framework | xUnit v2 | xUnit v3 |
+V1 (`Parlotype.Desktop`, Avalonia 11) has been retired — see ADR-018. V2 is now the sole desktop frontend.
+
+| Aspect | V2 (Parlotype.Desktop.V2) |
+|---|---|
+| Avalonia | 12.0.2 |
+| Primary UX | Tray menu + Transcribe window |
+| Settings | Per-section VMs in dedicated window with `SplitView` nav (Microphone, Whisper Model, Hotkey, Speech, Theme) |
+| Lifetime | `OnExplicitShutdown` (close hides; exit only via tray) |
+| Hotkey behaviour | Toggle/PTT recording + opens Transcribe window |
+| Test framework | xUnit v3 |
