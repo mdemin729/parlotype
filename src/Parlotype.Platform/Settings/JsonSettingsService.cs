@@ -36,8 +36,11 @@ public sealed class JsonSettingsService : ISettingsService
             var dict = await LoadAsync(cancellationToken);
             if (dict.TryGetValue(key, out var element) && element is JsonElement jsonElement)
             {
-                return jsonElement.Deserialize<T>(JsonOptions);
+                var result = jsonElement.Deserialize<T>(JsonOptions);
+                _logger.LogDebug("Setting value: {Key} = {Value}", key, result);
+                return result;
             }
+            _logger.LogDebug("Setting not found: {Key}, using default", key);
             return default;
         }
         finally
@@ -51,7 +54,7 @@ public sealed class JsonSettingsService : ISettingsService
         await Lock.WaitAsync(cancellationToken);
         try
         {
-            _logger.LogDebug("Writing setting: {Key}", key);
+            _logger.LogDebug("Writing setting: {Key} = {Value}", key, value);
             var dict = await LoadAsync(cancellationToken);
             dict[key] = JsonSerializer.SerializeToElement(value, JsonOptions);
             await SaveAsync(dict, cancellationToken);
