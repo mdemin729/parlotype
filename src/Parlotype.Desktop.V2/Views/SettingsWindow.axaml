@@ -23,6 +23,9 @@
         <DataTemplate DataType="vms:ThemeSettingsViewModel">
             <v:ThemeSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:SpeechSettingsViewModel">
+            <v:SpeechSettingsView />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <SplitView IsPaneOpen="True"

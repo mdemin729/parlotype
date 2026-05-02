@@ -29,6 +29,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 015 | [[015-parlotype-desktop-v2-avalonia12\|Parlotype.Desktop.V2 — Avalonia 12 Tray-Based UI]] | Accepted | Parallel tray-first frontend on Avalonia 12 with per-section settings VMs |
 | 016 | [[016-avalonia12-developer-tools\|Avalonia 12 Developer Tools (V2)]] | Accepted | DEBUG-only `AvaloniaUI.DiagnosticsSupport` + `avdt` global tool replace retired classic `Avalonia.Diagnostics` in V2 |
 | 017 | [[017-whisper-model-hot-swap\|Whisper Model Hot-Swap via UnloadAsync]] | Accepted | `ISpeechRecognizer.UnloadAsync` enables model switching without app restart |
+| 018 | [[018-v1-sunset-consolidation\|Sunset V1 — Consolidate on V2]] | Accepted | Removed `Parlotype.Desktop` (V1); implemented WaitTime, punctuation, profanity features in V2 end-to-end |
 
 ## Template
 

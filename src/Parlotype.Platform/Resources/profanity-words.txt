@@ -1,0 +1,23 @@
+# Profanity word list for transcription filtering.
+# One word per line. Lines starting with # are comments.
+# Matching is whole-word, case-insensitive.
+ass
+asshole
+bastard
+bitch
+bullshit
+crap
+cunt
+damn
+dick
+dumbass
+fuck
+fucking
+goddamn
+hell
+jackass
+motherfucker
+piss
+shit
+slut
+whore

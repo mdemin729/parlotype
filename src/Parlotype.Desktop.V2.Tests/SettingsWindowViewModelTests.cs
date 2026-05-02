@@ -16,13 +16,14 @@ public class SettingsWindowViewModelTests
         var mic = new MicrophoneSettingsViewModel(enumerator, settings);
         var model = new WhisperModelSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
+        var speech = new SpeechSettingsViewModel(settings);
         var theme = new ThemeSettingsViewModel(settings);
 
-        return new SettingsWindowViewModel(mic, model, hotkey, theme);
+        return new SettingsWindowViewModel(mic, model, hotkey, speech, theme);
     }
 
     [Fact]
-    public void Sections_ContainsAllFourInOrder()
+    public void Sections_ContainsAllFiveInOrder()
     {
         var vm = BuildViewModel();
 
@@ -30,6 +31,7 @@ public class SettingsWindowViewModelTests
             s => Assert.Equal("Microphone", s.Title),
             s => Assert.Equal("Whisper Model", s.Title),
             s => Assert.Equal("Hotkey", s.Title),
+            s => Assert.Equal("Speech", s.Title),
             s => Assert.Equal("Theme", s.Title));
     }
 

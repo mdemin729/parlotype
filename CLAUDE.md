@@ -12,10 +12,10 @@ Parlotype is a local-first, privacy-focused voice-to-text desktop application. A
 dotnet build Parlotype.slnx          # Build entire solution (must compile with zero warnings)
 dotnet test                           # Run all tests (platform + headless UI + benchmark)
 dotnet test src/Parlotype.Tests       # Run only core/platform tests
-dotnet test src/Parlotype.Desktop.Tests    # Run only Avalonia headless UI tests
+dotnet test src/Parlotype.Desktop.V2.Tests    # Run only Avalonia headless UI tests
 dotnet test src/Parlotype.Benchmark.Tests  # Run only benchmark tests
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Run a single test
-dotnet run --project src/Parlotype.Desktop  # Launch the app
+dotnet run --project src/Parlotype.Desktop.V2  # Launch the app
 ```
 
 ### GPU / CUDA Builds
@@ -74,16 +74,16 @@ dotnet run --project src/Parlotype.Benchmark -- check \
 
 **Solution:** `Parlotype.slnx` (modern .slnx format) with 7 projects.
 
-**Dependency direction:** `Desktop → Platform → Core` and `Benchmark → Platform → Core`. Tests → Core, Platform. Desktop.Tests → Desktop, Core. Benchmark.Tests → Benchmark, Core.
+**Dependency direction:** `Desktop.V2 → Platform → Core` and `Benchmark → Platform → Core`. Tests → Core, Platform. Desktop.V2.Tests → Desktop.V2, Core. Benchmark.Tests → Benchmark, Core.
 
 | Project | Purpose |
 |---------|---------|
 | **Parlotype.Core** | Domain interfaces and models. Zero external dependencies. All contracts live here. Subfolders: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`, `TextInjection/` |
 | **Parlotype.Platform** | Implements Core interfaces (Whisper.net, NAudio, SileroVad, SharpHook). Subfolders mirror Core: `Audio/`, `Hotkeys/`, `Settings/`, `Speech/`. Register new services in `PlatformServiceExtensions.cs` |
-| **Parlotype.Desktop** | Avalonia UI app (11.3.0, Fluent theme). Entry point. Wires DI, hosts views/viewmodels |
+| **Parlotype.Desktop.V2** | Avalonia 12 tray-based desktop app. Entry point. Wires DI, hosts views/viewmodels. Settings: Microphone, Whisper Model, Hotkey, Speech (wait time, punctuation, profanity), Theme |
 | **Parlotype.Benchmark** | Console CLI for evaluating transcription quality (WER/CER/RTF). System.CommandLine + Spectre.Console + SQLite. Includes SQLite index for historical run queries, comparison engine with delta metrics, parameter sweep support, repetition-based stability analysis, per-sample memory/GC tracking, CI regression detection, and export to CSV/Markdown/JSON. CLI commands: `run`, `import`, `list`, `compare`, `export`, `check`, `sweep`. Subfolders: `Configuration/`, `Metrics/`, `Pipeline/`, `Results/`, `Reporting/` |
-| **Parlotype.Tests** | xUnit tests for Core and Platform (audio pipeline, VAD, Whisper) |
-| **Parlotype.Desktop.Tests** | Avalonia headless UI tests using `Avalonia.Headless.XUnit`. Uses `[AvaloniaFact]` instead of `[Fact]`. Mock services in `Mocks/` folder |
+| **Parlotype.Tests** | xUnit tests for Core and Platform (audio pipeline, VAD, Whisper, text post-processing) |
+| **Parlotype.Desktop.V2.Tests** | Avalonia 12 headless UI tests using `Avalonia.Headless.XUnit` + xUnit v3. Uses `[AvaloniaFact]` instead of `[Fact]`. Mock services in `Mocks/` folder |
 | **Parlotype.Benchmark.Tests** | xUnit tests for benchmark metrics (WER/CER calculation, text normalization, config deserialization), comparison engine, CSV/Markdown formatters, SQLite index, sweep expansion, repetition stats, memory metrics, and regression checks |
 
 ### Audio Pipeline Data Flow
