@@ -1,0 +1,13 @@
+{
+  "name": "silence-threshold-sweep",
+  "description": "Sweep vad.minSilenceDurationMs at values matching WaitTimeOption: 100ms (Instant), 500ms (Medium), 3000ms (VeryLong). Proves that sub-500ms silence splitting degrades transcription quality.",
+  "datasets": ["smoke-test", "libri-speech-test-other"],
+  "repetitions": 3,
+  "sweep": {
+    "whisper.model": ["Base"],
+    "whisper.language": ["auto"],
+    "whisper.runtimePreference": ["Auto"],
+    "vad.enabled": [true],
+    "vad.minSilenceDurationMs": [100, 500, 3000]
+  }
+}

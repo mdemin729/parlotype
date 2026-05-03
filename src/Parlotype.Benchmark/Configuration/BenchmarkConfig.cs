@@ -70,4 +70,11 @@ public sealed record VadConfig
 
     [JsonPropertyName("interSegmentSilenceMs")]
     public int InterSegmentSilenceMs { get; init; } = 160;
+
+    /// <summary>Pipeline flush silence threshold in milliseconds. When set, the benchmark
+    /// simulates real-time AudioPipelineService behavior: incremental VAD in 500ms chunks
+    /// with silence-triggered flushing. Each flush is transcribed separately and results
+    /// are concatenated. When null (default), the entire file is processed in one shot.</summary>
+    [JsonPropertyName("silenceThresholdMs")]
+    public int? SilenceThresholdMs { get; init; }
 }

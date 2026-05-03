@@ -178,6 +178,7 @@ dotnet run --project src/Parlotype.Benchmark -- import --output results
 | `minSilenceDurationMs` | `500` | Minimum silence to split segments (ms) |
 | `minSpeechDurationMs` | `50` | Minimum speech duration to keep (ms) |
 | `interSegmentSilenceMs` | `160` | Silence inserted between concatenated segments (ms) |
+| `silenceThresholdMs` | `null` | Pipeline flush silence threshold (ms). When set, simulates real-time AudioPipelineService behavior: audio is fed in 10ms callbacks, VAD runs in 500ms chunks, and silence exceeding this threshold triggers a flush. Each flush segment is transcribed separately and results are concatenated. When null, the entire file is processed in one shot (existing behavior). |
 
 ### Sweep Config (parameter sweep)
 
@@ -220,6 +221,15 @@ The example above produces 2 x 2 x 2 x 2 = 16 configurations. Each runs all data
 | `vad.minSilenceDurationMs` | int | `[300, 500]` |
 | `vad.minSpeechDurationMs` | int | `[50, 100]` |
 | `vad.interSegmentSilenceMs` | int | `[0, 160]` |
+| `vad.silenceThresholdMs` | int | `[100, 500, 3000]` |
+
+### Pipeline Simulation Mode
+
+The `silenceThresholdMs` parameter enables pipeline simulation mode, which reproduces the real-time behavior of `AudioPipelineService` during benchmarking. This is useful for understanding how silence-triggered segment boundaries affect transcription quality in production.
+
+**How it works:** When `silenceThresholdMs` is set to a value (e.g., 500), the benchmark simulates the live pipeline by feeding audio in 10ms callbacks, running VAD on 500ms chunks, and flushing accumulated audio whenever silence exceeds the threshold. Each flush produces a segment that is transcribed independently; results are then concatenated with inter-segment silence inserted between them. This can differ from processing the entire file at once, since Whisper context and sentence-level output formatting are reset on each flush. By sweeping `silenceThresholdMs` values, you can identify optimal thresholds that balance latency (shorter thresholds = faster user response) with transcription quality (longer thresholds = more context per segment).
+
+When `silenceThresholdMs` is null, the file is processed in one shot (existing default behavior), suitable for batch evaluation where latency is not a concern.
 
 ## Datasets
 

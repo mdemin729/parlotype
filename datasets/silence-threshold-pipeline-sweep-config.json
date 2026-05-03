@@ -1,0 +1,13 @@
+{
+  "name": "pipeline-flush-sweep",
+  "description": "Sweep pipeline silence flush threshold to measure impact of premature flushing on transcription quality. Simulates real-time AudioPipelineService behavior with different WaitTimeOption values.",
+  "datasets": ["smoke-test", "libri-speech-test-other"],
+  "repetitions": 3,
+  "sweep": {
+    "whisper.model": ["Base"],
+    "whisper.language": ["auto"],
+    "whisper.runtimePreference": ["Auto"],
+    "vad.enabled": [true],
+    "vad.silenceThresholdMs": [100, 200, 300, 500, 1000, 3000]
+  }
+}

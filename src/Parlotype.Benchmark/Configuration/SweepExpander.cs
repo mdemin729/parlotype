@@ -170,13 +170,17 @@ public static class SweepExpander
                 var gapMs = value.GetInt32();
                 return (whisper, vad with { InterSegmentSilenceMs = gapMs }, $"gap{gapMs}");
 
+            case "vad.silencethresholdms":
+                var flushMs = value.GetInt32();
+                return (whisper, vad with { SilenceThresholdMs = flushMs }, $"flush{flushMs}");
+
             default:
                 throw new InvalidOperationException(
                     $"Unknown sweep parameter path: '{path}'. " +
                     $"Valid paths: whisper.model, whisper.beamSize, whisper.temperature, " +
                     $"whisper.language, whisper.threads, whisper.initialPrompt, whisper.runtimePreference, " +
                     $"vad.enabled, vad.threshold, vad.speechPadMs, vad.minSilenceDurationMs, " +
-                    $"vad.minSpeechDurationMs, vad.interSegmentSilenceMs");
+                    $"vad.minSpeechDurationMs, vad.interSegmentSilenceMs, vad.silenceThresholdMs");
         }
     }
 

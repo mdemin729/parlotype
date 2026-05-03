@@ -179,6 +179,8 @@ public sealed class BenchmarkRunner
 
         // Optional VAD preprocessing (once)
         float[] audioForRecognition;
+        List<float[]>? pipelineFlushSegments = null;
+
         if (vadConfig.Enabled && _vadService is not null)
         {
             var vadOptions = new VadOptions
@@ -190,18 +192,31 @@ public sealed class BenchmarkRunner
                 InterSegmentSilenceMs = vadConfig.InterSegmentSilenceMs,
             };
 
-            var speechSegments = _vadService.DetectSpeech(samples.AsSpan(), vadOptions);
-            if (speechSegments.Count > 0)
+            if (vadConfig.SilenceThresholdMs is { } silenceThresholdMs)
             {
-                audioForRecognition = SpeechSegmentExtractor.Extract(
-                    samples.AsSpan(), speechSegments, vadOptions.InterSegmentSilenceMs);
-                _logger.LogDebug("VAD: {SegmentCount} speech segments extracted from {Duration:F1}s audio",
-                    speechSegments.Count, durationSeconds);
+                // Pipeline simulation mode: simulate real-time flush behavior
+                pipelineFlushSegments = PipelineSimulator.Simulate(
+                    samples.AsSpan(), _vadService, vadOptions, silenceThresholdMs);
+                audioForRecognition = samples; // won't be used directly
+                _logger.LogDebug("Pipeline simulation: {FlushCount} flush(es) from {Duration:F1}s audio with {ThresholdMs}ms threshold",
+                    pipelineFlushSegments.Count, durationSeconds, silenceThresholdMs);
             }
             else
             {
-                audioForRecognition = samples;
-                _logger.LogDebug("VAD: no speech detected, using full audio");
+                // One-shot mode (existing behavior)
+                var speechSegments = _vadService.DetectSpeech(samples.AsSpan(), vadOptions);
+                if (speechSegments.Count > 0)
+                {
+                    audioForRecognition = SpeechSegmentExtractor.Extract(
+                        samples.AsSpan(), speechSegments, vadOptions.InterSegmentSilenceMs);
+                    _logger.LogDebug("VAD: {SegmentCount} speech segments extracted from {Duration:F1}s audio",
+                        speechSegments.Count, durationSeconds);
+                }
+                else
+                {
+                    audioForRecognition = samples;
+                    _logger.LogDebug("VAD: no speech detected, using full audio");
+                }
             }
         }
         else
@@ -215,7 +230,24 @@ public sealed class BenchmarkRunner
         for (int rep = 0; rep < repetitions; rep++)
         {
             var sw = Stopwatch.StartNew();
-            var transcription = await _recognizer.TranscribeAsync(audioForRecognition.AsMemory(), cancellationToken);
+            TranscriptionResult transcription;
+
+            if (pipelineFlushSegments is { Count: > 0 })
+            {
+                // Transcribe each flush segment and concatenate
+                var texts = new List<string>();
+                foreach (var segment in pipelineFlushSegments)
+                {
+                    var segResult = await _recognizer.TranscribeAsync(segment.AsMemory(), cancellationToken);
+                    if (!string.IsNullOrWhiteSpace(segResult.Text))
+                        texts.Add(segResult.Text.Trim());
+                }
+                transcription = new TranscriptionResult { Text = string.Join(" ", texts) };
+            }
+            else
+            {
+                transcription = await _recognizer.TranscribeAsync(audioForRecognition.AsMemory(), cancellationToken);
+            }
             sw.Stop();
 
             var processingTimeMs = sw.Elapsed.TotalMilliseconds;
