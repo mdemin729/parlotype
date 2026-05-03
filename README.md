@@ -20,11 +20,6 @@ Parlotype is a local-first, privacy-focused voice-to-text desktop application. A
 
 ## Build & Run
 
-```bash
-dotnet build Parlotype.slnx
-dotnet run --project src/Parlotype.Desktop.V2
-```
-
 ```powershell
 dotnet build Parlotype.slnx
 dotnet run --project src\Parlotype.Desktop.V2
@@ -40,13 +35,13 @@ edition — free under AvaloniaUI's community licence for organisations under
 
 1. Install the standalone tool once:
 
-   ```bash
+   ```powershell
    dotnet tool install --global AvaloniaUI.DeveloperTools
    ```
 
 2. Launch it in a separate window:
 
-   ```bash
+   ```powershell
    avdt
    ```
 
@@ -61,10 +56,6 @@ See [ADR 016](docs/decisions/016-avalonia12-developer-tools.md).
 
 ## Run Tests
 
-```bash
-dotnet test
-```
-
 ```powershell
 dotnet test
 ```
@@ -72,39 +63,6 @@ dotnet test
 ## Benchmark
 
 Evaluate speech recognition quality with the built-in benchmark tool:
-
-```bash
-# Run a benchmark
-dotnet run --project src/Parlotype.Benchmark -- run \
-  --config datasets/smoke-test-config.json \
-  --datasets datasets \
-  --output results
-
-# List historical benchmark runs
-dotnet run --project src/Parlotype.Benchmark -- list --output results
-
-# Compare two runs side by side
-dotnet run --project src/Parlotype.Benchmark -- compare \
-  --run-a <run-id-a> --run-b <run-id-b> --output results
-
-# Export a run as CSV, Markdown, or JSON
-dotnet run --project src/Parlotype.Benchmark -- export \
-  --run-id <run-id> --format markdown --output results
-
-# Rebuild SQLite index from existing JSON result files
-dotnet run --project src/Parlotype.Benchmark -- import --output results
-
-# Run a parameter sweep across configurations
-dotnet run --project src/Parlotype.Benchmark -- sweep \
-  --config datasets/sweep-config.json \
-  --datasets datasets \
-  --output results
-
-# Check for regressions against a baseline (for CI)
-dotnet run --project src/Parlotype.Benchmark -- check \
-  --baseline <run-id> --current latest \
-  --output results --max-wer-delta 2.0
-```
 
 ```powershell
 # Run a benchmark
