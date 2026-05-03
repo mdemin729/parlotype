@@ -232,9 +232,9 @@ public sealed class BenchmarkRunner
             var sw = Stopwatch.StartNew();
             TranscriptionResult transcription;
 
-            if (pipelineFlushSegments is { Count: > 0 })
+            if (pipelineFlushSegments is not null)
             {
-                // Transcribe each flush segment and concatenate
+                // Pipeline simulation mode: transcribe each flush segment and concatenate
                 var texts = new List<string>();
                 foreach (var segment in pipelineFlushSegments)
                 {

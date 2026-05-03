@@ -49,6 +49,14 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
             SelectedWaitTime = wt;
             UpdateWaitTimeSelection(wt);
         }
+        else if (!string.IsNullOrEmpty(savedWaitTime))
+        {
+            // Migrate legacy values (Instant, VeryShort, Short) removed in favor of 500ms minimum
+            _logger.LogInformation("Migrating legacy WaitTime '{Legacy}' to Medium", savedWaitTime);
+            SelectedWaitTime = WaitTimeOption.Medium;
+            UpdateWaitTimeSelection(WaitTimeOption.Medium);
+            await _settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.Medium.ToString());
+        }
 
         var savedPunctuation = await _settings.GetAsync<string>(SettingsKeys.AutomaticPunctuation);
         if (bool.TryParse(savedPunctuation, out var punct))
