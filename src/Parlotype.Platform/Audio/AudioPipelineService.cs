@@ -47,6 +47,9 @@ public sealed class AudioPipelineService : IAudioPipeline
     /// <summary>Post-processor for transcription text, built at pipeline start from settings.</summary>
     private TranscriptionTextProcessor? _textProcessor;
 
+    /// <summary>Whisper options built from settings, cached at pipeline start.</summary>
+    private WhisperOptions? _whisperOptions;
+
     public bool IsRunning { get; private set; }
 
     public event EventHandler<TranscriptionEventArgs>? TranscriptionAvailable;
@@ -78,7 +81,12 @@ public sealed class AudioPipelineService : IAudioPipeline
         await CacheSettingsAsync(cancellationToken);
 
         if (!_recognizer.IsReady)
-            await _recognizer.InitializeAsync(cancellationToken);
+        {
+            if (_whisperOptions is not null)
+                await _recognizer.InitializeAsync(_whisperOptions, cancellationToken);
+            else
+                await _recognizer.InitializeAsync(cancellationToken);
+        }
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _capture.DataAvailable += OnAudioDataAvailable;
@@ -356,6 +364,28 @@ public sealed class AudioPipelineService : IAudioPipeline
         _textProcessor = needsProcessor
             ? new TranscriptionTextProcessor(stripPunctuation: !punctuationEnabled, filterProfanity: profanityEnabled)
             : null;
+
+        // Build WhisperOptions from settings for recognizer initialization
+        var savedModel = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel, ct);
+        var modelType = Enum.TryParse<WhisperModelType>(savedModel, out var mt) ? mt : WhisperModelType.Base;
+
+        var translateStr = await _settings.GetAsync<string>(SettingsKeys.TranslateToEnglish, ct);
+        var translate = bool.TryParse(translateStr, out var tr) && tr; // default false
+
+        var runtimeStr = await _settings.GetAsync<string>(SettingsKeys.RuntimePreference, ct);
+        var runtime = Enum.TryParse<RuntimePreference>(runtimeStr, out var rp) ? rp : RuntimePreference.Auto;
+
+        _whisperOptions = new WhisperOptions
+        {
+            Model = modelType,
+            Language = "auto",
+            TranslateToEnglish = translate,
+            RuntimePreference = runtime,
+        };
+
+        _logger.LogInformation(
+            "Whisper options: Model={Model}, Translate={Translate}, Runtime={Runtime}",
+            _whisperOptions.Model, _whisperOptions.TranslateToEnglish, _whisperOptions.RuntimePreference);
     }
 
     public async ValueTask DisposeAsync()

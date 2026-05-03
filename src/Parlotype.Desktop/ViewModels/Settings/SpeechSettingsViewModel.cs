@@ -25,6 +25,9 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
     [ObservableProperty]
     private bool _filterProfanityEnabled;
 
+    [ObservableProperty]
+    private bool _translateToEnglishEnabled;
+
     public SpeechSettingsViewModel(
         ISettingsService settings,
         ILogger<SpeechSettingsViewModel>? logger = null)
@@ -65,6 +68,10 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
         var savedProfanity = await _settings.GetAsync<string>(SettingsKeys.FilterProfanity);
         if (bool.TryParse(savedProfanity, out var prof))
             FilterProfanityEnabled = prof;
+
+        var savedTranslate = await _settings.GetAsync<string>(SettingsKeys.TranslateToEnglish);
+        if (bool.TryParse(savedTranslate, out var trans))
+            TranslateToEnglishEnabled = trans;
     }
 
     [RelayCommand]
@@ -92,5 +99,11 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
     {
         _logger.LogInformation("Filter profanity: {Enabled}", value);
         _ = _settings.SetAsync(SettingsKeys.FilterProfanity, value.ToString());
+    }
+
+    partial void OnTranslateToEnglishEnabledChanged(bool value)
+    {
+        _logger.LogInformation("Translate to English: {Enabled}", value);
+        _ = _settings.SetAsync(SettingsKeys.TranslateToEnglish, value.ToString());
     }
 }

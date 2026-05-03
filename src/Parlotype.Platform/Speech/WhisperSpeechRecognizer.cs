@@ -14,6 +14,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
     private readonly ILogger<WhisperSpeechRecognizer> _logger;
     private WhisperFactory? _factory;
     private WhisperProcessor? _processor;
+    private WhisperOptions? _currentOptions;
     private bool _disposed;
 
     public bool IsReady { get; private set; }
@@ -57,8 +58,15 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (IsReady)
+        if (IsReady && options == _currentOptions)
             return;
+
+        // Options changed — unload the current model before reinitializing
+        if (IsReady)
+        {
+            _logger.LogInformation("Whisper options changed, reinitializing");
+            await UnloadAsync();
+        }
 
         _logger.LogInformation(
             "Initializing Whisper with model: {Model}, language: {Language}, beamSize: {BeamSize}, temperature: {Temperature}",
@@ -88,10 +96,14 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             builder.WithGreedySamplingStrategy();
         }
 
+        if (options.TranslateToEnglish)
+            builder.WithTranslate();
+
         if (!string.IsNullOrEmpty(options.InitialPrompt))
             builder.WithPrompt(options.InitialPrompt);
 
         _processor = builder.Build();
+        _currentOptions = options;
         IsReady = true;
         _logger.LogInformation("Whisper model loaded successfully");
     }

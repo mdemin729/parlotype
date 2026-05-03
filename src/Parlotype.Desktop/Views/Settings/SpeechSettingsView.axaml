@@ -64,5 +64,16 @@
             <TextBlock Text="When enabled, recognized profanity is replaced with asterisks."
                        Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
         </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Translate to English -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding TranslateToEnglishEnabled, Mode=TwoWay}"
+                          OnContent="Translating to English"
+                          OffContent="Translation off" />
+            <TextBlock Text="When enabled, non-English speech is translated to English. Works best with Medium or Large models."
+                       Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
+        </StackPanel>
     </StackPanel>
 </UserControl>
