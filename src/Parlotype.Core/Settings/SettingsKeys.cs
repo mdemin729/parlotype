@@ -13,4 +13,5 @@ public static class SettingsKeys
     public const string WaitTime = "WaitTime";
     public const string AutomaticPunctuation = "AutomaticPunctuation";
     public const string FilterProfanity = "FilterProfanity";
+    public const string TranslateToEnglish = "TranslateToEnglish";
 }

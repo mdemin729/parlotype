@@ -21,7 +21,7 @@ Tray-first desktop frontend on Avalonia 12.0.2 (GA). Sole desktop app after V1 s
 - `src/Parlotype.Desktop/Services/HotkeyCoordinator.cs` — bridges `IGlobalHotkeyService` → `ShowTranscribe()` + `StartRecordingAsync()`
 - `src/Parlotype.Desktop/Services/SilentModelDownloadService.cs` — `IModelDownloadService` impl that downloads Whisper models silently in the background (no dialog; tray app has no always-visible main window)
 - `src/Parlotype.Desktop/ViewModels/AppViewModel.cs` — tray menu commands (Open / Settings / Exit), bound from `Application.DataContext`
-- `src/Parlotype.Desktop/ViewModels/Settings/` — `MicrophoneSettingsViewModel`, `WhisperModelSettingsViewModel` (coordinates model hot-swap: stops recording + unloads model), `HotkeySettingsViewModel`, `SpeechSettingsViewModel` (wait time, punctuation, profanity), `ThemeSettingsViewModel`
+- `src/Parlotype.Desktop/ViewModels/Settings/` — `MicrophoneSettingsViewModel`, `WhisperModelSettingsViewModel` (coordinates model hot-swap: stops recording + unloads model), `HotkeySettingsViewModel`, `SpeechSettingsViewModel` (wait time, punctuation, profanity, translate to English), `ThemeSettingsViewModel`
 - `src/Parlotype.Desktop/Views/SettingsWindow.axaml` — `SplitView` + `ListBox` + `ContentControl` with `Window.DataTemplates` mapping each section VM type to its `UserControl`
 - `src/Parlotype.Desktop/Views/Settings/` — per-section UserControls
 - `src/Parlotype.Desktop/Assets/parlotype.ico` — tray icon

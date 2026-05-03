@@ -32,6 +32,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 018 | [[018-v1-sunset-consolidation\|Sunset V1 — Consolidate on V2]] | Accepted | Removed `Parlotype.Desktop` (V1); implemented WaitTime, punctuation, profanity features in V2 end-to-end |
 | 019 | [[019-remove-sub-500ms-silence-threshold\|Remove Sub-500ms Silence Threshold]] | Accepted | Removed Instant/VeryShort/Short from WaitTimeOption; benchmark proved sub-500ms causes 77%+ WER |
 | 020 | [[020-sharphook7-simple-global-hook\|Upgrade SharpHook 7 + SimpleGlobalHook]] | Accepted | Switched to SimpleGlobalHook for working event suppression; upgraded SharpHook 6→7.1.1 |
+| 021 | [[021-whisper-translation-to-english\|Whisper Translation to English via Settings]] | Accepted | Settings-driven translation toggle; recognizer reinitializes when options change |
 
 ## Template
 

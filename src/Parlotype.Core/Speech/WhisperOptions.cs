@@ -21,6 +21,7 @@ public sealed record WhisperOptions
     /// <summary>Number of CPU threads for inference. null = Whisper default.</summary>
     public int? Threads { get; init; }
 
-    /// <summary>Preferred runtime backend (Auto = try GPU first, Cpu = CPU only).</summary>
+    /// <summary>When true, translate non-English speech to English output.</summary>
+    public bool TranslateToEnglish { get; init; }
     public RuntimePreference RuntimePreference { get; init; } = RuntimePreference.Auto;
 }
