@@ -151,55 +151,31 @@ public class AudioPipelineTests
     }
 
     [Theory]
-    [InlineData(WaitTimeOption.Instant)]   // 100ms = 1600 samples → clamped to 8000
-    [InlineData(WaitTimeOption.VeryShort)] // 200ms = 3200 samples → clamped to 8000
-    [InlineData(WaitTimeOption.Short)]     // 300ms = 4800 samples → clamped to 8000
-    public async Task SilenceThreshold_BelowMinimum_ClampedTo500ms(WaitTimeOption waitTime)
+    [InlineData(WaitTimeOption.Medium)]    // 500ms
+    [InlineData(WaitTimeOption.Long)]      // 1000ms
+    [InlineData(WaitTimeOption.Extended)]  // 2000ms
+    [InlineData(WaitTimeOption.VeryLong)]  // 3000ms
+    public async Task SilenceThreshold_DoesNotFlushBeforeConfiguredDuration(WaitTimeOption waitTime)
     {
-        // 300ms of silence should NOT trigger flush even for Instant (100ms),
-        // because the threshold is clamped to 500ms (VadMinChunkSamples = 8000).
+        // 300ms of silence should NOT trigger flush for any option (minimum is 500ms)
         bool flushedAt300ms = await DidPipelineFlushAsync(waitTime, 300);
         Assert.False(flushedAt300ms,
-            $"WaitTimeOption.{waitTime} should NOT flush with only 300ms of silence " +
-            "(threshold is clamped to 500ms minimum)");
+            $"WaitTimeOption.{waitTime} should NOT flush with only 300ms of silence");
     }
 
-    [Theory]
-    [InlineData(WaitTimeOption.Instant)]   // clamped to 500ms
-    [InlineData(WaitTimeOption.VeryShort)] // clamped to 500ms
-    [InlineData(WaitTimeOption.Short)]     // clamped to 500ms
-    [InlineData(WaitTimeOption.Medium)]    // exactly 500ms (no clamping)
-    public async Task SilenceThreshold_AtOrAboveMinimum_FlushesAt500ms(WaitTimeOption waitTime)
+    [Fact]
+    public async Task SilenceThreshold_Medium_FlushesAt500ms()
     {
-        // 600ms of silence (> 500ms threshold) should trigger flush for all sub-500ms options
-        // and for Medium (which is exactly 500ms). Extra margin ensures VAD chunk boundary alignment.
-        bool flushedAt600ms = await DidPipelineFlushAsync(waitTime, 600);
+        // Medium = 500ms, so 600ms of silence should trigger flush
+        bool flushedAt600ms = await DidPipelineFlushAsync(WaitTimeOption.Medium, 600);
         Assert.True(flushedAt600ms,
-            $"WaitTimeOption.{waitTime} should flush with 600ms of silence " +
-            "(threshold is 500ms for all sub-500ms options and Medium)");
+            "WaitTimeOption.Medium (500ms) should flush with 600ms of silence");
     }
 
     [Fact]
-    public async Task SilenceThreshold_InstantAndMedium_BehaveIdentically()
+    public async Task SilenceThreshold_Long_FlushesAtConfiguredDuration()
     {
-        // Both Instant (100ms, clamped to 500ms) and Medium (500ms, unclamped)
-        // should produce the same behavior: no flush at 300ms, flush at 600ms.
-        bool instantAt300 = await DidPipelineFlushAsync(WaitTimeOption.Instant, 300);
-        bool mediumAt300 = await DidPipelineFlushAsync(WaitTimeOption.Medium, 300);
-        bool instantAt600 = await DidPipelineFlushAsync(WaitTimeOption.Instant, 600);
-        bool mediumAt600 = await DidPipelineFlushAsync(WaitTimeOption.Medium, 600);
-
-        Assert.Equal(instantAt300, mediumAt300); // Both false
-        Assert.Equal(instantAt600, mediumAt600); // Both true
-        Assert.False(instantAt300, "Neither should flush at 300ms");
-        Assert.True(instantAt600, "Both should flush at 600ms");
-    }
-
-    [Fact]
-    public async Task SilenceThreshold_Long_NotClamped_FlushesAtConfiguredDuration()
-    {
-        // WaitTimeOption.Long = 1000ms = 16000 samples — above VadMinChunkSamples,
-        // so it should NOT be clamped. 600ms silence should NOT trigger flush.
+        // WaitTimeOption.Long = 1000ms — 600ms silence should NOT trigger flush.
         bool flushedAt600ms = await DidPipelineFlushAsync(WaitTimeOption.Long, 600);
         Assert.False(flushedAt600ms,
             "WaitTimeOption.Long (1000ms) should NOT flush with only 600ms of silence");
