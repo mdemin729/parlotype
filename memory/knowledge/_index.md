@@ -28,6 +28,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[asyncrelaycommand-flicker]] | CommunityToolkit.Mvvm `AsyncRelayCommand` disables all buttons sharing the command while executing; use sync `RelayCommand` + fire-and-forget for shared commands in `ItemsControl` | 2026-04-30 |
 | [[benchmark-pipeline-recommendations]] | Optimal STT settings from 234+ config sweep: Medium/en/beam=1/temp=0.0/no-VAD for accuracy; BaseEn for speed. language="en" gives 2× speedup; higher beam sizes never help | 2026-05-01 |
 | [[vad-silence-threshold-constraint]] | Sub-500ms silence thresholds cause 77%+ WER. WaitTimeOption minimum is now Medium (500ms). Instant/VeryShort/Short removed. PipelineSimulator added for benchmark testing. | 2026-05-02 |
+| [[sharphook-suppress-event]] | SharpHook `SuppressEvent` only works with `SimpleGlobalHook`; `TaskPoolGlobalHook` and `EventLoopGlobalHook` silently ignore it | 2026-05-02 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

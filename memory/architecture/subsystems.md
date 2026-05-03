@@ -23,10 +23,10 @@ Two implementations of `ITextInjectionService`:
 ## Global Hotkeys
 
 - **Core**: `IGlobalHotkeyService`, `HotkeyBinding` record (modifiers + key name string)
-- **Platform**: `SharpHookHotkeyService` using `TaskPoolGlobalHook` for non-blocking dispatch
+- **Platform**: `SharpHookHotkeyService` using `SimpleGlobalHook` (required for event suppression; ADR-020)
 - **Mapping**: `KeyCodeMapper` converts Core key names → SharpHook `KeyCode`
 - **Modes**: Push-to-Talk (key-down → start, key-up → stop) and Toggle
-- **Suppression**: `SuppressEvent` prevents hotkey passthrough (Windows/macOS only)
+- **Suppression**: `SuppressEvent` prevents hotkey passthrough (Windows/macOS only; requires `SimpleGlobalHook` — `TaskPoolGlobalHook` silently ignores it)
 - **Conflict detection**: `HotkeyConflictDetector` warns on reserved OS shortcuts
 - **UI**: `HotkeyRecorderView` captures key combos in settings flyout
 - **Persistence**: `JsonSettingsService` stores `HotkeyModifiers`, `HotkeyKey`, `ActivationMode`

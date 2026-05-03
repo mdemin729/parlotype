@@ -7,7 +7,7 @@ using SharpHook.Data;
 namespace Parlotype.Platform.Hotkeys;
 
 /// <summary>
-/// Global hotkey listener using SharpHook's <see cref="TaskPoolGlobalHook"/>.
+/// Global hotkey listener using SharpHook's <see cref="SimpleGlobalHook"/>.
 /// Supports Push-to-Talk and Toggle activation modes.
 /// </summary>
 public sealed class SharpHookHotkeyService : IGlobalHotkeyService
@@ -15,7 +15,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
     private readonly ISettingsService _settings;
     private readonly ILogger<SharpHookHotkeyService> _logger;
 
-    private TaskPoolGlobalHook? _hook;
+    private SimpleGlobalHook? _hook;
     private KeyCode _targetKeyCode;
     private volatile bool _isActive;
     private volatile bool _isToggleRecording;
@@ -40,7 +40,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
 
         await LoadSettingsAsync(cancellationToken);
 
-        _hook = new TaskPoolGlobalHook(1, GlobalHookType.Keyboard, runAsyncOnBackgroundThread: true);
+        _hook = new SimpleGlobalHook(GlobalHookType.Keyboard, runAsyncOnBackgroundThread: true);
         _hook.KeyPressed += OnKeyPressed;
         _hook.KeyReleased += OnKeyReleased;
 
@@ -111,11 +111,16 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
 
     private void OnKeyReleased(object? sender, KeyboardHookEventArgs e)
     {
-        if (Mode != ActivationMode.PushToTalk)
+        if (e.Data.KeyCode != _targetKeyCode)
             return;
 
-        // For PTT, release on the primary key regardless of modifier state
-        if (e.Data.KeyCode != _targetKeyCode)
+        var modifiers = KeyCodeMapper.ToHotkeyModifiers(e.RawEvent.Mask);
+        if (modifiers != CurrentBinding.Modifiers)
+            return;
+
+        e.SuppressEvent = true;
+
+        if (Mode != ActivationMode.PushToTalk)
             return;
 
         if (_isActive)
