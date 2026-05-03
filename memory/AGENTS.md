@@ -16,7 +16,7 @@ Parlotype is a local-first, privacy-focused voice-to-text desktop app. All speec
 dotnet build Parlotype.slnx                    # Build (zero warnings required)
 dotnet test                                     # All tests
 dotnet test -p:EnableCuda=false                 # CPU-only tests
-dotnet run --project src/Parlotype.Desktop.V2   # Launch app
+dotnet run --project src/Parlotype.Desktop      # Launch app
 ```
 
 ## Navigation

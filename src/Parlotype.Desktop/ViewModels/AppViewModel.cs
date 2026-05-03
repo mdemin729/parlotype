@@ -37,7 +37,7 @@ public partial class AppViewModel : ViewModelBase
 
     private sealed class DesignWindowManager : IWindowManager
     {
-        public void ShowTranscribe() { }
+        public void ShowTranscribe(bool activate = true) { }
         public void ShowSettings() { }
         public void HideTranscribe() { }
         public void Exit() { }

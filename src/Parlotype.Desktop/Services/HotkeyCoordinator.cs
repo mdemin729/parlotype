@@ -57,7 +57,7 @@ public sealed class HotkeyCoordinator : IDisposable
     private void OnHotkeyPressed(object? sender, EventArgs e) =>
         Dispatcher.UIThread.Post(async () =>
         {
-            _windowManager.ShowTranscribe();
+            _windowManager.ShowTranscribe(activate: false);
             await _transcribeViewModel.StartRecordingAsync();
         });
 

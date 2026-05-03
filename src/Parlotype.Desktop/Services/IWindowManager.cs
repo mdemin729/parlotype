@@ -7,8 +7,9 @@ namespace Parlotype.Desktop.Services;
 /// </summary>
 public interface IWindowManager
 {
-    /// <summary>Show + activate the Transcribe window. Creates it if needed.</summary>
-    void ShowTranscribe();
+    /// <summary>Show the Transcribe window. Creates it if needed.</summary>
+    /// <param name="activate">When true, activates (focuses) the window; when false, shows without stealing focus.</param>
+    void ShowTranscribe(bool activate = true);
 
     /// <summary>Show + activate the Settings window. Creates it if needed.</summary>
     void ShowSettings();
