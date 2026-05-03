@@ -19,7 +19,7 @@ internal sealed class WindowManager : IWindowManager
         _services = services;
     }
 
-    public void ShowTranscribe() => Dispatcher.UIThread.Post(() =>
+    public void ShowTranscribe(bool activate = true) => Dispatcher.UIThread.Post(() =>
     {
         if (_transcribe is null || !_transcribe.IsVisible && _transcribe.PlatformImpl is null)
         {
@@ -35,9 +35,11 @@ internal sealed class WindowManager : IWindowManager
             };
         }
 
+        _transcribe.ShowActivated = activate;
         _transcribe.Show();
         _transcribe.WindowState = WindowState.Normal;
-        _transcribe.Activate();
+        if (activate)
+            _transcribe.Activate();
     });
 
     public void ShowSettings() => Dispatcher.UIThread.Post(() =>
