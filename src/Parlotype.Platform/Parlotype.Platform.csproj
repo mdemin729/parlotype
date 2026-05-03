@@ -22,7 +22,7 @@
     <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime.Cuda" Version="1.9.0" Condition="'$(EnableCuda)' != 'false'" />
     <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="SharpHook" Version="6.0.0" />
+    <PackageReference Include="SharpHook" Version="7.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-preview.1.25080.5" />
     <PackageReference Include="ZLogger" Version="2.5.10" />
   </ItemGroup>
