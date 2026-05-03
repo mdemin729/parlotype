@@ -103,13 +103,17 @@ public static class PipelineSimulator
             }
         }
 
-        // Final flush: if any speech segments remain
-        if (accumulatedSegments.Count > 0)
+        // Final flush: rerun VAD on the entire remaining buffer (mirrors AudioPipelineService.FlushBuffer)
+        if (buffer.Count >= 1024)
         {
             var bufferSpan = System.Runtime.InteropServices.CollectionsMarshal.AsSpan(buffer);
-            var speechSamples = SpeechSegmentExtractor.Extract(
-                bufferSpan, accumulatedSegments, vadOptions.InterSegmentSilenceMs);
-            results.Add(speechSamples);
+            var finalSegments = vadService.DetectSpeech(bufferSpan, vadOptions);
+            if (finalSegments.Count > 0)
+            {
+                var speechSamples = SpeechSegmentExtractor.Extract(
+                    bufferSpan, finalSegments, vadOptions.InterSegmentSilenceMs);
+                results.Add(speechSamples);
+            }
         }
 
         return results;
