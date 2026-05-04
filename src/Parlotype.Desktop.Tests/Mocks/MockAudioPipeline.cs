@@ -14,14 +14,19 @@ public sealed class MockAudioPipeline : IAudioPipeline
     /// <summary>When set, <see cref="StartAsync"/> will throw this exception.</summary>
     public Exception? ThrowOnStart { get; set; }
 
-    public Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default)
+    /// <summary>When set, <see cref="StartAsync"/> will delay for this duration before completing.</summary>
+    public TimeSpan? StartDelay { get; set; }
+
+    public async Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default)
     {
         if (ThrowOnStart is not null)
             throw ThrowOnStart;
 
+        if (StartDelay is not null)
+            await Task.Delay(StartDelay.Value, cancellationToken);
+
         IsRunning = true;
         StartCount++;
-        return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken = default)

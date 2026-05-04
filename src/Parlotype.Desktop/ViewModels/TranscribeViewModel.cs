@@ -62,6 +62,7 @@ public partial class TranscribeViewModel : ViewModelBase
         try
         {
             _pipeline.TranscriptionAvailable += OnTranscriptionAvailable;
+            StatusText = "Loading model...";
             await _pipeline.StartAsync(PipelineMode.Batch);
             IsRecording = true;
             StatusText = "Recording...";

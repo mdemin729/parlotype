@@ -99,6 +99,47 @@ public class AudioPipelineTests
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
+    /// <summary>
+    /// Speech recognizer spy that tracks <see cref="InitializeAsync(WhisperOptions, CancellationToken)"/> calls
+    /// and simulates unload/reload lifecycle.
+    /// </summary>
+    private sealed class SpySpeechRecognizer : ISpeechRecognizer
+    {
+        public bool IsReady { get; private set; }
+        public List<WhisperOptions> InitCalls { get; } = [];
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default)
+        {
+            IsReady = true;
+            return Task.CompletedTask;
+        }
+
+        public Task InitializeAsync(WhisperOptions options, CancellationToken cancellationToken = default)
+        {
+            if (IsReady && InitCalls.Count > 0 && options == InitCalls[^1])
+                return Task.CompletedTask;
+
+            InitCalls.Add(options);
+            IsReady = true;
+            return Task.CompletedTask;
+        }
+
+        public Task UnloadAsync()
+        {
+            IsReady = false;
+            return Task.CompletedTask;
+        }
+
+        public Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
+            => Task.FromResult(new TranscriptionResult { Text = "spy transcription" });
+
+        public ValueTask DisposeAsync()
+        {
+            IsReady = false;
+            return ValueTask.CompletedTask;
+        }
+    }
+
     /// <summary>Creates a block of non-zero "speech" samples at the given duration.</summary>
     private static float[] CreateSpeechSamples(int durationMs)
     {
@@ -161,6 +202,59 @@ public class AudioPipelineTests
         bool flushedAt300ms = await DidPipelineFlushAsync(waitTime, 300);
         Assert.False(flushedAt300ms,
             $"WaitTimeOption.{waitTime} should NOT flush with only 300ms of silence");
+    }
+
+    [Fact]
+    public async Task StartAsync_ReinitializesRecognizer_WhenTranslateSettingChanges()
+    {
+        // Arrange
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            NullLogger<AudioPipelineService>.Instance);
+
+        // Act 1: First start — should initialize with default options (translate=false)
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Single(recognizer.InitCalls);
+        Assert.False(recognizer.InitCalls[0].TranslateToEnglish);
+
+        // Act 2: Change translate setting, then start again
+        await settings.SetAsync(SettingsKeys.TranslateToEnglish, true.ToString());
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        // Assert: recognizer was reinitialized with updated options
+        Assert.Equal(2, recognizer.InitCalls.Count);
+        Assert.True(recognizer.InitCalls[1].TranslateToEnglish);
+    }
+
+    [Fact]
+    public async Task StartAsync_SkipsReinitialization_WhenSettingsUnchanged()
+    {
+        // Arrange
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            NullLogger<AudioPipelineService>.Instance);
+
+        // Act: Start twice with no settings change
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        // Assert: only initialized once (second call short-circuits)
+        Assert.Single(recognizer.InitCalls);
     }
 
     [Fact]

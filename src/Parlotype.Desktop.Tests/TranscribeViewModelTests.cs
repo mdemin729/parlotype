@@ -95,6 +95,28 @@ public class TranscribeViewModelTests
     }
 
     [AvaloniaFact]
+    public async Task StartRecording_ShowsLoadingStatus_DuringPipelineStart()
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            StartDelay = TimeSpan.FromMilliseconds(200)
+        };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        var startTask = vm.StartRecordingAsync();
+
+        // While pipeline is still starting, status should show loading message
+        Assert.Equal("Loading model...", vm.StatusText);
+        Assert.False(vm.IsRecording);
+
+        await startTask;
+
+        // After pipeline started, status should show recording
+        Assert.Equal("Recording...", vm.StatusText);
+        Assert.True(vm.IsRecording);
+    }
+
+    [AvaloniaFact]
     public async Task StartRecording_PipelineThrows_ResetsState()
     {
         var pipeline = new MockAudioPipeline
