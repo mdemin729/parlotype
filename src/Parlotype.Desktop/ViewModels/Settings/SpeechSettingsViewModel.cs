@@ -4,12 +4,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.ViewModels;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
 public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
 {
     private readonly ISettingsService _settings;
+    private readonly TranscribeViewModel? _transcribeViewModel;
     private readonly ILogger<SpeechSettingsViewModel> _logger;
 
     public override string Title => "Speech";
@@ -30,9 +32,11 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
 
     public SpeechSettingsViewModel(
         ISettingsService settings,
+        TranscribeViewModel? transcribeViewModel = null,
         ILogger<SpeechSettingsViewModel>? logger = null)
     {
         _settings = settings;
+        _transcribeViewModel = transcribeViewModel;
         _logger = logger ?? NullLogger<SpeechSettingsViewModel>.Instance;
 
         WaitTimeOptions = Enum.GetValues<WaitTimeOption>()
@@ -80,7 +84,7 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
         _logger.LogInformation("Wait time selected: {WaitTime}", option);
         SelectedWaitTime = option;
         UpdateWaitTimeSelection(option);
-        _ = _settings.SetAsync(SettingsKeys.WaitTime, option.ToString());
+        _ = SaveAndStopAsync(SettingsKeys.WaitTime, option.ToString());
     }
 
     private void UpdateWaitTimeSelection(WaitTimeOption selected)
@@ -92,18 +96,29 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
     partial void OnAutomaticPunctuationEnabledChanged(bool value)
     {
         _logger.LogInformation("Automatic punctuation: {Enabled}", value);
-        _ = _settings.SetAsync(SettingsKeys.AutomaticPunctuation, value.ToString());
+        _ = SaveAndStopAsync(SettingsKeys.AutomaticPunctuation, value.ToString());
     }
 
     partial void OnFilterProfanityEnabledChanged(bool value)
     {
         _logger.LogInformation("Filter profanity: {Enabled}", value);
-        _ = _settings.SetAsync(SettingsKeys.FilterProfanity, value.ToString());
+        _ = SaveAndStopAsync(SettingsKeys.FilterProfanity, value.ToString());
     }
 
     partial void OnTranslateToEnglishEnabledChanged(bool value)
     {
         _logger.LogInformation("Translate to English: {Enabled}", value);
-        _ = _settings.SetAsync(SettingsKeys.TranslateToEnglish, value.ToString());
+        _ = SaveAndStopAsync(SettingsKeys.TranslateToEnglish, value.ToString());
+    }
+
+    private async Task SaveAndStopAsync(string key, string value)
+    {
+        await _settings.SetAsync(key, value);
+
+        if (_transcribeViewModel is { IsRecording: true })
+        {
+            _logger.LogInformation("Stopping recording after settings change ({Key})", key);
+            await _transcribeViewModel.StopRecordingAsync();
+        }
     }
 }

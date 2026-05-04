@@ -80,13 +80,10 @@ public sealed class AudioPipelineService : IAudioPipeline
         // Snapshot settings for this recording session
         await CacheSettingsAsync(cancellationToken);
 
-        if (!_recognizer.IsReady)
-        {
-            if (_whisperOptions is not null)
-                await _recognizer.InitializeAsync(_whisperOptions, cancellationToken);
-            else
-                await _recognizer.InitializeAsync(cancellationToken);
-        }
+        if (_whisperOptions is not null)
+            await _recognizer.InitializeAsync(_whisperOptions, cancellationToken);
+        else if (!_recognizer.IsReady)
+            await _recognizer.InitializeAsync(cancellationToken);
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _capture.DataAvailable += OnAudioDataAvailable;
