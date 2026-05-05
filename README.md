@@ -14,15 +14,32 @@ Parlotype is a local-first, privacy-focused voice-to-text desktop application. A
 - **CommunityToolkit.Mvvm** — MVVM framework
 - **SharpHook** — Global hotkeys
 
+## Platform Support
+
+Parlotype currently runs on **Windows** only. macOS and Linux support are planned for the future.
+
+**GPU acceleration** is supported for **NVIDIA** graphics cards via CUDA. AMD Radeon support is planned for the nearest future. If no compatible GPU is detected, Parlotype falls back to CPU automatically.
+
 ## Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+
+### CUDA (optional, recommended)
+
+For GPU-accelerated speech recognition with an NVIDIA graphics card:
+
+1. Install the latest NVIDIA drivers for your GPU.
+2. Download and install CUDA from [developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads).
+   - Choose **Express Installation** when prompted.
+3. Restart your computer after installation.
+
+Parlotype will automatically detect and use CUDA when available. No additional configuration is needed.
 
 ## Build & Run
 
 ```powershell
 dotnet build Parlotype.slnx
-dotnet run --project src\Parlotype.Desktop.V2
+dotnet run --project src\Parlotype.Desktop
 ```
 
 The app starts minimized to the system tray. Click the tray icon for an Open / Settings / Exit menu, or press the global hotkey to open the Transcribe window and start recording.
@@ -105,8 +122,8 @@ The benchmarkcomputes **WER** (Word Error Rate), **CER** (Character Error Rate),
 src/
 ├── Parlotype.Core/            # Domain interfaces and models (zero external deps)
 ├── Parlotype.Platform/        # Platform-specific implementations (Whisper, NAudio, SharpHook)
-├── Parlotype.Desktop.V2/      # Avalonia 12 desktop app (tray-based, entry point)
-├── Parlotype.Desktop.V2.Tests/ # Avalonia headless UI tests (xUnit v3)
+├── Parlotype.Desktop/          # Avalonia 12 desktop app (tray-based, entry point)
+├── Parlotype.Desktop.Tests/   # Avalonia headless UI tests (xUnit v3)
 ├── Parlotype.Benchmark/       # CLI benchmark tool (WER/CER/RTF, sweep, compare, CI check)
 ├── Parlotype.Benchmark.Tests/ # Benchmark unit tests
 └── Parlotype.Tests/           # Core + Platform unit tests (xUnit)

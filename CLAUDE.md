@@ -139,7 +139,7 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 
 The `memory/` directory is an Obsidian vault serving as the persistent cognitive substrate for AI agents. It uses three-tier progressive disclosure:
 
-1. **Tier 1 (always loaded):** `memory/AGENTS.md` — lightweight router with navigation pointers
+1. **Tier 1 (always loaded):** `memory/CLAUDE.md` — lightweight router with navigation pointers
 2. **Tier 2 (on demand):** `memory/*/_index.md` — summary tables per directory
 3. **Tier 3 (when relevant):** Full documents — service profiles, architecture, conventions
 
@@ -150,15 +150,13 @@ The `memory/` directory is an Obsidian vault serving as the persistent cognitive
 - `memory/decisions/` — index linking to ADRs in `docs/decisions/`
 - `memory/sessions/` — session handoff notes (episodic memory)
 - `memory/knowledge/` — stable facts learned across sessions (semantic memory)
-- `memory/skills/` — agent skills (obsidian-markdown, debug-pipeline, implement-feature, session-management)
-
 ### Session Lifecycle
 
 Apply this protocol every session. Full detail lives in
-`.claude/skills/session-management/SKILL.md` (canonical: `memory/skills/session-management.md`).
+`.claude/skills/session-management/SKILL.md`.
 
 **Start of session:**
-1. Read `memory/AGENTS.md` for orientation
+1. Read `memory/CLAUDE.md` for orientation
 2. Read the latest note in `memory/sessions/` and pick up from its **Next Action**
 3. Read the relevant `_index.md` for the area of work, then drill into specific documents as needed
 4. Skim `memory/knowledge/_index.md` for recently learned facts

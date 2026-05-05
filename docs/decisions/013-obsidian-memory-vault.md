@@ -20,14 +20,14 @@ The project already has CLAUDE.md for agent instructions and ADRs in `docs/decis
 
 Create an Obsidian vault in `memory/` at the project root that serves as the persistent cognitive substrate for AI agents. The vault uses:
 
-- **Three-tier progressive disclosure**: root router (`AGENTS.md`, ~60 lines) → directory indexes (`_index.md`) → full documents. Agents read Tier 1, decide which Tier 2 index to consult, then pull specific Tier 3 documents. This keeps token budgets lean (~500-2000 tokens for orientation vs. loading everything).
+- **Three-tier progressive disclosure**: root router (`CLAUDE.md`, ~60 lines) → directory indexes (`_index.md`) → full documents. Agents read Tier 1, decide which Tier 2 index to consult, then pull specific Tier 3 documents. This keeps token budgets lean (~500-2000 tokens for orientation vs. loading everything).
 
 - **Five memory layers**:
   - **Procedural** (`conventions/`, `skills/`): how to do things — coding standards, agent skills
   - **Semantic** (`architecture/`, `services/`, `knowledge/`): facts about the codebase
   - **Episodic** (`sessions/`): session handoffs with active focus, decisions, blockers, next actions
   - **Decision** (`decisions/`): links to ADRs explaining why things are the way they are
-  - **Identity** (`AGENTS.md`): project overview, constraints, navigation
+  - **Identity** (`CLAUDE.md`): project overview, constraints, navigation
 
 - **Obsidian-native features**: YAML frontmatter on every note (type, status, tags, last_updated, summary), `[[wikilinks]]` for internal linking, callouts for important information.
 

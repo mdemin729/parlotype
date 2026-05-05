@@ -55,5 +55,3 @@ tags: [audio, vad, whisper]
 ## Embeds
 Embed another note's content with `![[note-name]]`. Use sparingly — prefer links.
 
-## See Also
-Canonical Obsidian version: `memory/skills/obsidian-markdown.md`
