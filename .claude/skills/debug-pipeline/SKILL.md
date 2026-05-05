@@ -53,5 +53,3 @@ description: Use when debugging audio capture, VAD, Whisper transcription, text 
 | Text appears in wrong window | Window tracker lost focus | `Win32TargetWindowTracker` logic |
 | UI freezes | Background thread updating UI directly | Missing `Dispatcher.UIThread` dispatch |
 
-## See Also
-Canonical Obsidian version: `memory/skills/debug-pipeline.md`

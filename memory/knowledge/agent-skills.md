@@ -12,9 +12,7 @@ summary: How Claude/Copilot skill auto-discovery actually behaves, and why per-s
 ## Skill discovery layout
 
 Claude/Copilot CLI discovers skills only when they live as
-`.claude/skills/<kebab-name>/SKILL.md` (directory per skill). A flat collection
-of `*.md` files (such as the Obsidian-friendly `memory/skills/*.md`) is **not**
-picked up by the runtime.
+`.claude/skills/<kebab-name>/SKILL.md` (directory per skill).
 
 Each `SKILL.md` must include YAML frontmatter with at minimum:
 
@@ -49,9 +47,7 @@ but not for *temporal* activation (e.g. "the session is starting / ending").
 |----------------|-----------------|
 | `CLAUDE.md` | Invariants and protocols that must apply every session/turn (Definition of Done, Session Lifecycle summary, hard architectural rules). |
 | `.claude/skills/<x>/SKILL.md` | Topic-triggered workflows the agent should auto-load when the user's request matches (debug-pipeline, implement-feature, obsidian-markdown). |
-| `memory/skills/<x>.md` | Canonical Obsidian-vault version, human-edited. The `.claude/skills/` copy is a discovery-friendly mirror; keep them in sync. |
 
 ## See also
 - `.claude/skills/session-management/SKILL.md`
 - `CLAUDE.md` → "Session Lifecycle"
-- `memory/sessions/2026-04-30-0916-skills-scaffolding.md`

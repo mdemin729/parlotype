@@ -72,5 +72,3 @@ ADRs go in `docs/decisions/` (use `_template.md`, sequential numbering — check
 - [ ] `memory/knowledge/` entry added for non-derivable facts
 - [ ] If deferring docs, asked the user first
 
-## See Also
-Canonical Obsidian version: `memory/skills/implement-feature.md`

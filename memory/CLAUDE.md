@@ -32,10 +32,7 @@ dotnet run --project src/Parlotype.Desktop      # Launch app
 | Past design decisions | [[decisions/_index]] |
 | Session handoffs | [[sessions/_template]] |
 | Learned knowledge | [[knowledge/_index]] |
-| Obsidian markdown guide | [[obsidian-markdown]] |
-| Session start/end protocol | [[session-management]] |
-| Debugging audio pipeline | [[debug-pipeline]] |
-| Adding new features | [[implement-feature]] |
+| Agent skills | `.claude/skills/` |
 
 ## Dependency Direction
 
