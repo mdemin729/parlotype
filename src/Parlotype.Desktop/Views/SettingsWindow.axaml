@@ -17,6 +17,9 @@
         <DataTemplate DataType="vms:WhisperModelSettingsViewModel">
             <v:WhisperModelSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:RuntimeSettingsViewModel">
+            <v:RuntimeSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:HotkeySettingsViewModel">
             <v:HotkeySettingsView />
         </DataTemplate>

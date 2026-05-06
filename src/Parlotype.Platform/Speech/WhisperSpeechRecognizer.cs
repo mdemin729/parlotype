@@ -11,6 +11,8 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 {
     private readonly IModelDownloadService _downloadService;
     private readonly ISettingsService _settings;
+    private readonly INvidiaEnvironmentProvider _nvidia;
+    private readonly IVulkanEnvironmentProvider _vulkan;
     private readonly ILogger<WhisperSpeechRecognizer> _logger;
     private WhisperFactory? _factory;
     private WhisperProcessor? _processor;
@@ -19,11 +21,54 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 
     public bool IsReady { get; private set; }
 
-    public WhisperSpeechRecognizer(IModelDownloadService downloadService, ISettingsService settings, ILogger<WhisperSpeechRecognizer> logger)
+    public WhisperSpeechRecognizer(
+        IModelDownloadService downloadService,
+        ISettingsService settings,
+        INvidiaEnvironmentProvider nvidia,
+        IVulkanEnvironmentProvider vulkan,
+        ILogger<WhisperSpeechRecognizer> logger)
     {
         _downloadService = downloadService;
         _settings = settings;
+        _nvidia = nvidia;
+        _vulkan = vulkan;
         _logger = logger;
+    }
+
+    private async Task EnsureRuntimeAvailableAsync(RuntimePreference preference, CancellationToken cancellationToken)
+    {
+        switch (preference)
+        {
+            case RuntimePreference.Cuda:
+                var nvidia = await _nvidia.GetAsync(cancellationToken).ConfigureAwait(false);
+                if (!nvidia.HasNvidia)
+                    throw new RuntimeUnavailableException(
+                        RuntimePreference.Cuda,
+                        "no NVIDIA driver was detected on this machine. Install CUDA-capable drivers, switch to a different runtime in Settings, or use Auto.");
+                break;
+            case RuntimePreference.Vulkan:
+                var vulkan = await _vulkan.GetAsync(cancellationToken).ConfigureAwait(false);
+                if (!vulkan.HasVulkanLoader)
+                    throw new RuntimeUnavailableException(
+                        RuntimePreference.Vulkan,
+                        "the Vulkan loader (vulkan-1.dll) was not found. Install your GPU vendor's latest drivers or the Vulkan SDK from https://vulkan.lunarg.com/sdk/home, then restart Parlotype.");
+                break;
+        }
+    }
+
+    private void AssertLoadedRuntimeMatches(RuntimePreference preference)
+    {
+        if (preference is not (RuntimePreference.Cuda or RuntimePreference.Vulkan))
+            return;
+
+        var loaded = WhisperRuntimeBootstrap.LoadedRuntime;
+        var expected = preference == RuntimePreference.Cuda ? RuntimeLibrary.Cuda : RuntimeLibrary.Vulkan;
+        if (loaded != expected)
+        {
+            throw new RuntimeUnavailableException(
+                preference,
+                $"Whisper.net loaded '{loaded?.ToString() ?? "(none)"}' instead of '{expected}'. The native runtime may be missing or incompatible.");
+        }
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -38,13 +83,32 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             ? parsed
             : WhisperModelType.Base;
 
+        var savedRuntime = await _settings.GetAsync<string>(SettingsKeys.RuntimePreference, cancellationToken);
+        var runtimePreference = Enum.TryParse<RuntimePreference>(savedRuntime, ignoreCase: true, out var parsedRuntime)
+            ? parsedRuntime
+            : RuntimePreference.Auto;
+
+        await EnsureRuntimeAvailableAsync(runtimePreference, cancellationToken);
+
         _logger.LogInformation("Initializing Whisper with model type: {ModelType}", modelType);
         var modelPath = await _downloadService.EnsureModelAsync(modelType, cancellationToken);
 
         await WhisperRuntimeBootstrap.EnsureInitializedAsync(_settings, _logger);
 
-        _factory = WhisperFactory.FromPath(modelPath);
+        try
+        {
+            _factory = WhisperFactory.FromPath(modelPath);
+        }
+        catch (Exception ex) when (runtimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
+        {
+            throw new RuntimeUnavailableException(
+                runtimePreference,
+                $"Whisper.net failed to load the '{runtimePreference}' runtime. The native libraries may be missing or incompatible.",
+                ex);
+        }
+
         _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
+        AssertLoadedRuntimeMatches(runtimePreference);
 
         _processor = _factory.CreateBuilder()
             .WithLanguage("auto")
@@ -72,12 +136,25 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             "Initializing Whisper with model: {Model}, language: {Language}, beamSize: {BeamSize}, temperature: {Temperature}",
             options.Model, options.Language, options.BeamSize, options.Temperature);
 
+        await EnsureRuntimeAvailableAsync(options.RuntimePreference, cancellationToken);
+
         var modelPath = await _downloadService.EnsureModelAsync(options.Model, cancellationToken);
 
         WhisperRuntimeBootstrap.Initialize(options.RuntimePreference, _logger);
 
-        _factory = WhisperFactory.FromPath(modelPath);
+        try
+        {
+            _factory = WhisperFactory.FromPath(modelPath);
+        }
+        catch (Exception ex) when (options.RuntimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
+        {
+            throw new RuntimeUnavailableException(
+                options.RuntimePreference,
+                $"Whisper.net failed to load the '{options.RuntimePreference}' runtime. The native libraries may be missing or incompatible.",
+                ex);
+        }
         _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
+        AssertLoadedRuntimeMatches(options.RuntimePreference);
 
         var builder = _factory.CreateBuilder()
             .WithLanguage(options.Language)

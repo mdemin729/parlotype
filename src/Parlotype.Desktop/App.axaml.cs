@@ -56,8 +56,42 @@ public class App : Application
         _ = _hotkeyCoordinator.StartAsync();
 
         _ = Task.Run(() => LogNvidiaEnvironmentAsync(_services));
+        _ = Task.Run(() => LogVulkanEnvironmentAsync(_services));
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task LogVulkanEnvironmentAsync(IServiceProvider provider)
+    {
+        var logger = provider.GetRequiredService<ILogger<App>>();
+        try
+        {
+            var vulkanProvider = provider.GetRequiredService<IVulkanEnvironmentProvider>();
+            var info = await vulkanProvider.GetAsync().ConfigureAwait(false);
+
+            if (!info.HasVulkanLoader)
+            {
+                logger.LogInformation(
+                    "No Vulkan loader detected on this system (SDK installed: {Sdk})",
+                    info.SdkInstalled ? "yes" : "no");
+                return;
+            }
+
+            var devices = info.Devices.Count > 0
+                ? string.Join(", ", info.Devices
+                    .Select(d => $"{d.Name} ({d.DeviceType}, api {d.ApiVersion}, driver {d.DriverVersion})"))
+                : "(none)";
+
+            logger.LogInformation(
+                "Vulkan environment detected: Loader={Loader}; SDK={Sdk}; Devices=[{Devices}]",
+                info.LoaderVersion ?? "unknown",
+                info.SdkInstalled ? info.SdkPath : "(not installed)",
+                devices);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to detect Vulkan environment");
+        }
     }
 
     private static async Task LogNvidiaEnvironmentAsync(IServiceProvider provider)
@@ -145,6 +179,7 @@ public class App : Application
 
         services.AddSingleton<MicrophoneSettingsViewModel>();
         services.AddSingleton<WhisperModelSettingsViewModel>();
+        services.AddSingleton<RuntimeSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<SpeechSettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();

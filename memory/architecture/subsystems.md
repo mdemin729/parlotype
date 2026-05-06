@@ -3,7 +3,7 @@ title: Key Subsystems
 type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging]
-last_updated: 2026-04-28
+last_updated: 2026-05-05
 summary: Text injection, global hotkeys, settings, logging, and model management subsystems
 ---
 
@@ -64,3 +64,34 @@ First-party detection independent of Whisper.net — see [[decisions/_index|ADR-
 - **DI**: selection in `PlatformServiceExtensions` via `OperatingSystem.IsWindows()`
 - **Caching**: first call detects, result cached with `SemaphoreSlim`; `RefreshAsync` clears cache and re-runs
 - **Startup hook**: `App.axaml.cs` fires `Task.Run` after `BuildServiceProvider`, logs Information line summarising driver/toolkits/runtimes
+
+## Vulkan Environment Detection
+
+First-party detection independent of Whisper.net — see [[decisions/_index|ADR-022]]. Used by `WhisperSpeechRecognizer` to gate strict `RuntimePreference.Vulkan`, by `RuntimeSettingsViewModel` to dim unavailable runtime options, and by `App.axaml.cs` for a startup diagnostic log.
+
+- **Core**: `IVulkanEnvironmentProvider`, `VulkanEnvironmentInfo`, `VulkanDeviceInfo`, `VulkanDeviceType` in `Parlotype.Core/Speech/`
+- **Platform (Windows)**: `WindowsVulkanEnvironmentProvider` probes:
+  1. `vulkan-1` loader presence via `NativeLibrary.TryLoad`
+  2. Loader API version via `vkEnumerateInstanceVersion` (assumes 1.0 when symbol missing)
+  3. Physical devices via `vkCreateInstance` + `vkEnumeratePhysicalDevices` + `vkGetPhysicalDeviceProperties` (P/Invoke; failures are absorbed)
+  4. `VULKAN_SDK` env var → SDK install presence
+- **Platform (other OS)**: `NoOpVulkanEnvironmentProvider` returns `VulkanEnvironmentInfo.Empty`
+- **DI**: selection in `PlatformServiceExtensions` via `OperatingSystem.IsWindows()`
+- **Caching**: first call detects, result cached with `SemaphoreSlim`; `RefreshAsync` clears cache and re-runs
+- **Startup hook**: `App.axaml.cs` `LogVulkanEnvironmentAsync` parallels the NVIDIA log
+
+## Whisper Runtime Selection
+
+User-facing `RuntimePreference` (`Parlotype.Core/Speech/`) maps to Whisper.net's `RuntimeOptions.RuntimeLibraryOrder` — see [[decisions/_index|ADR-012]] (CUDA) and [[decisions/_index|ADR-022]] (Vulkan).
+
+| Preference | Whisper.net order | Fallback? |
+|------------|-------------------|-----------|
+| `Auto` (default) | `[Cuda, Vulkan, Cpu]` | yes — silent chained |
+| `Cuda` | `[Cuda]` | **no** — strict |
+| `Vulkan` | `[Vulkan]` | **no** — strict |
+| `Cpu` | `[Cpu]` | n/a |
+
+- **Bootstrap**: `WhisperRuntimeBootstrap.Initialize(RuntimePreference, ILogger)` sets `RuntimeOptions.RuntimeLibraryOrder` once per process (first-call-wins).
+- **Strict-mode guard**: `WhisperSpeechRecognizer` calls `INvidiaEnvironmentProvider`/`IVulkanEnvironmentProvider` before factory creation. On a strict mismatch it throws `RuntimeUnavailableException` (Core) instead of silently falling back to CPU. `TranscribeViewModel` catches it and shows a status-bar message directing the user to Settings.
+- **UI**: `RuntimeSettingsViewModel` + `RuntimeSettingsView` (Settings → Runtime). Persists via `SettingsKeys.RuntimePreference`. Shows "Changes take effect after restart" because runtime selection is process-global one-shot.
+- **Packages**: `Whisper.net.Runtime.Cuda` (conditional on `EnableCuda` MSBuild prop, default true) and `Whisper.net.Runtime.Vulkan` (always included).

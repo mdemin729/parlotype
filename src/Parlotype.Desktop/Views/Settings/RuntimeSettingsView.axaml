@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.RuntimeSettingsView"
+             x:DataType="vms:RuntimeSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Runtime" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Choose which Whisper.net backend runs the speech model. Changes take effect after restart."
+                   Opacity="0.7"
+                   TextWrapping="Wrap" />
+
+        <ItemsControl ItemsSource="{Binding RuntimeOptions}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:RuntimeDisplayItem">
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            Padding="12,8"
+                            Margin="0,2"
+                            Command="{Binding SelectCommand}"
+                            CommandParameter="{Binding Type}">
+                        <Grid ColumnDefinitions="11,*" RowDefinitions="Auto,Auto,Auto">
+                            <Border Grid.Column="0" Grid.RowSpan="3"
+                                    Width="3" Height="16" CornerRadius="1.5"
+                                    Background="{DynamicResource SystemAccentColor}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Margin="0,4,0,0"
+                                    IsVisible="{Binding IsSelected}" />
+                            <TextBlock Grid.Column="1" Grid.Row="0"
+                                       Text="{Binding DisplayName}"
+                                       FontSize="14" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Grid.Row="1"
+                                       Text="{Binding Description}"
+                                       FontSize="12" Opacity="0.6"
+                                       TextWrapping="Wrap"
+                                       Margin="0,2,0,0" />
+                            <TextBlock Grid.Column="1" Grid.Row="2"
+                                       Text="{Binding UnavailableReason}"
+                                       Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Margin="0,4,0,0"
+                                       IsVisible="{Binding !IsAvailable}" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <StackPanel Spacing="4" IsVisible="{Binding VulkanLoaderMissing}" Margin="0,8,0,0">
+            <TextBlock Text="Vulkan loader (vulkan-1.dll) was not detected on this system."
+                       Opacity="0.7" TextWrapping="Wrap" />
+            <TextBlock>
+                <Run Text="Install the Vulkan SDK:" />
+                <Run />
+                <Run Text="https://vulkan.lunarg.com/sdk/home"
+                     FontWeight="SemiBold" />
+            </TextBlock>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

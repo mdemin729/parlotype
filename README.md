@@ -18,13 +18,13 @@ Parlotype is a local-first, privacy-focused voice-to-text desktop application. A
 
 Parlotype currently runs on **Windows** only. macOS and Linux support are planned for the future.
 
-**GPU acceleration** is supported for **NVIDIA** graphics cards via CUDA. AMD Radeon support is planned for the nearest future. If no compatible GPU is detected, Parlotype falls back to CPU automatically.
+**GPU acceleration** is supported on **NVIDIA** GPUs (via CUDA) and on **AMD / Intel / other** GPUs (via Vulkan). If no compatible GPU is detected, Parlotype falls back to CPU automatically. The active runtime can be changed in **Settings → Runtime**.
 
 ## Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
-### CUDA (optional, recommended)
+### CUDA (optional, NVIDIA GPUs)
 
 For GPU-accelerated speech recognition with an NVIDIA graphics card:
 
@@ -34,6 +34,14 @@ For GPU-accelerated speech recognition with an NVIDIA graphics card:
 3. Restart your computer after installation.
 
 Parlotype will automatically detect and use CUDA when available. No additional configuration is needed.
+
+### Vulkan (optional, AMD / Intel / NVIDIA GPUs)
+
+Vulkan is the recommended runtime when you don't have an NVIDIA GPU. Most modern GPU drivers (Radeon, Intel Arc, GeForce) already ship the Vulkan loader (`vulkan-1.dll`) — no extra install is needed for end users.
+
+If Parlotype reports that the Vulkan loader is missing, install the **Vulkan SDK** from [vulkan.lunarg.com/sdk/home](https://vulkan.lunarg.com/sdk/home) (the SDK bundles a system-wide Vulkan loader and is also useful for development).
+
+Parlotype will automatically detect and use Vulkan when available, in priority order **CUDA → Vulkan → CPU** (Auto mode). You can pin a specific runtime under **Settings → Runtime**.
 
 ## Build & Run
 

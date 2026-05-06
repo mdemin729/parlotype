@@ -18,7 +18,7 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
         services.AddSingleton<IVadService, SileroVadService>();
         services.AddSingleton<ISpeechRecognizer, WhisperSpeechRecognizer>();
-        // Whisper runtime bootstrap (CUDA vs CPU) is handled lazily inside
+        // Whisper runtime bootstrap (CUDA / Vulkan / CPU) is handled lazily inside
         // WhisperSpeechRecognizer.InitializeAsync, before any WhisperFactory
         // is created. No eager initialization is needed here.
         services.AddSingleton<IAudioPipeline, AudioPipelineService>();
@@ -29,9 +29,15 @@ public static class PlatformServiceExtensions
         services.AddSingleton<HttpModelDownloadService>();
 
         if (OperatingSystem.IsWindows())
+        {
             services.AddSingleton<INvidiaEnvironmentProvider, WindowsNvidiaEnvironmentProvider>();
+            services.AddSingleton<IVulkanEnvironmentProvider, WindowsVulkanEnvironmentProvider>();
+        }
         else
+        {
             services.AddSingleton<INvidiaEnvironmentProvider, NoOpNvidiaEnvironmentProvider>();
+            services.AddSingleton<IVulkanEnvironmentProvider, NoOpVulkanEnvironmentProvider>();
+        }
 
         return services;
     }

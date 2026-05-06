@@ -67,6 +67,13 @@ public partial class TranscribeViewModel : ViewModelBase
             IsRecording = true;
             StatusText = "Recording...";
         }
+        catch (RuntimeUnavailableException ex)
+        {
+            _logger.LogWarning(ex, "Whisper runtime '{Runtime}' unavailable", ex.Requested);
+            _pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            IsRecording = false;
+            StatusText = $"{ex.Requested} runtime not available — change in Settings";
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to start recording");

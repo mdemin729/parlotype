@@ -45,7 +45,12 @@ public class WhisperSpeechRecognizerTests
         var settings = new FakeSettingsService();
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
 
-        await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
+        await using var recognizer = new WhisperSpeechRecognizer(
+            new HeadlessModelDownloadService(),
+            settings,
+            new NoOpNvidiaEnvironmentProvider(),
+            new NoOpVulkanEnvironmentProvider(),
+            NullLogger<WhisperSpeechRecognizer>.Instance);
         await recognizer.InitializeAsync();
 
         Assert.True(recognizer.IsReady);
@@ -70,7 +75,12 @@ public class WhisperSpeechRecognizerTests
         var settings = new FakeSettingsService();
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
 
-        await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
+        await using var recognizer = new WhisperSpeechRecognizer(
+            new HeadlessModelDownloadService(),
+            settings,
+            new NoOpNvidiaEnvironmentProvider(),
+            new NoOpVulkanEnvironmentProvider(),
+            NullLogger<WhisperSpeechRecognizer>.Instance);
         await recognizer.InitializeAsync();
 
         // 1 second of silence as float samples
