@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [platform, implementations, whisper, nAudio, vad]
 criticality: high
-last_updated: 2026-04-28
+last_updated: 2026-05-06
 summary: Implements Core interfaces using Whisper.net, NAudio, SileroVad, SharpHook
 ---
 
@@ -15,13 +15,13 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 
 ## Key Paths
 - `src/Parlotype.Platform/Audio/` — `WasapiAudioCaptureService`, `SileroVadService`, `MicrophoneEnumerator`
-- `src/Parlotype.Platform/Speech/` — `WhisperSpeechRecognizer`, `WhisperModelTypeExtensions`, `WhisperRuntimeBootstrap` (CUDA/CPU runtime selection + Whisper.net diagnostics bridge), `WindowsNvidiaEnvironmentProvider`, `NoOpNvidiaEnvironmentProvider`
+- `src/Parlotype.Platform/Speech/` — `WhisperSpeechRecognizer`, `WhisperModelTypeExtensions`, `WhisperRuntimeBootstrap` (CUDA/Vulkan/CPU runtime selection + Whisper.net diagnostics bridge), `WindowsNvidiaEnvironmentProvider`, `NoOpNvidiaEnvironmentProvider`, `WindowsVulkanEnvironmentProvider`, `NoOpVulkanEnvironmentProvider`
 - `src/Parlotype.Platform/Hotkeys/` — `SharpHookHotkeyService`, `KeyCodeMapper`
 - `src/Parlotype.Platform/Settings/` — `JsonSettingsService`
 - `src/Parlotype.Platform/PlatformServiceExtensions.cs` — DI registration (all singletons)
 
 ## Key External Dependencies
-- **Whisper.net** + **Whisper.net.Runtime.Cuda** — transcription (CUDA optional, ~350 MB)
+- **Whisper.net** + **Whisper.net.Runtime.Cuda** (conditional, ~350 MB) + **Whisper.net.Runtime.Vulkan** (always, ~30 MB) — transcription
 - **NAudio** — WASAPI audio capture
 - **Microsoft.ML.OnnxRuntime** — Silero VAD ONNX inference
 - **SharpHook** — global keyboard hooks
@@ -29,8 +29,8 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 ## Conventions
 - Register all new services in `PlatformServiceExtensions.cs`
 - Mirror Core's subfolder structure
-- CUDA auto-detected via `RuntimeOptions.RuntimeLibraryOrder`, CPU fallback silent
-- NVIDIA env provider DI selection is gated by `OperatingSystem.IsWindows()` (Windows impl vs no-op)
+- Runtime selection: `Auto` chains CUDA → Vulkan → CPU silently; `Cuda` and `Vulkan` are strict and throw `RuntimeUnavailableException` when unavailable (no silent CPU fallback)
+- NVIDIA + Vulkan env provider DI selection is gated by `OperatingSystem.IsWindows()` (Windows impl vs no-op)
 - `WhisperRuntimeBootstrap` bridges Whisper.net's internal log via `LogProvider.AddLogger`; remaps the inverted `WhisperLogLevel` enum (see [[whisper-net-quirks]])
 
 ## Dependencies
@@ -42,3 +42,4 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 - [[decisions/_index|ADR-012]] CUDA GPU acceleration
 - [[decisions/_index|ADR-014]] NVIDIA/CUDA environment detection
 - [[decisions/_index|ADR-017]] Whisper model hot-swap via `UnloadAsync`
+- [[decisions/_index|ADR-022]] Vulkan GPU acceleration

@@ -289,7 +289,12 @@ public class AudioPipelineTests
 
         var settings = new FakeSettingsService();
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
-        await using var recognizer = new WhisperSpeechRecognizer(new HeadlessModelDownloadService(), settings, NullLogger<WhisperSpeechRecognizer>.Instance);
+        await using var recognizer = new WhisperSpeechRecognizer(
+            new HeadlessModelDownloadService(),
+            settings,
+            new NoOpNvidiaEnvironmentProvider(),
+            new NoOpVulkanEnvironmentProvider(),
+            NullLogger<WhisperSpeechRecognizer>.Instance);
 
         await using var pipeline = new AudioPipelineService(capture, vad, recognizer, settings, NullLogger<AudioPipelineService>.Instance);
 

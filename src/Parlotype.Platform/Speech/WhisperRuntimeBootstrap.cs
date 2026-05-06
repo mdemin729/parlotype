@@ -55,8 +55,13 @@ internal static class WhisperRuntimeBootstrap
         RuntimeOptions.RuntimeLibraryOrder = preference switch
         {
             RuntimePreference.Cpu => [RuntimeLibrary.Cpu],
-            // Auto: try CUDA first, then fall back to CPU
-            _ => [RuntimeLibrary.Cuda, RuntimeLibrary.Cpu],
+            // Strict modes: no fallback. WhisperSpeechRecognizer pre-checks the
+            // environment and surfaces a RuntimeUnavailableException if the chosen
+            // backend isn't usable.
+            RuntimePreference.Cuda => [RuntimeLibrary.Cuda],
+            RuntimePreference.Vulkan => [RuntimeLibrary.Vulkan],
+            // Auto: try CUDA, then Vulkan, then fall back to CPU.
+            _ => [RuntimeLibrary.Cuda, RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
         };
 
         logger.LogInformation(

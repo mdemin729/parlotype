@@ -2,7 +2,7 @@
 title: Architecture Decisions
 type: index
 status: active
-last_updated: 2026-04-30
+last_updated: 2026-05-05
 summary: Index of all Architecture Decision Records (ADRs) for Parlotype
 ---
 
@@ -33,6 +33,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 019 | [[019-remove-sub-500ms-silence-threshold\|Remove Sub-500ms Silence Threshold]] | Accepted | Removed Instant/VeryShort/Short from WaitTimeOption; benchmark proved sub-500ms causes 77%+ WER |
 | 020 | [[020-sharphook7-simple-global-hook\|Upgrade SharpHook 7 + SimpleGlobalHook]] | Accepted | Switched to SimpleGlobalHook for working event suppression; upgraded SharpHook 6→7.1.1 |
 | 021 | [[021-whisper-translation-to-english\|Whisper Translation to English via Settings]] | Accepted | Settings-driven translation toggle; recognizer reinitializes when options change |
+| 022 | [[022-vulkan-gpu-acceleration\|Vulkan GPU Acceleration]] | Accepted | `Whisper.net.Runtime.Vulkan` added unconditionally; `RuntimePreference` extended to Auto/Cuda/Vulkan/Cpu with strict no-fallback semantics; new Settings → Runtime section |
 
 ## Template
 

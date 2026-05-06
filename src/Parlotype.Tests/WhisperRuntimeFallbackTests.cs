@@ -48,14 +48,16 @@ public sealed class WhisperRuntimeFallbackTests : IDisposable
     }
 
     [Fact]
-    public void AutoMode_IncludesCudaAndCpuInOrder()
+    public void AutoMode_IncludesCudaVulkanAndCpuInOrder()
     {
         WhisperRuntimeBootstrap.Initialize(RuntimePreference.Auto, Logger);
 
         var order = RuntimeOptions.RuntimeLibraryOrder;
 
         Assert.Contains(RuntimeLibrary.Cuda, order);
+        Assert.Contains(RuntimeLibrary.Vulkan, order);
         Assert.Contains(RuntimeLibrary.Cpu, order);
         Assert.Equal(0, order.IndexOf(RuntimeLibrary.Cuda));
+        Assert.Equal(1, order.IndexOf(RuntimeLibrary.Vulkan));
     }
 }

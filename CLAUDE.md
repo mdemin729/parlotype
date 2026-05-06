@@ -18,16 +18,21 @@ dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Run a single t
 dotnet run --project src/Parlotype.Desktop  # Launch the app
 ```
 
-### GPU / CUDA Builds
+### GPU Runtime Builds
 
-The `Whisper.net.Runtime.Cuda` NuGet package (~350 MB) is included by default. To build without CUDA (faster CI, smaller output):
+Two GPU runtimes ship with Parlotype:
+
+- `Whisper.net.Runtime.Cuda` (~350 MB) — included when `EnableCuda` is `true` (default). NVIDIA GPUs only.
+- `Whisper.net.Runtime.Vulkan` (~30 MB) — **always included**. AMD, Intel, NVIDIA, etc.
+
+To skip the heavyweight CUDA package (faster CI, smaller output) — Vulkan stays:
 
 ```bash
-dotnet build Parlotype.slnx -p:EnableCuda=false   # CPU-only build
-dotnet test -p:EnableCuda=false                     # CPU-only tests
+dotnet build Parlotype.slnx -p:EnableCuda=false   # CUDA opt-out (Vulkan still active)
+dotnet test -p:EnableCuda=false
 ```
 
-CUDA is auto-detected at runtime via `RuntimeOptions.RuntimeLibraryOrder`. If no NVIDIA GPU is available, Whisper.net falls back to CPU silently.
+`RuntimePreference.Auto` (default) tries CUDA → Vulkan → CPU. `Cuda` and `Vulkan` are strict — they throw `RuntimeUnavailableException` rather than silently falling back to CPU. Selection lives at **Settings → Runtime** and persists under `SettingsKeys.RuntimePreference`. Selection is process-global one-shot (see ADR-012, ADR-022) — changes require an app restart.
 
 **Note:** File lock errors from `.NET Host` processes are common on Windows. Kill the locking process by PID before rebuilding.
 

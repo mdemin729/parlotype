@@ -13,6 +13,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
     public MicrophoneSettingsViewModel Microphone { get; }
     public WhisperModelSettingsViewModel WhisperModel { get; }
+    public RuntimeSettingsViewModel Runtime { get; }
     public HotkeySettingsViewModel Hotkey { get; }
     public SpeechSettingsViewModel Speech { get; }
     public ThemeSettingsViewModel Theme { get; }
@@ -20,18 +21,21 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public SettingsWindowViewModel(
         MicrophoneSettingsViewModel microphone,
         WhisperModelSettingsViewModel whisperModel,
+        RuntimeSettingsViewModel runtime,
         HotkeySettingsViewModel hotkey,
         SpeechSettingsViewModel speech,
         ThemeSettingsViewModel theme)
     {
         Microphone = microphone;
         WhisperModel = whisperModel;
+        Runtime = runtime;
         Hotkey = hotkey;
         Speech = speech;
         Theme = theme;
 
         Sections.Add(microphone);
         Sections.Add(whisperModel);
+        Sections.Add(runtime);
         Sections.Add(hotkey);
         Sections.Add(speech);
         Sections.Add(theme);

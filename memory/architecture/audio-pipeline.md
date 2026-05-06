@@ -36,7 +36,7 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 - `ISpeechRecognizer` (Core) → `WhisperSpeechRecognizer` (Platform)
 - Configured via `WhisperOptions` record (model, language, beam size, temperature, threads)
 - Greedy decoding for beam size 1, beam search for larger values
-- CUDA GPU acceleration when available, CPU fallback automatic
+- CUDA / Vulkan GPU acceleration when available, CPU fallback automatic in `Auto` mode (`Cuda` and `Vulkan` are strict — see [[decisions/_index|ADR-022]])
 
 ### 5. Text Injection
 - `ITextInjectionService` (Core) → two implementations:

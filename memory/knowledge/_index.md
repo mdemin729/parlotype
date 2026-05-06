@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-05-01
+last_updated: 2026-05-06
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -30,6 +30,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[vad-silence-threshold-constraint]] | Sub-500ms silence thresholds cause 77%+ WER. WaitTimeOption minimum is now Medium (500ms). Instant/VeryShort/Short removed. PipelineSimulator added for benchmark testing. | 2026-05-02 |
 | [[sharphook-suppress-event]] | SharpHook `SuppressEvent` only works with `SimpleGlobalHook`; `TaskPoolGlobalHook` and `EventLoopGlobalHook` silently ignore it | 2026-05-02 |
 | [[whisper-translation-models]] | Whisper translation to English only works with multilingual models (Medium+); English-only (*En) models don't support it; Base/Small produce mixed results | 2026-05-03 |
+| [[vulkan-runtime-probing]] | Vulkan API version packing (variant/major/minor/patch bits), `VkPhysicalDeviceProperties` 824-byte struct with stable 276-byte head, and `RuntimeOptions.LoadedLibrary` semantics in Whisper.net | 2026-05-06 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history
