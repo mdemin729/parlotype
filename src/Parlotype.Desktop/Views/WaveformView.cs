@@ -171,17 +171,18 @@ public class WaveformView : Control
         }
         ctx.DrawGeometry(brush, null, micGeo);
 
+        const int radii = 10;
         // Arc below mic
         var arcGeo = new StreamGeometry();
         using (var gc = arcGeo.Open())
         {
-            gc.BeginFigure(new Point(cx - 13, cy + 2), false);
-            gc.ArcTo(new Point(cx + 13, cy + 2), new Size(13, 13), 0, false, SweepDirection.CounterClockwise);
+            gc.BeginFigure(new Point(cx - radii, cy + 6), false);
+            gc.ArcTo(new Point(cx + radii, cy + 6), new Size(radii, radii), 0, false, SweepDirection.CounterClockwise);
         }
         ctx.DrawGeometry(null, pen, arcGeo);
 
         // Stem + base line
-        ctx.DrawLine(pen, new Point(cx, cy + 15), new Point(cx, cy + 22));
+        ctx.DrawLine(pen, new Point(cx, cy + 16), new Point(cx, cy + 22));
         ctx.DrawLine(pen, new Point(cx - 7, cy + 22), new Point(cx + 7, cy + 22));
     }
 }
