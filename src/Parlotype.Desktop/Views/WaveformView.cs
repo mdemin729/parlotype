@@ -37,6 +37,12 @@ public class WaveformView : Control
     private double _phase;
     private DispatcherTimer? _timer;
 
+    /// <summary>Blend factor 0.0 (idle) → 1.0 (active), animated per tick for smooth transitions.</summary>
+    private double _activeBlend;
+
+    /// <summary>Blend change per frame (~16ms). 0.06 ≈ 300ms transition at 60fps.</summary>
+    private const double BlendSpeed = 0.06;
+
     private const int BarCount = 13;
 
     // Brushes resolved from theme resources, with fallbacks
@@ -73,7 +79,16 @@ public class WaveformView : Control
         if (State == RecordingState.Disabled)
             return;
 
-        _phase += State == RecordingState.Active ? 0.06 : 0.015;
+        // Animate blend factor toward target (1.0 for Active, 0.0 for Idle)
+        var target = State == RecordingState.Active ? 1.0 : 0.0;
+        if (_activeBlend < target)
+            _activeBlend = Math.Min(_activeBlend + BlendSpeed, 1.0);
+        else if (_activeBlend > target)
+            _activeBlend = Math.Max(_activeBlend - BlendSpeed, 0.0);
+
+        // Phase speed interpolates between idle (slow) and active (fast)
+        _phase += 0.015 + _activeBlend * (0.06 - 0.015);
+
         InvalidateVisual();
     }
 
@@ -109,27 +124,24 @@ public class WaveformView : Control
         var totalW = BarCount * barW * 1.8;
         var offsetX = (w - totalW) / 2;
 
-        var brush = idle
+        // Lerp brush color during transition
+        var blend = _activeBlend;
+        var brush = blend < 0.01
             ? ResolveBrush("WaveformIdleBrush", FallbackIdleBrush)
             : ResolveBrush("WaveformActiveBrush", FallbackActiveBrush);
 
         for (int i = 0; i < BarCount; i++)
         {
-            double barH;
-            if (idle)
-            {
-                barH = maxBarH * (0.10 + 0.04 * Math.Sin(_phase + i * 0.4));
-            }
-            else
-            {
-                // Decorative multi-frequency wave (Option 1)
-                var amp = AudioAmplitude > 0.01f ? AudioAmplitude : 0.6f;
-                var wave = Math.Sin(_phase * 1.7 + i * 0.55) * 0.45
-                         + Math.Sin(_phase * 2.9 + i * 0.35) * 0.30
-                         + Math.Sin(_phase * 0.8 + i * 0.90) * 0.25;
-                barH = maxBarH * (0.12 + 0.88 * Math.Abs(wave) * amp);
-            }
+            // Compute both idle and active bar heights, then lerp
+            var idleH = maxBarH * (0.10 + 0.04 * Math.Sin(_phase + i * 0.4));
 
+            var amp = AudioAmplitude > 0.01f ? AudioAmplitude : 0.6f;
+            var wave = Math.Sin(_phase * 1.7 + i * 0.55) * 0.45
+                     + Math.Sin(_phase * 2.9 + i * 0.35) * 0.30
+                     + Math.Sin(_phase * 0.8 + i * 0.90) * 0.25;
+            var activeH = maxBarH * (0.12 + 0.88 * Math.Abs(wave) * amp);
+
+            var barH = idleH + (activeH - idleH) * blend;
             barH = Math.Max(barH, 4);
 
             var x = offsetX + i * barW * 1.8;

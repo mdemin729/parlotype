@@ -6,7 +6,7 @@
         x:DataType="vm:TranscribeViewModel"
         x:CompileBindings="True"
         Title="Parlotype — Transcribe"
-        Width="240" Height="128"
+        Width="440" Height="128"
         CanResize="False"
         Topmost="True"
         WindowStartupLocation="CenterScreen">
