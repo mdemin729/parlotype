@@ -39,6 +39,16 @@ A `WaveformView` Avalonia `Control` renders with `DrawingContext`:
 
 A `DispatcherTimer` at ~60 fps drives animation, attached/detached with the visual tree. Bars are white; the recording button background is blue `#378ADD` when recording. Theme-aware brushes are resolved via `TryFindResource` with hardcoded fallbacks.
 
+#### Smooth state transitions
+
+Since `WaveformView` uses `DrawingContext` rendering (not AXAML properties), Avalonia's built-in `Transitions` cannot be used for bar heights. Instead, a `_activeBlend` factor (0.0 = idle, 1.0 = active) is animated per frame at 0.06 per tick (~300ms full transition at 60 fps). Every frame computes both idle and active bar heights and lerps between them:
+
+```
+barH = idleH + (activeH - idleH) * _activeBlend
+```
+
+Phase speed also interpolates between the idle rate (0.015) and active rate (0.06), so the animation tempo ramps smoothly alongside the bar heights.
+
 ### ViewModel: state machine in `TranscribeViewModel`
 
 - Pipeline start → `RecordingState.Idle`
