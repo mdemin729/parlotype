@@ -14,7 +14,7 @@
     <Window.Resources>
         <SolidColorBrush x:Key="WaveformActiveBrush" Color="White" />
         <SolidColorBrush x:Key="WaveformIdleBrush" Color="White" />
-        <SolidColorBrush x:Key="WaveformDisabledBrush" Color="#E24B4A" />
+        <SolidColorBrush x:Key="WaveformDisabledBrush" Color="#378ADD" />
     </Window.Resources>
 
     <Window.Styles>

@@ -48,7 +48,7 @@ public class WaveformView : Control
     // Brushes resolved from theme resources, with fallbacks
     private static readonly IBrush FallbackActiveBrush = new SolidColorBrush(Color.Parse("#378ADD"));
     private static readonly IBrush FallbackIdleBrush = new SolidColorBrush(Color.Parse("#B4B2A9"));
-    private static readonly IBrush FallbackDisabledBrush = new SolidColorBrush(Color.Parse("#E24B4A"));
+    private static readonly IBrush FallbackDisabledBrush = new SolidColorBrush(Color.Parse("#378ADD"));
 
     static WaveformView()
     {
