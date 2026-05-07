@@ -14,7 +14,7 @@ summary: Domain interfaces and models — zero external dependencies, all contra
 Pure domain layer containing all interfaces, models, enums, and records. Zero external NuGet dependencies. Every other project depends on Core.
 
 ## Key Paths
-- `src/Parlotype.Core/Audio/` — `IAudioCaptureService`, `IMicrophoneEnumerator`, `IVoiceActivityDetector`
+- `src/Parlotype.Core/Audio/` — `IAudioCaptureService`, `IMicrophoneEnumerator`, `IVoiceActivityDetector`, `IAudioLevelProvider`, `RecordingState`
 - `src/Parlotype.Core/Speech/` — `ISpeechRecognizer`, `WhisperOptions`, `WhisperModelType`, `WhisperModelInfo`, `RuntimePreference` (Auto/Cuda/Vulkan/Cpu), `RuntimeUnavailableException`, `INvidiaEnvironmentProvider`, `NvidiaEnvironmentInfo`, `IVulkanEnvironmentProvider`, `VulkanEnvironmentInfo`, `VulkanDeviceInfo`
 - `src/Parlotype.Core/Hotkeys/` — `IGlobalHotkeyService`, `HotkeyBinding`, `HotkeyConflictDetector`
 - `src/Parlotype.Core/Settings/` — `ISettingsService`, `SettingsKeys`
@@ -34,3 +34,4 @@ None (by design).
 - [[decisions/_index|ADR-014]] NVIDIA/CUDA environment detection (provider contract lives here)
 - [[decisions/_index|ADR-017]] Whisper model hot-swap (`ISpeechRecognizer.UnloadAsync`)
 - [[decisions/_index|ADR-022]] Vulkan GPU acceleration (`IVulkanEnvironmentProvider`, `RuntimeUnavailableException`, extended `RuntimePreference`)
+- [[decisions/_index|ADR-023]] Audio-level provider & waveform visualisation (`IAudioLevelProvider`, `RecordingState`)

@@ -22,6 +22,8 @@ public static class PlatformServiceExtensions
         // WhisperSpeechRecognizer.InitializeAsync, before any WhisperFactory
         // is created. No eager initialization is needed here.
         services.AddSingleton<IAudioPipeline, AudioPipelineService>();
+        services.AddSingleton<IAudioLevelProvider>(sp =>
+            (AudioPipelineService)sp.GetRequiredService<IAudioPipeline>());
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
         services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
