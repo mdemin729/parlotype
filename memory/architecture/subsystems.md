@@ -3,7 +3,7 @@ title: Key Subsystems
 type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging]
-last_updated: 2026-05-05
+last_updated: 2026-05-06
 summary: Text injection, global hotkeys, settings, logging, and model management subsystems
 ---
 
@@ -95,3 +95,19 @@ User-facing `RuntimePreference` (`Parlotype.Core/Speech/`) maps to Whisper.net's
 - **Strict-mode guard**: `WhisperSpeechRecognizer` calls `INvidiaEnvironmentProvider`/`IVulkanEnvironmentProvider` before factory creation. On a strict mismatch it throws `RuntimeUnavailableException` (Core) instead of silently falling back to CPU. `TranscribeViewModel` catches it and shows a status-bar message directing the user to Settings.
 - **UI**: `RuntimeSettingsViewModel` + `RuntimeSettingsView` (Settings → Runtime). Persists via `SettingsKeys.RuntimePreference`. Shows "Changes take effect after restart" because runtime selection is process-global one-shot.
 - **Packages**: `Whisper.net.Runtime.Cuda` (conditional on `EnableCuda` MSBuild prop, default true) and `Whisper.net.Runtime.Vulkan` (always included).
+
+## Audio Level & Waveform Visualisation
+
+Real-time visual feedback showing whether the user is speaking. See [[decisions/_index|ADR-023]].
+
+- **Core**: `IAudioLevelProvider` (event `LevelChanged`, property `CurrentLevel`), `AudioLevelEventArgs`, `RecordingState` enum (`Disabled`, `Idle`, `Active`)
+- **Platform**: `AudioPipelineService` implements `IAudioLevelProvider` — computes RMS on each audio chunk via `PublishAudioLevel()`, fires event. DI forwards via `sp.GetRequiredService<IAudioPipeline>()` cast.
+- **Desktop**: `WaveformView` custom `Control` with `DrawingContext` rendering:
+  - **Disabled**: microphone icon via `StreamGeometry`
+  - **Idle**: 13 white bars with gentle sine-wave breathing animation
+  - **Active**: 13 white bars with decorative multi-frequency wave animation (amplitude 0.6 default)
+  - 60 fps `DispatcherTimer`, attached/detached with visual tree
+- **State machine** in `TranscribeViewModel`:
+  - EMA-smoothed RMS (attack 0.4, decay 0.05) compared against threshold 0.005
+  - 1200ms hold-off keeps Active state through natural speech pauses
+  - Button turns blue `#378ADD` when recording (Idle or Active)

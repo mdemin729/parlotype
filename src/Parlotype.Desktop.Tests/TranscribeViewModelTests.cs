@@ -1,4 +1,5 @@
 using Avalonia.Headless.XUnit;
+using Parlotype.Core.Audio;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels;
 using Xunit;
@@ -28,6 +29,7 @@ public class TranscribeViewModelTests
 
         Assert.False(vm.IsRecording);
         Assert.Equal("Ready", vm.StatusText);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
     }
 
     [AvaloniaFact]
@@ -41,6 +43,34 @@ public class TranscribeViewModelTests
         Assert.True(vm.IsRecording);
         Assert.Equal("Recording...", vm.StatusText);
         Assert.Equal(1, pipeline.StartCount);
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_SetsRecordingStateToIdle()
+    {
+        var pipeline = new MockAudioPipeline();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+
+        await vm.StartRecordingAsync();
+
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task StopRecording_SetsRecordingStateToDisabled()
+    {
+        var pipeline = new MockAudioPipeline();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        await vm.StartRecordingAsync();
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+
+        await vm.StopRecordingAsync();
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal(0f, vm.AudioLevel);
     }
 
     [AvaloniaFact]
@@ -129,5 +159,92 @@ public class TranscribeViewModelTests
 
         Assert.False(vm.IsRecording);
         Assert.Equal("Ready", vm.StatusText);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task StopRecording_UnsubscribesFromAudioLevel()
+    {
+        var pipeline = new MockAudioPipeline();
+        var levelProvider = new MockAudioLevelProvider();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, audioLevelProvider: levelProvider);
+
+        await vm.StartRecordingAsync();
+        await vm.StopRecordingAsync();
+
+        // Level event after stop should not change state
+        levelProvider.RaiseLevelChanged(0.5f);
+        await Task.Delay(50);
+
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal(0f, vm.AudioLevel);
+    }
+
+    [AvaloniaFact]
+    public async Task AudioLevel_AboveThreshold_SetsActiveState()
+    {
+        var pipeline = new MockAudioPipeline();
+        var levelProvider = new MockAudioLevelProvider();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, audioLevelProvider: levelProvider);
+
+        await vm.StartRecordingAsync();
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+
+        // Simulate speech
+        levelProvider.RaiseLevelChanged(0.1f);
+        await Task.Delay(50);
+
+        Assert.Equal(RecordingState.Active, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task AudioLevel_BelowThreshold_HoldsActiveState()
+    {
+        var pipeline = new MockAudioPipeline();
+        var levelProvider = new MockAudioLevelProvider();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, audioLevelProvider: levelProvider);
+
+        await vm.StartRecordingAsync();
+
+        // Go Active
+        levelProvider.RaiseLevelChanged(0.1f);
+        await Task.Delay(50);
+        Assert.Equal(RecordingState.Active, vm.RecordingState);
+
+        // Drop below threshold — should still be Active due to hold-off
+        levelProvider.RaiseLevelChanged(0.0f);
+        await Task.Delay(50);
+        Assert.Equal(RecordingState.Active, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task AudioLevel_BelowThreshold_EventuallyGoesIdle()
+    {
+        var pipeline = new MockAudioPipeline();
+        var levelProvider = new MockAudioLevelProvider();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, audioLevelProvider: levelProvider);
+
+        await vm.StartRecordingAsync();
+
+        // Go Active
+        levelProvider.RaiseLevelChanged(0.1f);
+        await Task.Delay(50);
+        Assert.Equal(RecordingState.Active, vm.RecordingState);
+
+        // Decay smoothed RMS with many zero events (slow decay factor 0.05)
+        for (int i = 0; i < 100; i++)
+        {
+            levelProvider.RaiseLevelChanged(0.0f);
+            await Task.Delay(5);
+        }
+
+        // Wait past the hold-off (1200ms)
+        await Task.Delay(1300);
+
+        // Final zero event to trigger the hold-off expiry check
+        levelProvider.RaiseLevelChanged(0.0f);
+        await Task.Delay(50);
+
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
     }
 }

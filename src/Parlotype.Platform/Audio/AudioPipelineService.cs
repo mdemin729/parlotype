@@ -11,7 +11,7 @@ namespace Parlotype.Platform.Audio;
 /// <summary>
 /// Orchestrates Microphone → VAD → Whisper pipeline with batch and streaming modes.
 /// </summary>
-public sealed class AudioPipelineService : IAudioPipeline
+public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 {
     private readonly IAudioCaptureService _capture;
     private readonly IVadService _vad;
@@ -53,6 +53,12 @@ public sealed class AudioPipelineService : IAudioPipeline
     public bool IsRunning { get; private set; }
 
     public event EventHandler<TranscriptionEventArgs>? TranscriptionAvailable;
+
+    /// <inheritdoc />
+    public float CurrentLevel { get; private set; }
+
+    /// <inheritdoc />
+    public event EventHandler<AudioLevelEventArgs>? LevelChanged;
 
     public AudioPipelineService(
         IAudioCaptureService capture,
@@ -132,6 +138,9 @@ public sealed class AudioPipelineService : IAudioPipeline
     {
         var floatSamples = e.Buffer.Span;
 
+        // Compute RMS for UI visualisation (outside lock — read-only on the span)
+        PublishAudioLevel(floatSamples);
+
         lock (_sampleBuffer)
         {
             foreach (var s in floatSamples)
@@ -147,6 +156,23 @@ public sealed class AudioPipelineService : IAudioPipeline
                     break;
             }
         }
+    }
+
+    private void PublishAudioLevel(ReadOnlySpan<float> samples)
+    {
+        if (samples.Length == 0)
+            return;
+
+        double sum = 0;
+        foreach (var s in samples)
+            sum += s * (double)s;
+
+        var rms = (float)Math.Sqrt(sum / samples.Length);
+        // Clamp to [0, 1] — microphone samples are normalised but RMS can briefly exceed 1.0
+        rms = Math.Min(rms, 1f);
+
+        CurrentLevel = rms;
+        LevelChanged?.Invoke(this, new AudioLevelEventArgs { Level = rms });
     }
 
     /// <summary>Minimum new samples before running VAD (8000 samples = 500ms at 16kHz).

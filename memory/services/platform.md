@@ -14,7 +14,7 @@ summary: Implements Core interfaces using Whisper.net, NAudio, SileroVad, SharpH
 Platform-specific implementations of all Core interfaces. Where the real audio capture, VAD, transcription, hotkeys, and settings logic lives.
 
 ## Key Paths
-- `src/Parlotype.Platform/Audio/` — `WasapiAudioCaptureService`, `SileroVadService`, `MicrophoneEnumerator`
+- `src/Parlotype.Platform/Audio/` — `WasapiAudioCaptureService`, `SileroVadService`, `MicrophoneEnumerator`, `AudioPipelineService` (also implements `IAudioLevelProvider`)
 - `src/Parlotype.Platform/Speech/` — `WhisperSpeechRecognizer`, `WhisperModelTypeExtensions`, `WhisperRuntimeBootstrap` (CUDA/Vulkan/CPU runtime selection + Whisper.net diagnostics bridge), `WindowsNvidiaEnvironmentProvider`, `NoOpNvidiaEnvironmentProvider`, `WindowsVulkanEnvironmentProvider`, `NoOpVulkanEnvironmentProvider`
 - `src/Parlotype.Platform/Hotkeys/` — `SharpHookHotkeyService`, `KeyCodeMapper`
 - `src/Parlotype.Platform/Settings/` — `JsonSettingsService`
@@ -43,3 +43,4 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 - [[decisions/_index|ADR-014]] NVIDIA/CUDA environment detection
 - [[decisions/_index|ADR-017]] Whisper model hot-swap via `UnloadAsync`
 - [[decisions/_index|ADR-022]] Vulkan GPU acceleration
+- [[decisions/_index|ADR-023]] Audio-level provider (RMS computation in `AudioPipelineService`)

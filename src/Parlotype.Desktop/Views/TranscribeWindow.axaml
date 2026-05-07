@@ -1,18 +1,25 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Parlotype.Desktop.ViewModels"
+        xmlns:views="using:Parlotype.Desktop.Views"
         x:Class="Parlotype.Desktop.Views.TranscribeWindow"
         x:DataType="vm:TranscribeViewModel"
         x:CompileBindings="True"
         Title="Parlotype — Transcribe"
-        Width="360" Height="180"
+        Width="240" Height="128"
         CanResize="False"
         Topmost="True"
         WindowStartupLocation="CenterScreen">
 
+    <Window.Resources>
+        <SolidColorBrush x:Key="WaveformActiveBrush" Color="White" />
+        <SolidColorBrush x:Key="WaveformIdleBrush" Color="White" />
+        <SolidColorBrush x:Key="WaveformDisabledBrush" Color="#E24B4A" />
+    </Window.Resources>
+
     <Window.Styles>
         <Style Selector="Button.recording">
-            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
+            <Setter Property="Background" Value="#378ADD" />
             <Setter Property="Foreground" Value="White" />
         </Style>
     </Window.Styles>
@@ -31,13 +38,23 @@
             <Button Name="RecordButton"
                     Classes.recording="{Binding IsRecording}"
                     Command="{Binding TogglePlayCommand}"
-                    Width="72" Height="72"
-                    CornerRadius="36"
+                    Width="112" Height="56"
+                    CornerRadius="28"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center"
                     Padding="0">
-                <PathIcon Width="28" Height="28"
-                          Data="M11.665 7.915v1.31a5.257 5.257 0 0 1-1.514 3.694 5.174 5.174 0 0 1-1.641 1.126 5.04 5.04 0 0 1-1.456.384v1.899h2.312a.554.554 0 0 1 0 1.108H3.634a.554.554 0 0 1 0-1.108h2.312v-1.899a5.045 5.045 0 0 1-1.456-.384 5.174 5.174 0 0 1-1.641-1.126 5.257 5.257 0 0 1-1.514-3.695v-1.31a.554.554 0 1 1 1.109 0v1.31a4.131 4.131 0 0 0 1.195 2.917 3.989 3.989 0 0 0 5.722 0 4.133 4.133 0 0 0 1.195-2.917v-1.31a.554.554 0 1 1 1.109 0z M3.77 10.37a2.875 2.875 0 0 1-.233-1.146V4.738A2.905 2.905 0 0 1 3.77 3.58a3 3 0 0 1 1.59-1.59 2.902 2.902 0 0 1 1.158-.233 2.865 2.865 0 0 1 1.152.233 2.977 2.977 0 0 1 1.793 2.748l-.012 4.487a2.958 2.958 0 0 1-.856 2.09 3.025 3.025 0 0 1-.937.634 2.865 2.865 0 0 1-1.152.233 2.905 2.905 0 0 1-1.158-.233A2.957 2.957 0 0 1 3.77 10.37z" />
+                <Border>
+                    <Border.Transitions>
+                        <Transitions>
+                            <DoubleTransition Property="Opacity" Duration="0:0:0.25" />
+                        </Transitions>
+                    </Border.Transitions>
+                    <views:WaveformView
+                        Width="96" Height="48"
+                        State="{Binding RecordingState}"
+                        AudioAmplitude="{Binding AudioLevel}"
+                        ClipToBounds="False" />
+                </Border>
             </Button>
 
             <Button Name="SettingsButton"
