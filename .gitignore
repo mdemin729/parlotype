@@ -44,3 +44,6 @@ datasets/**/.cache/*.wav
 # Benchmark results
 results/*
 
+
+# Generated test reports
+reports/
