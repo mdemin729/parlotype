@@ -35,6 +35,49 @@ description: Use when adding a new feature to Parlotype that spans Core/Platform
 - UI tests in `src/Parlotype.Desktop.Tests/` with `[AvaloniaFact]`
 - Use mocks from `Mocks/` folder for controllable testing
 
+#### Screenshot Tests (for UI features with settings views)
+If the feature adds or modifies a settings view, add headless screenshot tests:
+
+1. **Create a fixture** — one `IAsyncLifetime` fixture per test class that collects `Scenario` objects and generates an HTML report on dispose:
+   ```csharp
+   public sealed class MyScreenshotReportFixture : IAsyncLifetime
+   {
+       private readonly List<Scenario> _scenarios = [];
+       public void AddScenario(Scenario scenario) { lock (_scenarios) _scenarios.Add(scenario); }
+       public ValueTask InitializeAsync() => ValueTask.CompletedTask;
+       public ValueTask DisposeAsync()
+       {
+           // Generate to reports/<name>-scenarios.html
+           // Use ScreenshotReportFixture.FindRepoRoot() for the repo root
+       }
+   }
+   ```
+
+2. **Create test class** with `IClassFixture<MyScreenshotReportFixture>`:
+   - Each `[AvaloniaFact]` method = one scenario (e.g. default state, user interaction, edge case)
+   - Build ViewModel with mocks, call `SettleAsync()` (100ms delay + `Dispatcher.UIThread.RunJobs()`)
+   - Instantiate a **new view per screenshot** (not reuse) — set `DataContext` via `ScreenshotHelper`
+   - Capture with `await ScreenshotHelper.CaptureBase64Async(view, vm)`
+   - Collect steps as `ScenarioStep(description, base64Png)` → `_report.AddScenario(...)`
+
+3. **Key helpers** (already in the test project):
+   - `ScreenshotHelper.CaptureBase64Async(control, dataContext, width, maxHeight)` — renders in a headless window, auto-shrinks to content height, returns base64 PNG
+   - `ScreenshotReportGenerator.Generate(path, title, scenarios)` — self-contained HTML with embedded base64 images
+   - `Scenario(name, summary, steps)` / `ScenarioStep(description, base64Png)` — data records
+
+4. **Settle pattern** — always settle before capturing to let bindings propagate:
+   ```csharp
+   private static async Task SettleAsync()
+   {
+       await Task.Delay(100);
+       Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+   }
+   ```
+
+5. **Reports** are written to `reports/` (gitignored) and generated on-demand when screenshot tests run.
+
+See existing examples: `RuntimeSettingsScreenshotTests.cs`, `MicrophoneSettingsScreenshotTests.cs`, `HotkeySettingsScreenshotTests.cs`, `SpeechSettingsScreenshotTests.cs`, `ThemeSettingsScreenshotTests.cs`.
+
 ### 5. Verify
 ```bash
 dotnet build Parlotype.slnx          # Zero warnings
@@ -63,6 +106,7 @@ ADRs go in `docs/decisions/` (use `_template.md`, sequential numbering — check
 - [ ] Registered in `PlatformServiceExtensions.cs`
 - [ ] ViewModel + View in Desktop (if UI)
 - [ ] Tests written and passing
+- [ ] Screenshot tests added for new/modified settings views (if applicable)
 - [ ] Zero build warnings
 - [ ] End-to-end behaviour verified (manual run / log line / integration test)
 - [ ] ADR written if any trigger fires (see Step 6)
