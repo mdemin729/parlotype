@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,9 @@ namespace Parlotype.Desktop.ViewModels.Settings;
 
 public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
 {
+    private const string CudaDownloadUrl = "https://developer.nvidia.com/cuda-downloads";
+    private const string VulkanSdkUrl = "https://vulkan.lunarg.com/sdk/home";
+
     private readonly ISettingsService _settings;
     private readonly INvidiaEnvironmentProvider _nvidia;
     private readonly IVulkanEnvironmentProvider _vulkan;
@@ -23,6 +27,18 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
 
     [ObservableProperty]
     private bool _vulkanLoaderMissing;
+
+    /// <summary>True when no NVIDIA driver is detected at all.</summary>
+    [ObservableProperty]
+    private bool _cudaDriverMissing;
+
+    /// <summary>True when an NVIDIA driver exists but no CUDA runtime library can be loaded.</summary>
+    [ObservableProperty]
+    private bool _cudaSdkMissing;
+
+    /// <summary>The detected NVIDIA driver version, or null if no driver was found.</summary>
+    [ObservableProperty]
+    private string? _cudaDriverVersion;
 
     public RuntimeSettingsViewModel(
         ISettingsService settings,
@@ -70,15 +86,22 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
         var vulkan = await _vulkan.GetAsync();
         VulkanLoaderMissing = !vulkan.HasVulkanLoader;
 
+        // Distinguish CUDA readiness states
+        CudaDriverMissing = !nvidia.HasNvidia;
+        CudaSdkMissing = nvidia.HasNvidia && nvidia.LoadableRuntimes.Count == 0;
+        CudaDriverVersion = nvidia.DriverVersion;
+
         foreach (var item in RuntimeOptions)
         {
             switch (item.Type)
             {
                 case RuntimePreference.Cuda:
-                    item.IsAvailable = nvidia.HasNvidia;
-                    item.UnavailableReason = nvidia.HasNvidia
+                    item.IsAvailable = nvidia.HasNvidia && nvidia.LoadableRuntimes.Count > 0;
+                    item.UnavailableReason = item.IsAvailable
                         ? null
-                        : "No NVIDIA driver detected. Whisper will fail to start with this setting.";
+                        : CudaDriverMissing
+                            ? "No NVIDIA GPU detected — see guidance below."
+                            : "CUDA toolkit not installed — see guidance below.";
                     break;
                 case RuntimePreference.Vulkan:
                     item.IsAvailable = vulkan.HasVulkanLoader;
@@ -110,5 +133,19 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
         SelectedRuntime = type;
         foreach (var item in RuntimeOptions)
             item.IsSelected = item.Type == type;
+    }
+
+    [RelayCommand]
+    private void OpenCudaDownloadLink()
+    {
+        _logger.LogInformation("Opening CUDA download page: {Url}", CudaDownloadUrl);
+        Process.Start(new ProcessStartInfo(CudaDownloadUrl) { UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    private void OpenVulkanSdkLink()
+    {
+        _logger.LogInformation("Opening Vulkan SDK page: {Url}", VulkanSdkUrl);
+        Process.Start(new ProcessStartInfo(VulkanSdkUrl) { UseShellExecute = true });
     }
 }
