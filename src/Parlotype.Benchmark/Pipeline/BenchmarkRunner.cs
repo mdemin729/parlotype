@@ -35,20 +35,31 @@ public sealed class BenchmarkRunner
         var runId = $"{timestamp:yyyyMMdd-HHmmss}-{config.Name}";
 
         // Initialize recognizer with config options
-        var whisperOptions = new WhisperOptions
-        {
-            Model = config.Whisper.Model,
-            Language = config.Whisper.Language,
-            BeamSize = config.Whisper.BeamSize,
-            Temperature = config.Whisper.Temperature,
-            InitialPrompt = config.Whisper.InitialPrompt,
-            Threads = config.Whisper.Threads,
-            RuntimePreference = config.Whisper.RuntimePreference,
-        };
-
-        progress?.Report("Loading Whisper model...");
         var modelLoadSw = Stopwatch.StartNew();
-        await _recognizer.InitializeAsync(whisperOptions, cancellationToken);
+
+        if (config.IsGemma4)
+        {
+            progress?.Report("Starting Gemma 4 sidecar...");
+            await _recognizer.InitializeAsync(cancellationToken);
+        }
+        else
+        {
+            var whisper = config.EffectiveWhisper;
+            var whisperOptions = new WhisperOptions
+            {
+                Model = whisper.Model,
+                Language = whisper.Language,
+                BeamSize = whisper.BeamSize,
+                Temperature = whisper.Temperature,
+                InitialPrompt = whisper.InitialPrompt,
+                Threads = whisper.Threads,
+                RuntimePreference = whisper.RuntimePreference,
+            };
+
+            progress?.Report("Loading Whisper model...");
+            await _recognizer.InitializeAsync(whisperOptions, cancellationToken);
+        }
+
         modelLoadSw.Stop();
         var modelLoadTimeMs = modelLoadSw.Elapsed.TotalMilliseconds;
         _logger.LogInformation("Model loaded in {ModelLoadTimeMs:F0} ms", modelLoadTimeMs);

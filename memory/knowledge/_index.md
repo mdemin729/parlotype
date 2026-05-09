@@ -31,6 +31,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[sharphook-suppress-event]] | SharpHook `SuppressEvent` only works with `SimpleGlobalHook`; `TaskPoolGlobalHook` and `EventLoopGlobalHook` silently ignore it | 2026-05-02 |
 | [[whisper-translation-models]] | Whisper translation to English only works with multilingual models (Medium+); English-only (*En) models don't support it; Base/Small produce mixed results | 2026-05-03 |
 | [[vulkan-runtime-probing]] | Vulkan API version packing (variant/major/minor/patch bits), `VkPhysicalDeviceProperties` 824-byte struct with stable 276-byte head, and `RuntimeOptions.LoadedLibrary` semantics in Whisper.net | 2026-05-06 |
+| [[gemma4-cuda-blackwell]] | Gemma 4 E2B bfloat16/float16 hallucinates on CUDA with Blackwell GPUs (RTX 5070 Ti, compute 12.0); CPU works; bitsandbytes 4-bit crashes on audio encoder `torch.finfo()` | 2026-05-08 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

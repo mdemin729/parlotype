@@ -8,6 +8,7 @@ using Parlotype.Benchmark.Reporting;
 using Parlotype.Benchmark.Results;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Speech;
+using Parlotype.Gemma4;
 using Parlotype.Platform;
 using Spectre.Console;
 using ZLogger;
@@ -95,43 +96,82 @@ runCommand.SetAction(async parseResult =>
     // CLI --gpu flag overrides config: --gpu false forces CPU-only
     if (!gpu)
     {
-        var w = benchmarkConfig.Whisper;
-        benchmarkConfig = new BenchmarkConfig
+        if (benchmarkConfig.IsGemma4)
         {
-            Name = benchmarkConfig.Name,
-            Description = benchmarkConfig.Description,
-            Datasets = benchmarkConfig.Datasets,
-            Repetitions = benchmarkConfig.Repetitions,
-            Whisper = new WhisperConfig
+            benchmarkConfig = new BenchmarkConfig
             {
-                Model = w.Model,
-                Language = w.Language,
-                BeamSize = w.BeamSize,
-                Temperature = w.Temperature,
-                InitialPrompt = w.InitialPrompt,
-                Threads = w.Threads,
-                RuntimePreference = RuntimePreference.Cpu,
-            },
-            Vad = benchmarkConfig.Vad,
-        };
+                Name = benchmarkConfig.Name,
+                Description = benchmarkConfig.Description,
+                Datasets = benchmarkConfig.Datasets,
+                Repetitions = benchmarkConfig.Repetitions,
+                Gemma4 = new Gemma4Config
+                {
+                    ModelId = benchmarkConfig.Gemma4!.ModelId,
+                    ModelPath = benchmarkConfig.Gemma4.ModelPath,
+                    Quantization = "none",
+                    Port = benchmarkConfig.Gemma4.Port,
+                    PythonPath = benchmarkConfig.Gemma4.PythonPath,
+                    MaxNewTokens = benchmarkConfig.Gemma4.MaxNewTokens,
+                    DeviceMap = "cpu",
+                    StartupTimeoutSeconds = benchmarkConfig.Gemma4.StartupTimeoutSeconds,
+                },
+                Vad = benchmarkConfig.Vad,
+            };
+        }
+        else
+        {
+            var w = benchmarkConfig.EffectiveWhisper;
+            benchmarkConfig = new BenchmarkConfig
+            {
+                Name = benchmarkConfig.Name,
+                Description = benchmarkConfig.Description,
+                Datasets = benchmarkConfig.Datasets,
+                Repetitions = benchmarkConfig.Repetitions,
+                Whisper = new WhisperConfig
+                {
+                    Model = w.Model,
+                    Language = w.Language,
+                    BeamSize = w.BeamSize,
+                    Temperature = w.Temperature,
+                    InitialPrompt = w.InitialPrompt,
+                    Threads = w.Threads,
+                    RuntimePreference = RuntimePreference.Cpu,
+                },
+                Vad = benchmarkConfig.Vad,
+            };
+        }
     }
 
     AnsiConsole.MarkupLine($"[bold blue]Parlotype Benchmark[/] — {Markup.Escape(benchmarkConfig.Name)}");
+    AnsiConsole.MarkupLine($"[bold]Engine:[/] {benchmarkConfig.EngineName} — {benchmarkConfig.ModelDisplayName}");
     AnsiConsole.WriteLine();
 
-    // Set up DI
+    // Set up DI and create recognizer
     var services = new ServiceCollection();
     services.AddPlatformServices();
-    services.AddSingleton<IModelDownloadService, HeadlessModelDownloadService>();
     services.AddLogging(builder =>
     {
         builder.SetMinimumLevel(verbose ? LogLevel.Debug : LogLevel.Warning);
         builder.AddZLoggerConsole();
     });
 
+    if (!benchmarkConfig.IsGemma4)
+        services.AddSingleton<IModelDownloadService, HeadlessModelDownloadService>();
+
     await using var serviceProvider = services.BuildServiceProvider();
 
-    var recognizer = serviceProvider.GetRequiredService<ISpeechRecognizer>();
+    ISpeechRecognizer recognizer;
+    Gemma4SpeechRecognizer? gemma4Recognizer = null;
+    if (benchmarkConfig.IsGemma4)
+    {
+        gemma4Recognizer = new Gemma4SpeechRecognizer(benchmarkConfig.Gemma4!, serviceProvider.GetRequiredService<ILogger<Gemma4SpeechRecognizer>>());
+        recognizer = gemma4Recognizer;
+    }
+    else
+    {
+        recognizer = serviceProvider.GetRequiredService<ISpeechRecognizer>();
+    }
+
     var vadService = benchmarkConfig.Vad.Enabled
         ? serviceProvider.GetRequiredService<IVadService>()
         : null;
@@ -168,6 +208,10 @@ runCommand.SetAction(async parseResult =>
     }
 
     AnsiConsole.MarkupLine($"[green]Indexed into:[/] {Markup.Escape(dbPath)}");
+
+    // Dispose Gemma4 recognizer (not managed by DI)
+    if (gemma4Recognizer is not null)
+        await gemma4Recognizer.DisposeAsync();
 });
 
 // --- import command ---
@@ -659,7 +703,7 @@ sweepCommand.SetAction(async parseResult =>
     {
         configs = configs.Select(cfg =>
         {
-            var w = cfg.Whisper;
+            var w = cfg.EffectiveWhisper;
             return new BenchmarkConfig
             {
                 Name = cfg.Name,

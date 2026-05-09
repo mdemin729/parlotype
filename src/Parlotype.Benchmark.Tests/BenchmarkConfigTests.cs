@@ -34,7 +34,7 @@ public sealed class BenchmarkConfigTests
         Assert.Equal("A test configuration", config.Description);
         Assert.Equal(["dataset-a", "dataset-b"], config.Datasets);
         Assert.Equal(3, config.Repetitions);
-        Assert.Equal(WhisperModelType.Small, config.Whisper.Model);
+        Assert.Equal(WhisperModelType.Small, config.Whisper!.Model);
         Assert.Equal("en", config.Whisper.Language);
         Assert.Equal(5, config.Whisper.BeamSize);
         Assert.Equal(0.2f, config.Whisper.Temperature);
@@ -58,10 +58,10 @@ public sealed class BenchmarkConfigTests
         Assert.Null(config.Description);
         Assert.Single(config.Datasets);
         Assert.Equal(1, config.Repetitions);
-        Assert.Equal(WhisperModelType.Base, config.Whisper.Model);
-        Assert.Equal("auto", config.Whisper.Language);
-        Assert.Equal(1, config.Whisper.BeamSize);
-        Assert.Equal(0.0f, config.Whisper.Temperature);
+        Assert.Equal(WhisperModelType.Base, config.EffectiveWhisper.Model);
+        Assert.Equal("auto", config.EffectiveWhisper.Language);
+        Assert.Equal(1, config.EffectiveWhisper.BeamSize);
+        Assert.Equal(0.0f, config.EffectiveWhisper.Temperature);
         Assert.True(config.Vad.Enabled);
     }
 

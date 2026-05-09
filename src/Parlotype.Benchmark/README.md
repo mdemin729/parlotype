@@ -168,6 +168,48 @@ dotnet run --project src/Parlotype.Benchmark -- import --output results
 | `threads` | — | CPU thread count (omit to use Whisper default) |
 | `runtimePreference` | `Auto` | Runtime: `Auto`, `Cpu`, `Gpu` |
 
+#### Gemma 4 options (alternative engine)
+
+Instead of `"whisper"`, use a `"gemma4"` block to run Gemma 4 E2B/E4B via a Python sidecar.
+The two blocks are mutually exclusive — provide one or the other.
+
+```json
+{
+  "name": "gemma4-smoke-test",
+  "description": "Gemma 4 E2B smoke test (4-bit quantized)",
+  "datasets": ["smoke-test"],
+  "gemma4": {
+    "modelId": "gemma-4-E2B-it",
+    "quantization": "4bit",
+    "port": 8321
+  },
+  "vad": { "enabled": false }
+}
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `modelId` | `gemma-4-E2B-it` | HuggingFace model name (`gemma-4-E2B-it` or `gemma-4-E4B-it`) |
+| `modelPath` | auto | Local path to pre-downloaded model. Defaults to `{LocalAppData}/parlotype/models/{modelId}` |
+| `quantization` | `none` | `none` (BF16 full precision), `4bit` (bitsandbytes), or `8bit`. Note: 4-bit/8-bit may fail on Gemma 4 audio encoder |
+| `port` | `8321` | Localhost port for the Python sidecar |
+| `pythonPath` | `python` | Path to the Python executable |
+| `maxNewTokens` | `200` | Maximum tokens generated per transcription |
+| `deviceMap` | `auto` | Torch device placement (`auto`, `cpu`, `cuda:0`) |
+| `startupTimeoutSeconds` | `180` | Timeout for sidecar startup and model loading |
+
+**Prerequisites:**
+1. Python 3.10+ with CUDA support
+2. Install dependencies: `pip install -r src/Parlotype.Gemma4/sidecar/requirements.txt`
+3. Pre-download the model:
+   ```bash
+   hf login
+   hf download google/gemma-4-E2B-it \
+     --local-dir "%LOCALAPPDATA%\parlotype\models\gemma-4-E2B-it"
+   ```
+
+See [ADR-024](../../docs/decisions/024-gemma4-python-sidecar.md) for design rationale.
+
 #### VAD options
 
 | Field | Default | Description |
