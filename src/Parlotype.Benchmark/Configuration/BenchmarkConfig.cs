@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Parlotype.Core.Speech;
+using Parlotype.Gemma4;
 
 namespace Parlotype.Benchmark.Configuration;
 
@@ -19,10 +20,31 @@ public sealed class BenchmarkConfig
     public int Repetitions { get; init; } = 1;
 
     [JsonPropertyName("whisper")]
-    public WhisperConfig Whisper { get; init; } = new();
+    public WhisperConfig? Whisper { get; init; }
+
+    [JsonPropertyName("gemma4")]
+    public Gemma4Config? Gemma4 { get; init; }
 
     [JsonPropertyName("vad")]
     public VadConfig Vad { get; init; } = new();
+
+    /// <summary>Returns true when the Gemma 4 backend is selected.</summary>
+    [JsonIgnore]
+    public bool IsGemma4 => Gemma4 is not null;
+
+    /// <summary>Returns the effective Whisper config, defaulting if neither engine is specified.</summary>
+    [JsonIgnore]
+    public WhisperConfig EffectiveWhisper => Whisper ?? new WhisperConfig();
+
+    /// <summary>Returns a display-friendly engine name.</summary>
+    [JsonIgnore]
+    public string EngineName => IsGemma4 ? "Gemma4" : "Whisper";
+
+    /// <summary>Returns a display-friendly model identifier.</summary>
+    [JsonIgnore]
+    public string ModelDisplayName => IsGemma4
+        ? $"Gemma4/{Gemma4!.ModelId} ({Gemma4.Quantization})"
+        : EffectiveWhisper.Model.ToString();
 }
 
 public sealed class WhisperConfig

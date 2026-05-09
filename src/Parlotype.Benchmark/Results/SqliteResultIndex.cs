@@ -79,8 +79,8 @@ public sealed class SqliteResultIndex : IDisposable
 
             cmd.Parameters.AddWithValue("@runId", result.RunId);
             cmd.Parameters.AddWithValue("@configName", result.Configuration.Name);
-            cmd.Parameters.AddWithValue("@model", result.Configuration.Whisper.Model.ToString());
-            cmd.Parameters.AddWithValue("@language", result.Configuration.Whisper.Language);
+            cmd.Parameters.AddWithValue("@model", result.Configuration.ModelDisplayName);
+            cmd.Parameters.AddWithValue("@language", result.Configuration.EffectiveWhisper.Language);
             cmd.Parameters.AddWithValue("@vadEnabled", result.Configuration.Vad.Enabled ? 1 : 0);
             cmd.Parameters.AddWithValue("@timestamp", result.Timestamp.ToString("o"));
             cmd.Parameters.AddWithValue("@avgWer", result.Summary.AverageWer);

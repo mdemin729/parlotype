@@ -35,6 +35,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 021 | [[021-whisper-translation-to-english\|Whisper Translation to English via Settings]] | Accepted | Settings-driven translation toggle; recognizer reinitializes when options change |
 | 022 | [[022-vulkan-gpu-acceleration\|Vulkan GPU Acceleration]] | Accepted | `Whisper.net.Runtime.Vulkan` added unconditionally; `RuntimePreference` extended to Auto/Cuda/Vulkan/Cpu with strict no-fallback semantics; new Settings → Runtime section |
 | 023 | [[023-audio-level-waveform-visualisation\|Audio-Level Provider & Waveform Visualisation]] | Accepted | `IAudioLevelProvider` interface; `WaveformView` custom control with three visual states (mic icon / breathing bars / animated wave); EMA-smoothed RMS state machine |
+| 024 | [[024-gemma4-python-sidecar\|Gemma 4 Python Sidecar]] | Accepted | `Parlotype.Gemma4` project with `Gemma4SpeechRecognizer` implementing `ISpeechRecognizer`; auto-managed Python FastAPI sidecar for benchmark-only Gemma 4 E2B/E4B ASR; bitsandbytes quantization (4-bit default) |
 
 ## Template
 

@@ -22,7 +22,7 @@ public sealed class GpuConfigTests
         var config = JsonSerializer.Deserialize<BenchmarkConfig>(json,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
-        Assert.Equal(RuntimePreference.Auto, config.Whisper.RuntimePreference);
+        Assert.Equal(RuntimePreference.Auto, config.Whisper!.RuntimePreference);
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public sealed class GpuConfigTests
         var config = JsonSerializer.Deserialize<BenchmarkConfig>(json,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
-        Assert.Equal(RuntimePreference.Auto, config.Whisper.RuntimePreference);
+        Assert.Equal(RuntimePreference.Auto, config.Whisper!.RuntimePreference);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public sealed class GpuConfigTests
         var config = JsonSerializer.Deserialize<BenchmarkConfig>(json,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
-        Assert.Equal(RuntimePreference.Cpu, config.Whisper.RuntimePreference);
+        Assert.Equal(RuntimePreference.Cpu, config.Whisper!.RuntimePreference);
     }
 
     [Fact]
@@ -82,10 +82,8 @@ public sealed class GpuConfigTests
         var config = JsonSerializer.Deserialize<BenchmarkConfig>(json,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
-        Assert.Equal(RuntimePreference.Auto, config.Whisper.RuntimePreference);
+        Assert.Equal(RuntimePreference.Auto, config.Whisper!.RuntimePreference);
 
-        // Mimic what Program.cs does when --gpu false is passed:
-        // create a new BenchmarkConfig with RuntimePreference overridden to Cpu.
         var overridden = new BenchmarkConfig
         {
             Name = config.Name,
@@ -102,6 +100,6 @@ public sealed class GpuConfigTests
             Vad = config.Vad
         };
 
-        Assert.Equal(RuntimePreference.Cpu, overridden.Whisper.RuntimePreference);
+        Assert.Equal(RuntimePreference.Cpu, overridden.Whisper!.RuntimePreference);
     }
 }

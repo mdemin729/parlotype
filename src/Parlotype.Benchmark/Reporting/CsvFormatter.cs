@@ -50,8 +50,8 @@ public static class CsvFormatter
         foreach (var result in results)
         {
             sb.Append(Escape(result.Configuration.Name)).Append(',');
-            sb.Append(result.Configuration.Whisper.Model.ToString()).Append(',');
-            sb.Append(result.Configuration.Whisper.BeamSize.ToString(CultureInfo.InvariantCulture)).Append(',');
+            sb.Append(Escape(result.Configuration.ModelDisplayName)).Append(',');
+            sb.Append(result.Configuration.IsGemma4 ? "-" : result.Configuration.EffectiveWhisper.BeamSize.ToString(CultureInfo.InvariantCulture)).Append(',');
             sb.Append(result.Configuration.Vad.Enabled ? "true" : "false").Append(',');
             sb.Append(result.Summary.AverageWer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');
             sb.Append(result.Summary.AverageCer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');

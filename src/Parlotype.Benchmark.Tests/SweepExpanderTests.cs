@@ -194,8 +194,8 @@ public class SweepExpanderTests
         var configs = SweepExpander.Expand(sweep);
 
         Assert.Equal(2, configs.Count);
-        Assert.Equal(0.0f, configs[0].Whisper.Temperature);
-        Assert.Equal(0.5f, configs[1].Whisper.Temperature);
+        Assert.Equal(0.0f, configs[0].Whisper!.Temperature);
+        Assert.Equal(0.5f, configs[1].Whisper!.Temperature);
     }
 
     [Fact]
