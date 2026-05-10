@@ -1,0 +1,149 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.LlamaCppSettingsView"
+             x:DataType="vms:LlamaCppSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="llama.cpp" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Manage the llama-server process that powers Gemma 4 transcription."
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <!-- Server Status -->
+        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                CornerRadius="6" Padding="16" Margin="0,4,0,0">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                        <Ellipse Width="10" Height="10"
+                                 VerticalAlignment="Center"
+                                 Fill="Green"
+                                 IsVisible="{Binding IsConnected}" />
+                        <Ellipse Width="10" Height="10"
+                                 VerticalAlignment="Center"
+                                 Fill="Orange"
+                                 IsVisible="{Binding HasPortConflict}" />
+                        <Ellipse Width="10" Height="10"
+                                 VerticalAlignment="Center"
+                                 Fill="Gray"
+                                 IsVisible="{Binding !IsConnected}">
+                            <Ellipse.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding Path="!IsConnected" />
+                                    <Binding Path="!HasPortConflict" />
+                                </MultiBinding>
+                            </Ellipse.IsVisible>
+                        </Ellipse>
+                        <TextBlock Text="{Binding StatusText}"
+                                   FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Content="Refresh"
+                            Command="{Binding RefreshServerInfoCommand}"
+                            IsEnabled="{Binding !IsRefreshing}"
+                            Padding="12,4"
+                            FontSize="12" />
+                </Grid>
+
+                <!-- Server properties (visible when connected) -->
+                <StackPanel Spacing="6" IsVisible="{Binding IsConnected}">
+                    <Separator Margin="0,2" />
+
+                    <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,4,0,0">
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Model:" FontWeight="SemiBold" FontSize="12"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding ModelAlias}" FontSize="12"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Path:" FontWeight="SemiBold" FontSize="12"
+                                   VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding ModelPath}" FontSize="12"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" Margin="0,4,0,0"
+                                   ToolTip.Tip="{Binding ModelPath}" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="Audio:" FontWeight="SemiBold" FontSize="12"
+                                   VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="2" Grid.Column="1"
+                                   Text="Supported" FontSize="12"
+                                   VerticalAlignment="Center" Margin="0,4,0,0"
+                                   IsVisible="{Binding AudioSupported}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1"
+                                   Text="Not supported" FontSize="12"
+                                   Opacity="0.5"
+                                   VerticalAlignment="Center" Margin="0,4,0,0"
+                                   IsVisible="{Binding !AudioSupported}" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0"
+                                   Text="Build:" FontWeight="SemiBold" FontSize="12"
+                                   VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="3" Grid.Column="1"
+                                   Text="{Binding BuildInfo}" FontSize="12"
+                                   VerticalAlignment="Center" Margin="0,4,0,0" />
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Port conflict warning -->
+        <Border IsVisible="{Binding HasPortConflict}"
+                Background="#33FF8C00" CornerRadius="6" Padding="12" Margin="0,4,0,0">
+            <StackPanel Spacing="4">
+                <TextBlock Text="⚠ Port Conflict" FontWeight="SemiBold" FontSize="14" />
+                <TextBlock Text="{Binding ErrorMessage}"
+                           TextWrapping="Wrap" Opacity="0.8" FontSize="12" />
+                <TextBlock Text="Change the port below and click Save."
+                           Opacity="0.6" FontSize="12" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Error message -->
+        <TextBlock Text="{Binding ErrorMessage}"
+                   IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                   Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
+                   TextWrapping="Wrap" FontSize="12"
+                   Margin="0,4,0,0" />
+
+        <!-- Settings: Port -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Server Port" FontWeight="SemiBold" FontSize="14" />
+            <TextBlock Text="Port for llama-server (default: 8321). Requires restart."
+                       Opacity="0.6" FontSize="12" />
+            <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                <TextBox Grid.Column="0"
+                         Text="{Binding PortText, Mode=TwoWay}"
+                         Watermark="8321"
+                         MaxLength="5"
+                         Margin="0,0,8,0" />
+                <Button Grid.Column="1"
+                        Content="Save"
+                        Command="{Binding SavePortCommand}"
+                        Padding="16,6" />
+            </Grid>
+        </StackPanel>
+
+        <!-- Settings: Server Path -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Server Binary Path" FontWeight="SemiBold" FontSize="14" />
+            <TextBlock Text="Path to llama-server.exe (Vulkan build)."
+                       Opacity="0.6" FontSize="12" />
+            <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                <TextBox Grid.Column="0"
+                         Text="{Binding ServerPath, Mode=TwoWay}"
+                         Watermark="C:\ai\llama-server.exe"
+                         Margin="0,0,8,0" />
+                <Button Grid.Column="1"
+                        Content="Save"
+                        Command="{Binding SaveServerPathCommand}"
+                        Padding="16,6" />
+            </Grid>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

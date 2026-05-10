@@ -49,7 +49,15 @@ public class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            desktop.Exit += (_, _) => _hotkeyCoordinator?.Dispose();
+            desktop.Exit += async (_, _) =>
+            {
+                _hotkeyCoordinator?.Dispose();
+
+                // Stop the llama-server sidecar (if running) before exiting
+                var recognizer = _services.GetService<ISpeechRecognizer>();
+                if (recognizer is not null)
+                    await recognizer.DisposeAsync();
+            };
         }
 
         _hotkeyCoordinator = _services.GetRequiredService<HotkeyCoordinator>();
@@ -177,9 +185,11 @@ public class App : Application
         else
             services.AddSingleton<ITextInjectionService, ClipboardTextInjectionService>();
 
+        services.AddSingleton<SpeechEngineSettingsViewModel>();
         services.AddSingleton<MicrophoneSettingsViewModel>();
         services.AddSingleton<WhisperModelSettingsViewModel>();
         services.AddSingleton<RuntimeSettingsViewModel>();
+        services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<SpeechSettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();

@@ -16,37 +16,41 @@ public class SettingsWindowViewModelTests
         var nvidia = new MockNvidiaEnvironmentProvider();
         var vulkan = new MockVulkanEnvironmentProvider();
 
+        var engine = new SpeechEngineSettingsViewModel(settings);
         var mic = new MicrophoneSettingsViewModel(enumerator, settings);
         var model = new WhisperModelSettingsViewModel(settings);
         var runtime = new RuntimeSettingsViewModel(settings, nvidia, vulkan);
+        var llamaCpp = new LlamaCppSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
         var speech = new SpeechSettingsViewModel(settings);
         var theme = new ThemeSettingsViewModel(settings);
 
-        return new SettingsWindowViewModel(mic, model, runtime, hotkey, speech, theme);
+        return new SettingsWindowViewModel(engine, mic, model, runtime, llamaCpp, hotkey, speech, theme);
     }
 
     [Fact]
-    public void Sections_ContainsAllSixInOrder()
+    public void Sections_ContainsAllEightInOrder()
     {
         var vm = BuildViewModel();
 
         Assert.Collection(vm.Sections,
+            s => Assert.Equal("Speech Engine", s.Title),
             s => Assert.Equal("Microphone", s.Title),
             s => Assert.Equal("Whisper Model", s.Title),
             s => Assert.Equal("Runtime", s.Title),
+            s => Assert.Equal("llama.cpp", s.Title),
             s => Assert.Equal("Hotkey", s.Title),
             s => Assert.Equal("Speech", s.Title),
             s => Assert.Equal("Theme", s.Title));
     }
 
     [Fact]
-    public void DefaultSelectedSection_IsMicrophone()
+    public void DefaultSelectedSection_IsSpeechEngine()
     {
         var vm = BuildViewModel();
 
         Assert.NotNull(vm.SelectedSection);
-        Assert.Equal("Microphone", vm.SelectedSection!.Title);
+        Assert.Equal("Speech Engine", vm.SelectedSection!.Title);
     }
 
     [Fact]
