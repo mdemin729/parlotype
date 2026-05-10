@@ -17,10 +17,13 @@ public static class PlatformServiceExtensions
     {
         services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
         services.AddSingleton<IVadService, SileroVadService>();
-        services.AddSingleton<ISpeechRecognizer, WhisperSpeechRecognizer>();
-        // Whisper runtime bootstrap (CUDA / Vulkan / CPU) is handled lazily inside
-        // WhisperSpeechRecognizer.InitializeAsync, before any WhisperFactory
-        // is created. No eager initialization is needed here.
+        // Both recognizers are registered as concrete singletons.
+        // DelegatingSpeechRecognizer reads the SpeechEngine setting at
+        // InitializeAsync time and forwards to the correct one.
+        services.AddSingleton<WhisperSpeechRecognizer>();
+        services.AddSingleton<LlamaCppSpeechRecognizer>();
+        services.AddSingleton<SpeechRecognizerFactory>();
+        services.AddSingleton<ISpeechRecognizer, DelegatingSpeechRecognizer>();
         services.AddSingleton<IAudioPipeline, AudioPipelineService>();
         services.AddSingleton<IAudioLevelProvider>(sp =>
             (AudioPipelineService)sp.GetRequiredService<IAudioPipeline>());
@@ -29,6 +32,7 @@ public static class PlatformServiceExtensions
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromHours(1) });
         services.AddSingleton<HttpModelDownloadService>();
+        services.AddSingleton<Gemma4ModelDownloadService>();
 
         if (OperatingSystem.IsWindows())
         {

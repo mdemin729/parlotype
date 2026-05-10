@@ -11,6 +11,9 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.DataTemplates>
+        <DataTemplate DataType="vms:SpeechEngineSettingsViewModel">
+            <v:SpeechEngineSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:MicrophoneSettingsViewModel">
             <v:MicrophoneSettingsView />
         </DataTemplate>
@@ -19,6 +22,9 @@
         </DataTemplate>
         <DataTemplate DataType="vms:RuntimeSettingsViewModel">
             <v:RuntimeSettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vms:LlamaCppSettingsViewModel">
+            <v:LlamaCppSettingsView />
         </DataTemplate>
         <DataTemplate DataType="vms:HotkeySettingsViewModel">
             <v:HotkeySettingsView />

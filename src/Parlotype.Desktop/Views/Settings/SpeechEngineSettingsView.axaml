@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.SpeechEngineSettingsView"
+             x:DataType="vms:SpeechEngineSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Speech Engine" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Choose which engine transcribes your speech. Changes take effect on next recording."
+                   Opacity="0.7"
+                   TextWrapping="Wrap" />
+
+        <ItemsControl ItemsSource="{Binding EngineOptions}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:SpeechEngineDisplayItem">
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            Padding="12,8"
+                            Margin="0,2"
+                            Command="{Binding SelectCommand}"
+                            CommandParameter="{Binding Type}">
+                        <Grid ColumnDefinitions="11,*" RowDefinitions="Auto,Auto">
+                            <Border Grid.Column="0" Grid.RowSpan="2"
+                                    Width="3" Height="16" CornerRadius="1.5"
+                                    Background="{DynamicResource SystemAccentColor}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Margin="0,4,0,0"
+                                    IsVisible="{Binding IsSelected}" />
+                            <TextBlock Grid.Column="1" Grid.Row="0"
+                                       Text="{Binding DisplayName}"
+                                       FontSize="14" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Grid.Row="1"
+                                       Text="{Binding Description}"
+                                       FontSize="12" Opacity="0.6"
+                                       TextWrapping="Wrap"
+                                       Margin="0,2,0,0" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Gemma 4 info panel -->
+        <StackPanel Spacing="4" IsVisible="{Binding IsGemma4Selected}" Margin="0,8,0,0">
+            <TextBlock Text="Gemma 4 (Experimental)"
+                       FontWeight="SemiBold" FontSize="14" />
+            <TextBlock TextWrapping="Wrap" Opacity="0.7">
+                Gemma 4 E4B runs via a local llama-server process (llama.cpp, Vulkan).
+                English transcription only. Works best with clean speech and a good microphone.
+                The model files (~10 GB) will be downloaded on first use.
+            </TextBlock>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
