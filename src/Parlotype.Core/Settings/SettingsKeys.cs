@@ -15,6 +15,6 @@ public static class SettingsKeys
     public const string FilterProfanity = "FilterProfanity";
     public const string TranslateToEnglish = "TranslateToEnglish";
     public const string SpeechEngine = "SpeechEngine";
-    public const string LlamaCppServerPath = "LlamaCppServerPath";
+    public const string LlamaCppServerFolder = "LlamaCppServerFolder";
     public const string LlamaCppPort = "LlamaCppPort";
 }

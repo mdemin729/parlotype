@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
+using Parlotype.Core.Speech;
 using Parlotype.Platform.Speech;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
@@ -12,7 +13,13 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private const int DefaultPort = 8321;
     private const string DefaultHost = "127.0.0.1";
 
+    private static string DefaultServerFolder =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "parlotype", "llama-server");
+
     private readonly ISettingsService _settings;
+    private readonly ISpeechRecognizer? _recognizer;
     private readonly ILogger<LlamaCppSettingsViewModel> _logger;
 
     public override string Title => "llama.cpp";
@@ -54,16 +61,18 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private string _portText = DefaultPort.ToString();
 
     [ObservableProperty]
-    private string _serverPath = "";
+    private string _serverFolder = "";
 
     [ObservableProperty]
     private bool _isRefreshing;
 
     public LlamaCppSettingsViewModel(
         ISettingsService settings,
+        ISpeechRecognizer? recognizer = null,
         ILogger<LlamaCppSettingsViewModel>? logger = null)
     {
         _settings = settings;
+        _recognizer = recognizer;
         _logger = logger ?? NullLogger<LlamaCppSettingsViewModel>.Instance;
 
         _ = InitializeAsync();
@@ -78,8 +87,8 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         if (int.TryParse(portStr, out var port) && port is > 0 and <= 65535)
             PortText = port.ToString();
 
-        var path = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerPath);
-        ServerPath = path ?? @"C:\ai\llama-b9090-bin-win-vulkan-x64\llama-server.exe";
+        var folder = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerFolder);
+        ServerFolder = folder ?? DefaultServerFolder;
     }
 
     [RelayCommand]
@@ -167,35 +176,81 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     }
 
     [RelayCommand]
-    private async Task SavePortAsync()
+    private async Task SaveSettingsAsync()
     {
+        // Validate port
         if (!int.TryParse(PortText, out var port) || port is <= 0 or > 65535)
         {
             ErrorMessage = "Port must be a number between 1 and 65535.";
             return;
         }
 
+        // Validate folder
+        var folder = ServerFolder?.Trim();
+        if (string.IsNullOrEmpty(folder))
+        {
+            ErrorMessage = "Server folder cannot be empty.";
+            return;
+        }
+
         await _settings.SetAsync(SettingsKeys.LlamaCppPort, port.ToString());
-        _logger.LogInformation("llama.cpp port saved: {Port}", port);
+        await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, folder);
+        _logger.LogInformation("llama.cpp settings saved: port={Port}, folder={Folder}", port, folder);
         ErrorMessage = null;
+
+        // Unload current recognizer so it re-initializes with new settings
+        await UnloadRecognizerAsync();
 
         // Re-probe with the new port
         await RefreshServerInfoAsync();
     }
 
     [RelayCommand]
-    private async Task SaveServerPathAsync()
+    private async Task ResetDefaultsAsync()
     {
-        var path = ServerPath?.Trim();
-        if (string.IsNullOrEmpty(path))
-        {
-            ErrorMessage = "Server path cannot be empty.";
-            return;
-        }
+        PortText = DefaultPort.ToString();
+        ServerFolder = DefaultServerFolder;
 
-        await _settings.SetAsync(SettingsKeys.LlamaCppServerPath, path);
-        _logger.LogInformation("llama.cpp server path saved: {Path}", path);
+        await _settings.SetAsync(SettingsKeys.LlamaCppPort, DefaultPort.ToString());
+        await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, DefaultServerFolder);
+        _logger.LogInformation("llama.cpp settings reset to defaults");
         ErrorMessage = null;
+
+        await UnloadRecognizerAsync();
+        await RefreshServerInfoAsync();
+    }
+
+    [RelayCommand]
+    private async Task BrowseServerFolderAsync()
+    {
+        var topLevel = Avalonia.Application.Current?.ApplicationLifetime
+            is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+            ? desktop.Windows.FirstOrDefault()
+            : null;
+
+        if (topLevel is null)
+            return;
+
+        var result = await topLevel.StorageProvider.OpenFolderPickerAsync(
+            new Avalonia.Platform.Storage.FolderPickerOpenOptions
+            {
+                Title = "Select llama-server folder",
+                AllowMultiple = false,
+            });
+
+        if (result is { Count: > 0 })
+        {
+            ServerFolder = result[0].Path.LocalPath;
+        }
+    }
+
+    private async Task UnloadRecognizerAsync()
+    {
+        if (_recognizer is not { IsReady: true })
+            return;
+
+        _logger.LogInformation("Unloading speech recognizer after settings change");
+        await _recognizer.UnloadAsync();
     }
 
     private void ClearServerProps()
