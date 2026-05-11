@@ -114,36 +114,40 @@
         <!-- Settings: Port -->
         <StackPanel Spacing="4">
             <TextBlock Text="Server Port" FontWeight="SemiBold" FontSize="14" />
-            <TextBlock Text="Port for llama-server (default: 8321). Requires restart."
+            <TextBlock Text="Port for llama-server (default: 8321). Changes take effect on next recording."
+                       Opacity="0.6" FontSize="12" />
+            <TextBox Text="{Binding PortText, Mode=TwoWay}"
+                     Watermark="8321"
+                     MaxLength="5"
+                     Margin="0,4,0,0" />
+        </StackPanel>
+
+        <!-- Settings: Server Folder -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Server Folder" FontWeight="SemiBold" FontSize="14" />
+            <TextBlock Text="Folder containing llama-server.exe (Vulkan build)."
                        Opacity="0.6" FontSize="12" />
             <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
                 <TextBox Grid.Column="0"
-                         Text="{Binding PortText, Mode=TwoWay}"
-                         Watermark="8321"
-                         MaxLength="5"
+                         Text="{Binding ServerFolder, Mode=TwoWay}"
+                         Watermark="%LOCALAPPDATA%\parlotype\llama-server"
                          Margin="0,0,8,0" />
                 <Button Grid.Column="1"
-                        Content="Save"
-                        Command="{Binding SavePortCommand}"
-                        Padding="16,6" />
+                        Content="Browse…"
+                        Command="{Binding BrowseServerFolderCommand}"
+                        Padding="12,6" />
             </Grid>
         </StackPanel>
 
-        <!-- Settings: Server Path -->
-        <StackPanel Spacing="4">
-            <TextBlock Text="Server Binary Path" FontWeight="SemiBold" FontSize="14" />
-            <TextBlock Text="Path to llama-server.exe (Vulkan build)."
-                       Opacity="0.6" FontSize="12" />
-            <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                <TextBox Grid.Column="0"
-                         Text="{Binding ServerPath, Mode=TwoWay}"
-                         Watermark="C:\ai\llama-server.exe"
-                         Margin="0,0,8,0" />
-                <Button Grid.Column="1"
-                        Content="Save"
-                        Command="{Binding SaveServerPathCommand}"
-                        Padding="16,6" />
-            </Grid>
+        <!-- Action buttons -->
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+            <Button Content="Save"
+                    Command="{Binding SaveSettingsCommand}"
+                    Padding="20,6"
+                    FontWeight="SemiBold" />
+            <Button Content="Reset"
+                    Command="{Binding ResetDefaultsCommand}"
+                    Padding="16,6" />
         </StackPanel>
     </StackPanel>
 </UserControl>

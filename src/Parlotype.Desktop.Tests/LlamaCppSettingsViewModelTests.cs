@@ -36,28 +36,31 @@ public class LlamaCppSettingsViewModelTests
     }
 
     [Fact]
-    public async Task SavePort_PersistsToSettings()
+    public async Task SaveSettings_PersistsBothPortAndFolder()
     {
         var settings = new MockSettingsService();
         var vm = new LlamaCppSettingsViewModel(settings);
 
         vm.PortText = "9999";
-        vm.SavePortCommand.Execute(null);
+        vm.ServerFolder = @"C:\custom\llama";
+        vm.SaveSettingsCommand.Execute(null);
 
         await Task.Delay(200, TestContext.Current.CancellationToken);
 
-        var saved = await settings.GetAsync<string>("LlamaCppPort", TestContext.Current.CancellationToken);
-        Assert.Equal("9999", saved);
+        var port = await settings.GetAsync<string>("LlamaCppPort", TestContext.Current.CancellationToken);
+        var folder = await settings.GetAsync<string>("LlamaCppServerFolder", TestContext.Current.CancellationToken);
+        Assert.Equal("9999", port);
+        Assert.Equal(@"C:\custom\llama", folder);
     }
 
     [Fact]
-    public async Task SavePort_InvalidPort_ShowsError()
+    public async Task SaveSettings_InvalidPort_ShowsError()
     {
         var settings = new MockSettingsService();
         var vm = new LlamaCppSettingsViewModel(settings);
 
         vm.PortText = "invalid";
-        vm.SavePortCommand.Execute(null);
+        vm.SaveSettingsCommand.Execute(null);
 
         await Task.Delay(100, TestContext.Current.CancellationToken);
 
@@ -66,18 +69,20 @@ public class LlamaCppSettingsViewModelTests
     }
 
     [Fact]
-    public async Task SaveServerPath_PersistsToSettings()
+    public async Task ResetDefaults_RestoresDefaultValues()
     {
         var settings = new MockSettingsService();
         var vm = new LlamaCppSettingsViewModel(settings);
 
-        vm.ServerPath = @"C:\custom\llama-server.exe";
-        vm.SaveServerPathCommand.Execute(null);
+        vm.PortText = "9999";
+        vm.ServerFolder = @"C:\custom\path";
+        vm.ResetDefaultsCommand.Execute(null);
 
         await Task.Delay(200, TestContext.Current.CancellationToken);
 
-        var saved = await settings.GetAsync<string>("LlamaCppServerPath", TestContext.Current.CancellationToken);
-        Assert.Equal(@"C:\custom\llama-server.exe", saved);
+        Assert.Equal("8321", vm.PortText);
+        Assert.Contains("parlotype", vm.ServerFolder);
+        Assert.Contains("llama-server", vm.ServerFolder);
     }
 
     [Fact]

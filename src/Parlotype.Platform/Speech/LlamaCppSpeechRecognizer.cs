@@ -196,8 +196,16 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer
 
     public async Task UnloadAsync()
     {
-        await StopServerAsync();
-        IsReady = false;
+        await _initLock.WaitAsync();
+        try
+        {
+            await StopServerAsync();
+            IsReady = false;
+        }
+        finally
+        {
+            _initLock.Release();
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -210,15 +218,21 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer
         _initLock.Dispose();
     }
 
+    private const string ServerExeName = "llama-server.exe";
+
     private async Task<string> GetServerPathAsync(CancellationToken cancellationToken)
     {
-        var customPath = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerPath);
-        if (!string.IsNullOrWhiteSpace(customPath))
-            return customPath;
+        var folder = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerFolder);
+        if (!string.IsNullOrWhiteSpace(folder))
+            return Path.Combine(folder, ServerExeName);
 
-        // Default location
-        return @"C:\ai\llama-b9090-bin-win-vulkan-x64\llama-server.exe";
+        return Path.Combine(GetDefaultServerFolder(), ServerExeName);
     }
+
+    private static string GetDefaultServerFolder() =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "parlotype", "llama-server");
 
     private async Task<int> GetConfiguredPortAsync(CancellationToken cancellationToken)
     {
