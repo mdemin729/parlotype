@@ -31,6 +31,7 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromHours(1) });
+        services.AddSingleton<StreamingFileDownloader>();
         services.AddSingleton<HttpModelDownloadService>();
         services.AddSingleton<Gemma4ModelDownloadService>();
 

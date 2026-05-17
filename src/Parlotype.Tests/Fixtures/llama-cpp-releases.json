@@ -1,0 +1,146 @@
+[
+  {
+    "tag_name": "b9198",
+    "name": "b9198",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-05-17T08:00:00Z",
+    "assets": [
+      {
+        "name": "llama-b9198-bin-win-cuda-12.4-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-win-cuda-12.4-x64.zip",
+        "size": 391000000,
+        "digest": "sha256:8c79a9b226de4b3caa11111111111111111111111111111111111111111111aa"
+      },
+      {
+        "name": "cudart-llama-bin-win-cuda-12.4-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/cudart-llama-bin-win-cuda-12.4-x64.zip",
+        "size": 373000000,
+        "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc12"
+      },
+      {
+        "name": "llama-b9198-bin-win-cuda-13.1-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-win-cuda-13.1-x64.zip",
+        "size": 402000000,
+        "digest": "sha256:f96935e7e385e3b2dbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1"
+      },
+      {
+        "name": "cudart-llama-bin-win-cuda-13.1-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/cudart-llama-bin-win-cuda-13.1-x64.zip",
+        "size": 384000000,
+        "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd13"
+      },
+      {
+        "name": "llama-b9198-bin-win-vulkan-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-win-vulkan-x64.zip",
+        "size": 31000000,
+        "digest": "sha256:11111111111111111111111111111111111111111111111111111111111111aa"
+      },
+      {
+        "name": "llama-b9198-bin-win-cpu-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-win-cpu-x64.zip",
+        "size": 18000000,
+        "digest": "sha256:22222222222222222222222222222222222222222222222222222222222222bb"
+      },
+      {
+        "name": "llama-b9198-bin-win-cpu-arm64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-win-cpu-arm64.zip",
+        "size": 17000000,
+        "digest": "sha256:33333333333333333333333333333333333333333333333333333333333333cc"
+      },
+      {
+        "name": "llama-b9198-bin-win-hip-radeon-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-win-hip-radeon-x64.zip",
+        "size": 95000000,
+        "digest": null
+      },
+      {
+        "name": "llama-b9198-bin-macos-arm64.tar.gz",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-macos-arm64.tar.gz",
+        "size": 8100000,
+        "digest": "sha256:03f4bd00bc86bb34588888888888888888888888888888888888888888888888"
+      },
+      {
+        "name": "llama-b9198-bin-ubuntu-vulkan-x64.tar.gz",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-ubuntu-vulkan-x64.tar.gz",
+        "size": 12400000,
+        "digest": "sha256:99999999999999999999999999999999999999999999999999999999999999dd"
+      },
+      {
+        "name": "llama-b9198-bin-android-arm64.tar.gz",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-android-arm64.tar.gz",
+        "size": 62200000,
+        "digest": "sha256:a71b490b020e2e5b88888888888888888888888888888888888888888888888a"
+      },
+      {
+        "name": "llama-b9198-bin-310p-openEuler-x86.tar.gz",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9198/llama-b9198-bin-310p-openEuler-x86.tar.gz",
+        "size": 11100000,
+        "digest": "sha256:045269a3ad84d1f7eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      {
+        "name": "Source code (zip)",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/archive/refs/tags/b9198.zip",
+        "size": 12345678,
+        "digest": null
+      }
+    ]
+  },
+  {
+    "tag_name": "b9197",
+    "name": "b9197",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-05-16T20:00:00Z",
+    "assets": [
+      {
+        "name": "llama-b9197-bin-win-cuda-12.4-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9197/llama-b9197-bin-win-cuda-12.4-x64.zip",
+        "size": 390000000,
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa97"
+      },
+      {
+        "name": "cudart-llama-bin-win-cuda-12.4-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9197/cudart-llama-bin-win-cuda-12.4-x64.zip",
+        "size": 373000000,
+        "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb97"
+      },
+      {
+        "name": "llama-b9197-bin-win-vulkan-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9197/llama-b9197-bin-win-vulkan-x64.zip",
+        "size": 30900000,
+        "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc9700"
+      }
+    ]
+  },
+  {
+    "tag_name": "b9196-draft",
+    "name": "Draft release",
+    "draft": true,
+    "prerelease": false,
+    "published_at": null,
+    "assets": [
+      {
+        "name": "llama-b9196-bin-win-vulkan-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9196-draft/llama-b9196-bin-win-vulkan-x64.zip",
+        "size": 30000000,
+        "digest": null
+      }
+    ]
+  },
+  {
+    "tag_name": "b9195-rc1",
+    "name": "Prerelease",
+    "draft": false,
+    "prerelease": true,
+    "published_at": "2026-05-15T10:00:00Z",
+    "assets": [
+      {
+        "name": "llama-b9195-bin-win-vulkan-x64.zip",
+        "browser_download_url": "https://github.com/ggml-org/llama.cpp/releases/download/b9195-rc1/llama-b9195-bin-win-vulkan-x64.zip",
+        "size": 29900000,
+        "digest": null
+      }
+    ]
+  }
+]

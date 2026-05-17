@@ -17,4 +17,5 @@ public static class SettingsKeys
     public const string SpeechEngine = "SpeechEngine";
     public const string LlamaCppServerFolder = "LlamaCppServerFolder";
     public const string LlamaCppPort = "LlamaCppPort";
+    public const string LlamaCppActiveInstall = "LlamaCppActiveInstall";
 }
