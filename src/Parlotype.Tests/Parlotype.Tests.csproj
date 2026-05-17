@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Content Include="resources\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
