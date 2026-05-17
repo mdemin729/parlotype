@@ -47,7 +47,7 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
     private async Task<string> ShowDialogAndDownloadAsync(WhisperModelType modelType, CancellationToken cancellationToken)
     {
         var modelInfo = WhisperModelInfo.Get(modelType);
-        var viewModel = new ModelDownloadViewModel(modelInfo.DisplayName, modelInfo.DiskSize);
+        var viewModel = ModelDownloadViewModel.ForWhisperModel(modelInfo.DisplayName, modelInfo.DiskSize);
 
         var dialog = new ModelDownloadDialog { DataContext = viewModel };
         var owner = GetOwnerWindow();

@@ -4,7 +4,7 @@
         x:Class="Parlotype.Desktop.Views.ModelDownloadDialog"
         x:DataType="vm:ModelDownloadViewModel"
         x:CompileBindings="True"
-        Title="Model Download"
+        Title="{Binding Title}"
         Width="400"
         SizeToContent="Height"
         CanResize="False"
@@ -38,7 +38,7 @@
 
                 <!-- Download button (visible before download starts) -->
                 <Button Name="DownloadButton"
-                        Content="Download"
+                        Content="{Binding DownloadButtonText}"
                         IsVisible="{Binding !IsDownloading}"
                         Classes="accent"
                         MinWidth="90"
