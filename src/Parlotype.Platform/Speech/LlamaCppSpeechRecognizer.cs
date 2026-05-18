@@ -5,6 +5,8 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Core.LlamaServer;
+using Parlotype.Platform.LlamaServer;
 
 namespace Parlotype.Platform.Speech;
 
@@ -12,8 +14,11 @@ namespace Parlotype.Platform.Speech;
 /// Speech recognizer that delegates to a <c>llama-server</c> (llama.cpp) sidecar process.
 /// Sends audio as base64-encoded WAV via the OpenAI-compatible
 /// <c>/v1/chat/completions</c> endpoint with <c>input_audio</c> content blocks.
+/// Also implements <see cref="ILlamaCppServerLifecycle"/> so the installer can
+/// stop the sidecar before deleting or replacing its files (Windows file-lock
+/// release).
 /// </summary>
-public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer
+public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServerLifecycle
 {
     private const int PreferredPort = 8321;
     private const string DefaultHost = "127.0.0.1";
@@ -26,6 +31,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer
         "When transcribing numbers, write the digits.";
 
     private readonly ISettingsService _settings;
+    private readonly ILlamaServerRegistry _registry;
     private readonly ILogger<LlamaCppSpeechRecognizer> _logger;
     private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(5) };
     private readonly SemaphoreSlim _initLock = new(1, 1);
@@ -38,9 +44,11 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer
 
     public LlamaCppSpeechRecognizer(
         ISettingsService settings,
+        ILlamaServerRegistry registry,
         ILogger<LlamaCppSpeechRecognizer> logger)
     {
         _settings = settings;
+        _registry = registry;
         _logger = logger;
     }
 
@@ -208,6 +216,14 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer
         }
     }
 
+    /// <summary>
+    /// Stops a running sidecar so the installer can delete or replace its files.
+    /// Safe to call when nothing is running. Delegates to <see cref="UnloadAsync"/>
+    /// which handles the lock and process-tree kill.
+    /// </summary>
+    public Task StopForReplacementAsync(CancellationToken cancellationToken = default)
+        => UnloadAsync();
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
@@ -220,8 +236,19 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer
 
     private const string ServerExeName = "llama-server.exe";
 
-    private async Task<string> GetServerPathAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Resolves the absolute path to <c>llama-server.exe</c>. Consults the
+    /// active-install selector first: a managed install wins; manual mode (or
+    /// a missing managed selector) falls through to the legacy
+    /// <see cref="SettingsKeys.LlamaCppServerFolder"/> setting, which itself
+    /// defaults to <c>%LOCALAPPDATA%/parlotype/llama-server</c> when unset.
+    /// </summary>
+    internal async Task<string> GetServerPathAsync(CancellationToken cancellationToken)
     {
+        var active = await _registry.GetActiveAsync(cancellationToken);
+        if (active is { Source: LlamaServerSource.Managed })
+            return Path.Combine(active.AbsolutePath, ServerExeName);
+
         var folder = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerFolder);
         if (!string.IsNullOrWhiteSpace(folder))
             return Path.Combine(folder, ServerExeName);

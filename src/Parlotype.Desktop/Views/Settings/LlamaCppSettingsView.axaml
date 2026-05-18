@@ -4,29 +4,30 @@
              x:Class="Parlotype.Desktop.Views.Settings.LlamaCppSettingsView"
              x:DataType="vms:LlamaCppSettingsViewModel"
              x:CompileBindings="True">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="ManagedAccentBrush" Color="#1E88E5" />
+        <SolidColorBrush x:Key="ManualAccentBrush" Color="#9E9E9E" />
+    </UserControl.Resources>
+
     <StackPanel Spacing="16">
         <TextBlock Text="llama.cpp" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Manage the llama-server process that powers Gemma 4 transcription."
+        <TextBlock Text="Browse, install, and manage llama-server builds. The active install powers Gemma 4 transcription."
                    Opacity="0.7" TextWrapping="Wrap" />
 
-        <!-- Server Status -->
+        <!-- ============================================================
+             Active server (top): badge + build + backend + Refresh probe
+             ============================================================ -->
         <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-                CornerRadius="6" Padding="16" Margin="0,4,0,0">
+                CornerRadius="6" Padding="16">
             <StackPanel Spacing="10">
                 <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
-                        <Ellipse Width="10" Height="10"
-                                 VerticalAlignment="Center"
-                                 Fill="Green"
-                                 IsVisible="{Binding IsConnected}" />
-                        <Ellipse Width="10" Height="10"
-                                 VerticalAlignment="Center"
-                                 Fill="Orange"
-                                 IsVisible="{Binding HasPortConflict}" />
-                        <Ellipse Width="10" Height="10"
-                                 VerticalAlignment="Center"
-                                 Fill="Gray"
-                                 IsVisible="{Binding !IsConnected}">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Ellipse Width="10" Height="10" VerticalAlignment="Center"
+                                 Fill="Green" IsVisible="{Binding IsConnected}" />
+                        <Ellipse Width="10" Height="10" VerticalAlignment="Center"
+                                 Fill="Orange" IsVisible="{Binding HasPortConflict}" />
+                        <Ellipse Width="10" Height="10" VerticalAlignment="Center"
+                                 Fill="Gray">
                             <Ellipse.IsVisible>
                                 <MultiBinding Converter="{x:Static BoolConverters.And}">
                                     <Binding Path="!IsConnected" />
@@ -34,84 +35,280 @@
                                 </MultiBinding>
                             </Ellipse.IsVisible>
                         </Ellipse>
-                        <TextBlock Text="{Binding StatusText}"
-                                   FontSize="14" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding StatusText}" FontSize="14" FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
+                        <!-- Managed/Manual badge for the active install -->
+                        <Border Background="{StaticResource ManagedAccentBrush}" CornerRadius="3"
+                                Padding="6,2" Margin="6,0,0,0"
+                                IsVisible="{Binding IsManagedActive}">
+                            <TextBlock Text="Managed" Foreground="White" FontSize="11" FontWeight="SemiBold" />
+                        </Border>
+                        <Border Background="{StaticResource ManualAccentBrush}" CornerRadius="3"
+                                Padding="6,2" Margin="6,0,0,0"
+                                IsVisible="{Binding IsManualActive}">
+                            <TextBlock Text="Manual" Foreground="White" FontSize="11" FontWeight="SemiBold" />
+                        </Border>
                     </StackPanel>
-                    <Button Grid.Column="1"
-                            Content="Refresh"
+                    <Button Grid.Column="1" Content="Refresh"
                             Command="{Binding RefreshServerInfoCommand}"
                             IsEnabled="{Binding !IsRefreshing}"
-                            Padding="12,4"
-                            FontSize="12" />
+                            Padding="12,4" FontSize="12" />
                 </Grid>
 
-                <!-- Server properties (visible when connected) -->
+                <!-- Active managed install details -->
+                <StackPanel Spacing="4" IsVisible="{Binding IsManagedActive}">
+                    <Separator Margin="0,2" />
+                    <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto" Margin="0,4,0,0">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Active install:"
+                                   FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
+                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ActiveManagedInstall.Build}" FontSize="12" />
+                            <TextBlock Text="·" FontSize="12" Opacity="0.5" />
+                            <TextBlock Text="{Binding ActiveManagedInstall.BackendDisplay}" FontSize="12" />
+                        </StackPanel>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Path:" FontWeight="SemiBold"
+                                   FontSize="12" VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding ActiveManagedInstall.AbsolutePath}"
+                                   FontSize="12" TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" Margin="0,4,0,0"
+                                   ToolTip.Tip="{Binding ActiveManagedInstall.AbsolutePath}" />
+                    </Grid>
+                </StackPanel>
+
+                <!-- /props readout (visible when connected) -->
                 <StackPanel Spacing="6" IsVisible="{Binding IsConnected}">
                     <Separator Margin="0,2" />
-
                     <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,4,0,0">
-                        <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Model:" FontWeight="SemiBold" FontSize="12"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Grid.Row="0" Grid.Column="1"
-                                   Text="{Binding ModelAlias}" FontSize="12"
-                                   TextTrimming="CharacterEllipsis"
-                                   VerticalAlignment="Center" />
-
-                        <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Path:" FontWeight="SemiBold" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,4,0,0" />
-                        <TextBlock Grid.Row="1" Grid.Column="1"
-                                   Text="{Binding ModelPath}" FontSize="12"
-                                   TextTrimming="CharacterEllipsis"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Model:" FontWeight="SemiBold"
+                                   FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ModelAlias}"
+                                   FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Path:" FontWeight="SemiBold"
+                                   FontSize="12" VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ModelPath}"
+                                   FontSize="12" TextTrimming="CharacterEllipsis"
                                    VerticalAlignment="Center" Margin="0,4,0,0"
                                    ToolTip.Tip="{Binding ModelPath}" />
-
-                        <TextBlock Grid.Row="2" Grid.Column="0"
-                                   Text="Audio:" FontWeight="SemiBold" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,4,0,0" />
-                        <TextBlock Grid.Row="2" Grid.Column="1"
-                                   Text="Supported" FontSize="12"
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Audio:" FontWeight="SemiBold"
+                                   FontSize="12" VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Supported" FontSize="12"
                                    VerticalAlignment="Center" Margin="0,4,0,0"
                                    IsVisible="{Binding AudioSupported}" />
-                        <TextBlock Grid.Row="2" Grid.Column="1"
-                                   Text="Not supported" FontSize="12"
-                                   Opacity="0.5"
-                                   VerticalAlignment="Center" Margin="0,4,0,0"
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Not supported" FontSize="12"
+                                   Opacity="0.5" VerticalAlignment="Center" Margin="0,4,0,0"
                                    IsVisible="{Binding !AudioSupported}" />
-
-                        <TextBlock Grid.Row="3" Grid.Column="0"
-                                   Text="Build:" FontWeight="SemiBold" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,4,0,0" />
-                        <TextBlock Grid.Row="3" Grid.Column="1"
-                                   Text="{Binding BuildInfo}" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Build:" FontWeight="SemiBold"
+                                   FontSize="12" VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding BuildInfo}"
+                                   FontSize="12" VerticalAlignment="Center" Margin="0,4,0,0" />
                     </Grid>
                 </StackPanel>
             </StackPanel>
         </Border>
 
+        <!-- Update-available banner -->
+        <Border IsVisible="{Binding IsUpdateAvailable}"
+                Background="#332196F3" CornerRadius="6" Padding="12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Text="Update available" FontWeight="SemiBold" FontSize="13" />
+                    <TextBlock FontSize="12" Opacity="0.8" TextWrapping="Wrap">
+                        <Run Text="A newer build is available on GitHub: " />
+                        <Run Text="{Binding LatestAvailableBuild}" FontWeight="SemiBold" />
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Check for updates"
+                        Command="{Binding CheckForUpdatesCommand}"
+                        IsEnabled="{Binding !IsCheckingForUpdates}"
+                        Padding="10,4" FontSize="12" />
+            </Grid>
+        </Border>
+
         <!-- Port conflict warning -->
         <Border IsVisible="{Binding HasPortConflict}"
-                Background="#33FF8C00" CornerRadius="6" Padding="12" Margin="0,4,0,0">
+                Background="#33FF8C00" CornerRadius="6" Padding="12">
             <StackPanel Spacing="4">
                 <TextBlock Text="⚠ Port Conflict" FontWeight="SemiBold" FontSize="14" />
-                <TextBlock Text="{Binding ErrorMessage}"
-                           TextWrapping="Wrap" Opacity="0.8" FontSize="12" />
-                <TextBlock Text="Change the port below and click Save."
-                           Opacity="0.6" FontSize="12" Margin="0,4,0,0" />
+                <TextBlock Text="{Binding ErrorMessage}" TextWrapping="Wrap" Opacity="0.8" FontSize="12" />
+                <TextBlock Text="Change the port below and click Save." Opacity="0.6" FontSize="12" Margin="0,4,0,0" />
             </StackPanel>
         </Border>
 
-        <!-- Error message -->
+        <!-- Generic error from probe or catalog -->
         <TextBlock Text="{Binding ErrorMessage}"
                    IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                    Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
-                   TextWrapping="Wrap" FontSize="12"
-                   Margin="0,4,0,0" />
+                   TextWrapping="Wrap" FontSize="12" />
 
-        <!-- Settings: Port -->
+        <!-- ============================================================
+             Installed (managed) — rich rows with Set Active + Uninstall
+             ============================================================ -->
+        <StackPanel Spacing="6" IsVisible="{Binding HasManagedFeatures}">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="Installed" FontSize="14" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="Refresh list"
+                        Command="{Binding RefreshInstalledCommand}"
+                        Padding="10,4" FontSize="12" />
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding Installed}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vms:LlamaServerInstallRowVm">
+                        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                CornerRadius="4" Padding="12" Margin="0,0,0,6">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto" >
+                                <RadioButton Grid.Column="0" Grid.RowSpan="2"
+                                             GroupName="ActiveLlamaInstall"
+                                             IsChecked="{Binding IsActive, Mode=OneWay}"
+                                             Command="{Binding $parent[ItemsControl].((vms:LlamaCppSettingsViewModel)DataContext).SetActiveManagedCommand}"
+                                             CommandParameter="{Binding}"
+                                             VerticalAlignment="Center"
+                                             ToolTip.Tip="Use this install"
+                                             Margin="0,0,8,0" />
+
+                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{Binding Build}" FontSize="13" FontWeight="SemiBold" />
+                                    <Border Background="{StaticResource ManagedAccentBrush}" CornerRadius="3"
+                                            Padding="5,1">
+                                        <TextBlock Text="{Binding BackendDisplay}" Foreground="White"
+                                                   FontSize="11" FontWeight="SemiBold" />
+                                    </Border>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SubtitleText}"
+                                           FontSize="11" Opacity="0.6" TextTrimming="CharacterEllipsis"
+                                           ToolTip.Tip="{Binding AbsolutePath}" Margin="0,2,0,0" />
+
+                                <TextBlock Grid.RowSpan="2" Grid.Column="2" Text="⚠ missing"
+                                           IsVisible="{Binding !IsValid}"
+                                           Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
+                                           FontSize="11" VerticalAlignment="Center" Margin="8,0" />
+
+                                <Button Grid.RowSpan="2" Grid.Column="3" Content="Uninstall"
+                                        Command="{Binding $parent[ItemsControl].((vms:LlamaCppSettingsViewModel)DataContext).UninstallInstallCommand}"
+                                        CommandParameter="{Binding}"
+                                        Padding="10,4" FontSize="11" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="No managed installs yet. Pick one from the Available list below."
+                       IsVisible="{Binding !Installed.Count}"
+                       Opacity="0.6" FontSize="12" FontStyle="Italic" Margin="0,4" />
+        </StackPanel>
+
+        <!-- ============================================================
+             Manual install — separate panel with distinct background
+             ============================================================ -->
+        <Border Background="#33808080" CornerRadius="6" Padding="14">
+            <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="Manual install" FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <Border Background="{StaticResource ManualAccentBrush}" CornerRadius="3"
+                                Padding="6,2">
+                            <TextBlock Text="Not managed by Parlotype" Foreground="White"
+                                       FontSize="11" FontWeight="SemiBold" />
+                        </Border>
+                    </StackPanel>
+                    <RadioButton Grid.Column="1" Content="Use this"
+                                 GroupName="ActiveLlamaInstall"
+                                 IsChecked="{Binding IsManualActive, Mode=OneWay}"
+                                 Command="{Binding SetActiveManualCommand}"
+                                 IsVisible="{Binding HasManagedFeatures}" />
+                </Grid>
+
+                <TextBlock Text="Point at a folder containing llama-server.exe that you downloaded yourself."
+                           Opacity="0.7" FontSize="12" />
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBox Grid.Column="0"
+                             Text="{Binding ServerFolder, Mode=TwoWay}"
+                             Watermark="%LOCALAPPDATA%\parlotype\llama-server"
+                             Margin="0,0,8,0" />
+                    <Button Grid.Column="1" Content="Browse…"
+                            Command="{Binding BrowseServerFolderCommand}"
+                            Padding="12,6" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- ============================================================
+             Available — catalog rows with Install button
+             ============================================================ -->
+        <StackPanel Spacing="6" IsVisible="{Binding HasManagedFeatures}">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0" Text="Available builds" FontSize="14" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="(loading…)" FontSize="11" Opacity="0.6"
+                           VerticalAlignment="Center" Margin="0,0,8,0"
+                           IsVisible="{Binding IsLoadingCatalog}" />
+                <Button Grid.Column="2" Content="Check for updates"
+                        Command="{Binding CheckForUpdatesCommand}"
+                        IsEnabled="{Binding !IsCheckingForUpdates}"
+                        Padding="10,4" FontSize="12" />
+            </Grid>
+
+            <TextBlock Text="{Binding CatalogErrorMessage}"
+                       IsVisible="{Binding CatalogErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                       Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
+                       TextWrapping="Wrap" FontSize="12" />
+
+            <ItemsControl ItemsSource="{Binding Available}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vms:LlamaServerVariantRowVm">
+                        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                CornerRadius="4" Padding="12" Margin="0,0,0,6">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Build}" FontSize="13" FontWeight="SemiBold" />
+                                        <Border Background="{StaticResource ManagedAccentBrush}" CornerRadius="3"
+                                                Padding="5,1">
+                                            <TextBlock Text="{Binding BackendDisplay}" Foreground="White"
+                                                       FontSize="11" FontWeight="SemiBold" />
+                                        </Border>
+                                        <TextBlock Text="+ CUDA runtime" FontSize="10" Opacity="0.6"
+                                                   VerticalAlignment="Center"
+                                                   IsVisible="{Binding HasCompanion}" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding AssetName}" FontSize="11" Opacity="0.55"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip.Tip="{Binding AssetName}" />
+                                </StackPanel>
+
+                                <TextBlock Grid.Column="1" Text="{Binding SizeDisplay}" FontSize="12"
+                                           VerticalAlignment="Center" Margin="8,0" />
+
+                                <Button Grid.Column="2" Content="Install"
+                                        Command="{Binding $parent[ItemsControl].((vms:LlamaCppSettingsViewModel)DataContext).InstallVariantCommand}"
+                                        CommandParameter="{Binding}"
+                                        IsVisible="{Binding !IsAlreadyInstalled}"
+                                        Padding="14,4" FontSize="12" />
+                                <Border Grid.Column="2" Background="#3300C853" CornerRadius="3"
+                                        Padding="8,4" IsVisible="{Binding IsAlreadyInstalled}">
+                                    <TextBlock Text="Installed" FontSize="11" FontWeight="SemiBold" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="No builds matched the current OS / architecture."
+                       IsVisible="{Binding !Available.Count}"
+                       Opacity="0.6" FontSize="12" FontStyle="Italic" Margin="0,4" />
+        </StackPanel>
+
+        <!-- ============================================================
+             Port + Save controls (preserved from the original layout)
+             ============================================================ -->
         <StackPanel Spacing="4">
             <TextBlock Text="Server Port" FontWeight="SemiBold" FontSize="14" />
             <TextBlock Text="Port for llama-server (default: 8321). Changes take effect on next recording."
@@ -122,32 +319,10 @@
                      Margin="0,4,0,0" />
         </StackPanel>
 
-        <!-- Settings: Server Folder -->
-        <StackPanel Spacing="4">
-            <TextBlock Text="Server Folder" FontWeight="SemiBold" FontSize="14" />
-            <TextBlock Text="Folder containing llama-server.exe (Vulkan build)."
-                       Opacity="0.6" FontSize="12" />
-            <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                <TextBox Grid.Column="0"
-                         Text="{Binding ServerFolder, Mode=TwoWay}"
-                         Watermark="%LOCALAPPDATA%\parlotype\llama-server"
-                         Margin="0,0,8,0" />
-                <Button Grid.Column="1"
-                        Content="Browse…"
-                        Command="{Binding BrowseServerFolderCommand}"
-                        Padding="12,6" />
-            </Grid>
-        </StackPanel>
-
-        <!-- Action buttons -->
-        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
-            <Button Content="Save"
-                    Command="{Binding SaveSettingsCommand}"
-                    Padding="20,6"
-                    FontWeight="SemiBold" />
-            <Button Content="Reset"
-                    Command="{Binding ResetDefaultsCommand}"
-                    Padding="16,6" />
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+            <Button Content="Save" Command="{Binding SaveSettingsCommand}"
+                    Padding="20,6" FontWeight="SemiBold" />
+            <Button Content="Reset" Command="{Binding ResetDefaultsCommand}" Padding="16,6" />
         </StackPanel>
     </StackPanel>
 </UserControl>

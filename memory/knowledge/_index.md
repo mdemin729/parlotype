@@ -33,6 +33,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[vulkan-runtime-probing]] | Vulkan API version packing (variant/major/minor/patch bits), `VkPhysicalDeviceProperties` 824-byte struct with stable 276-byte head, and `RuntimeOptions.LoadedLibrary` semantics in Whisper.net | 2026-05-06 |
 | [[gemma4-cuda-blackwell]] | Gemma 4 E2B bfloat16/float16 hallucinates on CUDA with Blackwell GPUs (RTX 5070 Ti, compute 12.0); CPU works; bitsandbytes 4-bit crashes on audio encoder `torch.finfo()` | 2026-05-08 |
 | [[llamacpp-gemma4-integration]] | llama-server `/props` endpoint for server identification; Gemma 4 E4B GGUF filenames (case-sensitive `bf16` not `f16`); Vulkan audio performance on RTX 5070 Ti | 2026-05-09 |
+| [[llama-cpp-release-assets]] | llama.cpp release asset naming (`llama-b{N}-bin-{platform}-{backend}-{arch}.{ext}`), CUDA `cudart-*.zip` companion pairing rules, no "latest" alias, GitHub 60 req/h unauthenticated limit, ETag weak-validator round-trip rule | 2026-05-17 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

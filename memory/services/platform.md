@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [platform, implementations, whisper, nAudio, vad]
 criticality: high
-last_updated: 2026-05-06
+last_updated: 2026-05-18
 summary: Implements Core interfaces using Whisper.net, NAudio, SileroVad, SharpHook
 ---
 
@@ -15,7 +15,8 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 
 ## Key Paths
 - `src/Parlotype.Platform/Audio/` — `WasapiAudioCaptureService`, `SileroVadService`, `MicrophoneEnumerator`, `AudioPipelineService` (also implements `IAudioLevelProvider`)
-- `src/Parlotype.Platform/Speech/` — `WhisperSpeechRecognizer`, `LlamaCppSpeechRecognizer` (Gemma 4 via llama-server sidecar), `DelegatingSpeechRecognizer` (routes by `SpeechEngine` setting), `SpeechRecognizerFactory`, `Gemma4ModelDownloadService`, `WhisperModelTypeExtensions`, `WhisperRuntimeBootstrap` (CUDA/Vulkan/CPU runtime selection + Whisper.net diagnostics bridge), `WindowsNvidiaEnvironmentProvider`, `NoOpNvidiaEnvironmentProvider`, `WindowsVulkanEnvironmentProvider`, `NoOpVulkanEnvironmentProvider`
+- `src/Parlotype.Platform/Speech/` — `WhisperSpeechRecognizer`, `LlamaCppSpeechRecognizer` (Gemma 4 via llama-server sidecar; speech consumer of `LlamaServer`; also implements `ILlamaCppServerLifecycle` so the installer can stop it before deleting files), `DelegatingSpeechRecognizer` (routes by `SpeechEngine` setting), `SpeechRecognizerFactory`, `Gemma4ModelDownloadService`, `HttpModelDownloadService` (delegates the download loop to `StreamingFileDownloader`), `StreamingFileDownloader` (shared HTTP → temp → atomic-move helper), `WhisperModelTypeExtensions`, `WhisperRuntimeBootstrap` (CUDA/Vulkan/CPU runtime selection + Whisper.net diagnostics bridge), `WindowsNvidiaEnvironmentProvider`, `NoOpNvidiaEnvironmentProvider`, `WindowsVulkanEnvironmentProvider`, `NoOpVulkanEnvironmentProvider`
+- `src/Parlotype.Platform/LlamaServer/` — managed-install subsystem (ADR-026, namespace flattened in ADR-027 — workload-agnostic, shared by speech today and future post-processing): `JsonLlamaServerRegistry` (manifest.json + `LlamaCppActiveInstall` selector), `LlamaServerAssetParser` (tolerant filename parser), `LlamaServerAssetDescriptor` (parser-internal projection), `GitHubLlamaServerCatalog` (HTTP + ETag + 1h on-disk cache, OS/arch filter at read time), `LlamaServerInstaller` (staging dir + SHA256 verify + ZIP extract + atomic Directory.Move + cudart companion merge; `BuildInstallId` is public so the UI can pair catalog rows with installed entries), `LlamaCppServerInfo` (probe helper: `/health` + `/props` for adopt-vs-spawn decision, relocated here in ADR-027)
 - `src/Parlotype.Platform/Hotkeys/` — `SharpHookHotkeyService`, `KeyCodeMapper`
 - `src/Parlotype.Platform/Settings/` — `JsonSettingsService`
 - `src/Parlotype.Platform/PlatformServiceExtensions.cs` — DI registration (all singletons)
@@ -44,3 +45,6 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 - [[decisions/_index|ADR-017]] Whisper model hot-swap via `UnloadAsync`
 - [[decisions/_index|ADR-022]] Vulkan GPU acceleration
 - [[decisions/_index|ADR-023]] Audio-level provider (RMS computation in `AudioPipelineService`)
+- [[decisions/_index|ADR-025]] Gemma 4 via llama.cpp sidecar
+- [[decisions/_index|ADR-026]] Managed llama.cpp server installation (catalog + registry + installer; manual folder mode preserved)
+- [[decisions/_index|ADR-027]] LlamaServer namespace rescope (moved out of `Speech.*` to flat `Parlotype.*.LlamaServer.*` anticipating post-processing consumer)
