@@ -27,7 +27,9 @@ public class AudioPipelineTests
     private sealed class HeadlessModelDownloadService : IModelDownloadService
     {
         private readonly HttpModelDownloadService _http = new(
-            new HttpClient { Timeout = TimeSpan.FromHours(1) },
+            new StreamingFileDownloader(
+                new HttpClient { Timeout = TimeSpan.FromHours(1) },
+                NullLogger<StreamingFileDownloader>.Instance),
             NullLogger<HttpModelDownloadService>.Instance);
 
         public bool IsModelCached(WhisperModelType modelType) => _http.IsModelCached(modelType);

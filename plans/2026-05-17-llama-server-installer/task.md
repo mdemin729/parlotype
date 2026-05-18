@@ -1,9 +1,9 @@
 ---
 title: Managed llama.cpp server installer
-status: planned
+status: completed
 created: 2026-05-17
-started:
-completed:
+started: 2026-05-17
+completed: 2026-05-17
 ---
 
 # Managed llama.cpp Server Installer
@@ -45,14 +45,14 @@ User-facing requirements:
 
 Each phase = one reviewable commit. Detail in [implementation-plan.md](implementation-plan.md).
 
-- [ ] Phase 1 — Core contracts (enums, records, interfaces in `Parlotype.Core/Speech/LlamaServer/`)
-- [ ] Phase 2 — Manifest + registry (`JsonLlamaServerRegistry` in Platform + tests)
-- [ ] Phase 3 — GitHub catalog (`GitHubLlamaServerCatalog` + `LlamaServerAssetParser` + ETag cache + tests)
-- [ ] Phase 4 — Installer (`LlamaServerInstaller` with staging-dir + cudart companion + SHA256 + tests)
-- [ ] Phase 5 — Recognizer wiring (`LlamaCppActiveInstall` setting + path resolution + `ILlamaCppServerLifecycle`)
-- [ ] Phase 6 — DI + dialog generalization (register services + extract reusable download modal)
-- [ ] Phase 7 — Settings UI rework (sections: Installed, Manual, Available, Update banner)
-- [ ] Phase 8 — ADR-026 + architecture doc update + memory vault
+- [x] Phase 1 — Core contracts (enums, records, interfaces in `Parlotype.Core/Speech/LlamaServer/`)
+- [x] Phase 2 — Manifest + registry (`JsonLlamaServerRegistry` in Platform + tests)
+- [x] Phase 3 — GitHub catalog (`GitHubLlamaServerCatalog` + `LlamaServerAssetParser` + ETag cache + tests)
+- [x] Phase 4 — Installer (`LlamaServerInstaller` with staging-dir + cudart companion + SHA256 + tests)
+- [x] Phase 5 — Recognizer wiring (`LlamaCppActiveInstall` setting + path resolution + `ILlamaCppServerLifecycle`)
+- [x] Phase 6 — DI + dialog generalization (register services + extract reusable download modal)
+- [x] Phase 7 — Settings UI rework (sections: Installed, Manual, Available, Update banner)
+- [x] Phase 8 — ADR-026 + architecture doc update + memory vault
 
 ## Verification
 

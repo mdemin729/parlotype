@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Parlotype.Platform.Speech;
+namespace Parlotype.Platform.LlamaServer;
 
 /// <summary>Status of the llama-server connection.</summary>
 public enum LlamaCppServerStatus

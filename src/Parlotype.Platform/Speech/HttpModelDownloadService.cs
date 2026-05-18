@@ -8,12 +8,14 @@ public sealed class HttpModelDownloadService
 {
     private static readonly SemaphoreSlim DownloadLock = new(1, 1);
 
-    private readonly HttpClient _httpClient;
+    private readonly StreamingFileDownloader _downloader;
     private readonly ILogger<HttpModelDownloadService> _logger;
 
-    public HttpModelDownloadService(HttpClient httpClient, ILogger<HttpModelDownloadService> logger)
+    public HttpModelDownloadService(
+        StreamingFileDownloader downloader,
+        ILogger<HttpModelDownloadService> logger)
     {
-        _httpClient = httpClient;
+        _downloader = downloader;
         _logger = logger;
     }
 
@@ -32,8 +34,8 @@ public sealed class HttpModelDownloadService
         File.Exists(GetModelPath(modelType));
 
     /// <summary>
-    /// Downloads the model with progress reporting.
-    /// Uses a temp file and atomic move to prevent partial files.
+    /// Downloads the model with progress reporting. Uses a temp file and
+    /// atomic move via <see cref="StreamingFileDownloader"/>.
     /// </summary>
     public async Task DownloadModelAsync(
         WhisperModelType modelType,
@@ -53,42 +55,13 @@ public sealed class HttpModelDownloadService
             var url = GetDownloadUrl(modelType);
             _logger.LogInformation("Downloading Whisper model {ModelType} from {Url}", modelType, url);
 
-            using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            IProgress<StreamingDownloadProgress>? bridged = progress is null
+                ? null
+                : new Progress<StreamingDownloadProgress>(p =>
+                    progress.Report(new ModelDownloadProgress(p.BytesReceived, p.TotalBytes)));
 
-            var totalBytes = response.Content.Headers.ContentLength;
-            var tempPath = modelPath + ".tmp";
-
-            try
-            {
-                await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                await using var fileStream = File.Create(tempPath);
-
-                var buffer = new byte[81_920];
-                long bytesReceived = 0;
-
-                while (true)
-                {
-                    var bytesRead = await contentStream.ReadAsync(buffer, cancellationToken);
-                    if (bytesRead == 0)
-                        break;
-
-                    await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
-                    bytesReceived += bytesRead;
-
-                    progress?.Report(new ModelDownloadProgress(bytesReceived, totalBytes));
-                }
-
-                _logger.LogInformation("Download complete: {Bytes} bytes written", bytesReceived);
-            }
-            catch
-            {
-                // Clean up temp file on failure
-                try { File.Delete(tempPath); } catch { /* best effort */ }
-                throw;
-            }
-
-            File.Move(tempPath, modelPath);
+            await _downloader.DownloadAsync(url, modelPath, bridged, cancellationToken);
+            _logger.LogInformation("Whisper model {ModelType} download complete", modelType);
         }
         finally
         {

@@ -3,10 +3,12 @@ using Parlotype.Core.Audio;
 using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Core.LlamaServer;
 using Parlotype.Platform.Audio;
 using Parlotype.Platform.Hotkeys;
 using Parlotype.Platform.Settings;
 using Parlotype.Platform.Speech;
+using Parlotype.Platform.LlamaServer;
 
 namespace Parlotype.Platform;
 
@@ -22,6 +24,11 @@ public static class PlatformServiceExtensions
         // InitializeAsync time and forwards to the correct one.
         services.AddSingleton<WhisperSpeechRecognizer>();
         services.AddSingleton<LlamaCppSpeechRecognizer>();
+        // The recognizer also surfaces ILlamaCppServerLifecycle so the
+        // installer can stop the sidecar before deleting its files
+        // (Windows file-lock release on uninstall/switch).
+        services.AddSingleton<ILlamaCppServerLifecycle>(sp => sp.GetRequiredService<LlamaCppSpeechRecognizer>());
+        services.AddSingleton<ILlamaServerRegistry, JsonLlamaServerRegistry>();
         services.AddSingleton<SpeechRecognizerFactory>();
         services.AddSingleton<ISpeechRecognizer, DelegatingSpeechRecognizer>();
         services.AddSingleton<IAudioPipeline, AudioPipelineService>();
@@ -31,8 +38,15 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromHours(1) });
+        services.AddSingleton<StreamingFileDownloader>();
         services.AddSingleton<HttpModelDownloadService>();
         services.AddSingleton<Gemma4ModelDownloadService>();
+        services.AddSingleton<ILlamaServerCatalog, GitHubLlamaServerCatalog>();
+        // Register the installer as a concrete singleton too so a Desktop
+        // wrapper can inject it directly while still resolving as
+        // ILlamaServerInstaller for callers that just want the headless impl.
+        services.AddSingleton<LlamaServerInstaller>();
+        services.AddSingleton<ILlamaServerInstaller>(sp => sp.GetRequiredService<LlamaServerInstaller>());
 
         if (OperatingSystem.IsWindows())
         {
