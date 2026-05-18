@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Parlotype.Tests" />
+    <InternalsVisibleTo Include="Parlotype.Desktop.Tests" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Core.Speech.LlamaServer;
 using Parlotype.Core.TextInjection;
 using Parlotype.Desktop.Services;
 using Parlotype.Desktop.ViewModels;
@@ -178,6 +179,11 @@ public class App : Application
         services.AddPlatformServices();
 
         services.AddSingleton<IModelDownloadService, ModelDownloadDialogService>();
+        // Override the Platform default with a UI-aware wrapper that shows a modal
+        // progress dialog. The wrapper depends on the concrete LlamaServerInstaller
+        // (registered by Platform); the last AddSingleton wins when ILlamaServerInstaller
+        // is resolved, so the dialog service is what consumers see.
+        services.AddSingleton<ILlamaServerInstaller, LlamaServerInstallDialogService>();
 
         services.AddSingleton<ITargetWindowTracker, Win32TargetWindowTracker>();
         if (Program.TextInjectionMode == TextInjectionMode.SharpHook)
