@@ -260,13 +260,27 @@ terminal across multiple app launches.
 | Setting key | Default | Description |
 |-------------|---------|-------------|
 | `SettingsKeys.SpeechEngine` | `"Whisper"` | Selects engine. Set to `"Gemma4"` to route through `LlamaCppSpeechRecognizer`. |
-| `SettingsKeys.LlamaCppServerFolder` | `%LOCALAPPDATA%\parlotype\llama-server\` | Folder containing `llama-server.exe`. |
+| `SettingsKeys.LlamaCppActiveInstall` | (empty) | `managed:{id}` selects a managed install (resolved via `ILlamaServerRegistry`); `manual` falls through to `LlamaCppServerFolder`; empty preserves the legacy behaviour (use `LlamaCppServerFolder` or its default). |
+| `SettingsKeys.LlamaCppServerFolder` | `%LOCALAPPDATA%\parlotype\llama-server\` | Folder containing `llama-server.exe`. Used by **manual** mode (or as the fallback when no active selector is set). |
 | `SettingsKeys.LlamaCppPort` | `8321` (`PreferredPort` constant) | TCP port for the sidecar. Parsed as int; out-of-range values silently fall back to the default. |
+| Managed-install root (not a setting) | `%LOCALAPPDATA%\parlotype\llama-servers\` | From `JsonLlamaServerRegistry.DefaultRootDirectory()`. Holds `manifest.json`, `.cache/releases.json`, `.staging/{guid}/`, and one folder per managed install (`{build}-{os}-{backend}-{arch}`). |
 | Model cache (not a setting) | `%LOCALAPPDATA%\parlotype\models\` | From `Gemma4ModelInfo.GetModelCacheDirectory()`. Holds `gemma-4-E4B-it-Q4_K_M.gguf` and `mmproj-gemma-4-E4B-it-bf16.gguf`. |
 
 The host is hard-coded to `127.0.0.1` (`DefaultHost`). The model alias
 sent in HTTP requests is hard-coded to `"gemma-4-e4b"` and is independent
 of `Gemma4ModelInfo.ModelId`.
+
+**Server-path resolution order** (in `LlamaCppSpeechRecognizer.GetServerPathAsync`):
+
+1. Read `LlamaCppActiveInstall`. If it starts with `managed:`, ask
+   `ILlamaServerRegistry.GetActiveAsync()` and use that install's
+   absolute path.
+2. Else (selector is `manual`, missing, or a stale managed id whose
+   install is no longer in the manifest), read `LlamaCppServerFolder`.
+3. Else, fall back to `%LOCALAPPDATA%\parlotype\llama-server\`.
+
+The fallback chain keeps Phase 1's behaviour (single folder) fully
+backward-compatible — users who never touch the new UI see no change.
 
 ---
 
@@ -344,9 +358,122 @@ follow-up ADR.
 
 ---
 
-## 12 Related Documents
+## 12 Server Installation Lifecycle
+
+Added in ADR-026. Lets users browse, install, and switch between
+managed llama-server builds from GitHub, alongside the existing
+manual-folder option.
+
+### Components
+
+| Component | Project | Responsibility |
+|-----------|---------|----------------|
+| `ILlamaServerCatalog` / `GitHubLlamaServerCatalog` | Core / Platform | Fetches `https://api.github.com/repos/ggml-org/llama.cpp/releases`, parses asset names via `LlamaServerAssetParser`, pairs CUDA-Windows variants with their matching `cudart-llama-bin-win-cuda-*.zip` companion, filters to the current OS/arch, caches result + ETag on disk for 1 h. |
+| `ILlamaServerRegistry` / `JsonLlamaServerRegistry` | Core / Platform | Read/write `manifest.json` (list of managed installs). Resolves the active install by reading `LlamaCppActiveInstall` from `ISettingsService` and looking up the matching entry. Manual mode returns a synthetic install pointing at `LlamaCppServerFolder`. |
+| `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. Uninstall stops the active sidecar via `ILlamaCppServerLifecycle` before deleting the folder. |
+| `StreamingFileDownloader` | Platform | Shared HTTP → temp-file → atomic-rename helper. Reused by `HttpModelDownloadService` (Whisper) and the installer. |
+| `ILlamaCppServerLifecycle` | Core | Implemented by `LlamaCppSpeechRecognizer`. `StopForReplacementAsync` delegates to `UnloadAsync` so the installer can release the Windows file lock on `llama-server.exe` before deleting it. |
+| `LlamaServerInstallDialogService` | Desktop | Implements `ILlamaServerInstaller`; opens the generalized `ModelDownloadDialog` and maps the installer's phase strings (`downloading`, `downloading-companion`, `verifying`, `extracting`, `finalizing`) to friendly status text. Registered in `App.axaml.cs` as an override of the Platform default. |
+| `LlamaCppSettingsViewModel` / `LlamaCppSettingsView` | Desktop | Sections: Active server, Update banner, Installed (RadioButton + Uninstall per row), Manual install (distinct background + "Not managed by Parlotype" badge), Available builds, port + Save/Reset. |
+
+### Install flow (success path)
+
+```mermaid
+flowchart TD
+    UI["LlamaCppSettingsView<br/>'Install' button on a catalog row"]
+    DLG["LlamaServerInstallDialogService<br/>(Desktop)"]
+    INST["LlamaServerInstaller<br/>(Platform)"]
+    DL["StreamingFileDownloader"]
+    SHA["SHA256.ComputeHashAsync"]
+    EXT["ZipFile.ExtractToDirectory"]
+    MV[/"Directory.Move<br/>.staging/{guid}/payload → {root}/{id}/"/]
+    REG["ILlamaServerRegistry.AddOrUpdateAsync<br/>manifest.json"]
+
+    UI --> DLG --> INST
+    INST --> DL
+    DL -- "main + companion" --> SHA
+    SHA --> EXT
+    EXT --> MV --> REG
+```
+
+### Storage layout
+
+```
+%LOCALAPPDATA%\parlotype\llama-servers\
+   .staging\{guid}\               # in-progress install (deleted in finally)
+      payload\                    # extracted contents; renamed into place on success
+      main.zip / companion.zip    # downloaded archives
+   .cache\releases.json           # GitHub catalog cache: { fetchedAt, etag, releases[] }
+   manifest.json                  # source of truth (folder names not load-bearing)
+   b9198-win-cuda-12.4-x64\       # managed install — id = build-os-backend-arch
+      llama-server.exe
+      ggml-cuda.dll
+      cudart64_12.dll             # cudart companion zip merged into the same folder
+```
+
+### Manifest schema (`manifest.json`)
+
+```jsonc
+{
+  "version": 1,
+  "installs": [
+    {
+      "id": "b9198-win-cuda-12.4-x64",
+      "build": "b9198",
+      "backend": "Cuda12",
+      "os": "Windows",
+      "arch": "X64",
+      "assetName": "llama-b9198-bin-win-cuda-12.4-x64.zip",
+      "companionAssetName": "cudart-llama-bin-win-cuda-12.4-x64.zip",
+      "sha256": "8c79a9b226de4b3ca...",   // null when GitHub had no `digest`
+      "companionSha256": "...",
+      "installedAt": "2026-05-17T10:23:00Z"
+    }
+  ]
+}
+```
+
+Corrupt-read recovery: the registry renames `manifest.json` to
+`manifest.json.bak.{timestamp}`, logs a warning, and starts fresh.
+
+### Failure-mode summary
+
+| Phase | Failure | Outcome |
+|-------|---------|---------|
+| Disk-space precheck | `AvailableFreeSpace < bytes * 3` | `IOException` before any HTTP. |
+| Download (main or companion) | Non-2xx / `HttpRequestException` / cancel | Staging dir deleted; manifest untouched. |
+| SHA256 verify | digest present + hash mismatch | `InvalidOperationException`; staging dir deleted. |
+| Extract | `ZipFile.ExtractToDirectory` throws | Staging dir deleted. |
+| Rename (`Directory.Move`) | Target locked | Throws; staging dir kept for the finally cleanup. |
+| Manifest write | I/O failure | Logged; on-disk folder may exist without a manifest entry — next `ListManagedAsync` won't show it (manifest is the source of truth). |
+| Uninstall while active | Sidecar holds files open | `ILlamaCppServerLifecycle.StopForReplacementAsync` runs first; active selector is cleared before deletion. |
+
+### Catalog request semantics
+
+- **URL**: `https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=10`.
+- **Headers**: `User-Agent: parlotype/{version}` (required by GitHub),
+  `Accept: application/vnd.github+json`, `If-None-Match: {etag}` when a
+  cache exists.
+- **Cache TTL**: 1 h. Within TTL, no HTTP is issued unless
+  `FetchAsync(forceRefresh: true)` is called (the "Check for updates"
+  button).
+- **304 handling**: extends the cache `fetchedAt` so subsequent calls
+  remain offline. `EntityTagHeaderValue.IsWeak` is preserved on
+  round-trip via a small `FormatETag` helper (RFC 7232 requires byte-
+  exact echo).
+- **Failure with cache**: returns stale snapshot, logs a warning.
+- **Failure without cache**: rethrows.
+- **Filtering**: applied at read time (`Project`) so a single cache
+  works across users with different machines and across future phases
+  that add macOS/Linux without invalidating Windows users.
+
+---
+
+## 13 Related Documents
 
 - [ADR-025: Gemma 4 via llama.cpp Sidecar in Desktop](../decisions/025-gemma4-llamacpp-desktop.md)
+- [ADR-026: Managed llama.cpp Server Installation](../decisions/026-managed-llama-server-install.md)
 - [Audio Pipeline Architecture](./audio-pipeline-review.md)
 - [`memory/knowledge/llamacpp-gemma4-integration.md`](../../memory/knowledge/llamacpp-gemma4-integration.md) — `/props` semantics and Gemma 4 GGUF filenames
+- [`memory/knowledge/llama-cpp-release-assets.md`](../../memory/knowledge/llama-cpp-release-assets.md) — asset naming, cudart pairing, build tagging, rate-limit notes
 - [`memory/services/platform.md`](../../memory/services/platform.md) — Platform project service map
