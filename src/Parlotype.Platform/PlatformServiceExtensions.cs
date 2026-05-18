@@ -42,7 +42,11 @@ public static class PlatformServiceExtensions
         services.AddSingleton<HttpModelDownloadService>();
         services.AddSingleton<Gemma4ModelDownloadService>();
         services.AddSingleton<ILlamaServerCatalog, GitHubLlamaServerCatalog>();
-        services.AddSingleton<ILlamaServerInstaller, LlamaServerInstaller>();
+        // Register the installer as a concrete singleton too so a Desktop
+        // wrapper can inject it directly while still resolving as
+        // ILlamaServerInstaller for callers that just want the headless impl.
+        services.AddSingleton<LlamaServerInstaller>();
+        services.AddSingleton<ILlamaServerInstaller>(sp => sp.GetRequiredService<LlamaServerInstaller>());
 
         if (OperatingSystem.IsWindows())
         {

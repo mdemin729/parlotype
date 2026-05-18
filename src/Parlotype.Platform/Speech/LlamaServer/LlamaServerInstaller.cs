@@ -187,9 +187,10 @@ public sealed class LlamaServerInstaller : ILlamaServerInstaller
     /// e.g. <c>"llama-b9198-bin-win-cuda-12.4-x64.zip"</c>
     /// becomes <c>"b9198-win-cuda-12.4-x64"</c>. Stripping <c>llama-</c> and
     /// the <c>-bin-</c> infix keeps full CUDA minor versions (which the
-    /// <see cref="LlamaServerBackend"/> enum collapses).
+    /// <see cref="LlamaServerBackend"/> enum collapses). Used by the UI to
+    /// match catalog variants against installed entries.
     /// </summary>
-    internal static string BuildInstallId(LlamaServerVariant variant)
+    public static string BuildInstallId(LlamaServerVariant variant)
     {
         var name = variant.AssetName;
         if (name.StartsWith("llama-", StringComparison.Ordinal))
