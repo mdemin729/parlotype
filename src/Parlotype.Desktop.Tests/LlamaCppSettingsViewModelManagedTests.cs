@@ -1,10 +1,10 @@
 using Avalonia.Headless.XUnit;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels.Settings;
-using Parlotype.Platform.Speech.LlamaServer;
+using Parlotype.Platform.LlamaServer;
 using Xunit;
 
 namespace Parlotype.Desktop.Tests;

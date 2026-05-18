@@ -233,7 +233,7 @@ manifest.json updated; UI refreshes Installed list
   Platform-impl + Desktop-dialog-wrapper that this ADR reuses)
 - `memory/knowledge/llama-cpp-release-assets.md` — non-derivable asset
   naming + cudart pairing facts captured during this work
-- `docs/architecture/llamacpp-integration.md` §8 (Configuration Surface)
-  + new §11 (Server Installation Lifecycle)
+- `docs/architecture/llamacpp-subsystem.md` (renamed in ADR-027) §8 (Configuration Surface)
+  + new §12 (Server Installation Lifecycle)
 - `plans/2026-05-17-llama-server-installer/` — 8-phase implementation
   plan and the per-phase task breakdown

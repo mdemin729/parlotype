@@ -202,13 +202,13 @@ Headless UI tests in `Parlotype.Desktop.Tests` using the new mocks.
 ### Phase 8 — ADR + docs + memory vault
 
 - **ADR-026: Managed llama.cpp server installation.** Storage layout, manifest schema, staging+rename, companion handling, catalog caching/ETag, SHA256 policy, Windows-only phase-1 scope. Notes that ADR-025's "manual folder" guidance is **augmented**, not superseded.
-- Update [docs/architecture/llamacpp-integration.md](../../docs/architecture/llamacpp-integration.md) section 8 (Configuration Surface) and add new section "Server Installation Lifecycle".
+- Update [docs/architecture/llamacpp-subsystem.md](../../docs/architecture/llamacpp-subsystem.md) section 8 (Configuration Surface) and add new section "Server Installation Lifecycle".
 - Update `memory/services/parlotype-platform.md` and `memory/services/parlotype-desktop.md` with the new symbols.
 - Index the ADR in `memory/decisions/_index.md`.
 - Add `memory/knowledge/llama-cpp-release-assets.md` capturing the asset naming convention, cudart pairing rule, `b{N}` versioning, and the 60 req/hr unauthenticated GitHub rate limit. These are non-derivable third-party facts.
 
 **Critical files (new):** `docs/decisions/026-managed-llama-server-install.md`, `memory/knowledge/llama-cpp-release-assets.md`.
-**Critical files (modified):** [docs/architecture/llamacpp-integration.md](../../docs/architecture/llamacpp-integration.md), `memory/services/parlotype-platform.md`, `memory/services/parlotype-desktop.md`, `memory/decisions/_index.md`.
+**Critical files (modified):** [docs/architecture/llamacpp-subsystem.md](../../docs/architecture/llamacpp-subsystem.md), `memory/services/parlotype-platform.md`, `memory/services/parlotype-desktop.md`, `memory/decisions/_index.md`.
 
 ---
 

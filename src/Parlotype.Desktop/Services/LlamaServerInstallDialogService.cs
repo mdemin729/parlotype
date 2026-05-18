@@ -2,11 +2,11 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.ViewModels.Settings;
 using Parlotype.Desktop.Views;
-using Parlotype.Platform.Speech.LlamaServer;
+using Parlotype.Platform.LlamaServer;
 
 namespace Parlotype.Desktop.Services;
 

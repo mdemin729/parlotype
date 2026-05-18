@@ -5,7 +5,8 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
+using Parlotype.Platform.LlamaServer;
 
 namespace Parlotype.Platform.Speech;
 

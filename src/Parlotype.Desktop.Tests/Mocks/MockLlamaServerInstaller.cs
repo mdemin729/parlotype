@@ -1,5 +1,5 @@
-using Parlotype.Core.Speech.LlamaServer;
-using Parlotype.Platform.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
+using Parlotype.Platform.LlamaServer;
 
 namespace Parlotype.Desktop.Tests.Mocks;
 

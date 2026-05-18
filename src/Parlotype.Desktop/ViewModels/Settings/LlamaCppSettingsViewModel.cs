@@ -6,7 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
+using Parlotype.Platform.LlamaServer;
 using Parlotype.Platform.Speech;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
@@ -451,7 +452,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         {
             foreach (var variant in group.Variants)
             {
-                var id = Platform.Speech.LlamaServer.LlamaServerInstaller.BuildInstallId(variant);
+                var id = LlamaServerInstaller.BuildInstallId(variant);
                 rows.Add(new LlamaServerVariantRowVm(variant, alreadyInstalled: installedIds.Contains(id)));
             }
         }
@@ -470,7 +471,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         var rebuilt = Available
             .Select(v => new LlamaServerVariantRowVm(
                 v.Variant, alreadyInstalled: installedIds.Contains(
-                    Platform.Speech.LlamaServer.LlamaServerInstaller.BuildInstallId(v.Variant))))
+                    LlamaServerInstaller.BuildInstallId(v.Variant))))
             .ToList();
 
         await Dispatcher.UIThread.InvokeAsync(() =>

@@ -3,12 +3,12 @@ using Parlotype.Core.Audio;
 using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
 using Parlotype.Platform.Audio;
 using Parlotype.Platform.Hotkeys;
 using Parlotype.Platform.Settings;
 using Parlotype.Platform.Speech;
-using Parlotype.Platform.Speech.LlamaServer;
+using Parlotype.Platform.LlamaServer;
 
 namespace Parlotype.Platform;
 

@@ -3,7 +3,7 @@ title: llama.cpp GitHub Release Asset Conventions
 type: knowledge
 tags: [llamacpp, github, releases, packaging, cuda]
 created: 2026-05-17
-last_updated: 2026-05-17
+last_updated: 2026-05-18
 summary: Asset naming pattern, cudart pairing rule, b{N} versioning, and unauthenticated GitHub API rate limit relevant to Parlotype's managed-install installer
 ---
 
@@ -14,7 +14,7 @@ These are stable, non-derivable facts about how the
 publishes binary releases. They underpin
 [ADR-026](../decisions/_index|ADR-026) (managed llama-server install)
 and the parser in
-[`LlamaServerAssetParser.cs`](../../src/Parlotype.Platform/Speech/LlamaServer/LlamaServerAssetParser.cs).
+[`LlamaServerAssetParser.cs`](../../src/Parlotype.Platform/LlamaServer/LlamaServerAssetParser.cs).
 
 ## Versioning: `b{N}` tags, no "latest" alias
 
