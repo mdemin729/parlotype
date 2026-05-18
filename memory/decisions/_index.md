@@ -2,7 +2,7 @@
 title: Architecture Decisions
 type: index
 status: active
-last_updated: 2026-05-06
+last_updated: 2026-05-17
 summary: Index of all Architecture Decision Records (ADRs) for Parlotype
 ---
 
@@ -37,6 +37,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 023 | [[023-audio-level-waveform-visualisation\|Audio-Level Provider & Waveform Visualisation]] | Accepted | `IAudioLevelProvider` interface; `WaveformView` custom control with three visual states (mic icon / breathing bars / animated wave); EMA-smoothed RMS state machine |
 | 024 | [[024-gemma4-python-sidecar\|Gemma 4 Python Sidecar]] | Accepted | `Parlotype.Gemma4` project with `Gemma4SpeechRecognizer` implementing `ISpeechRecognizer`; auto-managed Python FastAPI sidecar for benchmark-only Gemma 4 E2B/E4B ASR; bitsandbytes quantization (4-bit default) |
 | 025 | [[025-gemma4-llamacpp-desktop\|Gemma 4 via llama.cpp in Desktop]] | Accepted | `SpeechEngine` enum (Whisper/Gemma4); `LlamaCppSpeechRecognizer` spawns llama-server with Vulkan; `DelegatingSpeechRecognizer` routes by setting; English-only, E4B model |
+| 026 | [[026-managed-llama-server-install\|Managed llama.cpp Server Installation]] | Accepted | `ILlamaServerCatalog`/`ILlamaServerInstaller`/`ILlamaServerRegistry` in Core; `GitHubLlamaServerCatalog` (HTTP+ETag+1h cache), `JsonLlamaServerRegistry` (manifest.json + `LlamaCppActiveInstall` selector), `LlamaServerInstaller` (staging+SHA256+atomic-rename, cudart companion merge) in Platform; reworked llama settings UI with managed Installed/Available lists and a distinct Manual panel; Phase-1 Windows-only |
 
 ## Template
 
