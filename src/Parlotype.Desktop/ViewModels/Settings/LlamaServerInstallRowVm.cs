@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 

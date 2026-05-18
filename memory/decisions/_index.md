@@ -2,7 +2,7 @@
 title: Architecture Decisions
 type: index
 status: active
-last_updated: 2026-05-17
+last_updated: 2026-05-18
 summary: Index of all Architecture Decision Records (ADRs) for Parlotype
 ---
 
@@ -38,6 +38,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 024 | [[024-gemma4-python-sidecar\|Gemma 4 Python Sidecar]] | Accepted | `Parlotype.Gemma4` project with `Gemma4SpeechRecognizer` implementing `ISpeechRecognizer`; auto-managed Python FastAPI sidecar for benchmark-only Gemma 4 E2B/E4B ASR; bitsandbytes quantization (4-bit default) |
 | 025 | [[025-gemma4-llamacpp-desktop\|Gemma 4 via llama.cpp in Desktop]] | Accepted | `SpeechEngine` enum (Whisper/Gemma4); `LlamaCppSpeechRecognizer` spawns llama-server with Vulkan; `DelegatingSpeechRecognizer` routes by setting; English-only, E4B model |
 | 026 | [[026-managed-llama-server-install\|Managed llama.cpp Server Installation]] | Accepted | `ILlamaServerCatalog`/`ILlamaServerInstaller`/`ILlamaServerRegistry` in Core; `GitHubLlamaServerCatalog` (HTTP+ETag+1h cache), `JsonLlamaServerRegistry` (manifest.json + `LlamaCppActiveInstall` selector), `LlamaServerInstaller` (staging+SHA256+atomic-rename, cudart companion merge) in Platform; reworked llama settings UI with managed Installed/Available lists and a distinct Manual panel; Phase-1 Windows-only |
+| 027 | [[027-llamaserver-namespace-rescope\|LlamaServer Namespace Rescope]] | Accepted | Moved `Parlotype.*.Speech.LlamaServer.*` → `Parlotype.*.LlamaServer.*` (flat). Relocated `LlamaCppServerInfo` to `Parlotype.Platform.LlamaServer`. Anticipates a second consumer (post-processing); pure refactor — no behaviour, schema, or settings change. Renamed `docs/architecture/llamacpp-integration.md` → `llamacpp-subsystem.md`. Flagged `LlamaServerHost` extraction as a follow-up triggered by the first post-processor |
 
 ## Template
 

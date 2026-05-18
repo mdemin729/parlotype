@@ -1,4 +1,4 @@
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
 
 namespace Parlotype.Desktop.Tests.Mocks;
 

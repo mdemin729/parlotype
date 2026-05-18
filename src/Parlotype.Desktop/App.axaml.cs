@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
-using Parlotype.Core.Speech.LlamaServer;
+using Parlotype.Core.LlamaServer;
 using Parlotype.Core.TextInjection;
 using Parlotype.Desktop.Services;
 using Parlotype.Desktop.ViewModels;
