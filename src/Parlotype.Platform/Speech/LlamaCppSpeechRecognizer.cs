@@ -33,7 +33,10 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     private readonly ISettingsService _settings;
     private readonly ILlamaServerRegistry _registry;
     private readonly ILogger<LlamaCppSpeechRecognizer> _logger;
-    private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromMinutes(5) };
+    // Recreated on each Initialize because HttpClient locks BaseAddress after first
+    // request, so reusing the same instance across unload/init cycles (e.g. when the
+    // user switches the active install) would throw InvalidOperationException.
+    private HttpClient? _httpClient;
     private readonly SemaphoreSlim _initLock = new(1, 1);
 
     private Process? _serverProcess;
@@ -68,7 +71,14 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
 
             // Resolve configured port
             _activePort = await GetConfiguredPortAsync(cancellationToken);
-            _httpClient.BaseAddress = new Uri($"http://{DefaultHost}:{_activePort}");
+
+            // Fresh HttpClient per init — see field comment.
+            _httpClient?.Dispose();
+            _httpClient = new HttpClient
+            {
+                BaseAddress = new Uri($"http://{DefaultHost}:{_activePort}"),
+                Timeout = TimeSpan.FromMinutes(5),
+            };
 
             // Probe the port to check what's there
             var probe = await LlamaCppServerInfo.ProbeAsync(DefaultHost, _activePort, cancellationToken);
@@ -152,7 +162,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (!IsReady)
+        if (!IsReady || _httpClient is null)
             throw new InvalidOperationException("Recognizer is not initialized. Call InitializeAsync first.");
 
         var wavBytes = EncodeWav(samples.Span, sampleRate: 16_000);
@@ -208,6 +218,8 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         try
         {
             await StopServerAsync();
+            _httpClient?.Dispose();
+            _httpClient = null;
             IsReady = false;
         }
         finally
@@ -230,7 +242,8 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         _disposed = true;
 
         await StopServerAsync();
-        _httpClient.Dispose();
+        _httpClient?.Dispose();
+        _httpClient = null;
         _initLock.Dispose();
     }
 
@@ -289,7 +302,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
 
             try
             {
-                using var resp = await _httpClient.GetAsync("/health", cancellationToken);
+                using var resp = await _httpClient!.GetAsync("/health", cancellationToken);
                 if (resp.IsSuccessStatusCode)
                     return;
 

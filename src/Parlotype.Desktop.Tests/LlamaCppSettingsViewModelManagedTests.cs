@@ -210,6 +210,162 @@ public sealed class LlamaCppSettingsViewModelManagedTests : IDisposable
     }
 
     [AvaloniaFact]
+    public async Task CheckForUpdates_NoBanner_WhenLatestInstalledOnDifferentBackend()
+    {
+        // Active install: older build on CUDA.
+        // Also installed: latest build on a different backend (CPU).
+        // Expected: banner hides because the user already has the latest, regardless of backend.
+        var oldCuda = SampleVariant(build: "b9000", backend: LlamaServerBackend.Cuda13);
+        var newCpu = SampleVariant(build: "b9198", backend: LlamaServerBackend.Cpu);
+        _catalog.SetGroups(
+            new LlamaServerReleaseGroup("b9198", new[] { newCpu }),
+            new LlamaServerReleaseGroup("b9000", new[] { oldCuda }));
+
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count >= 2);
+
+        var cudaRow = vm.Available.Single(r => r.Variant.Backend == LlamaServerBackend.Cuda13);
+        var cpuRow = vm.Available.Single(r => r.Variant.Backend == LlamaServerBackend.Cpu);
+        await vm.InstallVariantCommand.ExecuteAsync(cudaRow);
+        await vm.InstallVariantCommand.ExecuteAsync(cpuRow);
+
+        var cudaInstall = vm.Installed.Single(i => i.Backend == LlamaServerBackend.Cuda13);
+        await vm.SetActiveManagedCommand.ExecuteAsync(cudaInstall);
+
+        await vm.CheckForUpdatesCommand.ExecuteAsync(null);
+
+        Assert.Equal("b9198", vm.LatestAvailableBuild);
+        Assert.Equal("b9000", vm.ActiveManagedInstall?.Build);
+        Assert.False(vm.IsUpdateAvailable);
+    }
+
+    [AvaloniaFact]
+    public async Task InstallingLatestVariant_ClearsBanner_EvenWhenOlderStillActive()
+    {
+        // Older build installed and active → banner ON after checking for a newer build.
+        // Install the newer build (on a different backend) without changing active.
+        // Expected: banner turns OFF — Installed list now contains the latest.
+        var older = SampleVariant(build: "b9000", backend: LlamaServerBackend.Cuda13);
+        _catalog.SetGroups(new LlamaServerReleaseGroup("b9000", new[] { older }));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count > 0);
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available.Single());
+        await vm.SetActiveManagedCommand.ExecuteAsync(vm.Installed.Single());
+
+        var newer = SampleVariant(build: "b9198", backend: LlamaServerBackend.Cpu);
+        _catalog.SetGroups(
+            new LlamaServerReleaseGroup("b9198", new[] { newer }),
+            new LlamaServerReleaseGroup("b9000", new[] { older }));
+        await vm.CheckForUpdatesCommand.ExecuteAsync(null);
+        Assert.True(vm.IsUpdateAvailable);
+
+        var newerRow = vm.Available.Single(r => r.Variant.Build == "b9198");
+        await vm.InstallVariantCommand.ExecuteAsync(newerRow);
+
+        Assert.Equal("b9000", vm.ActiveManagedInstall?.Build);
+        Assert.False(vm.IsUpdateAvailable);
+    }
+
+    [AvaloniaFact]
+    public async Task RunningManagedInstall_TracksProbedBuild_NotRadioSelection()
+    {
+        // Two installs at different builds. The live server's /props reports the older
+        // build, but the user clicks the radio to mark the newer one as active.
+        // RunningManagedInstall must reflect what's running, not the radio choice.
+        var older = SampleVariant(build: "b9204", backend: LlamaServerBackend.Cuda13);
+        var newer = SampleVariant(build: "b9221", backend: LlamaServerBackend.Cpu);
+        _catalog.SetGroups(
+            new LlamaServerReleaseGroup("b9221", new[] { newer }),
+            new LlamaServerReleaseGroup("b9204", new[] { older }));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count >= 2);
+
+        var olderRow = vm.Available.Single(r => r.Variant.Build == "b9204");
+        var newerRow = vm.Available.Single(r => r.Variant.Build == "b9221");
+        await vm.InstallVariantCommand.ExecuteAsync(olderRow);
+        await vm.InstallVariantCommand.ExecuteAsync(newerRow);
+
+        // Simulate a successful probe of the b9204 server currently in memory.
+        vm.IsConnected = true;
+        vm.BuildInfo = "b9204-726704a16";
+
+        // User picks the newer install as the next-launch active.
+        var newerInstall = vm.Installed.Single(i => i.Build == "b9221");
+        await vm.SetActiveManagedCommand.ExecuteAsync(newerInstall);
+
+        Assert.Equal("b9221", vm.ActiveManagedInstall?.Build);
+        Assert.Equal("b9204", vm.RunningManagedInstall?.Build);
+        Assert.Equal(LlamaServerBackend.Cuda13, vm.RunningManagedInstall?.Backend);
+        Assert.True(vm.HasRunningManagedInstall);
+    }
+
+    [AvaloniaFact]
+    public async Task RunningManagedInstall_NullWhenProbeDisconnected()
+    {
+        var older = SampleVariant(build: "b9204", backend: LlamaServerBackend.Cuda13);
+        _catalog.SetGroups(new LlamaServerReleaseGroup("b9204", new[] { older }));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count > 0);
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available.Single());
+
+        // No live probe — disconnected.
+        vm.IsConnected = false;
+        vm.BuildInfo = null;
+        await vm.RefreshInstalledCommand.ExecuteAsync(null);
+
+        Assert.False(vm.HasRunningManagedInstall);
+        Assert.Null(vm.RunningManagedInstall);
+    }
+
+    [AvaloniaFact]
+    public async Task RunningManagedInstall_NullWhenMultipleInstallsShareSameBuild()
+    {
+        // When two installs share the same build (CUDA + CPU at b9221), the probe's
+        // build_info alone can't disambiguate backend, so RunningManagedInstall stays
+        // null and the status panel falls back to the /props "Build:" line.
+        var cudaVariant = VariantWithAsset(
+            build: "b9221",
+            backend: LlamaServerBackend.Cuda13,
+            assetName: "llama-b9221-bin-win-cuda-13.1-x64.zip");
+        var cpuVariant = VariantWithAsset(
+            build: "b9221",
+            backend: LlamaServerBackend.Cpu,
+            assetName: "llama-b9221-bin-win-cpu-x64.zip");
+        _catalog.SetGroups(new LlamaServerReleaseGroup("b9221", new[] { cudaVariant, cpuVariant }));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count >= 2);
+        await vm.InstallVariantCommand.ExecuteAsync(
+            vm.Available.Single(r => r.Variant.Backend == LlamaServerBackend.Cuda13));
+        await vm.InstallVariantCommand.ExecuteAsync(
+            vm.Available.Single(r => r.Variant.Backend == LlamaServerBackend.Cpu));
+        Assert.Equal(2, vm.Installed.Count);
+
+        vm.IsConnected = true;
+        vm.BuildInfo = "b9221-deadbeef";
+        await vm.RefreshInstalledCommand.ExecuteAsync(null);
+
+        Assert.Null(vm.RunningManagedInstall);
+        Assert.False(vm.HasRunningManagedInstall);
+    }
+
+    private static LlamaServerVariant VariantWithAsset(
+        string build,
+        LlamaServerBackend backend,
+        string assetName) => new(
+            Build: build,
+            Backend: backend,
+            Os: LlamaServerOs.Windows,
+            Arch: LlamaServerArch.X64,
+            AssetName: assetName,
+            Bytes: 31_000_000,
+            DownloadUrl: "https://example.test/v.zip",
+            Sha256: null,
+            CompanionAssetName: null,
+            CompanionDownloadUrl: null,
+            CompanionBytes: null,
+            CompanionSha256: null);
+
+    [AvaloniaFact]
     public async Task InstallVariant_FailingInstaller_SurfacesErrorMessage()
     {
         var variant = SampleVariant();

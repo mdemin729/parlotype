@@ -88,7 +88,25 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private bool _isManualActive;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPendingActiveSwitch))]
     private LlamaServerInstallRowVm? _activeManagedInstall;
+
+    // Identifies the install that actually backs the *currently running* llama-server
+    // (best-effort match from the probe's build_info against Installed). Distinct from
+    // ActiveManagedInstall, which is the user's choice for the next launch.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRunningManagedInstall))]
+    [NotifyPropertyChangedFor(nameof(IsPendingActiveSwitch))]
+    private LlamaServerInstallRowVm? _runningManagedInstall;
+
+    public bool HasRunningManagedInstall => RunningManagedInstall is not null;
+
+    // True when the user's selected active install differs from what's actually in
+    // memory — the hot-swap is deferred to the next recording start (lazy restart).
+    public bool IsPendingActiveSwitch =>
+        ActiveManagedInstall is not null
+        && RunningManagedInstall is not null
+        && !string.Equals(ActiveManagedInstall.Id, RunningManagedInstall.Id, StringComparison.Ordinal);
 
     [ObservableProperty]
     private string? _manualFolderPath;
@@ -234,6 +252,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         finally
         {
             IsRefreshing = false;
+            RefreshRunningManagedInstall();
         }
     }
 
@@ -441,6 +460,9 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
             ActiveManagedInstall = IsManagedActive
                 ? rows.FirstOrDefault(r => r.IsActive)
                 : null;
+
+            RefreshUpdateAvailable();
+            RefreshRunningManagedInstall();
         });
     }
 
@@ -484,18 +506,58 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
 
     private void UpdateUpdateBanner(IReadOnlyList<LlamaServerReleaseGroup> groups)
     {
-        var latest = groups.FirstOrDefault()?.Build;
-        LatestAvailableBuild = latest;
+        LatestAvailableBuild = groups.FirstOrDefault()?.Build;
+        RefreshUpdateAvailable();
+    }
 
-        if (latest is null)
+    private void RefreshUpdateAvailable()
+    {
+        var latest = LatestAvailableBuild;
+        if (string.IsNullOrEmpty(latest))
         {
             IsUpdateAvailable = false;
             return;
         }
 
-        var activeBuild = ActiveManagedInstall?.Build;
-        IsUpdateAvailable = activeBuild is not null
-            && !string.Equals(activeBuild, latest, StringComparison.Ordinal);
+        // Hide the banner if any installed variant already matches the latest build,
+        // regardless of backend (CPU / Vulkan / CUDA) — the user has the latest.
+        var hasLatest = Installed.Any(i =>
+            string.Equals(i.Build, latest, StringComparison.Ordinal));
+        IsUpdateAvailable = !hasLatest;
+    }
+
+    private void RefreshRunningManagedInstall()
+    {
+        if (!IsConnected)
+        {
+            RunningManagedInstall = null;
+            return;
+        }
+
+        var build = ExtractBuildPrefix(BuildInfo);
+        if (string.IsNullOrEmpty(build))
+        {
+            RunningManagedInstall = null;
+            return;
+        }
+
+        // Match the running server's build against Installed. If exactly one entry
+        // shares that build we can identify the backend too; otherwise the backend
+        // is ambiguous so we leave RunningManagedInstall null and only the /props
+        // build readout below describes the running server.
+        var matches = Installed
+            .Where(i => string.Equals(i.Build, build, StringComparison.Ordinal))
+            .ToList();
+        RunningManagedInstall = matches.Count == 1 ? matches[0] : null;
+    }
+
+    private static string? ExtractBuildPrefix(string? buildInfo)
+    {
+        if (string.IsNullOrWhiteSpace(buildInfo))
+            return null;
+        // build_info from /props looks like "b9204-726704a16" or sometimes just "b9204".
+        var dash = buildInfo.IndexOf('-');
+        return dash > 0 ? buildInfo[..dash] : buildInfo;
     }
 
     private async Task UnloadRecognizerAsync()
