@@ -62,4 +62,20 @@ public class SettingsWindowViewModelTests
 
         Assert.Same(vm.Hotkey, vm.SelectedSection);
     }
+
+    [Fact]
+    public async Task SelectingLlamaCppSection_TriggersServerProbe()
+    {
+        var vm = BuildViewModel();
+        Assert.Equal("Not probed", vm.LlamaCpp.StatusText);
+
+        vm.SelectedSection = vm.LlamaCpp;
+
+        var executionTask = vm.LlamaCpp.RefreshServerInfoCommand.ExecutionTask;
+        Assert.NotNull(executionTask);
+        await executionTask!;
+
+        Assert.NotEqual("Not probed", vm.LlamaCpp.StatusText);
+        Assert.False(vm.LlamaCpp.IsRefreshing);
+    }
 }

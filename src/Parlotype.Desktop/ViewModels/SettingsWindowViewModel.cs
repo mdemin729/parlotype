@@ -50,4 +50,13 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
         SelectedSection = Sections[0];
     }
+
+    partial void OnSelectedSectionChanged(SettingsSectionViewModelBase? value)
+    {
+        if (value is LlamaCppSettingsViewModel llamaCpp
+            && llamaCpp.RefreshServerInfoCommand.CanExecute(null))
+        {
+            llamaCpp.RefreshServerInfoCommand.Execute(null);
+        }
+    }
 }

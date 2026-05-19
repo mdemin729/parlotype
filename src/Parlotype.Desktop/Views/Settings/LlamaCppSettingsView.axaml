@@ -55,25 +55,27 @@
                             Padding="12,4" FontSize="12" />
                 </Grid>
 
-                <!-- Active managed install details -->
-                <StackPanel Spacing="4" IsVisible="{Binding IsManagedActive}">
+                <!-- Running managed install details — derived from the live /props probe,
+                     so it reflects the server actually loaded in memory, not the radio choice. -->
+                <StackPanel Spacing="4"
+                            IsVisible="{Binding HasRunningManagedInstall}">
                     <Separator Margin="0,2" />
                     <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto" Margin="0,4,0,0">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Active install:"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Running install:"
                                    FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" />
                         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="6"
                                     VerticalAlignment="Center">
-                            <TextBlock Text="{Binding ActiveManagedInstall.Build}" FontSize="12" />
+                            <TextBlock Text="{Binding RunningManagedInstall.Build}" FontSize="12" />
                             <TextBlock Text="·" FontSize="12" Opacity="0.5" />
-                            <TextBlock Text="{Binding ActiveManagedInstall.BackendDisplay}" FontSize="12" />
+                            <TextBlock Text="{Binding RunningManagedInstall.BackendDisplay}" FontSize="12" />
                         </StackPanel>
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Path:" FontWeight="SemiBold"
                                    FontSize="12" VerticalAlignment="Center" Margin="0,4,0,0" />
                         <TextBlock Grid.Row="1" Grid.Column="1"
-                                   Text="{Binding ActiveManagedInstall.AbsolutePath}"
+                                   Text="{Binding RunningManagedInstall.AbsolutePath}"
                                    FontSize="12" TextTrimming="CharacterEllipsis"
                                    VerticalAlignment="Center" Margin="0,4,0,0"
-                                   ToolTip.Tip="{Binding ActiveManagedInstall.AbsolutePath}" />
+                                   ToolTip.Tip="{Binding RunningManagedInstall.AbsolutePath}" />
                     </Grid>
                 </StackPanel>
 
@@ -200,6 +202,12 @@
             <TextBlock Text="No managed installs yet. Pick one from the Available list below."
                        IsVisible="{Binding !Installed.Count}"
                        Opacity="0.6" FontSize="12" FontStyle="Italic" Margin="0,4" />
+
+            <!-- Lazy-restart hint: the swap takes effect at the next recording start
+                 (the running server keeps serving until then). -->
+            <TextBlock Text="Selection will take effect on the next recording."
+                       IsVisible="{Binding IsPendingActiveSwitch}"
+                       Opacity="0.7" FontSize="12" FontStyle="Italic" Margin="0,4,0,0" />
         </StackPanel>
 
         <!-- ============================================================
