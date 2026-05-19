@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [desktop, avalonia, avalonia12, tray, ui, mvvm]
 criticality: medium
-last_updated: 2026-05-18
+last_updated: 2026-05-19
 summary: Avalonia 12 tray-based desktop frontend — sole desktop app
 ---
 
@@ -24,10 +24,13 @@ Tray-first desktop frontend on Avalonia 12.0.2 (GA). Sole desktop app after V1 s
 - `src/Parlotype.Desktop/ViewModels/AppViewModel.cs` — tray menu commands (Open / Settings / Exit), bound from `Application.DataContext`
 - `src/Parlotype.Desktop/ViewModels/TranscribeViewModel.cs` — recording state machine (`RecordingState`, `AudioLevel`, `IsIdle`, `IsActive`), EMA-smoothed RMS with 1200ms hold-off for stable Active/Idle transitions
 - `src/Parlotype.Desktop/Views/WaveformView.cs` — custom `Control` rendering three states: mic icon (Disabled), breathing bars (Idle), animated multi-frequency wave (Active); 60fps `DispatcherTimer`; white bars on blue button background
-- `src/Parlotype.Desktop/ViewModels/Settings/` — `SpeechEngineSettingsViewModel` (Whisper/Gemma4 toggle), `MicrophoneSettingsViewModel`, `WhisperModelSettingsViewModel` (coordinates model hot-swap: stops recording + unloads model), `HotkeySettingsViewModel`, `SpeechSettingsViewModel` (wait time, punctuation, profanity, translate to English), `ThemeSettingsViewModel`, `LlamaCppSettingsViewModel` (managed install browse/install/uninstall/set-active + manual folder picker, ADR-026), `LlamaServerInstallRowVm` / `LlamaServerVariantRowVm` / `LlamaServerBackendFormatter` (row VMs + display helpers for the llama settings page)
+- `src/Parlotype.Desktop/ViewModels/Settings/` — `SpeechEngineSettingsViewModel` (Whisper/Gemma4 toggle), `MicrophoneSettingsViewModel`, `SilenceTimeoutSettingsViewModel` (wait time, engine-agnostic — Audio category), `WhisperModelSettingsViewModel` (coordinates model hot-swap: stops recording + unloads model), `RuntimeSettingsViewModel` (CUDA/Vulkan/CPU pinning for Whisper), `WhisperOutputSettingsViewModel` (punctuation, profanity, translate to English — Whisper-restricted), `HotkeySettingsViewModel`, `ThemeSettingsViewModel`, `LlamaCppSettingsViewModel` (managed install browse/install/uninstall/set-active + manual folder picker, ADR-026), `LlamaServerInstallRowVm` / `LlamaServerVariantRowVm` / `LlamaServerBackendFormatter` (row VMs + display helpers for the llama settings page)
+- `src/Parlotype.Desktop/ViewModels/Settings/SettingsSectionViewModelBase.cs` — base abstract class; each section advertises `Title`, `Category` (`Audio` / `SpeechEngine` / `Input` / `Appearance`), and optional `RestrictToEngine` for engine-scoped sections (ADR-028)
+- `src/Parlotype.Desktop/ViewModels/Settings/SettingsCategory.cs` — category enum + `GetDisplayName` extension used for group headers in the navigation pane
+- `src/Parlotype.Desktop/ViewModels/Settings/SettingsNavItem.cs` — flat-list nav row model; either a non-selectable header (`IsHeader=true`) or a section row; consumed by the left `ListBox`
 - `src/Parlotype.Desktop/Views/Settings/LlamaCppSettingsView.axaml` — sections: Active server (status + Managed/Manual badge + /props readout), Update banner, Installed (RadioButton + colored backend chip + Uninstall per row), Manual install (distinct background + "Not managed by Parlotype" badge), Available builds (per-row Install button, badge swap when already installed), port + Save/Reset
-- `src/Parlotype.Desktop/Views/SettingsWindow.axaml` — `SplitView` + `ListBox` + `ContentControl` with `Window.DataTemplates` mapping each section VM type to its `UserControl`
-- `src/Parlotype.Desktop/ViewModels/SettingsWindowViewModel.cs` — `OnSelectedSectionChanged` auto-fires `LlamaCppSettingsViewModel.RefreshServerInfoCommand` whenever the user navigates to the llama.cpp section, so the `/health`+`/props` probe runs without a manual Refresh click
+- `src/Parlotype.Desktop/Views/SettingsWindow.axaml` — `SplitView` + `ListBox` (grouped nav with non-selectable headers via `navHeader` class) + `ContentControl` with `Window.DataTemplates` mapping each section VM type to its `UserControl`
+- `src/Parlotype.Desktop/ViewModels/SettingsWindowViewModel.cs` — projects all section VMs into `NavItems` (group headers + visible sections) filtered by active engine; rebuilds on engine change (subscribes to `SpeechEngineSettingsViewModel.SelectedEngine`); preserves selection across rebuilds; `OnSelectedNavItemChanged` auto-fires `LlamaCppSettingsViewModel.RefreshServerInfoCommand` whenever the user navigates to the llama.cpp section, so the `/health`+`/props` probe runs without a manual Refresh click
 - `src/Parlotype.Desktop/Views/Settings/` — per-section UserControls
 - `src/Parlotype.Desktop/Assets/parlotype.ico` — tray icon
 

@@ -18,7 +18,9 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
     private readonly IVulkanEnvironmentProvider _vulkan;
     private readonly ILogger<RuntimeSettingsViewModel> _logger;
 
-    public override string Title => "Runtime";
+    public override string Title => "Whisper runtime";
+    public override SettingsCategory Category => SettingsCategory.SpeechEngine;
+    public override SpeechEngine? RestrictToEngine => SpeechEngine.Whisper;
 
     public RuntimeDisplayItem[] RuntimeOptions { get; }
 

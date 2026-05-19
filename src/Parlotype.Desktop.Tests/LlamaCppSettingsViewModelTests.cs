@@ -12,7 +12,7 @@ public class LlamaCppSettingsViewModelTests
         var settings = new MockSettingsService();
         var vm = new LlamaCppSettingsViewModel(settings);
 
-        Assert.Equal("llama.cpp", vm.Title);
+        Assert.Equal("llama.cpp server", vm.Title);
     }
 
     [Fact]

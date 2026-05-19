@@ -17,6 +17,7 @@ public partial class MicrophoneSettingsViewModel : SettingsSectionViewModelBase,
     private bool _initialized;
 
     public override string Title => "Microphone";
+    public override SettingsCategory Category => SettingsCategory.Audio;
 
     public ObservableCollection<MicrophoneDisplayItem> AvailableMicrophones { get; } = [];
 

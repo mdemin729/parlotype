@@ -12,6 +12,7 @@ public partial class ThemeSettingsViewModel : SettingsSectionViewModelBase
     private readonly ILogger<ThemeSettingsViewModel> _logger;
 
     public override string Title => "Theme";
+    public override SettingsCategory Category => SettingsCategory.Appearance;
 
     public ThemeDisplayItem[] ThemeOptions { get; }
 
