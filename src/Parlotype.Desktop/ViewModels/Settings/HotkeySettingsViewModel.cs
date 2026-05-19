@@ -14,6 +14,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private readonly ILogger<HotkeySettingsViewModel> _logger;
 
     public override string Title => "Hotkey";
+    public override SettingsCategory Category => SettingsCategory.Input;
 
     [ObservableProperty]
     private HotkeyBinding _currentBinding = HotkeyBinding.Default;

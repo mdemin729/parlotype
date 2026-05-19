@@ -16,7 +16,9 @@ public partial class WhisperModelSettingsViewModel : SettingsSectionViewModelBas
     private readonly ISpeechRecognizer? _recognizer;
     private readonly ILogger<WhisperModelSettingsViewModel> _logger;
 
-    public override string Title => "Whisper Model";
+    public override string Title => "Whisper model";
+    public override SettingsCategory Category => SettingsCategory.SpeechEngine;
+    public override SpeechEngine? RestrictToEngine => SpeechEngine.Whisper;
 
     public WhisperModelDisplayItem[] ModelOptions { get; }
 

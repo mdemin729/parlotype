@@ -4,40 +4,35 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
-using Parlotype.Desktop.ViewModels;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
-public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
+/// <summary>
+/// Engine-agnostic silence-timeout (post-speech wait) setting. Lives in the
+/// Audio category — applies to both Whisper and Gemma 4 pipelines.
+/// </summary>
+public partial class SilenceTimeoutSettingsViewModel : SettingsSectionViewModelBase
 {
     private readonly ISettingsService _settings;
     private readonly TranscribeViewModel? _transcribeViewModel;
-    private readonly ILogger<SpeechSettingsViewModel> _logger;
+    private readonly ILogger<SilenceTimeoutSettingsViewModel> _logger;
 
-    public override string Title => "Speech";
+    public override string Title => "Silence timeout";
+    public override SettingsCategory Category => SettingsCategory.Audio;
 
     public WaitTimeDisplayItem[] WaitTimeOptions { get; }
 
     [ObservableProperty]
     private WaitTimeOption _selectedWaitTime = WaitTimeOption.Medium;
 
-    [ObservableProperty]
-    private bool _automaticPunctuationEnabled = true;
-
-    [ObservableProperty]
-    private bool _filterProfanityEnabled;
-
-    [ObservableProperty]
-    private bool _translateToEnglishEnabled;
-
-    public SpeechSettingsViewModel(
+    public SilenceTimeoutSettingsViewModel(
         ISettingsService settings,
         TranscribeViewModel? transcribeViewModel = null,
-        ILogger<SpeechSettingsViewModel>? logger = null)
+        ILogger<SilenceTimeoutSettingsViewModel>? logger = null)
     {
         _settings = settings;
         _transcribeViewModel = transcribeViewModel;
-        _logger = logger ?? NullLogger<SpeechSettingsViewModel>.Instance;
+        _logger = logger ?? NullLogger<SilenceTimeoutSettingsViewModel>.Instance;
 
         WaitTimeOptions = Enum.GetValues<WaitTimeOption>()
             .Select(o => new WaitTimeDisplayItem(o, SelectWaitTimeCommand))
@@ -64,18 +59,6 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
             UpdateWaitTimeSelection(WaitTimeOption.Medium);
             await _settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.Medium.ToString());
         }
-
-        var savedPunctuation = await _settings.GetAsync<string>(SettingsKeys.AutomaticPunctuation);
-        if (bool.TryParse(savedPunctuation, out var punct))
-            AutomaticPunctuationEnabled = punct;
-
-        var savedProfanity = await _settings.GetAsync<string>(SettingsKeys.FilterProfanity);
-        if (bool.TryParse(savedProfanity, out var prof))
-            FilterProfanityEnabled = prof;
-
-        var savedTranslate = await _settings.GetAsync<string>(SettingsKeys.TranslateToEnglish);
-        if (bool.TryParse(savedTranslate, out var trans))
-            TranslateToEnglishEnabled = trans;
     }
 
     [RelayCommand]
@@ -91,24 +74,6 @@ public partial class SpeechSettingsViewModel : SettingsSectionViewModelBase
     {
         foreach (var item in WaitTimeOptions)
             item.IsSelected = item.Option == selected;
-    }
-
-    partial void OnAutomaticPunctuationEnabledChanged(bool value)
-    {
-        _logger.LogInformation("Automatic punctuation: {Enabled}", value);
-        _ = SaveAndStopAsync(SettingsKeys.AutomaticPunctuation, value.ToString());
-    }
-
-    partial void OnFilterProfanityEnabledChanged(bool value)
-    {
-        _logger.LogInformation("Filter profanity: {Enabled}", value);
-        _ = SaveAndStopAsync(SettingsKeys.FilterProfanity, value.ToString());
-    }
-
-    partial void OnTranslateToEnglishEnabledChanged(bool value)
-    {
-        _logger.LogInformation("Translate to English: {Enabled}", value);
-        _ = SaveAndStopAsync(SettingsKeys.TranslateToEnglish, value.ToString());
     }
 
     private async Task SaveAndStopAsync(string key, string value)

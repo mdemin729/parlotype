@@ -29,7 +29,9 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private readonly ILlamaServerInstaller? _installer;
     private readonly ILogger<LlamaCppSettingsViewModel> _logger;
 
-    public override string Title => "llama.cpp";
+    public override string Title => "llama.cpp server";
+    public override SettingsCategory Category => SettingsCategory.SpeechEngine;
+    public override SpeechEngine? RestrictToEngine => SpeechEngine.Gemma4;
 
     // --- Server status (probe results) ---
 

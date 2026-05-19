@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.WhisperOutputSettingsView"
+             x:DataType="vms:WhisperOutputSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="Whisper output" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Output-shaping options specific to the Whisper engine."
+                   Opacity="0.7" />
+
+        <!-- Automatic Punctuation -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding AutomaticPunctuationEnabled, Mode=TwoWay}"
+                          OnContent="Punctuation included in output"
+                          OffContent="Punctuation stripped from output" />
+            <TextBlock Text="When enabled, transcription includes commas, periods, and other punctuation."
+                       Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
+        </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Filter Profanity -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding FilterProfanityEnabled, Mode=TwoWay}"
+                          OnContent="Profanity masked with ****"
+                          OffContent="Profanity filter off" />
+            <TextBlock Text="When enabled, recognized profanity is replaced with asterisks."
+                       Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
+        </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Translate to English -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding TranslateToEnglishEnabled, Mode=TwoWay}"
+                          OnContent="Translating to English"
+                          OffContent="Translation off" />
+            <TextBlock Text="When enabled, non-English speech is translated to English. Works best with Medium or Large models."
+                       Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

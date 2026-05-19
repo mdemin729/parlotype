@@ -193,11 +193,12 @@ public class App : Application
 
         services.AddSingleton<SpeechEngineSettingsViewModel>();
         services.AddSingleton<MicrophoneSettingsViewModel>();
+        services.AddSingleton<SilenceTimeoutSettingsViewModel>();
         services.AddSingleton<WhisperModelSettingsViewModel>();
         services.AddSingleton<RuntimeSettingsViewModel>();
+        services.AddSingleton<WhisperOutputSettingsViewModel>();
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
-        services.AddSingleton<SpeechSettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();
         services.AddSingleton<SettingsWindowViewModel>();
         services.AddSingleton<TranscribeViewModel>();

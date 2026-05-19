@@ -15,7 +15,8 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     private readonly ISpeechRecognizer? _recognizer;
     private readonly ILogger<SpeechEngineSettingsViewModel> _logger;
 
-    public override string Title => "Speech Engine";
+    public override string Title => "Engine";
+    public override SettingsCategory Category => SettingsCategory.SpeechEngine;
 
     public SpeechEngineDisplayItem[] EngineOptions { get; }
 
