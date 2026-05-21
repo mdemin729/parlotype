@@ -4,6 +4,7 @@ type: knowledge
 status: active
 tags: [avalonia, avalonia12, devtools, diagnostics, tooling, licensing]
 created: 2026-04-30
+last_updated: 2026-04-30
 summary: Avalonia 12 retired classic Avalonia.Diagnostics; the official replacement is split into an in-app library plus a per-developer global tool, with a free community-licence Essentials tier and a paid Complete tier.
 ---
 

@@ -4,6 +4,7 @@ type: knowledge
 status: active
 tags: [agent, skills, claude, copilot, session-management]
 created: 2026-04-30
+last_updated: 2026-05-04
 summary: How Claude/Copilot skill auto-discovery actually behaves, and why per-session protocols belong in CLAUDE.md rather than description-triggered skills.
 ---
 

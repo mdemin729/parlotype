@@ -3,7 +3,8 @@ title: Whisper Translation Model Requirements
 type: knowledge
 tags: [whisper, translation, models]
 created: 2026-05-03
-summary: Whisper translation to English only works reliably with multilingual models (Medium, Large); English-only models (*En) don't support it; Base/Small produce mixed results
+last_updated: 2026-05-03
+summary:Whisper translation to English only works reliably with multilingual models (Medium, Large); English-only models (*En) don't support it; Base/Small produce mixed results
 ---
 
 # Whisper Translation Model Requirements

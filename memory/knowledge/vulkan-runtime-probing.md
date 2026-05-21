@@ -3,7 +3,8 @@ title: Vulkan Runtime Probing on Windows
 type: knowledge
 tags: [vulkan, whisper, runtime, pinvoke, windows]
 created: 2026-05-06
-summary: Non-derivable facts about probing the Vulkan loader from .NET on Windows — version packing, VkPhysicalDeviceProperties layout, and Whisper.net's LoadedLibrary semantics.
+last_updated: 2026-05-06
+summary:Non-derivable facts about probing the Vulkan loader from .NET on Windows — version packing, VkPhysicalDeviceProperties layout, and Whisper.net's LoadedLibrary semantics.
 ---
 
 # Vulkan Runtime Probing on Windows

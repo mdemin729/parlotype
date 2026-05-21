@@ -2,6 +2,7 @@
 type: knowledge
 tags: [llamacpp, gemma4, huggingface, download]
 created: 2026-05-19
+last_updated: 2026-05-20
 summary: llama-server can download HF models itself via -hf; we deliberately use our own C# downloader for progress UX
 ---
 

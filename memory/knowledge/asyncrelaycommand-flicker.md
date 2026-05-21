@@ -3,6 +3,7 @@ title: AsyncRelayCommand CanExecute Flicker in ItemsControl
 type: knowledge
 tags: [communitytoolkit, mvvm, avalonia, ui]
 created: 2026-04-30
+last_updated: 2026-04-30
 summary: CommunityToolkit.Mvvm AsyncRelayCommand disables all buttons sharing the command while executing, causing visible flicker in Avalonia ItemsControl lists
 ---
 

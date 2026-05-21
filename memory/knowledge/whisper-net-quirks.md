@@ -3,6 +3,7 @@ title: Whisper.net Quirks
 type: knowledge
 tags: [whisper, cuda, logging, gotchas]
 created: 2026-04-28
+last_updated: 2026-04-28
 summary: Non-obvious behaviours of Whisper.net 1.9.0 that affected CUDA diagnostics
 ---
 
