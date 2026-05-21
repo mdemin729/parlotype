@@ -4,7 +4,7 @@
 
 | Plan | Started | Description |
 |------|---------|-------------|
-| [2026-03-04-benchmark](2026-03-04-benchmark/) | 2026-03-04 | Benchmark CLI requirements and initial research |
+| _none_ | | |
 
 ## Planned
 
