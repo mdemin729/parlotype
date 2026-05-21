@@ -1,6 +1,6 @@
 ---
 title: Global Hotkey & Input System
-status: done
+status: completed
 created: 2026-03-08
 started: 2026-03-08
 completed: 2026-03-08
