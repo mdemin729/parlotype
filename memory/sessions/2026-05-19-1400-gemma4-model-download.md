@@ -88,9 +88,8 @@ Files modified:
 
 ## Next Action
 
-Feature is code-complete and committed. User confirmed downloads work (E2B Q8_0
-and E2B BF16 observed downloading in-app). Remaining manual checks the user may
-do at leisure: run a transcription against a downloaded Gemma 4 model end-to-end,
-and exercise Delete. If everything holds, mark the plan
-`plans/2026-05-19-gemma4-model-download/` as `completed` and remove it from
-`plans/INDEX.md` In Progress.
+**Done.** User verified transcription + Delete end-to-end (2026-05-20). Plan
+`plans/2026-05-19-gemma4-model-download/` marked `completed` and removed from
+`plans/INDEX.md`. Feature shipped on branch `claude/agitated-gould-c939ab`
+(commits da5bb04 settings nav + 25feb94 Gemma download + this closeout). Nothing
+pushed yet — next session may open a PR if desired.
