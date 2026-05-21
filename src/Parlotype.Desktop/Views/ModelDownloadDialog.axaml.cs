@@ -14,11 +14,14 @@ public partial class ModelDownloadDialog : Window
 
         var downloadButton = this.FindControl<Button>("DownloadButton");
         var cancelButton = this.FindControl<Button>("CancelButton");
+        var closeButton = this.FindControl<Button>("CloseButton");
 
         if (downloadButton is not null)
             downloadButton.Click += OnDownloadClick;
         if (cancelButton is not null)
             cancelButton.Click += OnCancelClick;
+        if (closeButton is not null)
+            closeButton.Click += OnCloseClick;
     }
 
     private void OnDownloadClick(object? sender, RoutedEventArgs e)
@@ -29,6 +32,12 @@ public partial class ModelDownloadDialog : Window
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
         UserConfirmed = false;
+        Close();
+    }
+
+    private void OnCloseClick(object? sender, RoutedEventArgs e)
+    {
+        // Reached only after a successful download — keep UserConfirmed true.
         Close();
     }
 }

@@ -24,6 +24,14 @@
                        TextWrapping="Wrap"
                        FontSize="14" />
 
+            <!-- Byte counter on its own line (kept separate so its changing
+                 width does not reflow the status text above) -->
+            <TextBlock Text="{Binding ProgressText}"
+                       IsVisible="{Binding IsDownloading}"
+                       TextWrapping="NoWrap"
+                       FontSize="13"
+                       Opacity="0.7" />
+
             <!-- Progress bar (visible during download) -->
             <ProgressBar Minimum="0" Maximum="100"
                          Value="{Binding ProgressValue}"
@@ -36,17 +44,26 @@
                         HorizontalAlignment="Right"
                         Spacing="8">
 
-                <!-- Download button (visible before download starts) -->
+                <!-- Download button (visible before download starts / after failure) -->
                 <Button Name="DownloadButton"
                         Content="{Binding DownloadButtonText}"
-                        IsVisible="{Binding !IsDownloading}"
+                        IsVisible="{Binding ShowDownloadButton}"
                         Classes="accent"
                         MinWidth="90"
                         HorizontalContentAlignment="Center" />
 
-                <!-- Cancel button (always visible) -->
+                <!-- Cancel button (visible until download completes) -->
                 <Button Name="CancelButton"
                         Content="Cancel"
+                        IsVisible="{Binding ShowCancelButton}"
+                        MinWidth="90"
+                        HorizontalContentAlignment="Center" />
+
+                <!-- Close button (visible only after successful completion) -->
+                <Button Name="CloseButton"
+                        Content="Close"
+                        IsVisible="{Binding ShowCloseButton}"
+                        Classes="accent"
                         MinWidth="90"
                         HorizontalContentAlignment="Center" />
             </StackPanel>
