@@ -25,11 +25,35 @@ public partial class ModelDownloadViewModel : ViewModelBase
     [ObservableProperty]
     private string _statusText = string.Empty;
 
+    /// <summary>
+    /// Byte counter shown on its own line during download (e.g. "1113.7 / 8880.0 MiB").
+    /// Kept separate from <see cref="StatusText"/> so its changing length does
+    /// not reflow — and visibly flicker — the status line above it.
+    /// </summary>
     [ObservableProperty]
+    private string _progressText = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDownloadButton))]
     private bool _isDownloading;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDownloadButton))]
+    [NotifyPropertyChangedFor(nameof(ShowCancelButton))]
+    [NotifyPropertyChangedFor(nameof(ShowCloseButton))]
+    private bool _isComplete;
+
+    [ObservableProperty]
     private string _downloadButtonText = "Download";
+
+    /// <summary>Download is offered before it starts and after a failure (retry).</summary>
+    public bool ShowDownloadButton => !IsDownloading && !IsComplete;
+
+    /// <summary>Cancel is offered until the download has completed successfully.</summary>
+    public bool ShowCancelButton => !IsComplete;
+
+    /// <summary>Close replaces Download/Cancel once the download has completed.</summary>
+    public bool ShowCloseButton => IsComplete;
 
     /// <summary>Parameterless constructor for designer support.</summary>
     public ModelDownloadViewModel()
@@ -61,4 +85,15 @@ public partial class ModelDownloadViewModel : ViewModelBase
             itemName: modelName,
             itemSize: modelSize,
             statusText: $"Download \"{modelName}\" ({modelSize}) from the internet?");
+
+    /// <summary>
+    /// Adapter for the Gemma 4 download path. Notes the bundled vision
+    /// projector (mmproj) so users understand why the download is large.
+    /// </summary>
+    public static ModelDownloadViewModel ForGemma4Model(string modelName, string modelSize) =>
+        new(
+            title: "Model Download",
+            itemName: modelName,
+            itemSize: modelSize,
+            statusText: $"Download \"{modelName}\" ({modelSize}, includes vision projector) from the internet?");
 }

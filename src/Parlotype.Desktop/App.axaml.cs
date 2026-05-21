@@ -191,12 +191,15 @@ public class App : Application
         else
             services.AddSingleton<ITextInjectionService, ClipboardTextInjectionService>();
 
+        services.AddSingleton<Gemma4ModelDownloadDialogService>();
+
         services.AddSingleton<SpeechEngineSettingsViewModel>();
         services.AddSingleton<MicrophoneSettingsViewModel>();
         services.AddSingleton<SilenceTimeoutSettingsViewModel>();
         services.AddSingleton<WhisperModelSettingsViewModel>();
         services.AddSingleton<RuntimeSettingsViewModel>();
         services.AddSingleton<WhisperOutputSettingsViewModel>();
+        services.AddSingleton<Gemma4ModelSettingsViewModel>();
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();

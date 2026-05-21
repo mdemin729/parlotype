@@ -10,58 +10,55 @@ using Parlotype.Platform.Speech;
 namespace Parlotype.Desktop.Services;
 
 /// <summary>
-/// Desktop V2 implementation of <see cref="IModelDownloadService"/> that shows a modal
-/// confirmation dialog with a progress bar before downloading.
+/// Shows a modal confirmation dialog with a progress bar before downloading a
+/// Gemma 4 model variant (GGUF + mmproj). Mirrors
+/// <see cref="ModelDownloadDialogService"/> but targets the Gemma 4 catalog.
 /// </summary>
-public sealed class ModelDownloadDialogService : IModelDownloadService
+public sealed class Gemma4ModelDownloadDialogService
 {
-    private readonly HttpModelDownloadService _httpDownloader;
-    private readonly ILogger<ModelDownloadDialogService> _logger;
+    private readonly Gemma4ModelDownloadService _downloader;
+    private readonly ILogger<Gemma4ModelDownloadDialogService> _logger;
 
-    public ModelDownloadDialogService(HttpModelDownloadService httpDownloader, ILogger<ModelDownloadDialogService> logger)
+    public Gemma4ModelDownloadDialogService(
+        Gemma4ModelDownloadService downloader,
+        ILogger<Gemma4ModelDownloadDialogService> logger)
     {
-        _httpDownloader = httpDownloader;
+        _downloader = downloader;
         _logger = logger;
     }
 
-    public bool IsModelCached(WhisperModelType modelType) =>
-        _httpDownloader.IsModelCached(modelType);
-
-    public async Task<string> EnsureModelAsync(WhisperModelType modelType, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Ensures the variant's files are present, prompting the user to download
+    /// if not. Returns true when the model is cached on completion.
+    /// </summary>
+    public async Task<bool> EnsureModelAsync(Gemma4ModelInfo model, CancellationToken cancellationToken = default)
     {
-        var modelPath = _httpDownloader.GetModelPath(modelType);
+        if (_downloader.IsModelCached(model))
+            return true;
 
-        if (_httpDownloader.IsModelCached(modelType))
-            return modelPath;
-
-        // Must show dialog on UI thread
         if (!Dispatcher.UIThread.CheckAccess())
         {
             return await Dispatcher.UIThread.InvokeAsync(
-                () => ShowDialogAndDownloadAsync(modelType, cancellationToken));
+                () => ShowDialogAndDownloadAsync(model, cancellationToken));
         }
 
-        return await ShowDialogAndDownloadAsync(modelType, cancellationToken);
+        return await ShowDialogAndDownloadAsync(model, cancellationToken);
     }
 
-    private async Task<string> ShowDialogAndDownloadAsync(WhisperModelType modelType, CancellationToken cancellationToken)
+    private async Task<bool> ShowDialogAndDownloadAsync(Gemma4ModelInfo model, CancellationToken cancellationToken)
     {
-        var modelInfo = WhisperModelInfo.Get(modelType);
-        var viewModel = ModelDownloadViewModel.ForWhisperModel(modelInfo.DisplayName, modelInfo.DiskSize);
+        var viewModel = ModelDownloadViewModel.ForGemma4Model(model.DisplayName, model.DiskSize);
 
         var dialog = new ModelDownloadDialog { DataContext = viewModel };
         var owner = GetOwnerWindow();
 
         var downloadCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
         var dialogClosed = new TaskCompletionSource<bool>();
 
         dialog.Closed += (_, _) =>
         {
             if (!dialog.UserConfirmed || viewModel.IsDownloading)
-            {
                 downloadCts.Cancel();
-            }
             dialogClosed.TrySetResult(dialog.UserConfirmed);
         };
 
@@ -71,7 +68,7 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
             downloadButton.Click += async (_, _) =>
             {
                 viewModel.IsDownloading = true;
-                viewModel.StatusText = $"Downloading \"{modelInfo.DisplayName}\"...";
+                viewModel.StatusText = $"Downloading \"{model.DisplayName}\"...";
 
                 var progress = new Progress<ModelDownloadProgress>(p =>
                 {
@@ -87,20 +84,20 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
 
                 try
                 {
-                    await _httpDownloader.DownloadModelAsync(modelType, progress, downloadCts.Token);
+                    await _downloader.DownloadModelAsync(model, progress, downloadCts.Token);
                     viewModel.IsDownloading = false;
                     viewModel.IsComplete = true;
-                    viewModel.StatusText = $"\"{modelInfo.DisplayName}\" downloaded successfully.";
-                    _logger.LogInformation("Model {Model} downloaded successfully", modelType);
+                    viewModel.StatusText = $"\"{model.DisplayName}\" downloaded successfully.";
+                    _logger.LogInformation("Gemma 4 model {Variant} downloaded successfully", model.Variant);
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogInformation("Model download cancelled by user");
+                    _logger.LogInformation("Gemma 4 model download cancelled by user");
                     dialog.Close();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Model download failed");
+                    _logger.LogError(ex, "Gemma 4 model download failed");
                     viewModel.IsDownloading = false;
                     viewModel.StatusText = $"Download failed: {ex.Message}";
                 }
@@ -115,10 +112,7 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
         await dialogClosed.Task;
         downloadCts.Dispose();
 
-        if (!_httpDownloader.IsModelCached(modelType))
-            throw new OperationCanceledException("Model download was cancelled.");
-
-        return _httpDownloader.GetModelPath(modelType);
+        return _downloader.IsModelCached(model);
     }
 
     private static Window? GetOwnerWindow()
@@ -126,7 +120,6 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
         if (Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
             return null;
 
-        // Prefer an active/visible window; fall back to MainWindow
         foreach (var window in desktop.Windows)
         {
             if (window.IsVisible)

@@ -23,12 +23,13 @@ public class SettingsWindowViewModelTests
         var model = new WhisperModelSettingsViewModel(settings);
         var runtime = new RuntimeSettingsViewModel(settings, nvidia, vulkan);
         var whisperOutput = new WhisperOutputSettingsViewModel(settings);
+        var gemma4Model = new Gemma4ModelSettingsViewModel(settings);
         var llamaCpp = new LlamaCppSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
         var theme = new ThemeSettingsViewModel(settings);
 
         return new SettingsWindowViewModel(
-            engine, mic, silence, model, runtime, whisperOutput, llamaCpp, hotkey, theme);
+            engine, mic, silence, model, runtime, whisperOutput, gemma4Model, llamaCpp, hotkey, theme);
     }
 
     [Fact]
@@ -68,6 +69,7 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Silence timeout"),
             n => AssertHeader(n, "Speech engine"),
             n => AssertSection(n, "Engine"),
+            n => AssertSection(n, "Gemma 4 model"),
             n => AssertSection(n, "llama.cpp server"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkey"),

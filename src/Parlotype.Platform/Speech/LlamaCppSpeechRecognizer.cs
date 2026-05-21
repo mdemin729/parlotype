@@ -112,7 +112,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
                     "Set the path in Settings → llama.cpp.");
 
             var modelDir = Gemma4ModelInfo.GetModelCacheDirectory();
-            var model = Gemma4ModelInfo.Default;
+            var model = await GetSelectedModelAsync(cancellationToken);
             var ggufPath = Path.Combine(modelDir, model.GgufFileName);
             var mmprojPath = Path.Combine(modelDir, model.MmprojFileName);
 
@@ -280,6 +280,12 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         return int.TryParse(portStr, out var port) && port is > 0 and <= 65535
             ? port
             : PreferredPort;
+    }
+
+    private async Task<Gemma4ModelInfo> GetSelectedModelAsync(CancellationToken cancellationToken)
+    {
+        var saved = await _settings.GetAsync<string>(SettingsKeys.SelectedGemma4Model);
+        return Gemma4ModelInfo.GetById(saved) ?? Gemma4ModelInfo.Default;
     }
 
     private async Task WaitForServerReadyAsync(CancellationToken cancellationToken)
