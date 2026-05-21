@@ -1,9 +1,9 @@
 ---
 title: Gemma 4 model download (E2B + E4B)
-status: in_progress
+status: completed
 created: 2026-05-19
 started: 2026-05-19
-completed:
+completed: 2026-05-20
 ---
 
 # Gemma 4 model download

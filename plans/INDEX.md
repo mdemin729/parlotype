@@ -4,7 +4,6 @@
 
 | Plan | Started | Description |
 |------|---------|-------------|
-| [2026-05-19-gemma4-model-download](2026-05-19-gemma4-model-download/) | 2026-05-19 | Gemma 4 E2B/E4B download UI — code + tests done, manual e2e pending |
 | [2026-03-04-benchmark](2026-03-04-benchmark/) | 2026-03-04 | Benchmark CLI requirements and initial research |
 
 ## Planned
