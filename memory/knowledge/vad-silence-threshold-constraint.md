@@ -4,8 +4,8 @@ type: knowledge
 status: active
 tags: [audio, vad, pipeline, silence-detection]
 created: 2026-05-01
-updated: 2026-05-02
-summary: Sub-500ms silence thresholds cause catastrophic WER (77%+). WaitTimeOption now starts at Medium (500ms) — Instant/VeryShort/Short were removed.
+last_updated: 2026-05-02
+summary:Sub-500ms silence thresholds cause catastrophic WER (77%+). WaitTimeOption now starts at Medium (500ms) — Instant/VeryShort/Short were removed.
 ---
 
 # VAD Chunking and Silence Threshold Constraint

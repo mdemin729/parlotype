@@ -3,6 +3,7 @@ title: SharpHook SuppressEvent requires SimpleGlobalHook
 type: knowledge
 tags: [sharphook, hotkeys, suppression]
 created: 2026-05-02
+last_updated: 2026-05-02
 summary: TaskPoolGlobalHook and EventLoopGlobalHook silently ignore SuppressEvent; only SimpleGlobalHook supports it
 ---
 

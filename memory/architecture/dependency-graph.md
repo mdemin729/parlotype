@@ -3,8 +3,8 @@ title: Dependency Graph
 type: architecture
 status: active
 tags: [architecture, dependencies]
-last_updated: 2026-03-28
-summary: Project dependency directions and external package usage
+last_updated: 2026-05-21
+summary: Project dependency directions and external package usage (8 projects, Avalonia 12, Gemma 4 + llama.cpp engines)
 ---
 
 # Dependency Graph
@@ -12,44 +12,60 @@ summary: Project dependency directions and external package usage
 ## Project Dependencies
 
 ```
-┌──────────────────┐     ┌───────────────────┐
+┌──────────────────┐     ┌────────────────────┐
 │ Parlotype.Desktop │────▶│ Parlotype.Platform │
-│   (Avalonia UI)   │     │ (Implementations)  │
+│  (Avalonia 12 UI) │     │ (Implementations)  │
 └──────────────────┘     └────────┬───────────┘
                                   │
 ┌────────────────────┐            │
-│ Parlotype.Benchmark│────────────┤
-│   (Console CLI)    │            │
-└────────────────────┘            ▼
+│ Parlotype.Benchmark│────────────┤──────────▶ Parlotype.Gemma4
+│   (Console CLI)    │            │            (Python sidecar
+└────────────────────┘            ▼             ASR — benchmark)
                          ┌────────────────┐
                          │ Parlotype.Core │
                          │  (Contracts)   │
                          └────────────────┘
 
 Test Projects:
-  Tests ──────────────▶ Core, Platform
-  Desktop.Tests ──────▶ Desktop, Core
-  Benchmark.Tests ────▶ Benchmark, Core
+  Parlotype.Tests ─────────▶ Core, Platform
+  Parlotype.Desktop.Tests ─▶ Core, Desktop
+  Parlotype.Benchmark.Tests ▶ Core, Benchmark, Gemma4
 ```
+
+The 8 projects are wired in `Parlotype.slnx`. `Parlotype.Desktop` is the sole desktop frontend (V1 sunset in [[decisions/_index|ADR-018]]; was previously called `Parlotype.Desktop.V2`).
 
 ## External Dependencies by Project
 
-### Core (zero external dependencies)
-- Pure domain interfaces and models
+### Parlotype.Core (zero external dependencies)
+- Pure domain interfaces and models. Includes `LlamaServer` contracts (`ILlamaServerCatalog`, `ILlamaServerInstaller`, `ILlamaServerRegistry`) since [[decisions/_index|ADR-026]].
 
-### Platform
+### Parlotype.Platform
 - **Whisper.net** + **Whisper.net.Runtime** — speech recognition
-- **Whisper.net.Runtime.Cuda** — GPU acceleration (optional, ~350 MB)
+- **Whisper.net.Runtime.Cuda** — NVIDIA GPU acceleration (conditional via `EnableCuda` MSBuild flag, ~350 MB; default on)
+- **Whisper.net.Runtime.Vulkan** — cross-vendor GPU acceleration (always included, ~30 MB) — [[decisions/_index|ADR-022]]
 - **NAudio** — WASAPI audio capture
 - **Microsoft.ML.OnnxRuntime** — Silero VAD inference
-- **SharpHook** — global keyboard hooks
+- **SharpHook 7.x** — global keyboard hooks (uses `SimpleGlobalHook` for working event suppression — [[decisions/_index|ADR-020]])
 
-### Desktop
-- **Avalonia** (11.3.0) — UI framework
+### Parlotype.Desktop
+- **Avalonia 12.0.2** — UI framework (`Avalonia`, `Avalonia.Desktop`, `Avalonia.Themes.Fluent`, `Avalonia.Fonts.Inter`)
 - **CommunityToolkit.Mvvm** — MVVM source generators
 - **Microsoft.Extensions.DependencyInjection** — DI container
+- **ZLogger** — structured logging
+- **AvaloniaUI.DiagnosticsSupport** (Debug-only) — Avalonia 12 devtools replacement ([[decisions/_index|ADR-016]])
 
-### Benchmark
+### Parlotype.Benchmark
 - **System.CommandLine** — CLI framework
 - **Spectre.Console** — rich terminal output
 - **Microsoft.Data.Sqlite** — historical run storage
+
+### Parlotype.Gemma4
+- Wraps a Python FastAPI sidecar (auto-managed) exposing Gemma 4 ASR ([[decisions/_index|ADR-024]]). Benchmark-only.
+
+## External Process Boundaries
+
+| Process | Purpose | Spawned by | ADR |
+|---------|---------|-----------|-----|
+| `llama-server.exe` (llama.cpp) | Gemma 4 inference for desktop + benchmark | `LlamaCppSpeechRecognizer` (Platform); managed install via `LlamaServer` subsystem | ADR-025, ADR-026, ADR-027 |
+| Python FastAPI sidecar | Gemma 4 inference for benchmark (alternative path) | `Parlotype.Gemma4` | ADR-024 |
+

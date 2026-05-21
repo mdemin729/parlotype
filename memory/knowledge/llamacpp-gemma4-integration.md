@@ -3,6 +3,7 @@ title: llama-server Props Endpoint & Gemma 4 GGUF Naming
 type: knowledge
 tags: [llamacpp, gemma4, gguf, api]
 created: 2026-05-09
+last_updated: 2026-05-11
 summary: llama-server /props endpoint for identification, and correct Gemma 4 E4B GGUF filenames on HuggingFace
 ---
 

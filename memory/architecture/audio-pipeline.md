@@ -2,10 +2,10 @@
 title: Audio Pipeline Architecture
 type: architecture
 status: active
-tags: [audio, vad, whisper, pipeline]
+tags: [audio, vad, whisper, gemma4, llamacpp, pipeline]
 services: [core, platform, desktop]
-last_updated: 2026-03-28
-summary: End-to-end audio capture, VAD, transcription, and text injection pipeline
+last_updated: 2026-05-21
+summary: End-to-end audio capture, VAD, transcription (Whisper or Gemma 4 via llama.cpp), and text injection pipeline
 ---
 
 # Audio Pipeline
@@ -13,8 +13,15 @@ summary: End-to-end audio capture, VAD, transcription, and text injection pipeli
 ## Data Flow
 
 ```
-WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisper Transcription → Text Injection
+WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → ISpeechRecognizer → Text Injection
+                                                                          │
+                                                       ┌──────────────────┴──────────────────┐
+                                                       ▼                                     ▼
+                                              WhisperSpeechRecognizer            LlamaCppSpeechRecognizer
+                                                 (Whisper.net)                   (llama-server sidecar, Gemma 4)
 ```
+
+`DelegatingSpeechRecognizer` selects the active implementation at runtime based on `SettingsKeys.SpeechEngine` (`Whisper` / `Gemma4`) — see [[decisions/_index|ADR-025]].
 
 ## Pipeline Stages
 
@@ -31,12 +38,21 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 - `IVoiceActivityDetector` (Core) → `SileroVadService` (Platform)
 - Detects speech start/end boundaries
 - Incremental processing — see [[decisions/_index|ADR-008]]
+- `AudioPipelineService` also exposes EMA-smoothed RMS via `IAudioLevelProvider` for the waveform UI ([[decisions/_index|ADR-023]])
 
-### 4. Transcription (Whisper.net)
+### 4. Transcription
+
+**Whisper engine** (default):
 - `ISpeechRecognizer` (Core) → `WhisperSpeechRecognizer` (Platform)
-- Configured via `WhisperOptions` record (model, language, beam size, temperature, threads)
+- Configured via `WhisperOptions` record (model, language, beam size, temperature, threads, translate)
 - Greedy decoding for beam size 1, beam search for larger values
-- CUDA / Vulkan GPU acceleration when available, CPU fallback automatic in `Auto` mode (`Cuda` and `Vulkan` are strict — see [[decisions/_index|ADR-022]])
+- CUDA / Vulkan GPU acceleration: `RuntimePreference.Auto` chains CUDA → Vulkan → CPU; `Cuda` and `Vulkan` are strict and throw `RuntimeUnavailableException` rather than silently falling back ([[decisions/_index|ADR-022]])
+- Model hot-swap supported via `ISpeechRecognizer.UnloadAsync()` ([[decisions/_index|ADR-017]]) — never two models loaded simultaneously
+
+**Gemma 4 engine** (alternative, desktop + benchmark):
+- `LlamaCppSpeechRecognizer` (Platform) spawns or adopts `llama-server` (Vulkan backend) and POSTs audio to its `/v1/audio/transcriptions` endpoint
+- English-only, E4B model by default; managed install via `LlamaServer` subsystem ([[decisions/_index|ADR-026]])
+- Benchmark-only Python sidecar variant lives in `Parlotype.Gemma4` ([[decisions/_index|ADR-024]])
 
 ### 5. Text Injection
 - `ITextInjectionService` (Core) → two implementations:
@@ -54,5 +70,6 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 
 | Mode | Behavior | Trigger |
 |------|----------|---------|
-| **Batch** (default) | Buffer audio, detect end-of-speech via silence, then transcribe | Silence threshold |
+| **Batch** (default) | Buffer audio, detect end-of-speech via silence, then transcribe | `WaitTime` silence threshold (minimum **500 ms**; sub-500 ms options removed in [[decisions/_index|ADR-019]] because they caused 77%+ WER) |
 | **Streaming** | Process fixed 3-second windows continuously | Timer-based |
+

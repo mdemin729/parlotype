@@ -3,7 +3,8 @@ title: Gemma 4 CUDA Inference on Blackwell GPUs
 type: knowledge
 tags: [gemma4, cuda, blackwell, rtx5070ti, precision]
 created: 2026-05-08
-summary: Gemma 4 E2B produces garbage transcriptions on CUDA with bfloat16/float16 on Blackwell GPUs (compute 12.0). CPU inference works correctly. bitsandbytes 4-bit quantization crashes on audio encoder.
+last_updated: 2026-05-08
+summary:Gemma 4 E2B produces garbage transcriptions on CUDA with bfloat16/float16 on Blackwell GPUs (compute 12.0). CPU inference works correctly. bitsandbytes 4-bit quantization crashes on audio encoder.
 ---
 
 # Gemma 4 CUDA Inference on Blackwell GPUs

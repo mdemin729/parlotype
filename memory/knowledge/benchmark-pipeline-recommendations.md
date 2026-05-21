@@ -3,6 +3,7 @@ title: Benchmark-Derived Pipeline Recommendations
 type: knowledge
 tags: [whisper, benchmark, pipeline, vad, performance]
 created: 2026-05-01
+last_updated: 2026-05-01
 summary: Optimal STT settings from 234+ config benchmark sweep (ADR-011) — not derivable from code alone
 ---
 
