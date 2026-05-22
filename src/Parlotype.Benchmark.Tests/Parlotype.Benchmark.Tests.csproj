@@ -8,7 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Parlotype.Benchmark\Parlotype.Benchmark.csproj" />
     <ProjectReference Include="..\Parlotype.Core\Parlotype.Core.csproj" />
-    <ProjectReference Include="..\Parlotype.Gemma4\Parlotype.Gemma4.csproj" />
   </ItemGroup>
 
   <ItemGroup>

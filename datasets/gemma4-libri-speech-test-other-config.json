@@ -1,11 +1,9 @@
 {
   "name": "gemma4-libri-speech-test-other",
-  "description": "Gemma 4 E2B BF16 on LibriSpeech test-other (English-only, 50 samples)",
+  "description": "Gemma 4 E4B Q4_K_M on LibriSpeech test-other (English-only, 50 samples) via llama.cpp",
   "datasets": ["libri-speech-test-other"],
-  "gemma4": {
-    "modelId": "gemma-4-E2B-it",
-    "quantization": "none",
-    "dtype": "float16",
+  "llamaCpp": {
+    "modelId": "gemma-4-E4B-it-Q4_K_M",
     "port": 8321
   },
   "vad": {

@@ -170,17 +170,16 @@ dotnet run --project src/Parlotype.Benchmark -- import --output results
 
 #### Gemma 4 options (alternative engine)
 
-Instead of `"whisper"`, use a `"gemma4"` block to run Gemma 4 E2B/E4B via a Python sidecar.
-The two blocks are mutually exclusive — provide one or the other.
+Instead of `"whisper"`, use a `"llamaCpp"` block to run Gemma 4 E2B/E4B via the llama.cpp
+server. The two blocks are mutually exclusive — provide one or the other.
 
 ```json
 {
   "name": "gemma4-smoke-test",
-  "description": "Gemma 4 E2B smoke test (4-bit quantized)",
+  "description": "Gemma 4 E4B Q4_K_M smoke test via llama.cpp",
   "datasets": ["smoke-test"],
-  "gemma4": {
-    "modelId": "gemma-4-E2B-it",
-    "quantization": "4bit",
+  "llamaCpp": {
+    "modelId": "gemma-4-E4B-it-Q4_K_M",
     "port": 8321
   },
   "vad": { "enabled": false }
@@ -189,26 +188,20 @@ The two blocks are mutually exclusive — provide one or the other.
 
 | Field | Default | Description |
 |-------|---------|-------------|
-| `modelId` | `gemma-4-E2B-it` | HuggingFace model name (`gemma-4-E2B-it` or `gemma-4-E4B-it`) |
-| `modelPath` | auto | Local path to pre-downloaded model. Defaults to `{LocalAppData}/parlotype/models/{modelId}` |
-| `quantization` | `none` | `none` (BF16 full precision), `4bit` (bitsandbytes), or `8bit`. Note: 4-bit/8-bit may fail on Gemma 4 audio encoder |
-| `port` | `8321` | Localhost port for the Python sidecar |
-| `pythonPath` | `python` | Path to the Python executable |
-| `maxNewTokens` | `200` | Maximum tokens generated per transcription |
-| `deviceMap` | `auto` | Torch device placement (`auto`, `cpu`, `cuda:0`) |
-| `startupTimeoutSeconds` | `180` | Timeout for sidecar startup and model loading |
+| `modelId` | `gemma-4-E4B-it-Q4_K_M` | Gemma 4 GGUF catalog ID. Valid IDs: `gemma-4-E2B-it-Q8_0`, `gemma-4-E2B-it-BF16`, `gemma-4-E4B-it-Q4_K_M`, `gemma-4-E4B-it-Q8_0`, `gemma-4-E4B-it-BF16` |
+| `port` | `8321` | Localhost port for the llama-server process |
+| `serverFolder` | auto | Optional path to the folder containing `llama-server.exe`. When omitted, falls back to the llama-server registry or `%LOCALAPPDATA%/parlotype/llama-server` |
 
 **Prerequisites:**
-1. Python 3.10+ with CUDA support
-2. Install dependencies: `pip install -r src/Parlotype.Gemma4/sidecar/requirements.txt`
-3. Pre-download the model:
-   ```bash
-   hf login
-   hf download google/gemma-4-E2B-it \
-     --local-dir "%LOCALAPPDATA%\parlotype\models\gemma-4-E2B-it"
-   ```
+1. llama-server installed via **Settings → llama.cpp** in the Parlotype Desktop app
+2. Gemma 4 GGUF model downloaded via **Settings → Gemma 4 model** in the Desktop app
+   (or downloaded manually to `%LOCALAPPDATA%\parlotype\models\`)
 
-See [ADR-024](../../docs/decisions/024-gemma4-python-sidecar.md) for design rationale.
+The benchmark adopts an already-running llama-server on the configured port, or spawns
+a new one automatically. Transcription uses the OpenAI-compatible `/v1/chat/completions`
+endpoint with `input_audio` content blocks.
+
+See [ADR-029](../../docs/decisions/029-gemma4-model-download-ui.md) for design rationale.
 
 #### VAD options
 
