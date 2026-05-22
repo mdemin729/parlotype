@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using Parlotype.Core.Speech;
-using Parlotype.Gemma4;
 
 namespace Parlotype.Benchmark.Configuration;
 
@@ -22,15 +21,15 @@ public sealed class BenchmarkConfig
     [JsonPropertyName("whisper")]
     public WhisperConfig? Whisper { get; init; }
 
-    [JsonPropertyName("gemma4")]
-    public Gemma4Config? Gemma4 { get; init; }
+    [JsonPropertyName("llamaCpp")]
+    public LlamaCppConfig? LlamaCpp { get; init; }
 
     [JsonPropertyName("vad")]
     public VadConfig Vad { get; init; } = new();
 
-    /// <summary>Returns true when the Gemma 4 backend is selected.</summary>
+    /// <summary>Returns true when the Gemma 4 llama.cpp backend is selected.</summary>
     [JsonIgnore]
-    public bool IsGemma4 => Gemma4 is not null;
+    public bool IsLlamaCpp => LlamaCpp is not null;
 
     /// <summary>Returns the effective Whisper config, defaulting if neither engine is specified.</summary>
     [JsonIgnore]
@@ -38,12 +37,12 @@ public sealed class BenchmarkConfig
 
     /// <summary>Returns a display-friendly engine name.</summary>
     [JsonIgnore]
-    public string EngineName => IsGemma4 ? "Gemma4" : "Whisper";
+    public string EngineName => IsLlamaCpp ? "Gemma4" : "Whisper";
 
     /// <summary>Returns a display-friendly model identifier.</summary>
     [JsonIgnore]
-    public string ModelDisplayName => IsGemma4
-        ? $"Gemma4/{Gemma4!.ModelId} ({Gemma4.Quantization})"
+    public string ModelDisplayName => IsLlamaCpp
+        ? LlamaCpp!.ModelId
         : EffectiveWhisper.Model.ToString();
 }
 
@@ -99,4 +98,23 @@ public sealed record VadConfig
     /// are concatenated. When null (default), the entire file is processed in one shot.</summary>
     [JsonPropertyName("silenceThresholdMs")]
     public int? SilenceThresholdMs { get; init; }
+}
+
+/// <summary>Configuration for the Gemma 4 llama.cpp engine in benchmark runs.</summary>
+public sealed class LlamaCppConfig
+{
+    /// <summary>Gemma 4 GGUF catalog model ID (e.g. "gemma-4-E4B-it-Q4_K_M").
+    /// Must match a <see cref="Parlotype.Core.Speech.Gemma4ModelInfo"/> catalog entry.</summary>
+    [JsonPropertyName("modelId")]
+    public string ModelId { get; init; } = "gemma-4-E4B-it-Q4_K_M";
+
+    /// <summary>Port for the llama-server process (default 8321).</summary>
+    [JsonPropertyName("port")]
+    public int Port { get; init; } = 8321;
+
+    /// <summary>Optional path override to the folder containing llama-server.exe.
+    /// When null, falls back to the llama-server registry or
+    /// <c>%LOCALAPPDATA%/parlotype/llama-server</c>.</summary>
+    [JsonPropertyName("serverFolder")]
+    public string? ServerFolder { get; init; }
 }

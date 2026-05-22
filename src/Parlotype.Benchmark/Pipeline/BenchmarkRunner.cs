@@ -37,9 +37,9 @@ public sealed class BenchmarkRunner
         // Initialize recognizer with config options
         var modelLoadSw = Stopwatch.StartNew();
 
-        if (config.IsGemma4)
+        if (config.IsLlamaCpp)
         {
-            progress?.Report("Starting Gemma 4 sidecar...");
+            progress?.Report("Starting llama-server (Gemma 4)...");
             await _recognizer.InitializeAsync(cancellationToken);
         }
         else

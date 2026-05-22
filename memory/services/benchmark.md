@@ -2,10 +2,10 @@
 title: Parlotype.Benchmark
 type: service-profile
 status: active
-tags: [benchmark, cli, wer, cer, quality, gemma4]
+tags: [benchmark, cli, wer, cer, quality, gemma4, llamacpp]
 criticality: medium
 last_updated: 2026-05-21
-summary: Console CLI for evaluating transcription quality with WER/CER/RTF metrics — supports Whisper and Gemma 4 engines
+summary: Console CLI for evaluating transcription quality with WER/CER/RTF metrics — supports Whisper and Gemma 4 (llama.cpp) engines
 ---
 
 # Parlotype.Benchmark
@@ -38,14 +38,14 @@ check     # CI regression detection (exit 0 pass / 1 fail)
 - Repetitions: `repetitions > 1` for mean/stddev stability analysis
 
 ## Dependencies
-- [[platform]], [[core]], `Parlotype.Gemma4`
+- [[platform]], [[core]]
 - System.CommandLine, Spectre.Console, Microsoft.Data.Sqlite
 
 ## Related Decisions
 - [[decisions/_index|ADR-009]] Benchmark CLI design
 - [[decisions/_index|ADR-011]] Optimal STT pipeline settings
-- [[decisions/_index|ADR-024]] Gemma 4 Python sidecar
-- [[decisions/_index|ADR-025]] Gemma 4 via llama.cpp in Desktop (benchmark can also exercise this path via `DelegatingSpeechRecognizer`)
+- [[decisions/_index|ADR-025]] Gemma 4 via llama.cpp
+- [[decisions/_index|ADR-029]] Gemma 4 model download UI
 
 ## Speech Recognition Engines
 
@@ -54,11 +54,12 @@ check     # CI regression detection (exit 0 pass / 1 fail)
 - Uses `ISpeechRecognizer` → `WhisperSpeechRecognizer` from Platform
 - Supports CUDA, Vulkan, and CPU runtimes (`RuntimePreference.Auto/Cuda/Vulkan/Cpu`; `Cuda`/`Vulkan` are strict per ADR-022)
 
-### Gemma 4 (via Python sidecar — benchmark-only path)
-- Configured via `"gemma4": { ... }` block (mutually exclusive with `"whisper"`)
-- Uses `ISpeechRecognizer` → `Gemma4SpeechRecognizer` from `Parlotype.Gemma4`
-- Auto-managed Python FastAPI sidecar on localhost ([[decisions/_index|ADR-024]])
-- Supports E2B (~2B params) and E4B (~4.5B params) models
-- Quantization: `4bit` (default), `8bit`, `none` (BF16)
-- Requires pre-downloaded model via `hf download` (the CLI binary is `hf`, not `huggingface-cli`)
+### Gemma 4 (via llama.cpp)
+- Configured via `"llamaCpp": { ... }` block (mutually exclusive with `"whisper"`)
+- Uses `LlamaCppSpeechRecognizer` from Platform (same as Desktop)
+- Fields: `modelId` (GGUF catalog ID, default `"gemma-4-E4B-it-Q4_K_M"`), `port` (default 8321), `serverFolder?`
+- `InMemorySettingsService` (benchmark-scoped) feeds config values to the recognizer, bypassing the user's `settings.json`
+- `LlamaCppSpeechRecognizer` resolved directly (bypasses `DelegatingSpeechRecognizer`)
+- Requires llama-server + GGUF model pre-downloaded via Desktop Settings
+- `--gpu false` flag is a no-op for llama.cpp (GPU controlled by `-ngl` inside the recognizer)
 

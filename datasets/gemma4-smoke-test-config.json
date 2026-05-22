@@ -1,10 +1,9 @@
 {
   "name": "gemma4-smoke-test",
-  "description": "Gemma 4 E2B smoke test (BF16, ~9 GB VRAM)",
+  "description": "Gemma 4 E4B Q4_K_M smoke test via llama.cpp",
   "datasets": ["smoke-test"],
-  "gemma4": {
-    "modelId": "gemma-4-E2B-it",
-    "quantization": "none",
+  "llamaCpp": {
+    "modelId": "gemma-4-E4B-it-Q4_K_M",
     "port": 8321
   },
   "vad": {

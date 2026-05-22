@@ -7,9 +7,10 @@ using Parlotype.Benchmark.Pipeline;
 using Parlotype.Benchmark.Reporting;
 using Parlotype.Benchmark.Results;
 using Parlotype.Core.Audio;
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
-using Parlotype.Gemma4;
 using Parlotype.Platform;
+using Parlotype.Platform.Speech;
 using Spectre.Console;
 using ZLogger;
 
@@ -96,27 +97,12 @@ runCommand.SetAction(async parseResult =>
     // CLI --gpu flag overrides config: --gpu false forces CPU-only
     if (!gpu)
     {
-        if (benchmarkConfig.IsGemma4)
+        if (benchmarkConfig.IsLlamaCpp)
         {
-            benchmarkConfig = new BenchmarkConfig
-            {
-                Name = benchmarkConfig.Name,
-                Description = benchmarkConfig.Description,
-                Datasets = benchmarkConfig.Datasets,
-                Repetitions = benchmarkConfig.Repetitions,
-                Gemma4 = new Gemma4Config
-                {
-                    ModelId = benchmarkConfig.Gemma4!.ModelId,
-                    ModelPath = benchmarkConfig.Gemma4.ModelPath,
-                    Quantization = "none",
-                    Port = benchmarkConfig.Gemma4.Port,
-                    PythonPath = benchmarkConfig.Gemma4.PythonPath,
-                    MaxNewTokens = benchmarkConfig.Gemma4.MaxNewTokens,
-                    DeviceMap = "cpu",
-                    StartupTimeoutSeconds = benchmarkConfig.Gemma4.StartupTimeoutSeconds,
-                },
-                Vad = benchmarkConfig.Vad,
-            };
+            // GPU control for llama-server is via -ngl; the benchmark cannot override it
+            // without modifying the Platform layer.  Emit a warning and continue.
+            AnsiConsole.MarkupLine("[yellow]Warning: --gpu false is not supported for the Gemma4 " +
+                "(llama.cpp) engine. llama-server controls GPU usage internally. Ignoring.[/]");
         }
         else
         {
@@ -155,17 +141,33 @@ runCommand.SetAction(async parseResult =>
         builder.AddZLoggerConsole();
     });
 
-    if (!benchmarkConfig.IsGemma4)
+    if (benchmarkConfig.IsLlamaCpp)
+    {
+        // Override ISettingsService so LlamaCppSpeechRecognizer reads from the benchmark
+        // config rather than the user's personal settings.json.
+        var llamaCpp = benchmarkConfig.LlamaCpp!;
+        services.AddSingleton<ISettingsService>(new InMemorySettingsService(
+            new Dictionary<string, string?>
+            {
+                [SettingsKeys.LlamaCppPort]        = llamaCpp.Port.ToString(),
+                [SettingsKeys.SelectedGemma4Model] = llamaCpp.ModelId,
+                [SettingsKeys.LlamaCppServerFolder] = llamaCpp.ServerFolder,
+            }));
+        // Model must already be present on disk; no download service needed.
+    }
+    else
+    {
         services.AddSingleton<IModelDownloadService, HeadlessModelDownloadService>();
+    }
 
     await using var serviceProvider = services.BuildServiceProvider();
 
     ISpeechRecognizer recognizer;
-    Gemma4SpeechRecognizer? gemma4Recognizer = null;
-    if (benchmarkConfig.IsGemma4)
+    if (benchmarkConfig.IsLlamaCpp)
     {
-        gemma4Recognizer = new Gemma4SpeechRecognizer(benchmarkConfig.Gemma4!, serviceProvider.GetRequiredService<ILogger<Gemma4SpeechRecognizer>>());
-        recognizer = gemma4Recognizer;
+        // Resolve the concrete type directly so we bypass DelegatingSpeechRecognizer,
+        // which would read SpeechEngine from settings and might route to Whisper.
+        recognizer = serviceProvider.GetRequiredService<LlamaCppSpeechRecognizer>();
     }
     else
     {
@@ -208,10 +210,7 @@ runCommand.SetAction(async parseResult =>
     }
 
     AnsiConsole.MarkupLine($"[green]Indexed into:[/] {Markup.Escape(dbPath)}");
-
-    // Dispose Gemma4 recognizer (not managed by DI)
-    if (gemma4Recognizer is not null)
-        await gemma4Recognizer.DisposeAsync();
+    // Note: LlamaCppSpeechRecognizer is managed by the DI container (await using serviceProvider).
 });
 
 // --- import command ---

@@ -170,7 +170,7 @@ public static class ConsoleReporter
         table.AddRow("Engine", config.EngineName);
         table.AddRow("Model", config.ModelDisplayName);
         table.AddRow("Runtime", result.Environment.WhisperRuntime);
-        table.AddRow("Language", config.IsGemma4 ? "en (hard-coded)" : config.EffectiveWhisper.Language);
+        table.AddRow("Language", config.IsLlamaCpp ? "en (llama.cpp)" : config.EffectiveWhisper.Language);
         table.AddRow("VAD", config.Vad.Enabled ? "Enabled" : "Disabled");
         table.AddRow("Samples", summary.TotalSamples.ToString());
         table.AddRow("Avg WER", $"{summary.AverageWer:F1}%");
@@ -281,7 +281,7 @@ public static class ConsoleReporter
             table.AddRow(
                 Markup.Escape(result.Configuration.Name),
                 result.Configuration.ModelDisplayName,
-                result.Configuration.IsGemma4 ? "-" : result.Configuration.EffectiveWhisper.BeamSize.ToString(),
+                result.Configuration.IsLlamaCpp ? "-" : result.Configuration.EffectiveWhisper.BeamSize.ToString(),
                 result.Configuration.Vad.Enabled ? "✓" : "✗",
                 $"[{werColor}]{result.Summary.AverageWer:F1}[/]",
                 $"{result.Summary.AverageCer:F1}",
