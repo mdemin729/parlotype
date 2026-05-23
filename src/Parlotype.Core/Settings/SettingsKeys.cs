@@ -19,4 +19,5 @@ public static class SettingsKeys
     public const string LlamaCppServerFolder = "LlamaCppServerFolder";
     public const string LlamaCppPort = "LlamaCppPort";
     public const string LlamaCppActiveInstall = "LlamaCppActiveInstall";
+    public const string ActivePromptId = "ActivePromptId";
 }

@@ -32,6 +32,9 @@
         <DataTemplate DataType="vms:Gemma4ModelSettingsViewModel">
             <v:Gemma4ModelSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:PromptSettingsViewModel">
+            <v:PromptSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:LlamaCppSettingsViewModel">
             <v:LlamaCppSettingsView />
         </DataTemplate>

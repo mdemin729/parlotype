@@ -29,6 +29,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public RuntimeSettingsViewModel Runtime { get; }
     public WhisperOutputSettingsViewModel WhisperOutput { get; }
     public Gemma4ModelSettingsViewModel Gemma4Model { get; }
+    public PromptSettingsViewModel Prompts { get; }
     public LlamaCppSettingsViewModel LlamaCpp { get; }
     public HotkeySettingsViewModel Hotkey { get; }
     public ThemeSettingsViewModel Theme { get; }
@@ -41,6 +42,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         RuntimeSettingsViewModel runtime,
         WhisperOutputSettingsViewModel whisperOutput,
         Gemma4ModelSettingsViewModel gemma4Model,
+        PromptSettingsViewModel prompts,
         LlamaCppSettingsViewModel llamaCpp,
         HotkeySettingsViewModel hotkey,
         ThemeSettingsViewModel theme)
@@ -52,6 +54,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         Runtime = runtime;
         WhisperOutput = whisperOutput;
         Gemma4Model = gemma4Model;
+        Prompts = prompts;
         LlamaCpp = llamaCpp;
         Hotkey = hotkey;
         Theme = theme;
@@ -67,6 +70,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             runtime,
             whisperOutput,
             gemma4Model,
+            prompts,
             llamaCpp,
             hotkey,
             theme,
