@@ -29,6 +29,7 @@ public static class PlatformServiceExtensions
         // (Windows file-lock release on uninstall/switch).
         services.AddSingleton<ILlamaCppServerLifecycle>(sp => sp.GetRequiredService<LlamaCppSpeechRecognizer>());
         services.AddSingleton<ILlamaServerRegistry, JsonLlamaServerRegistry>();
+        services.AddSingleton<IPromptTemplateRegistry, JsonPromptTemplateRegistry>();
         services.AddSingleton<SpeechRecognizerFactory>();
         services.AddSingleton<ISpeechRecognizer, DelegatingSpeechRecognizer>();
         services.AddSingleton<IAudioPipeline, AudioPipelineService>();

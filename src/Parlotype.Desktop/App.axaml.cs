@@ -200,6 +200,7 @@ public class App : Application
         services.AddSingleton<RuntimeSettingsViewModel>();
         services.AddSingleton<WhisperOutputSettingsViewModel>();
         services.AddSingleton<Gemma4ModelSettingsViewModel>();
+        services.AddSingleton<PromptSettingsViewModel>();
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();

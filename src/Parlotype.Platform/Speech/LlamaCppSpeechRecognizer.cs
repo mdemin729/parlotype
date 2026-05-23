@@ -24,14 +24,9 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     private const string DefaultHost = "127.0.0.1";
     private const int StartupTimeoutSeconds = 120;
 
-    /// <summary>Google's prescribed prompt for accurate verbatim transcription.</summary>
-    private const string TranscriptionPrompt =
-        "Transcribe the following speech segment in English into English text. " +
-        "Only output the transcription, with no newlines. " +
-        "When transcribing numbers, write the digits.";
-
     private readonly ISettingsService _settings;
     private readonly ILlamaServerRegistry _registry;
+    private readonly IPromptTemplateRegistry _prompts;
     private readonly ILogger<LlamaCppSpeechRecognizer> _logger;
     // Recreated on each Initialize because HttpClient locks BaseAddress after first
     // request, so reusing the same instance across unload/init cycles (e.g. when the
@@ -48,10 +43,12 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     public LlamaCppSpeechRecognizer(
         ISettingsService settings,
         ILlamaServerRegistry registry,
+        IPromptTemplateRegistry prompts,
         ILogger<LlamaCppSpeechRecognizer> logger)
     {
         _settings = settings;
         _registry = registry;
+        _prompts = prompts;
         _logger = logger;
     }
 
@@ -168,7 +165,12 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         var wavBytes = EncodeWav(samples.Span, sampleRate: 16_000);
         var base64 = Convert.ToBase64String(wavBytes);
 
-        _logger.LogDebug("Transcribing {SampleCount} samples via llama-server", samples.Length);
+        var activePrompt = await _prompts.GetActiveAsync(cancellationToken);
+        var promptText = activePrompt.Render();
+
+        _logger.LogDebug(
+            "Transcribing {SampleCount} samples via llama-server (prompt: {PromptName})",
+            samples.Length, activePrompt.Name);
 
         var body = new
         {
@@ -184,7 +186,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
                     role = "user",
                     content = new object[]
                     {
-                        new { type = "text", text = TranscriptionPrompt },
+                        new { type = "text", text = promptText },
                         new { type = "input_audio", input_audio = new { data = base64, format = "wav" } }
                     }
                 }

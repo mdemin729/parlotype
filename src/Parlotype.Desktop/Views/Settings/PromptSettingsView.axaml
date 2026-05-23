@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.PromptSettingsView"
+             x:DataType="vms:PromptSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Prompts" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Manage the instruction sent to the Gemma 4 engine for each transcription. The {language} placeholder is replaced with the source language automatically."
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <!-- Prompt list (hidden while editing) -->
+        <StackPanel Spacing="4" IsVisible="{Binding !IsEditing}">
+            <ItemsControl ItemsSource="{Binding Prompts}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PromptDisplayItem">
+                        <Border Padding="0,2" Margin="0,2">
+                            <Grid ColumnDefinitions="11,*,Auto,Auto,Auto">
+                                <!-- Selection indicator -->
+                                <Border Grid.Column="0"
+                                        Width="3" Height="16" CornerRadius="1.5"
+                                        Background="{DynamicResource SystemAccentColor}"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding IsSelected}" />
+
+                                <!-- Name (click to select) -->
+                                <Button Grid.Column="1"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Left"
+                                        Background="Transparent"
+                                        Padding="6,8"
+                                        Command="{Binding SelectCommand}"
+                                        CommandParameter="{Binding Id}">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="14"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Text="Built-in"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource SystemAccentColor}"
+                                                   VerticalAlignment="Center"
+                                                   IsVisible="{Binding IsBuiltIn}" />
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Duplicate -->
+                                <Button Grid.Column="2"
+                                        Content="Duplicate"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding DuplicateCommand}"
+                                        CommandParameter="{Binding Id}" />
+
+                                <!-- Edit (user prompts only) -->
+                                <Button Grid.Column="3"
+                                        Content="Edit"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding EditCommand}"
+                                        CommandParameter="{Binding Id}"
+                                        IsVisible="{Binding CanEdit}" />
+
+                                <!-- Delete (user prompts only) -->
+                                <Button Grid.Column="4"
+                                        Content="Delete"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding DeleteCommand}"
+                                        CommandParameter="{Binding Id}"
+                                        IsVisible="{Binding CanEdit}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Button Content="New prompt"
+                    Margin="0,8,0,0"
+                    Command="{Binding NewPromptCommand}" />
+        </StackPanel>
+
+        <!-- Inline editor -->
+        <StackPanel Spacing="8" IsVisible="{Binding IsEditing}">
+            <TextBlock Text="Name" FontWeight="SemiBold" />
+            <TextBox Text="{Binding EditingName}" PlaceholderText="My prompt" />
+
+            <TextBlock Text="Prompt text" FontWeight="SemiBold" Margin="0,4,0,0" />
+            <TextBox Text="{Binding EditingText}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     MinHeight="120" />
+            <TextBlock Text="Tip: use {language} where the source language should appear."
+                       FontSize="12" Opacity="0.6" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                <Button Content="Save"
+                        Command="{Binding SavePromptCommand}" />
+                <Button Content="Cancel"
+                        Command="{Binding CancelEditCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
