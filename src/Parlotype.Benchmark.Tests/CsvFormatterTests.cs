@@ -7,7 +7,7 @@ namespace Parlotype.Benchmark.Tests;
 
 public class CsvFormatterTests
 {
-    private static BenchmarkResult CreateTestResult()
+    private static BenchmarkResult CreateTestResult(double? warmupTimeMs = null)
     {
         return new BenchmarkResult
         {
@@ -28,6 +28,7 @@ public class CsvFormatterTests
                 AverageCer = 5,
                 AverageRtf = 0.5,
                 ModelLoadTimeMs = 500,
+                WarmupTimeMs = warmupTimeMs,
                 TotalProcessingTimeMs = 2000,
                 PeakRamMb = 512,
             },
@@ -91,5 +92,19 @@ public class CsvFormatterTests
         var csv = CsvFormatter.FormatComparison(comparison);
 
         Assert.StartsWith("SampleId,WER_A,WER_B,WER_Delta,CER_A,CER_B,CER_Delta", csv);
+    }
+
+    [Fact]
+    public void FormatSweepSummary_IncludesWarmupColumn()
+    {
+        var noWarmup = CreateTestResult();
+        var withWarmup = CreateTestResult(warmupTimeMs: 750);
+
+        var csv = CsvFormatter.FormatSweepSummary([noWarmup, withWarmup]);
+        var lines = csv.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries);
+
+        Assert.EndsWith("WarmupMs", lines[0]);
+        Assert.EndsWith(",", lines[1]); // null warmup → empty trailing field
+        Assert.EndsWith(",750", lines[2]);
     }
 }

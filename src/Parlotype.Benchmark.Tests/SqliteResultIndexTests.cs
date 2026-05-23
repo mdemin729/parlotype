@@ -16,7 +16,7 @@ public class SqliteResultIndexTests : IDisposable
     }
 
     private static BenchmarkResult CreateResult(string runId = "test-run", string configName = "test-config",
-        WhisperModelType model = WhisperModelType.Base)
+        WhisperModelType model = WhisperModelType.Base, double? warmupTimeMs = null)
     {
         return new BenchmarkResult
         {
@@ -37,6 +37,7 @@ public class SqliteResultIndexTests : IDisposable
                 AverageCer = 5,
                 AverageRtf = 0.5,
                 ModelLoadTimeMs = 500,
+                WarmupTimeMs = warmupTimeMs,
                 TotalProcessingTimeMs = 2000,
                 PeakRamMb = 512,
             },
@@ -133,6 +134,58 @@ public class SqliteResultIndexTests : IDisposable
     public void Contains_ReturnsFalseForUnknownRun()
     {
         Assert.False(_index.Contains("nonexistent"));
+    }
+
+    [Fact]
+    public void Index_PersistsWarmupTimeWhenSet()
+    {
+        _index.Index(CreateResult(warmupTimeMs: 1234.5));
+
+        using var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbPath}");
+        conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT warmup_ms FROM runs WHERE run_id = 'test-run'";
+        var value = cmd.ExecuteScalar();
+        Assert.Equal(1234.5, Convert.ToDouble(value));
+    }
+
+    [Fact]
+    public void Index_PersistsNullWarmupTime()
+    {
+        _index.Index(CreateResult());
+
+        using var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbPath}");
+        conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT warmup_ms FROM runs WHERE run_id = 'test-run'";
+        var value = cmd.ExecuteScalar();
+        Assert.Equal(DBNull.Value, value);
+    }
+
+    [Fact]
+    public void EnsureSchema_AddsWarmupColumnToLegacyDatabase()
+    {
+        // Simulate an older database by dropping the column after first creation, then
+        // re-opening should idempotently re-add it.
+        _index.Index(CreateResult("legacy-run"));
+        _index.Dispose();
+
+        using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbPath}"))
+        {
+            conn.Open();
+            using var drop = conn.CreateCommand();
+            drop.CommandText = "ALTER TABLE runs DROP COLUMN warmup_ms";
+            drop.ExecuteNonQuery();
+        }
+
+        using var migrated = new SqliteResultIndex(_dbPath);
+        migrated.Index(CreateResult("new-run", warmupTimeMs: 42));
+
+        using var conn2 = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_dbPath}");
+        conn2.Open();
+        using var cmd = conn2.CreateCommand();
+        cmd.CommandText = "SELECT warmup_ms FROM runs WHERE run_id = 'new-run'";
+        Assert.Equal(42.0, Convert.ToDouble(cmd.ExecuteScalar()));
     }
 
     public void Dispose()

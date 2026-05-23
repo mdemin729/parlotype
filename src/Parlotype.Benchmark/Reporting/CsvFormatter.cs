@@ -45,7 +45,7 @@ public static class CsvFormatter
     public static string FormatSweepSummary(List<BenchmarkResult> results)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Config,Model,BeamSize,VAD,AvgWER,AvgCER,AvgRTF,TotalTimeMs,PeakRamMb,ModelLoadMs");
+        sb.AppendLine("Config,Model,BeamSize,VAD,AvgWER,AvgCER,AvgRTF,TotalTimeMs,PeakRamMb,ModelLoadMs,WarmupMs");
 
         foreach (var result in results)
         {
@@ -58,7 +58,10 @@ public static class CsvFormatter
             sb.Append(result.Summary.AverageRtf.ToString("F4", CultureInfo.InvariantCulture)).Append(',');
             sb.Append(result.Summary.TotalProcessingTimeMs.ToString("F0", CultureInfo.InvariantCulture)).Append(',');
             sb.Append(result.Summary.PeakRamMb.ToString("F0", CultureInfo.InvariantCulture)).Append(',');
-            sb.AppendLine(result.Summary.ModelLoadTimeMs.ToString("F0", CultureInfo.InvariantCulture));
+            sb.Append(result.Summary.ModelLoadTimeMs.ToString("F0", CultureInfo.InvariantCulture)).Append(',');
+            sb.AppendLine(result.Summary.WarmupTimeMs is { } w
+                ? w.ToString("F0", CultureInfo.InvariantCulture)
+                : string.Empty);
         }
 
         return sb.ToString();

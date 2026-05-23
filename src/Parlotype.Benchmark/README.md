@@ -331,6 +331,12 @@ When `repetitions > 1`, the runner also computes per-sample standard deviation a
 
 Memory metrics are tracked per-sample: peak RAM (MB), average RAM delta, total GC allocations, and GC collection counts per generation.
 
+### Warm-up pass
+
+Every run performs **one throwaway transcription of the first sample** between `InitializeAsync` and the timed loop. This primes CUDA / OS page cache / first-inference paths so the reported per-sample numbers reflect steady-state behaviour rather than cold-start cost. The time spent in warm-up is reported separately as `warmupTimeMs`; the same sample is re-run inside the timed loop. GC counters are reset after warm-up so per-sample GC numbers cover the timed loop only. See [ADR 031](../../docs/decisions/031-benchmark-warmup-pass.md).
+
+> **Caveat:** `peakRamMb` is derived from `Process.PeakWorkingSet64`, which is a high-water mark — warm-up RAM may be reflected in peak readings during the timed loop. For Whisper this is a non-issue because the model is already loaded by `InitializeAsync`. For Gemma the model lives in an external `llama-server` process and isn't counted either way.
+
 ## Results Storage
 
 Each run produces a JSON file in the output directory (e.g. `20260319-145230-smoke-test-baseline.json`) and is auto-indexed into `benchmarks.db` (SQLite) for fast historical queries.

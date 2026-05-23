@@ -30,6 +30,7 @@ public static class MarkdownFormatter
         sb.AppendLine($"| Avg CER | {Fmt(result.Summary.AverageCer)}% |");
         sb.AppendLine($"| Avg RTF | {result.Summary.AverageRtf.ToString("F3", CultureInfo.InvariantCulture)} |");
         sb.AppendLine($"| Model Load | {Fmt(result.Summary.ModelLoadTimeMs, "F0")} ms |");
+        sb.AppendLine($"| Warm-up | {(result.Summary.WarmupTimeMs is { } w ? $"{Fmt(w, "F0")} ms" : "—")} |");
         sb.AppendLine($"| Total Time | {Fmt(result.Summary.TotalProcessingTimeMs, "F0")} ms |");
         sb.AppendLine($"| Peak RAM | {Fmt(result.Summary.PeakRamMb, "F0")} MB |");
         if (result.Summary.Repetitions > 1)
@@ -97,6 +98,8 @@ public static class MarkdownFormatter
         AppendDeltaRow(sb, "Avg CER", comparison.CerDelta, "%");
         AppendDeltaRow(sb, "Avg RTF", comparison.RtfDelta, "", "F3");
         AppendDeltaRow(sb, "Model Load", comparison.ModelLoadDelta, " ms", "F0");
+        if (comparison.WarmupDelta is { } warmupDelta)
+            AppendDeltaRow(sb, "Warm-up", warmupDelta, " ms", "F0");
         AppendDeltaRow(sb, "Peak RAM", comparison.PeakRamDelta, " MB", "F0");
         AppendDeltaRow(sb, "Total Time", comparison.TotalTimeDelta, " ms", "F0");
 

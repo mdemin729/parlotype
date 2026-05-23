@@ -8,7 +8,8 @@ namespace Parlotype.Benchmark.Tests;
 public class ResultComparerTests
 {
     private static BenchmarkResult CreateResult(string runId, double avgWer, double avgCer, double avgRtf,
-        double modelLoad = 500, double totalTime = 2000, double peakRam = 512, List<SampleResult>? samples = null)
+        double modelLoad = 500, double totalTime = 2000, double peakRam = 512,
+        List<SampleResult>? samples = null, double? warmupTimeMs = null)
     {
         return new BenchmarkResult
         {
@@ -29,6 +30,7 @@ public class ResultComparerTests
                 AverageCer = avgCer,
                 AverageRtf = avgRtf,
                 ModelLoadTimeMs = modelLoad,
+                WarmupTimeMs = warmupTimeMs,
                 TotalProcessingTimeMs = totalTime,
                 PeakRamMb = peakRam,
             },
@@ -118,5 +120,29 @@ public class ResultComparerTests
 
         Assert.Equal(5, delta.Absolute, 0.001);
         Assert.Null(delta.Relative);
+    }
+
+    [Fact]
+    public void Compare_WarmupDelta_PopulatedWhenBothPresent()
+    {
+        var a = CreateResult("run-a", 10, 5, 0.5, warmupTimeMs: 1000);
+        var b = CreateResult("run-b", 8, 4, 0.4, warmupTimeMs: 600);
+
+        var comparison = ResultComparer.Compare(a, b);
+
+        Assert.NotNull(comparison.WarmupDelta);
+        Assert.Equal(-400, comparison.WarmupDelta!.Absolute, 0.001);
+        Assert.True(comparison.WarmupDelta.IsImproved);
+    }
+
+    [Fact]
+    public void Compare_WarmupDelta_NullWhenEitherMissing()
+    {
+        var a = CreateResult("run-a", 10, 5, 0.5);
+        var b = CreateResult("run-b", 8, 4, 0.4, warmupTimeMs: 600);
+
+        var comparison = ResultComparer.Compare(a, b);
+
+        Assert.Null(comparison.WarmupDelta);
     }
 }

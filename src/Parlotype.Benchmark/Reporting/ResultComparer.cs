@@ -24,6 +24,9 @@ public static class ResultComparer
             CerDelta = new MetricDelta(runA.Summary.AverageCer, runB.Summary.AverageCer),
             RtfDelta = new MetricDelta(runA.Summary.AverageRtf, runB.Summary.AverageRtf),
             ModelLoadDelta = new MetricDelta(runA.Summary.ModelLoadTimeMs, runB.Summary.ModelLoadTimeMs),
+            WarmupDelta = runA.Summary.WarmupTimeMs is { } warmupA && runB.Summary.WarmupTimeMs is { } warmupB
+                ? new MetricDelta(warmupA, warmupB)
+                : null,
             PeakRamDelta = new MetricDelta(runA.Summary.PeakRamMb, runB.Summary.PeakRamMb),
             TotalTimeDelta = new MetricDelta(runA.Summary.TotalProcessingTimeMs, runB.Summary.TotalProcessingTimeMs),
             SampleDeltas = sampleDeltas,

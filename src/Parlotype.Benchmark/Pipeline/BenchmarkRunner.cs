@@ -117,10 +117,33 @@ public sealed class BenchmarkRunner
         _logger.LogInformation("Found {SampleCount} samples across {DatasetCount} dataset(s)",
             allSamples.Count, config.Datasets.Length);
 
+        // Warm-up pass: one throwaway transcription of the first sample to prime CUDA / OS
+        // file cache / first-inference paths so the timed loop reports steady-state numbers.
+        // The same sample is re-run inside the timed loop, so all reported per-sample
+        // numbers are warm. Exceptions propagate — a failed warm-up means the timed loop
+        // would still be cold, so the run is invalid.
+        double? warmupTimeMs = null;
+        if (allSamples.Count > 0)
+        {
+            var (warmupInfo, warmupAudioPath) = allSamples[0];
+            cancellationToken.ThrowIfCancellationRequested();
+            progress?.Report($"Warming up on {warmupInfo.Id}...");
+            _logger.LogInformation("Warm-up pass on sample {SampleId}", warmupInfo.Id);
+
+            var warmupSw = Stopwatch.StartNew();
+            var (warmupSamples, _) = AudioFileLoader.Load(warmupAudioPath);
+            _ = await _recognizer.TranscribeAsync(warmupSamples.AsMemory(), cancellationToken);
+            warmupSw.Stop();
+            warmupTimeMs = warmupSw.Elapsed.TotalMilliseconds;
+            _logger.LogInformation("Warm-up completed in {WarmupTimeMs:F0} ms", warmupTimeMs);
+        }
+
         // Process each sample
         var sampleResults = new List<SampleResult>();
         double peakRamMb = 0;
 
+        // GC baselines captured AFTER warm-up so per-sample GC counters reflect the
+        // timed loop only (otherwise warm-up GC collections would pollute the summary).
         var gcGen0Before = GC.CollectionCount(0);
         var gcGen1Before = GC.CollectionCount(1);
         var gcGen2Before = GC.CollectionCount(2);
@@ -158,6 +181,7 @@ public sealed class BenchmarkRunner
             AverageRtf = sampleResults.Count > 0 ? sampleResults.Average(s => s.Rtf) : 0,
             TotalProcessingTimeMs = sampleResults.Sum(s => s.ProcessingTimeMs),
             ModelLoadTimeMs = modelLoadTimeMs,
+            WarmupTimeMs = warmupTimeMs,
             PeakRamMb = peakRamMb,
             AvgRamDeltaMb = sampleResults.Count > 0 ? sampleResults.Average(s => s.RamDeltaMb) : 0,
             TotalGcAllocatedBytes = sampleResults.Sum(s => s.GcAllocatedBytes),

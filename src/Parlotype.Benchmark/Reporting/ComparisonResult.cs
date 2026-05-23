@@ -41,6 +41,11 @@ public sealed class ComparisonResult
     [JsonPropertyName("modelLoadDelta")]
     public required MetricDelta ModelLoadDelta { get; init; }
 
+    /// <summary>Warm-up time delta. Null when either run lacks warm-up data
+    /// (e.g. one side is a pre-warmup historical run).</summary>
+    [JsonPropertyName("warmupDelta")]
+    public MetricDelta? WarmupDelta { get; init; }
+
     [JsonPropertyName("peakRamDelta")]
     public required MetricDelta PeakRamDelta { get; init; }
 

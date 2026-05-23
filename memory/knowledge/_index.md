@@ -17,7 +17,9 @@ This directory stores **stable facts** learned across sessions — things that a
 
 ## Entries
 
-<!-- Add entries as facts are learned across sessions -->
+| File | Tags | Summary |
+|------|------|---------|
+| [[benchmark-warmup]] | benchmark, warm-up, cold-start | Every benchmark run performs one throwaway warm-up transcription; reported as `warmupTimeMs` |
 <!-- Format: | [[filename]] | one-line summary | date | -->
 
 | Fact | Summary | Learned |

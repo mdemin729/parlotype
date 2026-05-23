@@ -1,6 +1,6 @@
 {
-  "name": "gemma4-libri-speech-test-other",
-  "description": "Gemma 4 E4B Q4_K_M on LibriSpeech test-other (English-only, 50 samples) via llama.cpp",
+  "name": "gemma4-e4b-q4-libri-speech-test-other",
+  "description": "Gemma 4 E4B Q4_K_M on LibriSpeech test-other (50 samples) via llama.cpp (CUDA b9297)",
   "datasets": ["libri-speech-test-other"],
   "llamaCpp": {
     "modelId": "gemma-4-E4B-it-Q4_K_M",
