@@ -182,7 +182,9 @@ Apply this protocol every session. Full detail lives in
 
 ## Plans & Decisions
 
-See [plans/WORKFLOW.md](plans/WORKFLOW.md) for task tracking workflows, plan format, and ADR templates. Plans live in `plans/` (flat structure, status via YAML frontmatter). ADRs live in `docs/decisions/`.
+Each plan is its **own folder** `plans/YYYY-MM-DD-kebab-name/` containing a primary `task.md` (YAML frontmatter: `title`, `status`, `created`/`started`/`completed`) plus optional `implementation-plan.md` and `research.md`. **Never create a bare `.md` file directly under `plans/`** — the per-plan folder is mandatory; follow any existing plan as the pattern. (This is unrelated to the scratch plan file the plan-mode harness writes under `~/.claude/plans/`.)
+
+See [plans/WORKFLOW.md](plans/WORKFLOW.md) for the full create/start/complete/abandon workflows, `INDEX.md` format, and ADR templates. ADRs live in `docs/decisions/`.
 
 ## Definition of Done
 
