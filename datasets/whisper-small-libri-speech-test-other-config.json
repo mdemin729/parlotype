@@ -1,0 +1,15 @@
+{
+  "name": "whisper-small-libri-speech-test-other",
+  "description": "Whisper Small on LibriSpeech test-other (50 samples)",
+  "datasets": ["libri-speech-test-other"],
+  "repetitions": 1,
+  "whisper": {
+    "model": "Small",
+    "language": "auto",
+    "beamSize": 1,
+    "temperature": 0.0
+  },
+  "vad": {
+    "enabled": false
+  }
+}

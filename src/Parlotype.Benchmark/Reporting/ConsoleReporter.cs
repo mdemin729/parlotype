@@ -42,6 +42,8 @@ public static class ConsoleReporter
         AddMetricRow(table, "Avg CER", comparison.CerDelta, "%");
         AddMetricRow(table, "Avg RTF", comparison.RtfDelta, "", "F3");
         AddMetricRow(table, "Model Load", comparison.ModelLoadDelta, " ms", "F0");
+        if (comparison.WarmupDelta is { } warmupDelta)
+            AddMetricRow(table, "Warm-up", warmupDelta, " ms", "F0");
         AddMetricRow(table, "Peak RAM", comparison.PeakRamDelta, " MB", "F0");
         AddMetricRow(table, "Total Time", comparison.TotalTimeDelta, " ms", "F0");
 
@@ -177,6 +179,7 @@ public static class ConsoleReporter
         table.AddRow("Avg CER", $"{summary.AverageCer:F1}%");
         table.AddRow("Avg RTF", $"{summary.AverageRtf:F3}");
         table.AddRow("Model Load", $"{summary.ModelLoadTimeMs:F0} ms");
+        table.AddRow("Warm-up", summary.WarmupTimeMs is { } w ? $"{w:F0} ms" : "—");
         table.AddRow("Total Time", $"{summary.TotalProcessingTimeMs:F0} ms");
         table.AddRow("Peak RAM", $"{summary.PeakRamMb:F0} MB");
 

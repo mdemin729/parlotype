@@ -45,6 +45,12 @@ public sealed class BenchmarkSummary
     [JsonPropertyName("modelLoadTimeMs")]
     public required double ModelLoadTimeMs { get; init; }
 
+    /// <summary>Time spent running a single throwaway warm-up inference on the first
+    /// sample before the timed loop. Null when the run pre-dates the warm-up feature
+    /// (i.e. imported from older JSON results). Always populated for new runs.</summary>
+    [JsonPropertyName("warmupTimeMs")]
+    public double? WarmupTimeMs { get; init; }
+
     [JsonPropertyName("peakRamMb")]
     public required double PeakRamMb { get; init; }
 

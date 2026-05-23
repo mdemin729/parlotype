@@ -1,0 +1,12 @@
+{
+  "name": "gemma4-e2b-q8-libri-speech-test-other",
+  "description": "Gemma 4 E2B Q8_0 on LibriSpeech test-other (50 samples) via llama.cpp (CUDA b9297)",
+  "datasets": ["libri-speech-test-other"],
+  "llamaCpp": {
+    "modelId": "gemma-4-E2B-it-Q8_0",
+    "port": 8321
+  },
+  "vad": {
+    "enabled": false
+  }
+}

@@ -7,7 +7,7 @@ namespace Parlotype.Benchmark.Tests;
 
 public class MarkdownFormatterTests
 {
-    private static BenchmarkResult CreateTestResult()
+    private static BenchmarkResult CreateTestResult(double? warmupTimeMs = null)
     {
         return new BenchmarkResult
         {
@@ -28,6 +28,7 @@ public class MarkdownFormatterTests
                 AverageCer = 5.2,
                 AverageRtf = 0.456,
                 ModelLoadTimeMs = 500,
+                WarmupTimeMs = warmupTimeMs,
                 TotalProcessingTimeMs = 2000,
                 PeakRamMb = 512,
             },
@@ -64,6 +65,25 @@ public class MarkdownFormatterTests
 
         Assert.Contains("## Per-Sample Results", md);
         Assert.Contains("| s1 |", md);
+    }
+
+    [Fact]
+    public void FormatResult_WarmupRow_RendersDashWhenNull()
+    {
+        var result = CreateTestResult();
+        var md = MarkdownFormatter.FormatResult(result);
+
+        Assert.Contains("| Warm-up | — |", md);
+    }
+
+    [Fact]
+    public void FormatResult_WarmupRow_RendersValueWhenSet()
+    {
+        var result = CreateTestResult(warmupTimeMs: 750);
+
+        var md = MarkdownFormatter.FormatResult(result);
+
+        Assert.Contains("| Warm-up | 750 ms |", md);
     }
 
     [Fact]

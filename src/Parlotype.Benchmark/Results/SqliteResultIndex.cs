@@ -30,6 +30,7 @@ public sealed class SqliteResultIndex : IDisposable
                 avg_cer REAL NOT NULL,
                 avg_rtf REAL NOT NULL,
                 model_load_ms REAL NOT NULL,
+                warmup_ms REAL,
                 total_time_ms REAL NOT NULL,
                 peak_ram_mb REAL NOT NULL,
                 total_samples INTEGER NOT NULL,
@@ -57,6 +58,30 @@ public sealed class SqliteResultIndex : IDisposable
             CREATE INDEX IF NOT EXISTS idx_runs_model ON runs(model);
             """;
         cmd.ExecuteNonQuery();
+
+        MigrateRunsAddColumnIfMissing("warmup_ms", "REAL");
+    }
+
+    /// <summary>Idempotent migration: adds a column to the runs table when missing.
+    /// Uses <c>PRAGMA table_info</c> rather than catching <c>ALTER TABLE</c> errors so
+    /// we don't swallow unrelated schema problems.</summary>
+    private void MigrateRunsAddColumnIfMissing(string columnName, string columnType)
+    {
+        using (var checkCmd = _connection.CreateCommand())
+        {
+            checkCmd.CommandText = "PRAGMA table_info(runs)";
+            using var reader = checkCmd.ExecuteReader();
+            while (reader.Read())
+            {
+                // PRAGMA table_info columns: cid, name, type, notnull, dflt_value, pk
+                if (string.Equals(reader.GetString(1), columnName, StringComparison.OrdinalIgnoreCase))
+                    return;
+            }
+        }
+
+        using var alterCmd = _connection.CreateCommand();
+        alterCmd.CommandText = $"ALTER TABLE runs ADD COLUMN {columnName} {columnType}";
+        alterCmd.ExecuteNonQuery();
     }
 
     /// <summary>Indexes a benchmark result into SQLite.</summary>
@@ -69,11 +94,11 @@ public sealed class SqliteResultIndex : IDisposable
             cmd.CommandText = """
                 INSERT OR REPLACE INTO runs
                 (run_id, config_name, model, language, vad_enabled, timestamp,
-                 avg_wer, avg_cer, avg_rtf, model_load_ms, total_time_ms, peak_ram_mb, total_samples,
+                 avg_wer, avg_cer, avg_rtf, model_load_ms, warmup_ms, total_time_ms, peak_ram_mb, total_samples,
                  json_path, os, architecture, dotnet_version, processor_count, whisper_runtime)
                 VALUES
                 (@runId, @configName, @model, @language, @vadEnabled, @timestamp,
-                 @avgWer, @avgCer, @avgRtf, @modelLoadMs, @totalTimeMs, @peakRamMb, @totalSamples,
+                 @avgWer, @avgCer, @avgRtf, @modelLoadMs, @warmupMs, @totalTimeMs, @peakRamMb, @totalSamples,
                  @jsonPath, @os, @arch, @dotnetVersion, @processorCount, @whisperRuntime)
                 """;
 
@@ -87,6 +112,7 @@ public sealed class SqliteResultIndex : IDisposable
             cmd.Parameters.AddWithValue("@avgCer", result.Summary.AverageCer);
             cmd.Parameters.AddWithValue("@avgRtf", result.Summary.AverageRtf);
             cmd.Parameters.AddWithValue("@modelLoadMs", result.Summary.ModelLoadTimeMs);
+            cmd.Parameters.AddWithValue("@warmupMs", (object?)result.Summary.WarmupTimeMs ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@totalTimeMs", result.Summary.TotalProcessingTimeMs);
             cmd.Parameters.AddWithValue("@peakRamMb", result.Summary.PeakRamMb);
             cmd.Parameters.AddWithValue("@totalSamples", result.Summary.TotalSamples);

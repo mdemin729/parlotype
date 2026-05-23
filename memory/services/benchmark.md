@@ -36,6 +36,7 @@ check     # CI regression detection (exit 0 pass / 1 fail)
 - Results auto-indexed into `benchmarks.db` SQLite after each run
 - Sweeps use `SweepConfig` with dot-notation axes (e.g., `whisper.model`, `whisper.beamSize`)
 - Repetitions: `repetitions > 1` for mean/stddev stability analysis
+- Every `run` performs a throwaway warm-up transcription on the first sample (always on); reported separately as `warmupTimeMs`. See [[../knowledge/benchmark-warmup]] and ADR 031
 
 ## Dependencies
 - [[platform]], [[core]]
@@ -46,6 +47,7 @@ check     # CI regression detection (exit 0 pass / 1 fail)
 - [[decisions/_index|ADR-011]] Optimal STT pipeline settings
 - [[decisions/_index|ADR-025]] Gemma 4 via llama.cpp
 - [[decisions/_index|ADR-029]] Gemma 4 model download UI
+- [[decisions/_index|ADR-031]] Benchmark warm-up pass
 
 ## Speech Recognition Engines
 
