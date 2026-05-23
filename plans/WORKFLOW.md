@@ -38,6 +38,9 @@ completed:               # date when finished
 ### Creating a New Plan
 
 1. Create folder: `plans/YYYY-MM-DD-kebab-case-name/`
+
+   > **Do NOT** create a bare `plans/YYYY-MM-DD-name.md` file. The dated **folder** is required, with `task.md` inside it.
+
 2. Create primary file (e.g., `task.md`) with frontmatter (`status: planned`)
 3. Add row to `plans/INDEX.md` under **Planned** section
 4. Add supporting files as needed (`research.md`, `implementation-plan.md`)
