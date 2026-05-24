@@ -15,6 +15,8 @@ public sealed class MockPromptTemplateRegistry : IPromptTemplateRegistry
     public static readonly PromptTemplate BuiltIn = new(
         BuiltInId, "Default (verbatim transcription)", "Transcribe in {language}.", IsBuiltIn: true);
 
+    public int SetActiveCallCount;
+
     private readonly List<PromptTemplate> _users = [];
     private string _activeId = BuiltInId;
 
@@ -66,6 +68,7 @@ public sealed class MockPromptTemplateRegistry : IPromptTemplateRegistry
 
     public Task SetActiveAsync(string id, CancellationToken cancellationToken = default)
     {
+        SetActiveCallCount++;
         _activeId = id;
         return Task.CompletedTask;
     }
