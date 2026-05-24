@@ -2,13 +2,14 @@
 
 **Speak freely. Type privately.**
 
-Parlotype is a local-first, privacy-focused voice-to-text desktop application. All speech recognition runs on-device using [Whisper](https://github.com/openai/whisper) — your voice data never leaves your machine.
+Parlotype is a local-first, privacy-focused voice-to-text desktop application. All speech recognition runs on-device — your voice data never leaves your machine. Choose between two engines: **[Whisper](https://github.com/openai/whisper)** (fast, well-tested, the default) and **[Gemma 4](https://deepmind.google/models/gemma/gemma-4/https://deepmind.google/models/gemma/gemma-4/)** (Google's multimodal model, run via a local [llama.cpp](https://github.com/ggml-org/llama.cpp) sidecar).
 
 ## Tech Stack
 
 - **.NET 10** — Runtime
 - **Avalonia UI 12** — Cross-platform desktop UI (tray-based)
 - **Whisper.net** — On-device speech recognition (OpenAI Whisper)
+- **llama.cpp (`llama-server`)** — Gemma 4 speech recognition sidecar
 - **Silero VAD** — Voice activity detection
 - **NAudio** — Windows audio capture (WASAPI)
 - **CommunityToolkit.Mvvm** — MVVM framework
@@ -19,6 +20,22 @@ Parlotype is a local-first, privacy-focused voice-to-text desktop application. A
 Parlotype currently runs on **Windows** only. macOS and Linux support are planned for the future.
 
 **GPU acceleration** is supported on **NVIDIA** GPUs (via CUDA) and on **AMD / Intel / other** GPUs (via Vulkan). If no compatible GPU is detected, Parlotype falls back to CPU automatically. The active runtime can be changed in **Settings → Runtime**.
+
+## Speech Engines
+
+Parlotype ships two interchangeable speech-to-text engines. Both run entirely on-device — switch between them at **Settings → Speech Engine**.
+
+### Whisper (default)
+
+OpenAI Whisper via [Whisper.net](https://github.com/sandrohanea/whisper.net). Fast, well-tested, and the default. You can pick any GGML model from **Tiny** through **Large v3 Turbo** in the settings menu; models download on demand. GPU-accelerated via CUDA or Vulkan (see above), with automatic CPU fallback.
+
+### Gemma 4 (llama.cpp sidecar)
+
+Google's multimodal **Gemma 4** model, run through a local [`llama-server`](https://github.com/ggml-org/llama.cpp) process. Parlotype manages the sidecar for you: audio is sent over a loopback HTTP connection, so nothing leaves your machine.
+
+- **Model files** — GGUF weights plus an audio projector (`mmproj`), downloaded from HuggingFace (`ggml-org/gemma-4-E2B-it-GGUF` / `gemma-4-E4B-it-GGUF`) into `%LOCALAPPDATA%\parlotype\models\`. Sizes range from ~5.5 GiB to ~15 GiB depending on variant and quantization; the default is **E4B (Q4_K_M)** (~5.9 GiB).
+- **Server build** — the `llama-server` binary is installed and managed from the Settings UI (or you can point Parlotype at your own copy).
+- **English-only** for now.
 
 ## Prerequisites
 
@@ -146,6 +163,7 @@ datasets/
 - **Platform** implements those interfaces with real dependencies
 - **Desktop** wires everything via dependency injection and provides the UI
 - Clean separation ensures Core has no UI or platform dependencies
+- Speech recognition is pluggable: `SpeechRecognizerFactory` resolves either the Whisper or Gemma 4 (`LlamaCppSpeechRecognizer`) implementation of `ISpeechRecognizer` from the persisted `SpeechEngine` setting
 - Users can select from all available Whisper GGML models (Tiny through Large v3 Turbo) in the settings menu
 - Configurable Whisper parameters (language, beam size, temperature, thread count) via `WhisperOptions` for benchmarking
 
