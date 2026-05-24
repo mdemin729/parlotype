@@ -44,6 +44,21 @@ datasets/**/.cache/*.wav
 # Benchmark results
 results/*
 
+# Committed benchmark artefacts — keep in lock-step with the comparison reports
+# that reference them. Add a new `!` line whenever a report is committed.
+!results/comparison-libri-speech-test-other-2026-05-23-cuda.md
+!results/20260523-200406-whisper-small-libri-speech-test-other.json
+!results/20260523-200421-whisper-medium-libri-speech-test-other.json
+!results/20260523-200446-whisper-large-v3-turbo-libri-speech-test-other.json
+!results/20260523-204306-whisper-small-libri-speech-test-other.json
+!results/20260523-204332-whisper-medium-libri-speech-test-other.json
+!results/20260523-204406-whisper-large-v3-turbo-libri-speech-test-other.json
+!results/20260523-200528-gemma4-e2b-bf16-libri-speech-test-other.json
+!results/20260523-200549-gemma4-e4b-q4-libri-speech-test-other.json
+!results/20260523-200611-gemma4-e4b-q8-libri-speech-test-other.json
+!results/20260523-200638-gemma4-e4b-bf16-libri-speech-test-other.json
+!results/20260523-201057-gemma4-e2b-q8-libri-speech-test-other.json
+
 
 # Generated test reports
 reports/
