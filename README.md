@@ -2,7 +2,7 @@
 
 **Speak freely. Type privately.**
 
-Parlotype is a local-first, privacy-focused voice-to-text desktop application. All speech recognition runs on-device — your voice data never leaves your machine. Choose between two engines: **[Whisper](https://github.com/openai/whisper)** (fast, well-tested, the default) and **[Gemma 4](https://deepmind.google/models/gemma/gemma-4/https://deepmind.google/models/gemma/gemma-4/)** (Google's multimodal model, run via a local [llama.cpp](https://github.com/ggml-org/llama.cpp) sidecar).
+Parlotype is a local-first, privacy-focused voice-to-text desktop application. All speech recognition runs on-device — your voice data never leaves your machine. Choose between two engines: **[Whisper](https://github.com/openai/whisper)** (fast, well-tested, the default) and **[Gemma 4](https://deepmind.google/models/gemma/gemma-4/)** (Google's multimodal model, run via a local [llama.cpp](https://github.com/ggml-org/llama.cpp) sidecar).
 
 ## Tech Stack
 
@@ -139,7 +139,7 @@ dotnet run --project src\Parlotype.Benchmark -- check `
   --output results --max-wer-delta 2.0
 ```
 
-The benchmarkcomputes **WER** (Word Error Rate), **CER** (Character Error Rate), and **RTF** (Real-Time Factor) against WAV/FLAC datasets with ground-truth transcriptions. Results are saved as JSON and auto-indexed into SQLite for historical queries. Supports tag/sample filtering (`--tags`, `--samples`), side-by-side comparison with delta metrics, and export to CSV, Markdown, or JSON.
+The benchmark computes **WER** (Word Error Rate), **CER** (Character Error Rate), and **RTF** (Real-Time Factor) against WAV/FLAC datasets with ground-truth transcriptions. Results are saved as JSON and auto-indexed into SQLite for historical queries. Supports tag/sample filtering (`--tags`, `--samples`), side-by-side comparison with delta metrics, and export to CSV, Markdown, or JSON.
 
 ## Project Structure
 
@@ -166,6 +166,7 @@ datasets/
 - Speech recognition is pluggable: `SpeechRecognizerFactory` resolves either the Whisper or Gemma 4 (`LlamaCppSpeechRecognizer`) implementation of `ISpeechRecognizer` from the persisted `SpeechEngine` setting
 - Users can select from all available Whisper GGML models (Tiny through Large v3 Turbo) in the settings menu
 - Configurable Whisper parameters (language, beam size, temperature, thread count) via `WhisperOptions` for benchmarking
+- Architectural decisions are recorded as ADRs in [`docs/decisions/`](docs/decisions/) — the Gemma 4 integration alone spans seven ADRs (024–030)
 
 ## License
 
