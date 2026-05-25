@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -38,6 +38,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[llama-cpp-release-assets]] | llama.cpp release asset naming (`llama-b{N}-bin-{platform}-{backend}-{arch}.{ext}`), CUDA `cudart-*.zip` companion pairing rules, no "latest" alias, GitHub 60 req/h unauthenticated limit, ETag weak-validator round-trip rule | 2026-05-17 |
 | [[llama-server-hf-download]] | llama-server downloads HF models itself via `-hf <repo>[:quant]` (defaults Q4_K_M, auto-mmproj, `HF_TOKEN` for gated, `~/.cache/huggingface/hub`); Parlotype uses its own C# downloader instead for progress UX (ADR-029) | 2026-05-19 |
 | [[whisper-cuda-runtime-packaging]] | `Whisper.net.Runtime.Cuda` adds only `ggml-cuda-whisper.dll` (~150 MB) to published output and does NOT bundle cudart/cublas — Full build still needs the user's installed CUDA toolkit. Self-contained sizes: Lite ~720 MB, Full ~870 MB unzipped (ADR-031) | 2026-05-24 |
+| [[brand-positioning]] | Parlotype is positioned as **Local by default. Cloud by choice.** — single app, local-default, opt-in cloud (BYOK); tagline preserved; replaces "privacy-first" wording (ADR-032) | 2026-05-25 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Parlotype is a local-first, privacy-focused voice-to-text desktop application. All speech recognition runs on-device using Whisper.net — voice data never leaves the user's machine. Built with .NET 10 and Avalonia UI.
+Parlotype is a **local-by-default** voice-to-text desktop application: on-device speech recognition is the default, and audio never leaves the user's machine in local mode. Two local engines ship today (Whisper.net and Gemma 4 via llama.cpp); cloud / online speech providers are planned as an **opt-in** option (see [ADR-032](docs/decisions/032-online-speech-providers-positioning.md) for positioning). Built with .NET 10 and Avalonia UI.
 
 ## Build & Test Commands
 

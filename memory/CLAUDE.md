@@ -46,7 +46,7 @@ Benchmark.Tests → Benchmark, Core
 
 ## Key Architectural Constraints
 
-- **Privacy-first**: voice data never leaves the device
+- **Local-by-default**: on-device speech recognition is the default and only baseline guarantee. Cloud / online providers (when added) are opt-in, clearly indicated in the UI, and use user-supplied credentials (BYOK) — see [[../docs/decisions/032-online-speech-providers-positioning|ADR-032]] and [[knowledge/brand-positioning]]
 - **Warnings as errors**: `TreatWarningsAsErrors=true` in `Directory.Build.props`
 - **Interfaces in Core, implementations in Platform**: never add platform packages to Core
 - **All services are singletons** registered in `PlatformServiceExtensions.cs`

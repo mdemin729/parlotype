@@ -2,7 +2,7 @@
 
 **Speak freely. Type privately.**
 
-Parlotype is a local-first, privacy-focused voice-to-text desktop application. All speech recognition runs on-device — your voice data never leaves your machine. Choose between two engines: **[Whisper](https://github.com/openai/whisper)** (fast, well-tested, the default) and **[Gemma 4](https://deepmind.google/models/gemma/gemma-4/)** (Google's multimodal model, run via a local [llama.cpp](https://github.com/ggml-org/llama.cpp) sidecar).
+Parlotype is a **local-by-default** voice-to-text desktop application: on-device speech recognition is the default, and your voice never leaves your machine in local mode. Choose between two local engines — **[Whisper](https://github.com/openai/whisper)** (fast, well-tested, the default) and **[Gemma 4](https://deepmind.google/models/gemma/gemma-4/)** (Google's multimodal model, run via a local [llama.cpp](https://github.com/ggml-org/llama.cpp) sidecar). Cloud speech providers are planned as an **opt-in** option for users whose hardware can't deliver the latency they need — see [Provider Modes](#provider-modes) below and [ADR-032](docs/decisions/032-online-speech-providers-positioning.md).
 
 ## Tech Stack
 
@@ -39,6 +39,15 @@ found. The builds are currently unsigned, so Windows SmartScreen may warn on fir
 ## Speech Engines
 
 Parlotype ships two interchangeable speech-to-text engines. Both run entirely on-device — switch between them at **Settings → Speech Engine**.
+
+### Provider Modes
+
+Parlotype is **local by default. Cloud by choice.**
+
+- **Local (default)** — Whisper or Gemma 4 run entirely on your machine. No audio leaves the device. This is the only mode enabled out of the box and the only mode required to use the app.
+- **Cloud (opt-in, planned)** — When local hardware can't deliver the latency you need, you will be able to enable a cloud speech provider in **Settings → Speech Engine**. When enabled, audio will be sent over HTTPS to the provider you choose using credentials you supply (bring your own key). A clear in-app indicator will show when cloud mode is active. Cloud providers will never be auto-selected.
+
+See [ADR-032](docs/decisions/032-online-speech-providers-positioning.md) for the full positioning principles and brand commitments.
 
 ### Whisper (default)
 
