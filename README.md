@@ -21,6 +21,21 @@ Parlotype currently runs on **Windows** only. macOS and Linux support are planne
 
 **GPU acceleration** is supported on **NVIDIA** GPUs (via CUDA) and on **AMD / Intel / other** GPUs (via Vulkan). If no compatible GPU is detected, Parlotype falls back to CPU automatically. The active runtime can be changed in **Settings → Runtime**.
 
+## Download / Releases
+
+Pre-built Windows binaries are published on the [Releases page](../../releases). Each
+release ships two self-contained `win-x64` builds — no .NET runtime install required, just
+unzip and run `Parlotype.Desktop.exe`:
+
+| Build | Contents | Use when |
+|-------|----------|----------|
+| **Full** | CUDA + Vulkan GPU runtimes | You have an **NVIDIA** GPU and want CUDA acceleration (also requires the [CUDA toolkit](#cuda-optional-nvidia-gpus) installed) |
+| **Lite** | Vulkan GPU runtime only | Everything else — AMD / Intel GPUs, or you prefer a smaller download (NVIDIA still works via Vulkan) |
+
+Both are self-contained, so they're large (Lite ~720 MB, Full ~870 MB unzipped; the
+downloaded zips are smaller). Both fall back to CPU automatically if no compatible GPU is
+found. The builds are currently unsigned, so Windows SmartScreen may warn on first launch.
+
 ## Speech Engines
 
 Parlotype ships two interchangeable speech-to-text engines. Both run entirely on-device — switch between them at **Settings → Speech Engine**.

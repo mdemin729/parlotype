@@ -2,7 +2,7 @@
 title: Architecture Decisions
 type: index
 status: active
-last_updated: 2026-05-22
+last_updated: 2026-05-24
 summary: Index of all Architecture Decision Records (ADRs) for Parlotype
 ---
 
@@ -41,6 +41,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 027 | [[027-llamaserver-namespace-rescope\|LlamaServer Namespace Rescope]] | Accepted | Moved `Parlotype.*.Speech.LlamaServer.*` → `Parlotype.*.LlamaServer.*` (flat). Relocated `LlamaCppServerInfo` to `Parlotype.Platform.LlamaServer`. Anticipates a second consumer (post-processing); pure refactor — no behaviour, schema, or settings change. Renamed `docs/architecture/llamacpp-integration.md` → `llamacpp-subsystem.md`. Flagged `LlamaServerHost` extraction as a follow-up triggered by the first post-processor |
 | 028 | [[028-settings-grouped-navigation\|Settings Grouped Navigation]] | Accepted | Settings window reorganised into four categories (Audio / Speech engine / Input / Appearance) with non-selectable group headers; engine-restricted rows hidden for the inactive engine. `SettingsSectionViewModelBase` gains `Category` and `RestrictToEngine`; `SettingsWindowViewModel` projects via `SettingsNavItem`. Old `SpeechSettingsViewModel` split into `SilenceTimeoutSettingsViewModel` (Audio) and `WhisperOutputSettingsViewModel` (SpeechEngine, Whisper-only). Settings keys unchanged |
 | 030 | [[030-configurable-gemma4-prompts\|Configurable Gemma 4 Prompts]] | Accepted | `PromptTemplate` record + `IPromptTemplateRegistry` (Core) with `{language}` placeholder/`Render` + `ActivePromptId` key; `JsonPromptTemplateRegistry` (`prompts.json`, non-deletable built-in default merged at read time, corrupt-file quarantine) modelled on `JsonLlamaServerRegistry`; `LlamaCppSpeechRecognizer.TranscribeAsync` resolves active prompt per call (no model reload). New `PromptSettingsViewModel`/`View` (SpeechEngine category, Gemma4-restricted) with inline create/edit/duplicate/delete/select. Shared keyboard-layout source-language setting deferred — only the `{language}` seam built |
+| 031 | [[031-github-release-strategy\|GitHub Release Strategy]] | Accepted | Tag-triggered (`v*`) `release.yml`; two self-contained `win-x64` zips per release — **Full** (`EnableCuda=true`, CUDA+Vulkan) and **Lite** (`EnableCuda=false`, Vulkan-only); version derived from tag, hyphenated tags = pre-release; no single-file/trim; windows-latest matrix build + ubuntu release job. Signing & auto-update deferred |
 | 029 | [[029-gemma4-model-download-ui\|Gemma 4 Model Download UI]] | Accepted | `Gemma4ModelInfo` is a 5-entry catalog (E2B Q8_0/BF16, E4B Q4_K_M/Q8_0/BF16) keyed by `ModelId`, with `Gemma4Variant`+`Gemma4Quant` enums + `SelectedGemma4Model` settings key (E2B has no Q4_K_M upstream). New `Gemma4ModelSettingsViewModel`/`View` (SpeechEngine category, Gemma4-restricted) with per-model Download/Delete via reused `ModelDownloadDialog` (now with a completion **Close** state + cumulative GGUF+mmproj progress) + new `Gemma4ModelDownloadDialogService`. `Gemma4ModelDownloadService` parameterised by model + `DeleteModelAsync` (streams scoped before `File.Move`). `LlamaCppSpeechRecognizer` resolves selected model via `GetById`. Chose own C# downloader over llama-server `-hf` (progress UX). No SHA/token/migration |
 
 ## Template
