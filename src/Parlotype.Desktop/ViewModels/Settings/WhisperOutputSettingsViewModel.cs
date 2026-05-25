@@ -28,7 +28,45 @@ public partial class WhisperOutputSettingsViewModel : SettingsSectionViewModelBa
     private bool _filterProfanityEnabled;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TranslationUnavailableNote))]
+    [NotifyPropertyChangedFor(nameof(ShowTranslationPausedNote))]
+    [NotifyPropertyChangedFor(nameof(ShowTranslationUnavailableNote))]
     private bool _translateToEnglishEnabled;
+
+    /// <summary>
+    /// Whether the currently selected Whisper model supports translation. When
+    /// false the translate toggle is disabled, but the user's saved preference
+    /// (<see cref="TranslateToEnglishEnabled"/>) is preserved so it is restored
+    /// when a translation-capable model is selected again.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TranslationUnavailableNote))]
+    [NotifyPropertyChangedFor(nameof(ShowTranslationPausedNote))]
+    [NotifyPropertyChangedFor(nameof(ShowTranslationUnavailableNote))]
+    private bool _canTranslate = true;
+
+    /// <summary>
+    /// Explanatory text shown under the disabled translate toggle. The wording
+    /// depends on the user's saved preference: when translation is enabled it
+    /// reads as "paused / will resume" (making the preserved intent explicit and
+    /// avoiding the apparent contradiction of a greyed-but-checked toggle);
+    /// otherwise it simply states the model can't translate.
+    /// </summary>
+    public string TranslationUnavailableNote => TranslateToEnglishEnabled
+        ? "Translation is paused — the selected model can't translate. It resumes automatically when you pick a multilingual model (Medium or Large v1/v2/v3)."
+        : "The selected model doesn't support translation. Choose a multilingual model (Medium or Large v1/v2/v3) to use it.";
+
+    /// <summary>
+    /// True when translation is enabled by the user but unsupported by the current model.
+    /// Used to show the "paused / resumes" note in accent color, signalling preserved intent.
+    /// </summary>
+    public bool ShowTranslationPausedNote => !CanTranslate && TranslateToEnglishEnabled;
+
+    /// <summary>
+    /// True when translation is disabled by the user and unsupported by the current model.
+    /// Used to show the neutral "doesn't support translation" note in muted style.
+    /// </summary>
+    public bool ShowTranslationUnavailableNote => !CanTranslate && !TranslateToEnglishEnabled;
 
     public WhisperOutputSettingsViewModel(
         ISettingsService settings,
@@ -55,6 +93,20 @@ public partial class WhisperOutputSettingsViewModel : SettingsSectionViewModelBa
         var savedTranslate = await _settings.GetAsync<string>(SettingsKeys.TranslateToEnglish);
         if (bool.TryParse(savedTranslate, out var trans))
             TranslateToEnglishEnabled = trans;
+
+        var savedModel = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel);
+        var modelType = Enum.TryParse<WhisperModelType>(savedModel, out var m) ? m : WhisperModelType.Base;
+        UpdateTranslationAvailability(modelType);
+    }
+
+    /// <summary>
+    /// Recomputes <see cref="CanTranslate"/> for the given model. Called when the
+    /// user switches models in the Whisper model section. Does not alter the
+    /// user's saved translate preference.
+    /// </summary>
+    public void UpdateTranslationAvailability(WhisperModelType model)
+    {
+        CanTranslate = WhisperModelInfo.Get(model).SupportsTranslation;
     }
 
     partial void OnAutomaticPunctuationEnabledChanged(bool value)

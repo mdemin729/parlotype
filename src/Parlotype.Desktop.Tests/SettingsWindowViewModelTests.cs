@@ -152,6 +152,24 @@ public class SettingsWindowViewModelTests
         Assert.False(vm.SelectedNavItem!.IsHeader);
     }
 
+    [Fact]
+    public void SelectingNonTranslatingModel_DisablesTranslateToggle()
+    {
+        var vm = BuildViewModel();
+
+        // Base (default) supports translation.
+        Assert.True(vm.WhisperOutput.CanTranslate);
+
+        // Large v3 Turbo does not — changing the model must flow through the
+        // PropertyChanged wiring and disable the translate toggle.
+        vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.LargeV3Turbo);
+        Assert.False(vm.WhisperOutput.CanTranslate);
+
+        // Switching back to a translation-capable model re-enables it.
+        vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.Medium);
+        Assert.True(vm.WhisperOutput.CanTranslate);
+    }
+
     private static void AssertHeader(SettingsNavItem item, string label)
     {
         Assert.True(item.IsHeader, $"Expected header '{label}' but row was a section.");

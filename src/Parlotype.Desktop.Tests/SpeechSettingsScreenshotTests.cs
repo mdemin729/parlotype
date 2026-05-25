@@ -172,4 +172,91 @@ public class WhisperOutputSettingsScreenshotTests : IClassFixture<SpeechScreensh
             "User disables punctuation, profanity filter, and translation.",
             steps));
     }
+
+    [AvaloniaFact]
+    public async Task Scenario_TranslationPaused_AccentNoteVisible()
+    {
+        var settings = new MockSettingsService();
+        var vm = new WhisperOutputSettingsViewModel(settings);
+        await SettleAsync();
+
+        vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
+        vm.TranslateToEnglishEnabled = true;
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+
+        var view = new WhisperOutputSettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
+        steps.Add(new ScenarioStep(
+            "Model changed to Large v3 Turbo (no translation support). The translate toggle is disabled but checked — " +
+            "the user's preference is preserved. The blue accent note reads: \"Translation is paused…\"",
+            screenshot));
+
+        _report.AddScenario(new Scenario(
+            "Whisper Output — Translation Paused (accent note)",
+            "Large v3 Turbo selected while translation preference is on: toggle greyed+checked, accent note visible.",
+            steps));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_TranslationUnavailable_MutedNoteVisible()
+    {
+        var settings = new MockSettingsService();
+        var vm = new WhisperOutputSettingsViewModel(settings);
+        await SettleAsync();
+
+        vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
+        vm.TranslateToEnglishEnabled = false;
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+
+        var view = new WhisperOutputSettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
+        steps.Add(new ScenarioStep(
+            "Model is Large v3 Turbo and translation preference is off. The muted note reads: " +
+            "\"The selected model doesn't support translation.\"",
+            screenshot));
+
+        _report.AddScenario(new Scenario(
+            "Whisper Output — Translation Unavailable (muted note)",
+            "Large v3 Turbo selected while translation preference is off: toggle greyed+unchecked, muted note visible.",
+            steps));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_TranslationRestored_NoteDisappears()
+    {
+        var settings = new MockSettingsService();
+        var vm = new WhisperOutputSettingsViewModel(settings);
+        await SettleAsync();
+
+        vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
+        vm.TranslateToEnglishEnabled = true;
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+
+        var view1 = new WhisperOutputSettingsView();
+        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view1, vm);
+        steps.Add(new ScenarioStep(
+            "Large v3 Turbo selected — translation paused, accent note visible.",
+            screenshot1));
+
+        vm.UpdateTranslationAvailability(WhisperModelType.Medium);
+        await SettleAsync();
+
+        var view2 = new WhisperOutputSettingsView();
+        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
+        steps.Add(new ScenarioStep(
+            "Switched to Medium — translation capability restored. The accent note disappears and " +
+            "the toggle re-enables with the user's preference (on) intact.",
+            screenshot2));
+
+        _report.AddScenario(new Scenario(
+            "Whisper Output — Translation Restored",
+            "Switching from Large v3 Turbo back to Medium restores the toggle and removes the note.",
+            steps));
+    }
 }

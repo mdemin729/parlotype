@@ -10,6 +10,7 @@ public sealed partial class WhisperModelDisplayItem(WhisperModelInfo info, bool 
     public WhisperModelType Type { get; } = info.Type;
     public string DisplayName { get; } = info.DisplayName;
     public string DiskSize { get; } = info.DiskSize;
+    public bool SupportsTranslation { get; } = info.SupportsTranslation;
     public ICommand SelectCommand { get; } = selectCommand;
 
     [ObservableProperty]

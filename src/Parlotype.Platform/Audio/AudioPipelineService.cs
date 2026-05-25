@@ -395,6 +395,10 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         var translateStr = await _settings.GetAsync<string>(SettingsKeys.TranslateToEnglish, ct);
         var translate = bool.TryParse(translateStr, out var tr) && tr; // default false
 
+        // The user's translate intent only takes effect on models that support
+        // translation. English-only models and Large v3 Turbo never translate.
+        var effectiveTranslate = translate && WhisperModelInfo.Get(modelType).SupportsTranslation;
+
         var runtimeStr = await _settings.GetAsync<string>(SettingsKeys.RuntimePreference, ct);
         var runtime = Enum.TryParse<RuntimePreference>(runtimeStr, out var rp) ? rp : RuntimePreference.Auto;
 
@@ -402,7 +406,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         {
             Model = modelType,
             Language = "auto",
-            TranslateToEnglish = translate,
+            TranslateToEnglish = effectiveTranslate,
             RuntimePreference = runtime,
         };
 

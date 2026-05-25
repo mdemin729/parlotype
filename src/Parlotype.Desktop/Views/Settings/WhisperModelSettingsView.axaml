@@ -20,7 +20,7 @@
                             Margin="0,2"
                             Command="{Binding SelectCommand}"
                             CommandParameter="{Binding Type}">
-                        <Grid ColumnDefinitions="11,*,Auto,Auto">
+                        <Grid ColumnDefinitions="11,Auto,*,Auto,Auto">
                             <Border Grid.Column="0"
                                     Width="3" Height="16" CornerRadius="1.5"
                                     Background="{DynamicResource SystemAccentColor}"
@@ -31,11 +31,18 @@
                                        FontSize="14"
                                        VerticalAlignment="Center" />
                             <TextBlock Grid.Column="2"
+                                       Text="no translation"
+                                       FontSize="12"
+                                       Opacity="0.5"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"
+                                       IsVisible="{Binding !SupportsTranslation}" />
+                            <TextBlock Grid.Column="3"
                                        Text="{Binding DiskSize}"
                                        FontSize="13" Opacity="0.5"
                                        VerticalAlignment="Center"
                                        Margin="24,0,0,0" />
-                            <TextBlock Grid.Column="3"
+                            <TextBlock Grid.Column="4"
                                        Text="(not downloaded)"
                                        FontSize="12"
                                        Opacity="0.5"
