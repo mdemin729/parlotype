@@ -2,7 +2,7 @@
 title: Architecture Decisions
 type: index
 status: active
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 summary: Index of all Architecture Decision Records (ADRs) for Parlotype
 ---
 
@@ -44,6 +44,7 @@ ADR source files live in `docs/decisions/`. This index provides a quick referenc
 | 031 | [[031-github-release-strategy\|GitHub Release Strategy]] | Accepted | Tag-triggered (`v*`) `release.yml`; two self-contained `win-x64` zips per release — **Full** (`EnableCuda=true`, CUDA+Vulkan) and **Lite** (`EnableCuda=false`, Vulkan-only); version derived from tag, hyphenated tags = pre-release; no single-file/trim; windows-latest matrix build + ubuntu release job. Signing & auto-update deferred |
 | 029 | [[029-gemma4-model-download-ui\|Gemma 4 Model Download UI]] | Accepted | `Gemma4ModelInfo` is a 5-entry catalog (E2B Q8_0/BF16, E4B Q4_K_M/Q8_0/BF16) keyed by `ModelId`, with `Gemma4Variant`+`Gemma4Quant` enums + `SelectedGemma4Model` settings key (E2B has no Q4_K_M upstream). New `Gemma4ModelSettingsViewModel`/`View` (SpeechEngine category, Gemma4-restricted) with per-model Download/Delete via reused `ModelDownloadDialog` (now with a completion **Close** state + cumulative GGUF+mmproj progress) + new `Gemma4ModelDownloadDialogService`. `Gemma4ModelDownloadService` parameterised by model + `DeleteModelAsync` (streams scoped before `File.Move`). `LlamaCppSpeechRecognizer` resolves selected model via `GetById`. Chose own C# downloader over llama-server `-hf` (progress UX). No SHA/token/migration |
 | 031 | [[031-benchmark-warmup-pass\|Benchmark Warm-up Pass]] | Accepted | Every `benchmark run` now performs one throwaway `TranscribeAsync` on the first sample between `InitializeAsync` and the timed loop to prime CUDA/OS page cache/first-inference paths. New nullable `BenchmarkSummary.WarmupTimeMs` + `warmup_ms REAL` column in `SqliteResultIndex` (idempotent `PRAGMA table_info` migration). Reporters add Warm-up row; `ComparisonResult.WarmupDelta` populated only when both runs have data. GC baselines captured after warm-up; warm-up exceptions fail loud. No config/CLI flag — always on |
+| 032 | [[032-online-speech-providers-positioning\|Online Speech Providers — Brand & Positioning]] | Accepted | Single-app product with **local-by-default, cloud-by-choice** positioning. Tagline preserved. No rename, no separate SKU. 5 brand commitments (local stays default; opt-in; transparency; BYOK; tagline preserved). Replaces "privacy-first" wording across docs/vault. Implementation (provider selection, key storage, settings UI, fallback behaviour, etc.) explicitly deferred to follow-up ADRs |
 
 ## Template
 

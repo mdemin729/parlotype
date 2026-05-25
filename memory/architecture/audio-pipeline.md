@@ -23,6 +23,8 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → ISpee
 
 `DelegatingSpeechRecognizer` selects the active implementation at runtime based on `SettingsKeys.SpeechEngine` (`Whisper` / `Gemma4`) — see [[decisions/_index|ADR-025]].
 
+> **Extension point — future cloud providers.** `ISpeechRecognizer` is the integration seam for cloud / online speech providers (planned, opt-in). Adding a provider means a new `SpeechEngine` enum value, a new recognizer in Platform, and a new branch in `SpeechRecognizerFactory`. Audio leaves the device **only** when a cloud recognizer is explicitly selected. Brand framing: **local by default, cloud by choice** — see [[../knowledge/brand-positioning]] and [[decisions/_index|ADR-032]].
+
 ## Pipeline Stages
 
 ### 1. Audio Capture (NAudio / WASAPI)
