@@ -237,6 +237,55 @@ public class AudioPipelineTests
     }
 
     [Fact]
+    public async Task StartAsync_DisablesTranslation_WhenModelDoesNotSupportIt()
+    {
+        // Arrange: translate intent ON, but model is Large v3 Turbo (no translation)
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.TranslateToEnglish, true.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.LargeV3Turbo.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            NullLogger<AudioPipelineService>.Instance);
+
+        // Act
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        // Assert: effective translate is gated off despite the saved preference
+        Assert.Single(recognizer.InitCalls);
+        Assert.Equal(WhisperModelType.LargeV3Turbo, recognizer.InitCalls[0].Model);
+        Assert.False(recognizer.InitCalls[0].TranslateToEnglish);
+    }
+
+    [Fact]
+    public async Task StartAsync_KeepsTranslation_WhenModelSupportsIt()
+    {
+        // Arrange: translate intent ON with a multilingual model
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.TranslateToEnglish, true.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            NullLogger<AudioPipelineService>.Instance);
+
+        // Act
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        // Assert
+        Assert.Single(recognizer.InitCalls);
+        Assert.True(recognizer.InitCalls[0].TranslateToEnglish);
+    }
+
+    [Fact]
     public async Task StartAsync_SkipsReinitialization_WhenSettingsUnchanged()
     {
         // Arrange

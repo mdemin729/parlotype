@@ -1,5 +1,11 @@
 # Plans
 
+## Completed
+
+| Plan | Completed | Description |
+|------|-----------|-------------|
+| [2026-05-25-translation-model-capability](2026-05-25-translation-model-capability/) | 2026-05-25 | Gate Whisper translation by model capability (`SupportsTranslation`); disable toggle + model-list hint for `*En` and Large v3 Turbo, preserving user preference (ADR-033) |
+
 ## In Progress
 
 | Plan | Started | Description |

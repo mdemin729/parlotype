@@ -15,7 +15,7 @@ Pure domain layer containing all interfaces, models, enums, and records. Zero ex
 
 ## Key Paths
 - `src/Parlotype.Core/Audio/` — `IAudioCaptureService`, `IMicrophoneEnumerator`, `IVoiceActivityDetector`, `IAudioLevelProvider`, `RecordingState`
-- `src/Parlotype.Core/Speech/` — `ISpeechRecognizer`, `WhisperOptions`, `WhisperModelType`, `WhisperModelInfo`, `SpeechEngine` (Whisper/Gemma4 today; cloud / online provider values planned per [[decisions/_index|ADR-032]] — local by default, cloud opt-in), `Gemma4ModelInfo`, `IPromptTemplateRegistry`, `PromptTemplate` (with `{language}` token + `Render`), `RuntimePreference` (Auto/Cuda/Vulkan/Cpu), `RuntimeUnavailableException`, `INvidiaEnvironmentProvider`, `NvidiaEnvironmentInfo`, `IVulkanEnvironmentProvider`, `VulkanEnvironmentInfo`, `VulkanDeviceInfo`
+- `src/Parlotype.Core/Speech/` — `ISpeechRecognizer`, `WhisperOptions`, `WhisperModelType`, `WhisperModelInfo` (with `SupportsTranslation` flag — false for `*En` models + `LargeV3Turbo`, see [[decisions/_index|ADR-033]]), `SpeechEngine` (Whisper/Gemma4 today; cloud / online provider values planned per [[decisions/_index|ADR-032]] — local by default, cloud opt-in), `Gemma4ModelInfo`, `IPromptTemplateRegistry`, `PromptTemplate` (with `{language}` token + `Render`), `RuntimePreference` (Auto/Cuda/Vulkan/Cpu), `RuntimeUnavailableException`, `INvidiaEnvironmentProvider`, `NvidiaEnvironmentInfo`, `IVulkanEnvironmentProvider`, `VulkanEnvironmentInfo`, `VulkanDeviceInfo`
 - `src/Parlotype.Core/Hotkeys/` — `IGlobalHotkeyService`, `HotkeyBinding`, `HotkeyConflictDetector`
 - `src/Parlotype.Core/Settings/` — `ISettingsService`, `SettingsKeys`
 - `src/Parlotype.Core/TextInjection/` — `ITextInjectionService`, `ITargetWindowTracker`
