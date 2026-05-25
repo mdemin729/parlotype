@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: full
+            cuda: 'true'
+          - variant: lite
+            cuda: 'false'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Derive version from tag
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Restore
+        run: dotnet restore Parlotype.slnx
+
+      - name: Test (gate)
+        run: dotnet test --no-restore -p:EnableCuda=${{ matrix.cuda }}
+
+      - name: Publish
+        run: >
+          dotnet publish src/Parlotype.Desktop
+          -c Release -r win-x64 --self-contained true
+          -p:EnableCuda=${{ matrix.cuda }}
+          -p:Version=${{ env.VERSION }}
+          -o publish/${{ matrix.variant }}
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path publish/${{ matrix.variant }}/* -DestinationPath "Parlotype-${{ env.VERSION }}-win-x64-${{ matrix.variant }}.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.variant }}
+          path: Parlotype-*.zip
+          retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.zip
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
