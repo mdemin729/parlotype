@@ -17,3 +17,4 @@
 | Plan | Created | Description |
 |------|---------|-------------|
 | [2026-05-01-pipeline-settings-alignment](2026-05-01-pipeline-settings-alignment/) | 2026-05-01 | Align pipeline defaults with ADR-011 benchmark recommendations (Medium model, language=en, beam=1) |
+| [2026-05-25-language-selection](2026-05-25-language-selection/) | 2026-05-25 | Source & target language selection: user-selectable source (Auto/manual) + engine-aware translation target (Whisper=EN-only, Gemma4=any), with recent-5 MRU |
