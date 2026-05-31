@@ -166,7 +166,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         var base64 = Convert.ToBase64String(wavBytes);
 
         var activePrompt = await _prompts.GetActiveAsync(cancellationToken);
-        var promptText = activePrompt.Render();
+        var promptText = await BuildPromptTextAsync(activePrompt, cancellationToken);
 
         _logger.LogDebug(
             "Transcribing {SampleCount} samples via llama-server (prompt: {PromptName})",
@@ -212,6 +212,33 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
             .GetString() ?? string.Empty;
 
         return new TranscriptionResult { Text = text.Trim() };
+    }
+
+    /// <summary>
+    /// Renders the active prompt with the user's selected source language and, when
+    /// a translation target is selected, appends an instruction to translate the
+    /// transcript into that language. The LLM performs both transcription and
+    /// translation in a single call (no separate ASR step required).
+    /// </summary>
+    internal async Task<string> BuildPromptTextAsync(PromptTemplate activePrompt, CancellationToken cancellationToken)
+    {
+        var sourceCode = await _settings.GetAsync<string>(SettingsKeys.SelectedSourceLanguage, cancellationToken);
+        var targetCode = await _settings.GetAsync<string>(SettingsKeys.SelectedTargetLanguage, cancellationToken);
+
+        // Render {language} with the source language name. When auto-detect (or
+        // unknown), PromptTemplate falls back to its default language.
+        var sourceName = LanguageCatalog.IsAutoDetect(sourceCode) ? null : LanguageCatalog.GetEnglishName(sourceCode);
+        var promptText = activePrompt.Render(sourceName);
+
+        if (!LanguageCatalog.IsNoTranslation(targetCode))
+        {
+            var targetName = LanguageCatalog.GetEnglishName(targetCode);
+            promptText +=
+                $"\n\nThen translate the transcript into {targetName}. " +
+                $"Respond with only the {targetName} translation and no other text.";
+        }
+
+        return promptText;
     }
 
     public async Task UnloadAsync()

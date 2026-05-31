@@ -402,17 +402,21 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         var runtimeStr = await _settings.GetAsync<string>(SettingsKeys.RuntimePreference, ct);
         var runtime = Enum.TryParse<RuntimePreference>(runtimeStr, out var rp) ? rp : RuntimePreference.Auto;
 
+        // Source language: "auto" (detection) or an explicit Whisper language code.
+        var sourceLang = await _settings.GetAsync<string>(SettingsKeys.SelectedSourceLanguage, ct);
+        var language = string.IsNullOrWhiteSpace(sourceLang) ? LanguageCatalog.AutoDetectCode : sourceLang;
+
         _whisperOptions = new WhisperOptions
         {
             Model = modelType,
-            Language = "auto",
+            Language = language,
             TranslateToEnglish = effectiveTranslate,
             RuntimePreference = runtime,
         };
 
         _logger.LogInformation(
-            "Whisper options: Model={Model}, Translate={Translate}, Runtime={Runtime}",
-            _whisperOptions.Model, _whisperOptions.TranslateToEnglish, _whisperOptions.RuntimePreference);
+            "Whisper options: Model={Model}, Language={Language}, Translate={Translate}, Runtime={Runtime}",
+            _whisperOptions.Model, _whisperOptions.Language, _whisperOptions.TranslateToEnglish, _whisperOptions.RuntimePreference);
     }
 
     public async ValueTask DisposeAsync()

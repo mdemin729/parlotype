@@ -29,6 +29,9 @@
         <DataTemplate DataType="vms:WhisperOutputSettingsViewModel">
             <v:WhisperOutputSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:LanguageSelectionSettingsViewModel">
+            <v:LanguageSelectionSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:Gemma4ModelSettingsViewModel">
             <v:Gemma4ModelSettingsView />
         </DataTemplate>
