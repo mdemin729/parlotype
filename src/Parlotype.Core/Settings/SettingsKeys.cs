@@ -14,6 +14,9 @@ public static class SettingsKeys
     public const string AutomaticPunctuation = "AutomaticPunctuation";
     public const string FilterProfanity = "FilterProfanity";
     public const string TranslateToEnglish = "TranslateToEnglish";
+    public const string SelectedSourceLanguage = "SelectedSourceLanguage";
+    public const string SelectedTargetLanguage = "SelectedTargetLanguage";
+    public const string RecentLanguages = "RecentLanguages";
     public const string SpeechEngine = "SpeechEngine";
     public const string SelectedGemma4Model = "SelectedGemma4Model";
     public const string LlamaCppServerFolder = "LlamaCppServerFolder";

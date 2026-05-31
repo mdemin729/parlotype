@@ -1,9 +1,9 @@
 ---
 title: Source & target language selection (transcription + LLM translation)
-status: planned
+status: completed
 created: 2026-05-25
-started:
-completed:
+started: 2026-05-25
+completed: 2026-05-25
 ---
 
 # Source & Target Language Selection

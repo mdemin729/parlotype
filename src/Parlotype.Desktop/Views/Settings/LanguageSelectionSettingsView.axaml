@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.LanguageSelectionSettingsView"
+             x:DataType="vms:LanguageSelectionSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Language" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Pick the spoken (source) language for more accurate transcription. Recently used languages appear at the top."
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <!-- Source language -->
+        <TextBlock Text="Source language" FontSize="15" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <TextBox Text="{Binding SourceFilter, Mode=TwoWay}"
+                 PlaceholderText="Search languages…" />
+        <TextBlock Text="No languages match."
+                   Opacity="0.6" Margin="12,0,0,0"
+                   IsVisible="{Binding SourceHasNoResults}" />
+        <ItemsControl ItemsSource="{Binding SourceLanguages}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:LanguageDisplayItem">
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            Padding="12,8"
+                            Margin="0,1"
+                            Command="{Binding SelectCommand}"
+                            CommandParameter="{Binding Code}">
+                        <Grid ColumnDefinitions="11,*,Auto">
+                            <Border Grid.Column="0"
+                                    Width="3" Height="16" CornerRadius="1.5"
+                                    Background="{DynamicResource SystemAccentColor}"
+                                    HorizontalAlignment="Left"
+                                    IsVisible="{Binding IsSelected}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DisplayName}"
+                                       FontSize="14"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2"
+                                       Text="recent"
+                                       FontSize="12" Opacity="0.5"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"
+                                       IsVisible="{Binding IsRecent}" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Whisper: translation is English-only and lives in Whisper output -->
+        <TextBlock Text="To translate speech to English, use the “Translate to English” toggle under Whisper output. For translation into other languages, switch to the Gemma 4 engine."
+                   Opacity="0.6" TextWrapping="Wrap" Margin="0,8,0,0"
+                   IsVisible="{Binding ShowWhisperTranslationHint}" />
+
+        <!-- Target language (arbitrary-translation engines only) -->
+        <StackPanel Spacing="12" IsVisible="{Binding ShowTargetPicker}">
+            <TextBlock Text="Translate to" FontSize="15" FontWeight="SemiBold" Margin="0,8,0,0" />
+            <TextBlock Text="Choose a target language to translate the transcription on the fly, or keep the default to output the source language unchanged."
+                       Opacity="0.7" TextWrapping="Wrap" />
+            <TextBox Text="{Binding TargetFilter, Mode=TwoWay}"
+                     PlaceholderText="Search languages…" />
+            <TextBlock Text="No languages match."
+                       Opacity="0.6" Margin="12,0,0,0"
+                       IsVisible="{Binding TargetHasNoResults}" />
+            <ItemsControl ItemsSource="{Binding TargetLanguages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LanguageDisplayItem">
+                        <Button HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Background="Transparent"
+                                Padding="12,8"
+                                Margin="0,1"
+                                Command="{Binding SelectCommand}"
+                                CommandParameter="{Binding Code}">
+                            <Grid ColumnDefinitions="11,*,Auto">
+                                <Border Grid.Column="0"
+                                        Width="3" Height="16" CornerRadius="1.5"
+                                        Background="{DynamicResource SystemAccentColor}"
+                                        HorizontalAlignment="Left"
+                                        IsVisible="{Binding IsSelected}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding DisplayName}"
+                                           FontSize="14"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2"
+                                           Text="recent"
+                                           FontSize="12" Opacity="0.5"
+                                           VerticalAlignment="Center"
+                                           Margin="12,0,0,0"
+                                           IsVisible="{Binding IsRecent}" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

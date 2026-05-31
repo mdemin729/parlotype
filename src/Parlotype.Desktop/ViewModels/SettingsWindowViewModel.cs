@@ -28,6 +28,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public WhisperModelSettingsViewModel WhisperModel { get; }
     public RuntimeSettingsViewModel Runtime { get; }
     public WhisperOutputSettingsViewModel WhisperOutput { get; }
+    public LanguageSelectionSettingsViewModel Language { get; }
     public Gemma4ModelSettingsViewModel Gemma4Model { get; }
     public PromptSettingsViewModel Prompts { get; }
     public LlamaCppSettingsViewModel LlamaCpp { get; }
@@ -41,6 +42,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         WhisperModelSettingsViewModel whisperModel,
         RuntimeSettingsViewModel runtime,
         WhisperOutputSettingsViewModel whisperOutput,
+        LanguageSelectionSettingsViewModel language,
         Gemma4ModelSettingsViewModel gemma4Model,
         PromptSettingsViewModel prompts,
         LlamaCppSettingsViewModel llamaCpp,
@@ -53,6 +55,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         WhisperModel = whisperModel;
         Runtime = runtime;
         WhisperOutput = whisperOutput;
+        Language = language;
         Gemma4Model = gemma4Model;
         Prompts = prompts;
         LlamaCpp = llamaCpp;
@@ -66,6 +69,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             microphone,
             silenceTimeout,
             speechEngine,
+            language,
             whisperModel,
             runtime,
             whisperOutput,
@@ -79,6 +83,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         speechEngine.PropertyChanged += OnSpeechEnginePropertyChanged;
         whisperModel.PropertyChanged += OnWhisperModelPropertyChanged;
         whisperOutput.UpdateTranslationAvailability(whisperModel.SelectedModel);
+        language.UpdateForEngine(speechEngine.SelectedEngine);
 
         RebuildNavItems();
         SelectedNavItem = NavItems.FirstOrDefault(n => !n.IsHeader);
@@ -87,7 +92,10 @@ public partial class SettingsWindowViewModel : ViewModelBase
     private void OnSpeechEnginePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(SpeechEngineSettingsViewModel.SelectedEngine))
+        {
+            Language.UpdateForEngine(SpeechEngine.SelectedEngine);
             RebuildNavItems();
+        }
     }
 
     private void OnWhisperModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
