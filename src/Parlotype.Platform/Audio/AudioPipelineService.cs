@@ -371,6 +371,11 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
     private async Task CacheSettingsAsync(CancellationToken ct)
     {
+        // One-shot migration from the pre-redesign settings (legacy TranslateToEnglish
+        // flag, shared RecentLanguages MRU) to TranslationEnabled + per-role MRUs.
+        // Idempotent — returns early once migration has run.
+        await LanguageSettingsMigrator.MigrateAsync(_settings, ct);
+
         var savedWaitTime = await _settings.GetAsync<string>(SettingsKeys.WaitTime, ct);
         var waitTime = Enum.TryParse<WaitTimeOption>(savedWaitTime, out var wt) ? wt : WaitTimeOption.Medium;
         _silenceThresholdSamples = (int)(waitTime.GetSeconds() * SampleRate);
@@ -392,12 +397,17 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         var savedModel = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel, ct);
         var modelType = Enum.TryParse<WhisperModelType>(savedModel, out var mt) ? mt : WhisperModelType.Base;
 
-        var translateStr = await _settings.GetAsync<string>(SettingsKeys.TranslateToEnglish, ct);
-        var translate = bool.TryParse(translateStr, out var tr) && tr; // default false
+        var translationEnabledStr = await _settings.GetAsync<string>(SettingsKeys.TranslationEnabled, ct);
+        var translationEnabled = bool.TryParse(translationEnabledStr, out var te) && te;
 
-        // The user's translate intent only takes effect on models that support
-        // translation. English-only models and Large v3 Turbo never translate.
-        var effectiveTranslate = translate && WhisperModelInfo.Get(modelType).SupportsTranslation;
+        var targetCode = await _settings.GetAsync<string>(SettingsKeys.SelectedTargetLanguage, ct);
+
+        // Whisper can only translate *to English*. Other targets are valid intents but
+        // are ignored at the Whisper layer (the Gemma 4 engine honours them via the
+        // prompt). Model capability (ADR-033) gates the actual flag regardless.
+        var translateToEnglish = translationEnabled
+            && string.Equals(targetCode, LanguageCatalog.EnglishCode, StringComparison.OrdinalIgnoreCase);
+        var effectiveTranslate = translateToEnglish && WhisperModelInfo.Get(modelType).SupportsTranslation;
 
         var runtimeStr = await _settings.GetAsync<string>(SettingsKeys.RuntimePreference, ct);
         var runtime = Enum.TryParse<RuntimePreference>(runtimeStr, out var rp) ? rp : RuntimePreference.Auto;

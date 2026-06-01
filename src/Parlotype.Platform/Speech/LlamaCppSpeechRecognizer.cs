@@ -222,15 +222,22 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     /// </summary>
     internal async Task<string> BuildPromptTextAsync(PromptTemplate activePrompt, CancellationToken cancellationToken)
     {
+        // Migration is run from AudioPipelineService.CacheSettingsAsync (every recognizer
+        // init) and LanguageSelectionSettingsViewModel (settings page load); by the time
+        // we get here both have run at least once, so no per-transcription migration
+        // call is needed on this hot path.
         var sourceCode = await _settings.GetAsync<string>(SettingsKeys.SelectedSourceLanguage, cancellationToken);
         var targetCode = await _settings.GetAsync<string>(SettingsKeys.SelectedTargetLanguage, cancellationToken);
+
+        var translationEnabledStr = await _settings.GetAsync<string>(SettingsKeys.TranslationEnabled, cancellationToken);
+        var translationEnabled = bool.TryParse(translationEnabledStr, out var te) && te;
 
         // Render {language} with the source language name. When auto-detect (or
         // unknown), PromptTemplate falls back to its default language.
         var sourceName = LanguageCatalog.IsAutoDetect(sourceCode) ? null : LanguageCatalog.GetEnglishName(sourceCode);
         var promptText = activePrompt.Render(sourceName);
 
-        if (!LanguageCatalog.IsNoTranslation(targetCode))
+        if (translationEnabled && !LanguageCatalog.IsNoTranslation(targetCode))
         {
             var targetName = LanguageCatalog.GetEnglishName(targetCode);
             promptText +=

@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [core, contracts, domain]
 criticality: high
-last_updated: 2026-05-22
+last_updated: 2026-05-31
 summary: Domain interfaces and models — zero external dependencies, all contracts live here
 ---
 
@@ -15,8 +15,8 @@ Pure domain layer containing all interfaces, models, enums, and records. Zero ex
 
 ## Key Paths
 - `src/Parlotype.Core/Audio/` — `IAudioCaptureService`, `IMicrophoneEnumerator`, `IVoiceActivityDetector`, `IAudioLevelProvider`, `RecordingState`
-- `src/Parlotype.Core/Speech/` — `ISpeechRecognizer`, `WhisperOptions`, `WhisperModelType`, `WhisperModelInfo` (with `SupportsTranslation` flag — false for `*En` models + `LargeV3Turbo`, see [[decisions/_index|ADR-033]]), `SpeechEngine` (Whisper/Gemma4 today; cloud / online provider values planned per [[decisions/_index|ADR-032]] — local by default, cloud opt-in), `Gemma4ModelInfo`, `IPromptTemplateRegistry`, `PromptTemplate` (with `{language}` token + `Render`), `LanguageInfo` + `LanguageCatalog` (curated `WhisperLanguages` ~99 + `CultureInfo`-derived `AllLanguages` fallback; `AutoDetectCode`/`NoTranslationCode` sentinels), `LanguageCapabilities` + `SpeechEngineCapabilities.For` (per-engine source set + arbitrary-translation flag), `RecentLanguages` (pure MRU helper, cap 5) — all [[decisions/_index|ADR-034]], `RuntimePreference` (Auto/Cuda/Vulkan/Cpu), `RuntimeUnavailableException`, `INvidiaEnvironmentProvider`, `NvidiaEnvironmentInfo`, `IVulkanEnvironmentProvider`, `VulkanEnvironmentInfo`, `VulkanDeviceInfo`
-- `src/Parlotype.Core/Settings/` keys for language: `SelectedSourceLanguage`, `SelectedTargetLanguage`, `RecentLanguages` (ADR-034)
+- `src/Parlotype.Core/Speech/` — `ISpeechRecognizer`, `WhisperOptions`, `WhisperModelType`, `WhisperModelInfo` (with `SupportsTranslation` flag — false for `*En` models + `LargeV3Turbo`, see [[decisions/_index|ADR-033]]), `SpeechEngine` (Whisper/Gemma4 today; cloud / online provider values planned per [[decisions/_index|ADR-032]] — local by default, cloud opt-in), `Gemma4ModelInfo`, `IPromptTemplateRegistry`, `PromptTemplate` (with `{language}` token + `Render`), `LanguageInfo` + `LanguageCatalog` (curated `WhisperLanguages` ~99 + `CultureInfo`-derived `AllLanguages` fallback; `AutoDetectCode`/`NoTranslationCode` sentinels), `LanguageCapabilities` + `SpeechEngineCapabilities.For` (per-engine source set + `FixedTranslationTargets` — Whisper publishes `[English]` so the unified UI renders it uniformly, ADR-035), `RecentLanguages` (pure MRU helper, cap 5, role-agnostic — caller picks `RecentSourceLanguages` or `RecentTargetLanguages` key), `LanguageSettingsMigrator` (idempotent one-shot migration from legacy `TranslateToEnglish` and shared `RecentLanguages` to `TranslationEnabled` + per-role MRUs, ADR-035) — all [[decisions/_index|ADR-034]] / [[decisions/_index|ADR-035]], `RuntimePreference` (Auto/Cuda/Vulkan/Cpu), `RuntimeUnavailableException`, `INvidiaEnvironmentProvider`, `NvidiaEnvironmentInfo`, `IVulkanEnvironmentProvider`, `VulkanEnvironmentInfo`, `VulkanDeviceInfo`
+- `src/Parlotype.Core/Settings/` keys for language: `SelectedSourceLanguage`, `SelectedTargetLanguage`, `TranslationEnabled` (master toggle, ADR-035), per-role MRUs `RecentSourceLanguages` / `RecentTargetLanguages` (ADR-035). Legacy `TranslateToEnglish` and shared `RecentLanguages` keys retained for one-shot migration only
 - `src/Parlotype.Core/Hotkeys/` — `IGlobalHotkeyService`, `HotkeyBinding`, `HotkeyConflictDetector`
 - `src/Parlotype.Core/Settings/` — `ISettingsService`, `SettingsKeys`
 - `src/Parlotype.Core/TextInjection/` — `ITextInjectionService`, `ITargetWindowTracker`
@@ -37,3 +37,5 @@ None (by design).
 - [[decisions/_index|ADR-022]] Vulkan GPU acceleration (`IVulkanEnvironmentProvider`, `RuntimeUnavailableException`, extended `RuntimePreference`)
 - [[decisions/_index|ADR-023]] Audio-level provider & waveform visualisation (`IAudioLevelProvider`, `RecordingState`)
 - [[decisions/_index|ADR-030]] Configurable Gemma 4 prompts (`IPromptTemplateRegistry`, `PromptTemplate`, `SettingsKeys.ActivePromptId`)
+- [[decisions/_index|ADR-034]] Source & target language selection (`LanguageCatalog`, `LanguageCapabilities`, `RecentLanguages`)
+- [[decisions/_index|ADR-035]] Language settings UX redesign (`LanguageSettingsMigrator`, `TranslationEnabled`, per-role MRU keys, Whisper `FixedTranslationTargets` populated)

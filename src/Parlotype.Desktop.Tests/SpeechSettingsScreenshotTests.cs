@@ -1,4 +1,5 @@
 using Avalonia.Headless.XUnit;
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels.Settings;
@@ -122,7 +123,7 @@ public class WhisperOutputSettingsScreenshotTests : IClassFixture<SpeechScreensh
     }
 
     [AvaloniaFact]
-    public async Task Scenario_AllTogglesEnabled()
+    public async Task Scenario_PunctuationAndProfanityOn()
     {
         var settings = new MockSettingsService();
         var vm = new WhisperOutputSettingsViewModel(settings);
@@ -130,7 +131,6 @@ public class WhisperOutputSettingsScreenshotTests : IClassFixture<SpeechScreensh
 
         vm.AutomaticPunctuationEnabled = true;
         vm.FilterProfanityEnabled = true;
-        vm.TranslateToEnglishEnabled = true;
         await SettleAsync();
 
         var steps = new List<ScenarioStep>();
@@ -138,17 +138,18 @@ public class WhisperOutputSettingsScreenshotTests : IClassFixture<SpeechScreensh
         var view = new WhisperOutputSettingsView();
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
-            "All Whisper output options enabled: punctuation on, profanity filter on, translation on.",
+            "Whisper output options enabled: punctuation on, profanity filter on. " +
+            "(Translation lives on the Language settings page from now on.)",
             screenshot));
 
         _report.AddScenario(new Scenario(
-            "Whisper Output — All Toggles Enabled",
-            "User enables punctuation, profanity filter, and translation.",
+            "Whisper Output — Toggles Enabled",
+            "User enables punctuation and profanity filter.",
             steps));
     }
 
     [AvaloniaFact]
-    public async Task Scenario_AllTogglesDisabled()
+    public async Task Scenario_PunctuationAndProfanityOff()
     {
         var settings = new MockSettingsService();
         var vm = new WhisperOutputSettingsViewModel(settings);
@@ -156,7 +157,6 @@ public class WhisperOutputSettingsScreenshotTests : IClassFixture<SpeechScreensh
 
         vm.AutomaticPunctuationEnabled = false;
         vm.FilterProfanityEnabled = false;
-        vm.TranslateToEnglishEnabled = false;
         await SettleAsync();
 
         var steps = new List<ScenarioStep>();
@@ -164,99 +164,153 @@ public class WhisperOutputSettingsScreenshotTests : IClassFixture<SpeechScreensh
         var view = new WhisperOutputSettingsView();
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
-            "All Whisper output options disabled: punctuation stripped, profanity filter off, translation off.",
+            "Whisper output options disabled: punctuation stripped, profanity filter off.",
             screenshot));
 
         _report.AddScenario(new Scenario(
-            "Whisper Output — All Toggles Disabled",
-            "User disables punctuation, profanity filter, and translation.",
+            "Whisper Output — Toggles Disabled",
+            "User disables punctuation and profanity filter.",
             steps));
+    }
+}
+
+public class LanguageSettingsScreenshotTests : IClassFixture<SpeechScreenshotReportFixture>
+{
+    private readonly SpeechScreenshotReportFixture _report;
+
+    public LanguageSettingsScreenshotTests(SpeechScreenshotReportFixture report)
+    {
+        _report = report;
+    }
+
+    private static async Task SettleAsync()
+    {
+        await Task.Delay(100);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
     }
 
     [AvaloniaFact]
-    public async Task Scenario_TranslationPaused_AccentNoteVisible()
+    public async Task Scenario_TranslationDisabled_TargetGreyed()
     {
         var settings = new MockSettingsService();
-        var vm = new WhisperOutputSettingsViewModel(settings);
-        await SettleAsync();
-
-        vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
-        vm.TranslateToEnglishEnabled = true;
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Whisper.ToString(),
+            TestContext.Current.CancellationToken);
+        var vm = new LanguageSelectionSettingsViewModel(settings);
         await SettleAsync();
 
         var steps = new List<ScenarioStep>();
-
-        var view = new WhisperOutputSettingsView();
+        var view = new LanguageSelectionSettingsView();
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
-            "Model changed to Large v3 Turbo (no translation support). The translate toggle is disabled but checked — " +
-            "the user's preference is preserved. The blue accent note reads: \"Translation is paused…\"",
+            "Default state: translation off, arrow dimmed, target button disabled.",
             screenshot));
 
         _report.AddScenario(new Scenario(
-            "Whisper Output — Translation Paused (accent note)",
-            "Large v3 Turbo selected while translation preference is on: toggle greyed+checked, accent note visible.",
+            "Language — Translation Disabled",
+            "Fresh install: source = Auto-detect, target button greyed, arrow off.",
             steps));
     }
 
     [AvaloniaFact]
-    public async Task Scenario_TranslationUnavailable_MutedNoteVisible()
+    public async Task Scenario_TranslationEnabled_Whisper_TargetIsEnglish()
     {
         var settings = new MockSettingsService();
-        var vm = new WhisperOutputSettingsViewModel(settings);
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Whisper.ToString(),
+            TestContext.Current.CancellationToken);
+        var vm = new LanguageSelectionSettingsViewModel(settings);
         await SettleAsync();
 
-        vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
-        vm.TranslateToEnglishEnabled = false;
+        vm.ToggleTranslationCommand.Execute(null);
         await SettleAsync();
 
         var steps = new List<ScenarioStep>();
-
-        var view = new WhisperOutputSettingsView();
+        var view = new LanguageSelectionSettingsView();
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
-            "Model is Large v3 Turbo and translation preference is off. The muted note reads: " +
-            "\"The selected model doesn't support translation.\"",
+            "User toggles translation on. Arrow lights up; target button becomes \"English\" (Whisper's only target).",
             screenshot));
 
         _report.AddScenario(new Scenario(
-            "Whisper Output — Translation Unavailable (muted note)",
-            "Large v3 Turbo selected while translation preference is off: toggle greyed+unchecked, muted note visible.",
+            "Language — Whisper Translation On",
+            "Whisper engine: translation enabled, target = English.",
             steps));
     }
 
     [AvaloniaFact]
-    public async Task Scenario_TranslationRestored_NoteDisappears()
+    public async Task Scenario_TranslationEnabled_Gemma4_ArbitraryTarget()
     {
         var settings = new MockSettingsService();
-        var vm = new WhisperOutputSettingsViewModel(settings);
-        await SettleAsync();
-
-        vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
-        vm.TranslateToEnglishEnabled = true;
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Gemma4.ToString(),
+            TestContext.Current.CancellationToken);
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, "ru",
+            TestContext.Current.CancellationToken);
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, true.ToString(),
+            TestContext.Current.CancellationToken);
+        var vm = new LanguageSelectionSettingsViewModel(settings);
         await SettleAsync();
 
         var steps = new List<ScenarioStep>();
-
-        var view1 = new WhisperOutputSettingsView();
-        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view1, vm);
+        var view = new LanguageSelectionSettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
-            "Large v3 Turbo selected — translation paused, accent note visible.",
-            screenshot1));
-
-        vm.UpdateTranslationAvailability(WhisperModelType.Medium);
-        await SettleAsync();
-
-        var view2 = new WhisperOutputSettingsView();
-        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
-        steps.Add(new ScenarioStep(
-            "Switched to Medium — translation capability restored. The accent note disappears and " +
-            "the toggle re-enables with the user's preference (on) intact.",
-            screenshot2));
+            "Gemma 4 engine with translation on. Target is an arbitrary language (Russian) from the full catalog.",
+            screenshot));
 
         _report.AddScenario(new Scenario(
-            "Whisper Output — Translation Restored",
-            "Switching from Large v3 Turbo back to Medium restores the toggle and removes the note.",
+            "Language — Gemma 4 Translation On",
+            "Gemma 4 engine: translation enabled, target = Russian.",
+            steps));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_SourcePickerOpen_ShowsList()
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Whisper.ToString(),
+            TestContext.Current.CancellationToken);
+        var vm = new LanguageSelectionSettingsViewModel(settings);
+        await SettleAsync();
+
+        vm.OpenSourcePickerCommand.Execute(null);
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+        var view = new LanguageSelectionSettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
+        steps.Add(new ScenarioStep(
+            "User clicks the source language button. The picker expands inline; the source button gets the green focus border.",
+            screenshot));
+
+        _report.AddScenario(new Scenario(
+            "Language — Source Picker Open",
+            "Clicking the source button reveals the picker (search + scrollable list).",
+            steps));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_TranslationPaused_OnNonTranslatingWhisperModel()
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Whisper.ToString(),
+            TestContext.Current.CancellationToken);
+        var vm = new LanguageSelectionSettingsViewModel(settings);
+        await SettleAsync();
+
+        vm.ToggleTranslationCommand.Execute(null);
+        vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+        var view = new LanguageSelectionSettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
+        steps.Add(new ScenarioStep(
+            "Translation is on but the selected Whisper model (Large v3 Turbo) can't translate. " +
+            "Buttons stay enabled (preference preserved); the accent note explains why nothing will be translated.",
+            screenshot));
+
+        _report.AddScenario(new Scenario(
+            "Language — Translation Paused (accent note)",
+            "Large v3 Turbo + translation on: accent note visible.",
             steps));
     }
 }

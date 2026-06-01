@@ -156,21 +156,24 @@ public class SettingsWindowViewModelTests
     }
 
     [Fact]
-    public void SelectingNonTranslatingModel_DisablesTranslateToggle()
+    public void SelectingNonTranslatingModel_FlipsPausedNoteOnLanguagePage()
     {
         var vm = BuildViewModel();
 
-        // Base (default) supports translation.
-        Assert.True(vm.WhisperOutput.CanTranslate);
+        // Translation has to be on for the paused note to be reachable.
+        vm.Language.ToggleTranslationCommand.Execute(null);
 
-        // Large v3 Turbo does not — changing the model must flow through the
-        // PropertyChanged wiring and disable the translate toggle.
+        // Base (default) supports translation — note stays hidden.
+        Assert.False(vm.Language.ShowTranslationPausedNote);
+
+        // Large v3 Turbo does not — the model change must propagate through the
+        // SettingsWindowViewModel wiring and surface the paused note.
         vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.LargeV3Turbo);
-        Assert.False(vm.WhisperOutput.CanTranslate);
+        Assert.True(vm.Language.ShowTranslationPausedNote);
 
-        // Switching back to a translation-capable model re-enables it.
+        // Switching back to a translation-capable model hides the note again.
         vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.Medium);
-        Assert.True(vm.WhisperOutput.CanTranslate);
+        Assert.False(vm.Language.ShowTranslationPausedNote);
     }
 
     private static void AssertHeader(SettingsNavItem item, string label)

@@ -3,7 +3,7 @@ title: Key Subsystems
 type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging]
-last_updated: 2026-05-06
+last_updated: 2026-05-31
 summary: Text injection, global hotkeys, settings, logging, and model management subsystems
 ---
 
@@ -36,6 +36,18 @@ Two implementations of `ITextInjectionService`:
 - `ISettingsService` (Core) → `JsonSettingsService` (Platform)
 - Persists to `%LOCALAPPDATA%/parlotype/settings.json`
 - Thread-safe via `SemaphoreSlim`
+
+## Language & Translation
+
+Single source of truth for "what language(s) the user wants" — see [[decisions/_index|ADR-034]] (initial data model) and [[decisions/_index|ADR-035]] (UX redesign).
+
+- **Catalog** (Core): `LanguageCatalog` exposes `WhisperLanguages` (curated ~99-language set) and `AllLanguages` (CultureInfo-derived fallback). Sentinels `AutoDetectCode = "auto"` / `NoTranslationCode = "none"`.
+- **Capabilities** (Core): `LanguageCapabilities` per engine via `SpeechEngineCapabilities.For`. Whisper publishes `FixedTranslationTargets = [English]` (ADR-035) so the unified picker renders it like any other target; Gemma 4 sets `SupportsArbitraryTranslation = true` for the full catalog.
+- **Settings keys** (Core): `SelectedSourceLanguage`, `SelectedTargetLanguage`, `TranslationEnabled` (master toggle), per-role MRU `RecentSourceLanguages` / `RecentTargetLanguages`. Legacy `TranslateToEnglish` and shared `RecentLanguages` are migrated once via `LanguageSettingsMigrator` and then ignored.
+- **MRU helper** (Core): `RecentLanguages.Add(existing, code, max = 5)` — pure push-to-front / dedupe / cap. Caller owns the storage key.
+- **Migration** (Core): `LanguageSettingsMigrator.MigrateAsync(settings)` is idempotent and invoked from `AudioPipelineService.CacheSettingsAsync`, `LlamaCppSpeechRecognizer.BuildPromptTextAsync`, and `LanguageSelectionSettingsViewModel.InitializeAsync` so any read of the new keys triggers migration on first run.
+- **Pipeline wiring** (Platform): `AudioPipelineService` derives `WhisperOptions.TranslateToEnglish = TranslationEnabled && target == "en" && model.SupportsTranslation` (the ADR-033 capability gate still applies). `LlamaCppSpeechRecognizer` gates its in-prompt translation instruction on `TranslationEnabled`.
+- **UI** (Desktop): `LanguageSelectionSettingsViewModel`/`View` owns the section; arrow between source & target buttons is `ToggleTranslationCommand`; two `LanguagePickerViewModel`/`View` instances render the inline pickers via callback-bound `getSupported`/`getRecents`/`getSelectedCode`/`onSelect`/`getLeadingSentinel`. "Translation paused" hint appears when the user has translation on but the active Whisper model can't translate (ADR-033 + ADR-035).
 
 ## Logging
 

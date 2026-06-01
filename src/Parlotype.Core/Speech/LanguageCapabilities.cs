@@ -35,17 +35,22 @@ public sealed record LanguageCapabilities(
 /// <summary>Resolves <see cref="LanguageCapabilities"/> for each speech engine.</summary>
 public static class SpeechEngineCapabilities
 {
+    private static readonly IReadOnlyList<LanguageInfo> WhisperEnglishOnlyTargets =
+        [LanguageCatalog.TryGet(LanguageCatalog.EnglishCode)!];
+
+
     /// <summary>Returns the language capabilities for the given engine.</summary>
     public static LanguageCapabilities For(SpeechEngine engine) => engine switch
     {
         // Whisper: detects + transcribes its fixed ~99-language set. Translation is
-        // English-only and handled by the existing "Translate to English" toggle, so
-        // no arbitrary target picker is offered here.
+        // English-only (Whisper's translate task hard-codes the target). The target
+        // picker offers English as the sole option so the unified UI on the Language
+        // page can render it like any other selectable target.
         SpeechEngine.Whisper => new LanguageCapabilities(
             SupportsAutoDetect: true,
             SupportedSourceLanguages: LanguageCatalog.WhisperLanguages,
             SupportsArbitraryTranslation: false,
-            FixedTranslationTargets: []),
+            FixedTranslationTargets: WhisperEnglishOnlyTargets),
 
         // Gemma 4 (LLM): detects + transcribes, and can translate into any language
         // via the prompt, so the full target list is offered.

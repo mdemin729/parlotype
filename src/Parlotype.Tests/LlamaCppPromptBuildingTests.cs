@@ -50,11 +50,12 @@ public class LlamaCppPromptBuildingTests
     }
 
     [Fact]
-    public async Task TargetLanguage_AppendsTranslationInstruction()
+    public async Task TargetLanguage_AppendsTranslationInstruction_WhenTranslationEnabled()
     {
         var settings = new FakeSettings();
         settings.Values[SettingsKeys.SelectedSourceLanguage] = "ru";
         settings.Values[SettingsKeys.SelectedTargetLanguage] = "fr";
+        settings.Values[SettingsKeys.TranslationEnabled] = true.ToString();
 
         var vm = CreateRecognizer(settings);
         var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
@@ -64,10 +65,28 @@ public class LlamaCppPromptBuildingTests
     }
 
     [Fact]
+    public async Task TargetLanguage_SkipsTranslation_WhenTranslationDisabled()
+    {
+        // TranslationEnabled is the master gate — even with an explicit non-"none"
+        // target, the prompt must not append the translation instruction when the
+        // user has toggled translation off.
+        var settings = new FakeSettings();
+        settings.Values[SettingsKeys.SelectedSourceLanguage] = "ru";
+        settings.Values[SettingsKeys.SelectedTargetLanguage] = "fr";
+        settings.Values[SettingsKeys.TranslationEnabled] = false.ToString();
+
+        var vm = CreateRecognizer(settings);
+        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+
+        Assert.DoesNotContain("translate", text, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task NoneTarget_DoesNotAppendTranslation()
     {
         var settings = new FakeSettings();
         settings.Values[SettingsKeys.SelectedTargetLanguage] = LanguageCatalog.NoTranslationCode;
+        settings.Values[SettingsKeys.TranslationEnabled] = true.ToString();
 
         var vm = CreateRecognizer(settings);
         var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
