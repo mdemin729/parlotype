@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             x:Class="Parlotype.Desktop.Views.Settings.LanguagePickerView"
+             x:DataType="vm:LanguagePickerViewModel"
+             x:CompileBindings="True"
+             IsVisible="{Binding IsOpen}">
+    <StackPanel Spacing="8">
+        <TextBlock Text="{Binding Header}" FontSize="14" Opacity="0.85" />
+
+        <TextBox Text="{Binding Filter, Mode=TwoWay}"
+                 PlaceholderText="Search languages…" />
+
+        <TextBlock Text="No languages match."
+                   Opacity="0.6" Margin="12,0,0,0"
+                   IsVisible="{Binding HasNoResults}" />
+
+        <ItemsControl ItemsSource="{Binding Items}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:LanguageDisplayItem">
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            Padding="12,8"
+                            Margin="0,1"
+                            Command="{Binding SelectCommand}"
+                            CommandParameter="{Binding Code}">
+                        <Grid ColumnDefinitions="11,*,Auto">
+                            <Border Grid.Column="0"
+                                    Width="3" Height="16" CornerRadius="1.5"
+                                    Background="{DynamicResource SystemAccentColor}"
+                                    HorizontalAlignment="Left"
+                                    IsVisible="{Binding IsSelected}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DisplayName}"
+                                       FontSize="14"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2"
+                                       Text="Recent"
+                                       FontSize="12" Opacity="0.5"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0"
+                                       IsVisible="{Binding IsRecent}" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

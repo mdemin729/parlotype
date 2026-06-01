@@ -226,8 +226,9 @@ public class AudioPipelineTests
         Assert.Single(recognizer.InitCalls);
         Assert.False(recognizer.InitCalls[0].TranslateToEnglish);
 
-        // Act 2: Change translate setting, then start again
-        await settings.SetAsync(SettingsKeys.TranslateToEnglish, true.ToString());
+        // Act 2: Enable translation + target English, then start again
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, true.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, "en");
         await pipeline.StartAsync(PipelineMode.Batch);
         await pipeline.StopAsync();
 
@@ -244,7 +245,8 @@ public class AudioPipelineTests
         await using var vad = new FakeVadService();
         await using var recognizer = new SpySpeechRecognizer();
         var settings = new FakeSettingsService();
-        await settings.SetAsync(SettingsKeys.TranslateToEnglish, true.ToString());
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, true.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, "en");
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.LargeV3Turbo.ToString());
 
         await using var pipeline = new AudioPipelineService(
@@ -269,7 +271,8 @@ public class AudioPipelineTests
         await using var vad = new FakeVadService();
         await using var recognizer = new SpySpeechRecognizer();
         var settings = new FakeSettingsService();
-        await settings.SetAsync(SettingsKeys.TranslateToEnglish, true.ToString());
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, true.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, "en");
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.Medium.ToString());
 
         await using var pipeline = new AudioPipelineService(
@@ -283,6 +286,83 @@ public class AudioPipelineTests
         // Assert
         Assert.Single(recognizer.InitCalls);
         Assert.True(recognizer.InitCalls[0].TranslateToEnglish);
+    }
+
+    [Fact]
+    public async Task StartAsync_SkipsWhisperTranslation_WhenTargetIsNotEnglish()
+    {
+        // Whisper can only translate *to English*. A non-English target is a valid
+        // user intent (honoured by Gemma 4 via the prompt) but must not flip
+        // WhisperOptions.TranslateToEnglish — that would produce English output
+        // instead of, say, French.
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, true.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, "fr");
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Single(recognizer.InitCalls);
+        Assert.False(recognizer.InitCalls[0].TranslateToEnglish);
+    }
+
+    [Fact]
+    public async Task StartAsync_SkipsTranslation_WhenTranslationDisabled()
+    {
+        // Even with target=en, TranslationEnabled=false must suppress translation.
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, false.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, "en");
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Single(recognizer.InitCalls);
+        Assert.False(recognizer.InitCalls[0].TranslateToEnglish);
+    }
+
+    [Fact]
+    public async Task StartAsync_MigratesLegacyTranslateToEnglish()
+    {
+        // Existing installations only have the legacy TranslateToEnglish flag set.
+        // The pipeline must migrate that to TranslationEnabled + target=en so the
+        // intent survives the schema change.
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.TranslateToEnglish, true.ToString());
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Single(recognizer.InitCalls);
+        Assert.True(recognizer.InitCalls[0].TranslateToEnglish);
+
+        // The new keys are now written.
+        Assert.Equal(true.ToString(), await settings.GetAsync<string>(SettingsKeys.TranslationEnabled));
+        Assert.Equal("en", await settings.GetAsync<string>(SettingsKeys.SelectedTargetLanguage));
     }
 
     [Fact]

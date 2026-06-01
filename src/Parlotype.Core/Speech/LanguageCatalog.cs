@@ -26,6 +26,12 @@ public static class LanguageCatalog
     /// <summary>Sentinel code meaning "do not translate" (output the source language).</summary>
     public const string NoTranslationCode = "none";
 
+    /// <summary>
+    /// ISO 639-1 code for English. Whisper's only translation target (ADR-021)
+    /// and the default target when translation is first enabled.
+    /// </summary>
+    public const string EnglishCode = "en";
+
     // Curated Whisper language set (ISO 639-1 where available, plus Whisper-specific
     // codes such as "yue", "jw", "haw"). English names match the Whisper tokenizer.
     private static readonly (string Code, string Name)[] WhisperRaw =
@@ -93,6 +99,18 @@ public static class LanguageCatalog
     /// </summary>
     public static string GetEnglishName(string? code) =>
         TryGet(code)?.EnglishName ?? code ?? string.Empty;
+
+    /// <summary>
+    /// Returns a human-readable label: <c>"English"</c> when English and native
+    /// names coincide, otherwise <c>"English — Native"</c>. Falls back to the
+    /// code itself when it is unknown to the catalog.
+    /// </summary>
+    public static string GetDisplayLabel(string? code) =>
+        TryGet(code) is { } info
+            ? string.Equals(info.EnglishName, info.NativeName, StringComparison.OrdinalIgnoreCase)
+                ? info.EnglishName
+                : $"{info.EnglishName} — {info.NativeName}"
+            : code ?? string.Empty;
 
     /// <summary>True when <paramref name="code"/> is the auto-detect sentinel.</summary>
     public static bool IsAutoDetect(string? code) =>

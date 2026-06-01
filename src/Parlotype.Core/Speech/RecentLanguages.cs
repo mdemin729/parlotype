@@ -3,7 +3,8 @@ namespace Parlotype.Core.Speech;
 /// <summary>
 /// Pure most-recently-used list logic for language codes. Kept free of storage
 /// concerns so it is trivially testable; the persistence layer reads/writes the
-/// list under <see cref="Settings.SettingsKeys.RecentLanguages"/>.
+/// list under <see cref="Settings.SettingsKeys.RecentSourceLanguages"/> or
+/// <see cref="Settings.SettingsKeys.RecentTargetLanguages"/> depending on role.
 /// </summary>
 public static class RecentLanguages
 {

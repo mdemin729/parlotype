@@ -82,8 +82,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
         speechEngine.PropertyChanged += OnSpeechEnginePropertyChanged;
         whisperModel.PropertyChanged += OnWhisperModelPropertyChanged;
-        whisperOutput.UpdateTranslationAvailability(whisperModel.SelectedModel);
         language.UpdateForEngine(speechEngine.SelectedEngine);
+        language.UpdateTranslationAvailability(whisperModel.SelectedModel);
 
         RebuildNavItems();
         SelectedNavItem = NavItems.FirstOrDefault(n => !n.IsHeader);
@@ -101,7 +101,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     private void OnWhisperModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(WhisperModelSettingsViewModel.SelectedModel))
-            WhisperOutput.UpdateTranslationAvailability(WhisperModel.SelectedModel);
+            Language.UpdateTranslationAvailability(WhisperModel.SelectedModel);
     }
 
     private void RebuildNavItems()
