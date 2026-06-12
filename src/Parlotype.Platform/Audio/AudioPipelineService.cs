@@ -17,6 +17,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     private readonly IVadService _vad;
     private readonly ISpeechRecognizer _recognizer;
     private readonly ISettingsService _settings;
+    private readonly IKeyboardLayoutService _keyboardLayout;
     private readonly ILogger<AudioPipelineService> _logger;
 
     private PipelineMode _mode;
@@ -65,12 +66,14 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         IVadService vad,
         ISpeechRecognizer recognizer,
         ISettingsService settings,
+        IKeyboardLayoutService keyboardLayout,
         ILogger<AudioPipelineService> logger)
     {
         _capture = capture;
         _vad = vad;
         _recognizer = recognizer;
         _settings = settings;
+        _keyboardLayout = keyboardLayout;
         _logger = logger;
     }
 
@@ -412,9 +415,16 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         var runtimeStr = await _settings.GetAsync<string>(SettingsKeys.RuntimePreference, ct);
         var runtime = Enum.TryParse<RuntimePreference>(runtimeStr, out var rp) ? rp : RuntimePreference.Auto;
 
-        // Source language: "auto" (detection) or an explicit Whisper language code.
+        // Source language: "auto" (detection), "keyboard" (OS layout, resolved
+        // here), or an explicit Whisper language code. The keyboard sentinel
+        // resolves to the detected layout language, falling back to auto when
+        // detection is unavailable or the layout language isn't one Whisper knows.
         var sourceLang = await _settings.GetAsync<string>(SettingsKeys.SelectedSourceLanguage, ct);
-        var language = string.IsNullOrWhiteSpace(sourceLang) ? LanguageCatalog.AutoDetectCode : sourceLang;
+        var detectedLayout = LanguageCatalog.IsKeyboardLayout(sourceLang) ? _keyboardLayout.Detect() : null;
+        var language = SourceLanguageResolver.Resolve(sourceLang, detectedLayout, LanguageCatalog.WhisperLanguages);
+        if (LanguageCatalog.IsKeyboardLayout(sourceLang))
+            _logger.LogInformation("Keyboard-layout source resolved: {Layout} → {Language}",
+                detectedLayout?.FriendlyName ?? "(undetected)", language);
 
         _whisperOptions = new WhisperOptions
         {

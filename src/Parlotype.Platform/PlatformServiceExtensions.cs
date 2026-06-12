@@ -53,11 +53,13 @@ public static class PlatformServiceExtensions
         {
             services.AddSingleton<INvidiaEnvironmentProvider, WindowsNvidiaEnvironmentProvider>();
             services.AddSingleton<IVulkanEnvironmentProvider, WindowsVulkanEnvironmentProvider>();
+            services.AddSingleton<IKeyboardLayoutService, Win32KeyboardLayoutService>();
         }
         else
         {
             services.AddSingleton<INvidiaEnvironmentProvider, NoOpNvidiaEnvironmentProvider>();
             services.AddSingleton<IVulkanEnvironmentProvider, NoOpVulkanEnvironmentProvider>();
+            services.AddSingleton<IKeyboardLayoutService, NoOpKeyboardLayoutService>();
         }
 
         return services;

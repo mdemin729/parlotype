@@ -8,9 +8,17 @@ namespace Parlotype.Tests;
 
 public class LlamaCppPromptBuildingTests
 {
-    private static LlamaCppSpeechRecognizer CreateRecognizer(ISettingsService settings) =>
+    private static LlamaCppSpeechRecognizer CreateRecognizer(
+        ISettingsService settings, KeyboardLayoutInfo? keyboardLayout = null) =>
         // registry/prompts are unused by BuildPromptTextAsync.
-        new(settings, registry: null!, prompts: null!, NullLogger<LlamaCppSpeechRecognizer>.Instance);
+        new(settings, registry: null!, prompts: null!,
+            new FakeKeyboardLayout(keyboardLayout),
+            NullLogger<LlamaCppSpeechRecognizer>.Instance);
+
+    private sealed class FakeKeyboardLayout(KeyboardLayoutInfo? result) : IKeyboardLayoutService
+    {
+        public KeyboardLayoutInfo? Detect() => result;
+    }
 
     private static readonly PromptTemplate Prompt =
         new("p1", "Test", "Transcribe the {language} audio.");
@@ -44,6 +52,30 @@ public class LlamaCppPromptBuildingTests
         settings.Values[SettingsKeys.SelectedSourceLanguage] = LanguageCatalog.AutoDetectCode;
 
         var vm = CreateRecognizer(settings);
+        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe the English audio.", text);
+    }
+
+    [Fact]
+    public async Task KeyboardSource_RendersDetectedLayoutLanguage()
+    {
+        var settings = new FakeSettings();
+        settings.Values[SettingsKeys.SelectedSourceLanguage] = LanguageCatalog.KeyboardLayoutCode;
+
+        var vm = CreateRecognizer(settings, new KeyboardLayoutInfo("ru", "Russian (Russia)"));
+        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe the Russian audio.", text);
+    }
+
+    [Fact]
+    public async Task KeyboardSource_DetectionUnavailable_FallsBackToDefaultLanguage()
+    {
+        var settings = new FakeSettings();
+        settings.Values[SettingsKeys.SelectedSourceLanguage] = LanguageCatalog.KeyboardLayoutCode;
+
+        var vm = CreateRecognizer(settings, keyboardLayout: null);
         var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
 
         Assert.Equal("Transcribe the English audio.", text);
