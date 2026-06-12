@@ -35,6 +35,7 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
     private LlamaCppSpeechRecognizer NewRecognizer() =>
         new(_settings, _registry,
             new JsonPromptTemplateRegistry(_root, _settings, NullLogger<JsonPromptTemplateRegistry>.Instance),
+            new NoOpKeyboardLayoutService(),
             NullLogger<LlamaCppSpeechRecognizer>.Instance);
 
     private static LlamaServerManagedInstallRecord SampleRecord(string id) => new(

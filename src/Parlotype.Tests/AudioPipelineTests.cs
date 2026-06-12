@@ -43,6 +43,16 @@ public class AudioPipelineTests
     }
 
     /// <summary>
+    /// Keyboard-layout fake with a settable detection result (null = unavailable,
+    /// the non-Windows / detection-failed path).
+    /// </summary>
+    private sealed class FakeKeyboardLayoutService : IKeyboardLayoutService
+    {
+        public KeyboardLayoutInfo? Result { get; set; }
+        public KeyboardLayoutInfo? Detect() => Result;
+    }
+
+    /// <summary>
     /// Lightweight VAD fake: reports speech covering all non-zero samples.
     /// Returns a single segment [0..N) where N is the last non-zero sample index + 1.
     /// </summary>
@@ -171,6 +181,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         var flushed = new TaskCompletionSource<bool>();
@@ -217,6 +228,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act 1: First start — should initialize with default options (translate=false)
@@ -251,6 +263,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act
@@ -277,6 +290,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act
@@ -305,6 +319,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -328,6 +343,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -335,6 +351,77 @@ public class AudioPipelineTests
 
         Assert.Single(recognizer.InitCalls);
         Assert.False(recognizer.InitCalls[0].TranslateToEnglish);
+    }
+
+    [Fact]
+    public async Task StartAsync_ResolvesKeyboardSource_ToDetectedLayoutLanguage()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, LanguageCatalog.KeyboardLayoutCode);
+        var keyboard = new FakeKeyboardLayoutService
+        {
+            Result = new KeyboardLayoutInfo("ru", "Russian (Russia)"),
+        };
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings, keyboard,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Single(recognizer.InitCalls);
+        Assert.Equal("ru", recognizer.InitCalls[0].Language);
+    }
+
+    [Fact]
+    public async Task StartAsync_KeyboardSource_FallsBackToAuto_WhenDetectionUnavailable()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, LanguageCatalog.KeyboardLayoutCode);
+        var keyboard = new FakeKeyboardLayoutService { Result = null };
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings, keyboard,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Single(recognizer.InitCalls);
+        Assert.Equal(LanguageCatalog.AutoDetectCode, recognizer.InitCalls[0].Language);
+    }
+
+    [Fact]
+    public async Task StartAsync_KeyboardSource_FallsBackToAuto_WhenLayoutLanguageNotInWhisperSet()
+    {
+        // A keyboard layout whose language Whisper doesn't recognise must not be
+        // passed through as WhisperOptions.Language.
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SpySpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, LanguageCatalog.KeyboardLayoutCode);
+        var keyboard = new FakeKeyboardLayoutService
+        {
+            Result = new KeyboardLayoutInfo("kl", "Greenlandic (Greenland)"),
+        };
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings, keyboard,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Single(recognizer.InitCalls);
+        Assert.Equal(LanguageCatalog.AutoDetectCode, recognizer.InitCalls[0].Language);
     }
 
     [Fact]
@@ -352,6 +439,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -376,6 +464,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act: Start twice with no settings change
@@ -427,7 +516,10 @@ public class AudioPipelineTests
             new NoOpVulkanEnvironmentProvider(),
             NullLogger<WhisperSpeechRecognizer>.Instance);
 
-        await using var pipeline = new AudioPipelineService(capture, vad, recognizer, settings, NullLogger<AudioPipelineService>.Instance);
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
 
         TranscriptionResult? transcription = null;
         var transcriptionReceived = new TaskCompletionSource<TranscriptionResult>();

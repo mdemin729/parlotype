@@ -27,6 +27,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     private readonly ISettingsService _settings;
     private readonly ILlamaServerRegistry _registry;
     private readonly IPromptTemplateRegistry _prompts;
+    private readonly IKeyboardLayoutService _keyboardLayout;
     private readonly ILogger<LlamaCppSpeechRecognizer> _logger;
     // Recreated on each Initialize because HttpClient locks BaseAddress after first
     // request, so reusing the same instance across unload/init cycles (e.g. when the
@@ -44,11 +45,13 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         ISettingsService settings,
         ILlamaServerRegistry registry,
         IPromptTemplateRegistry prompts,
+        IKeyboardLayoutService keyboardLayout,
         ILogger<LlamaCppSpeechRecognizer> logger)
     {
         _settings = settings;
         _registry = registry;
         _prompts = prompts;
+        _keyboardLayout = keyboardLayout;
         _logger = logger;
     }
 
@@ -232,9 +235,13 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         var translationEnabledStr = await _settings.GetAsync<string>(SettingsKeys.TranslationEnabled, cancellationToken);
         var translationEnabled = bool.TryParse(translationEnabledStr, out var te) && te;
 
-        // Render {language} with the source language name. When auto-detect (or
+        // Resolve the keyboard-layout sentinel to the detected layout language
+        // (falls back to auto when detection is unavailable), then render
+        // {language} with the source language name. When auto-detect (or
         // unknown), PromptTemplate falls back to its default language.
-        var sourceName = LanguageCatalog.IsAutoDetect(sourceCode) ? null : LanguageCatalog.GetEnglishName(sourceCode);
+        var detectedLayout = LanguageCatalog.IsKeyboardLayout(sourceCode) ? _keyboardLayout.Detect() : null;
+        var resolvedSource = SourceLanguageResolver.Resolve(sourceCode, detectedLayout);
+        var sourceName = LanguageCatalog.IsAutoDetect(resolvedSource) ? null : LanguageCatalog.GetEnglishName(resolvedSource);
         var promptText = activePrompt.Render(sourceName);
 
         if (translationEnabled && !LanguageCatalog.IsNoTranslation(targetCode))
