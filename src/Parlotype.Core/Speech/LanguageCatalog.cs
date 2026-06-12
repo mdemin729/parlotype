@@ -23,6 +23,14 @@ public static class LanguageCatalog
     /// <summary>Sentinel code meaning "let the model detect the source language".</summary>
     public const string AutoDetectCode = "auto";
 
+    /// <summary>
+    /// Sentinel code meaning "use the OS keyboard layout's language as the source".
+    /// Resolved to a concrete language code at pipeline start via
+    /// <see cref="IKeyboardLayoutService"/>; falls back to <see cref="AutoDetectCode"/>
+    /// when detection is unavailable (e.g. non-Windows platforms).
+    /// </summary>
+    public const string KeyboardLayoutCode = "keyboard";
+
     /// <summary>Sentinel code meaning "do not translate" (output the source language).</summary>
     public const string NoTranslationCode = "none";
 
@@ -115,6 +123,14 @@ public static class LanguageCatalog
     /// <summary>True when <paramref name="code"/> is the auto-detect sentinel.</summary>
     public static bool IsAutoDetect(string? code) =>
         string.IsNullOrWhiteSpace(code) || string.Equals(code, AutoDetectCode, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// True when <paramref name="code"/> is the keyboard-layout sentinel. Unlike
+    /// <see cref="IsAutoDetect"/>, blank codes are not treated as keyboard — the
+    /// keyboard source is an explicit opt-in.
+    /// </summary>
+    public static bool IsKeyboardLayout(string? code) =>
+        string.Equals(code, KeyboardLayoutCode, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>True when <paramref name="code"/> represents "no translation".</summary>
     public static bool IsNoTranslation(string? code) =>
