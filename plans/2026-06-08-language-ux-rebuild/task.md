@@ -1,8 +1,8 @@
 ---
 title: Language UX rebuild (keyboard-layout source, model-driven target forms, popover pickers, transcribe quick picker)
-status: planned
+status: in_progress
 created: 2026-06-08
-started:
+started: 2026-06-11
 completed:
 ---
 

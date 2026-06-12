@@ -12,11 +12,10 @@
 
 | Plan | Started | Description |
 |------|---------|-------------|
-| _none_ | | |
+| [2026-06-08-language-ux-rebuild](2026-06-08-language-ux-rebuild/) | 2026-06-11 | Rebuild Language UX from the new prototype: keyboard-layout source, model-driven target forms (toggle/full/none), floating popover pickers, summary + switch-fallback toasts (Phase 1 Settings) and a Transcribe-window quick-picker strip + flyout (Phase 2) |
 
 ## Planned
 
 | Plan | Created | Description |
 |------|---------|-------------|
-| [2026-06-08-language-ux-rebuild](2026-06-08-language-ux-rebuild/) | 2026-06-08 | Rebuild Language UX from the new prototype: keyboard-layout source, model-driven target forms (toggle/full/none), floating popover pickers, summary + switch-fallback toasts (Phase 1 Settings) and a Transcribe-window quick-picker strip + flyout (Phase 2) |
 | [2026-05-01-pipeline-settings-alignment](2026-05-01-pipeline-settings-alignment/) | 2026-05-01 | Align pipeline defaults with ADR-011 benchmark recommendations (Medium model, language=en, beam=1) |
