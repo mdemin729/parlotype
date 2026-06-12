@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-05-25
+last_updated: 2026-06-11
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -39,6 +39,8 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[llama-server-hf-download]] | llama-server downloads HF models itself via `-hf <repo>[:quant]` (defaults Q4_K_M, auto-mmproj, `HF_TOKEN` for gated, `~/.cache/huggingface/hub`); Parlotype uses its own C# downloader instead for progress UX (ADR-029) | 2026-05-19 |
 | [[whisper-cuda-runtime-packaging]] | `Whisper.net.Runtime.Cuda` adds only `ggml-cuda-whisper.dll` (~150 MB) to published output and does NOT bundle cudart/cublas — Full build still needs the user's installed CUDA toolkit. Self-contained sizes: Lite ~720 MB, Full ~870 MB unzipped (ADR-031) | 2026-05-24 |
 | [[brand-positioning]] | Parlotype is positioned as **Local by default. Cloud by choice.** — single app, local-default, opt-in cloud (BYOK); tagline preserved; replaces "privacy-first" wording (ADR-032) | 2026-05-25 |
+| [[win32-keyboard-layout]] | Windows keyboard layouts are per-thread — query the foreground window's thread, not your own; HKL low word = LANGID; transient LANGIDs (0x2000 range) throw `CultureNotFoundException` | 2026-06-11 |
+| [[avalonia-popup-patterns]] | Headless `CaptureRenderedFrame` excludes the popup layer (screenshot popover content directly); setting `DataContext` on an element rebases its other bindings (wrap in a Panel); light dismiss consumes the anchor click so button-toggled popups work without extra state | 2026-06-11 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

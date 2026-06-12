@@ -1,9 +1,16 @@
 ---
-status: accepted
+status: superseded by ADR-036
 date: 2026-05-31
 ---
 
 # 035. Language Settings UX Redesign
+
+> **Superseded by [ADR-036](036-language-ux-rebuild.md)** (2026-06-11): the
+> inline pickers became floating popovers, the target side became model-driven
+> (toggle / full / none forms), a keyboard-layout source sentinel was added, and
+> the page logic moved into a shared `LanguageRelationshipViewModel` also used
+> by the Transcribe window quick picker. The data model and migration from this
+> ADR remain in force.
 
 ## Context
 
