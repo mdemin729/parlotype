@@ -21,7 +21,8 @@ public static class ScreenshotHelper
         Control control,
         object? dataContext = null,
         int width = 600,
-        int maxHeight = 1200)
+        int maxHeight = 1200,
+        Avalonia.Styling.ThemeVariant? theme = null)
     {
         if (dataContext is not null)
             control.DataContext = dataContext;
@@ -33,6 +34,9 @@ public static class ScreenshotHelper
             Height = maxHeight,
             Content = control,
         };
+
+        if (theme is not null)
+            window.RequestedThemeVariant = theme;
 
         window.Show();
 
