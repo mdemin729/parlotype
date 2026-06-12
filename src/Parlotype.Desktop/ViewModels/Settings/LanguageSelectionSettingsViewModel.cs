@@ -1,343 +1,287 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
-/// <summary>Which picker, if any, is currently expanded under the source/target buttons.</summary>
-public enum LanguagePickerKind { None, Source, Target }
-
 /// <summary>
-/// Source-language + target-language settings for the active speech engine, with
-/// translation as a master toggle (the arrow between the two language buttons).
-///
-/// <para>The section owns the persisted state (selection codes, translation flag,
-/// per-role MRU lists) and the engine-aware capability surface. The actual picker
-/// UI (search box + list) is delegated to two <see cref="LanguagePickerViewModel"/>
-/// instances exposed as <see cref="SourcePicker"/> and <see cref="TargetPicker"/>.</para>
-///
-/// <para>Translation has one source of truth: <see cref="TranslationEnabled"/>. The
-/// pipeline reads it alongside <see cref="SelectedTargetCode"/>; for Whisper that
-/// resolves to the legacy <c>TranslateToEnglish</c> flag (ADR-021/033), and for
-/// Gemma 4 it gates the in-prompt translation instruction.</para>
+/// Settings → Language page: a thin presentation wrapper over the shared
+/// <see cref="LanguageRelationshipViewModel"/> (which owns all state,
+/// persistence, and fallback logic — see spec §7/§8). This VM contributes only
+/// what is page-specific: the two picker popovers, the target's form-dependent
+/// rendering flags (toggle / full / none), the connector CSS-class booleans,
+/// and recording-stop on selection changes.
 /// </summary>
 public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewModelBase
 {
-    private readonly ISettingsService _settings;
     private readonly TranscribeViewModel? _transcribeViewModel;
     private readonly ILogger<LanguageSelectionSettingsViewModel> _logger;
-
-    private LanguageCapabilities _capabilities = SpeechEngineCapabilities.For(SpeechEngine.Whisper);
-    private List<string> _sourceRecent = [];
-    private List<string> _targetRecent = [];
-    private bool _initialized;
 
     public override string Title => "Language";
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
 
+    /// <summary>The shared source → target relationship (state + derivations).</summary>
+    public LanguageRelationshipViewModel Relationship { get; }
+
     public LanguagePickerViewModel SourcePicker { get; }
     public LanguagePickerViewModel TargetPicker { get; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsSourcePickerOpen))]
-    [NotifyPropertyChangedFor(nameof(IsTargetPickerOpen))]
-    private LanguagePickerKind _openPicker = LanguagePickerKind.None;
-
-    public bool IsSourcePickerOpen => OpenPicker == LanguagePickerKind.Source;
-    public bool IsTargetPickerOpen => OpenPicker == LanguagePickerKind.Target;
-
-    partial void OnOpenPickerChanged(LanguagePickerKind value)
+    public LanguageSelectionSettingsViewModel(
+        LanguageRelationshipViewModel relationship,
+        TranscribeViewModel? transcribeViewModel = null,
+        ILogger<LanguageSelectionSettingsViewModel>? logger = null)
     {
-        SourcePicker.IsOpen = value == LanguagePickerKind.Source;
-        TargetPicker.IsOpen = value == LanguagePickerKind.Target;
+        Relationship = relationship;
+        _transcribeViewModel = transcribeViewModel;
+        _logger = logger ?? NullLogger<LanguageSelectionSettingsViewModel>.Instance;
+
+        SourcePicker = new LanguagePickerViewModel(
+            header: "You speak",
+            getSupported: () => Relationship.Capabilities.EffectiveSourceLanguages,
+            getRecents: () => Relationship.SourceRecent,
+            getSelectedCode: () => Relationship.SourceCode,
+            onSelect: SelectSource,
+            getSpecials: BuildSourceSpecials);
+
+        TargetPicker = new LanguagePickerViewModel(
+            header: "Translate to",
+            getSupported: () => Relationship.TargetLanguages,
+            getRecents: () => Relationship.TargetRecent,
+            getSelectedCode: () => Relationship.TranslationEnabled
+                ? Relationship.TargetCode
+                : LanguageCatalog.NoTranslationCode,
+            onSelect: SelectTarget,
+            getSpecials: () =>
+                [new LanguageSpecialRow(
+                    LanguageCatalog.NoTranslationCode, "Off — no translation",
+                    SubHint: null, LanguageRowIcon.Off)]);
+
+        Relationship.PropertyChanged += OnRelationshipPropertyChanged;
+        Relationship.RelationshipChanged += OnRelationshipChanged;
+
+        // Fire-and-forget — idempotent; log faults so a corrupt settings.json
+        // doesn't fail silently. (The relationship may already be initialized by
+        // another surface.)
+        _ = Relationship.InitializeAsync().ContinueWith(
+            t => _logger.LogError(t.Exception, "Language settings initialization failed"),
+            TaskContinuationOptions.OnlyOnFaulted);
     }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SourceButtonLabel))]
-    private string _selectedSourceCode = LanguageCatalog.AutoDetectCode;
+    // ----- Form / connector rendering flags --------------------------------
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TargetButtonLabel))]
-    private string _selectedTargetCode = LanguageCatalog.NoTranslationCode;
+    /// <summary>Whisper-style: exactly off + one fixed target ⇒ a switch, no list.</summary>
+    public bool IsToggleForm => Relationship.TargetForm == TranslationForm.Toggle;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsTargetButtonEnabled))]
-    [NotifyPropertyChangedFor(nameof(ShowTranslationPausedNote))]
-    private bool _translationEnabled;
+    /// <summary>LLM-style arbitrary targets ⇒ picker button + popover.</summary>
+    public bool IsFullForm => Relationship.TargetForm == TranslationForm.Full;
 
-    /// <summary>
-    /// Whether the active Whisper model can translate (ADR-033). Tracked so the
-    /// "translation paused" note can appear when the user has translation on but
-    /// the chosen model can't honour it. Always true on engines other than Whisper.
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowTranslationPausedNote))]
-    private bool _whisperModelSupportsTranslation = true;
+    /// <summary>Engine can't translate ⇒ disabled card + amber note + locked connector.</summary>
+    public bool IsNoneForm => Relationship.TargetForm == TranslationForm.None;
 
-    /// <summary>Pretty label for the source button (e.g. "Auto-detect", "Russian — Русский").</summary>
-    public string SourceButtonLabel =>
-        LanguageCatalog.IsAutoDetect(SelectedSourceCode)
-            ? "Auto-detect"
-            : LanguageCatalog.GetDisplayLabel(SelectedSourceCode);
+    public bool IsConnectorOn => Relationship.Connector == ConnectorState.On;
+    public bool IsConnectorOff => Relationship.Connector == ConnectorState.Off;
+    public bool IsConnectorLocked => Relationship.Connector == ConnectorState.Locked;
 
     /// <summary>
-    /// Pretty label for the target button. Shows the currently selected target even
-    /// when translation is disabled, so the user can see what would be used if they
-    /// re-enabled it. Defaults to "English" when nothing has been chosen yet.
+    /// Two-way surface for the toggle-form switch. Routed through
+    /// <see cref="LanguageRelationshipViewModel.ToggleTranslation"/> so default
+    /// targets and persistence apply.
     /// </summary>
-    public string TargetButtonLabel =>
-        LanguageCatalog.IsNoTranslation(SelectedTargetCode)
-            ? "English"
-            : LanguageCatalog.GetDisplayLabel(SelectedTargetCode);
+    public bool TranslationSwitch
+    {
+        get => Relationship.TranslationEnabled;
+        set
+        {
+            if (value != Relationship.TranslationEnabled)
+                Relationship.ToggleTranslation();
+        }
+    }
 
-    /// <summary>
-    /// True when the target button accepts clicks. Disabled when translation is off —
-    /// the arrow is the way to bring it back. Independent of model capability: a
-    /// translation-incapable Whisper model surfaces the paused note instead of
-    /// blocking interaction.
-    /// </summary>
-    public bool IsTargetButtonEnabled => TranslationEnabled;
+    /// <summary>Label for the toggle-form switch (e.g. "Translate to English").</summary>
+    public string ToggleSwitchLabel =>
+        Relationship.Capabilities.FixedTranslationTargets.Count > 0
+            ? $"Translate to {LanguageCatalog.GetEnglishName(Relationship.Capabilities.FixedTranslationTargets[0].Code)}"
+            : "Translate";
 
-    /// <summary>
-    /// True when the user has translation on but the active Whisper model can't
-    /// honour it (e.g. <c>Large v3 Turbo</c>). Drives the explanatory accent note.
-    /// Not shown on engines that translate via prompt (Gemma 4).
-    /// </summary>
-    public bool ShowTranslationPausedNote =>
-        !_capabilities.SupportsArbitraryTranslation
-        && TranslationEnabled
-        && !WhisperModelSupportsTranslation;
+    /// <summary>Amber inline note for the none form, naming the model (spec §4).</summary>
+    public string UnavailableNote =>
+        $"{Relationship.EngineDisplayName} can't translate — Parlotype types exactly what you say.";
+
+    /// <summary>Sub-hint under the full-form target field.</summary>
+    public string TargetSubHint =>
+        Relationship.TranslationEnabled ? "Translation target" : "Off — no translation";
+
+    /// <summary>Tile glyph for the source field (mirrors the picker rows).</summary>
+    public string SourceTileText =>
+        LanguageCatalog.IsKeyboardLayout(Relationship.SourceCode) ? "⌨"
+        : LanguageCatalog.IsAutoDetect(Relationship.SourceCode) ? "✦"
+        : Relationship.SourceCode.ToUpperInvariant();
+
+    /// <summary>Tile glyph for the full-form target field.</summary>
+    public string TargetTileText =>
+        Relationship.TranslationEnabled && !LanguageCatalog.IsNoTranslation(Relationship.TargetCode)
+            ? Relationship.TargetCode.ToUpperInvariant()
+            : "⊘";
 
     public string TranslationPausedNote =>
         "Translation is paused — the selected Whisper model can't translate. " +
         "Pick Medium or Large v1/v2/v3 to resume.";
 
-    public LanguageSelectionSettingsViewModel(
-        ISettingsService settings,
-        TranscribeViewModel? transcribeViewModel = null,
-        ILogger<LanguageSelectionSettingsViewModel>? logger = null)
-    {
-        _settings = settings;
-        _transcribeViewModel = transcribeViewModel;
-        _logger = logger ?? NullLogger<LanguageSelectionSettingsViewModel>.Instance;
-
-        SourcePicker = new LanguagePickerViewModel(
-            header: "Select source language",
-            getSupported: () => _capabilities.EffectiveSourceLanguages,
-            getRecents: () => _sourceRecent,
-            getSelectedCode: () => SelectedSourceCode,
-            onSelect: SelectSource,
-            getLeadingSentinel: () => _capabilities.SupportsAutoDetect
-                ? ((string Code, string Label)?)(LanguageCatalog.AutoDetectCode, "Auto-detect")
-                : null);
-
-        TargetPicker = new LanguagePickerViewModel(
-            header: "Select target language",
-            getSupported: GetTargetLanguageList,
-            getRecents: () => _targetRecent,
-            getSelectedCode: () => SelectedTargetCode,
-            onSelect: SelectTarget,
-            getLeadingSentinel: () => null);
-
-        // Fire-and-forget — log faults so a corrupt settings.json doesn't fail silently.
-        _ = InitializeAsync().ContinueWith(
-            t => _logger.LogError(t.Exception, "Language settings initialization failed"),
-            TaskContinuationOptions.OnlyOnFaulted);
-    }
-
-    private IReadOnlyList<LanguageInfo> GetTargetLanguageList() =>
-        _capabilities.SupportsArbitraryTranslation
-            ? LanguageCatalog.AllLanguages
-            : _capabilities.FixedTranslationTargets;
-
-    private async Task InitializeAsync()
-    {
-        if (_initialized)
-            return;
-        _initialized = true;
-
-        // Idempotent — picks up legacy TranslateToEnglish / RecentLanguages on first run.
-        await LanguageSettingsMigrator.MigrateAsync(_settings);
-
-        SelectedSourceCode = await _settings.GetAsync<string>(SettingsKeys.SelectedSourceLanguage)
-                             ?? LanguageCatalog.AutoDetectCode;
-        SelectedTargetCode = await _settings.GetAsync<string>(SettingsKeys.SelectedTargetLanguage)
-                             ?? LanguageCatalog.NoTranslationCode;
-
-        var translationEnabledStr = await _settings.GetAsync<string>(SettingsKeys.TranslationEnabled);
-        TranslationEnabled = bool.TryParse(translationEnabledStr, out var te) && te;
-
-        _sourceRecent = (await _settings.GetAsync<List<string>>(SettingsKeys.RecentSourceLanguages))?.ToList() ?? [];
-        _targetRecent = (await _settings.GetAsync<List<string>>(SettingsKeys.RecentTargetLanguages))?.ToList() ?? [];
-
-        var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);
-        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var e) ? e : SpeechEngine.Whisper;
-        UpdateForEngine(engine);
-
-        var modelStr = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel);
-        var model = Enum.TryParse<WhisperModelType>(modelStr, out var m) ? m : WhisperModelType.Base;
-        UpdateTranslationAvailability(model);
-    }
+    // ----- Engine / model hooks (called by SettingsWindowViewModel) ---------
 
     /// <summary>
-    /// Recomputes the source/target pickers for the given engine. Called from the
-    /// settings window when the active engine changes.
+    /// Applies a new engine: capability swap + spec §8 fallbacks/toasts happen
+    /// in the relationship VM; this layer refreshes the pickers and collapses
+    /// any popover that no longer fits the new form.
     /// </summary>
     public void UpdateForEngine(SpeechEngine engine)
     {
-        _capabilities = SpeechEngineCapabilities.For(engine);
-        // Only ShowTranslationPausedNote reads _capabilities; button labels depend
-        // on the selection codes which haven't changed here.
-        OnPropertyChanged(nameof(ShowTranslationPausedNote));
+        Relationship.SetEngine(engine);
 
         SourcePicker.Refresh();
         TargetPicker.Refresh();
 
-        // If the open picker no longer fits the new engine (e.g. target picker open
-        // but translation is off / the engine offers nothing), collapse it.
-        if (OpenPicker == LanguagePickerKind.Target && !IsTargetButtonEnabled)
-            OpenPicker = LanguagePickerKind.None;
+        if (TargetPicker.IsOpen && !IsFullForm)
+            TargetPicker.IsOpen = false;
     }
 
-    /// <summary>
-    /// Updates the Whisper-model-derived translation-availability flag (ADR-033).
-    /// Has no effect on the user's saved <see cref="TranslationEnabled"/> intent —
-    /// only the paused-note visibility.
-    /// </summary>
+    /// <summary>Updates the Whisper-model translation-availability flag (ADR-033).</summary>
     public void UpdateTranslationAvailability(WhisperModelType model) =>
-        WhisperModelSupportsTranslation = WhisperModelInfo.Get(model).SupportsTranslation;
+        Relationship.SetWhisperModel(model);
+
+    // ----- Popover commands --------------------------------------------------
 
     [RelayCommand]
-    private void OpenSourcePicker() =>
-        TogglePicker(LanguagePickerKind.Source, gate: true, picker: SourcePicker);
-
-    [RelayCommand]
-    private void OpenTargetPicker() =>
-        TogglePicker(LanguagePickerKind.Target, gate: IsTargetButtonEnabled, picker: TargetPicker);
-
-    private void TogglePicker(LanguagePickerKind kind, bool gate, LanguagePickerViewModel picker)
+    private void OpenSourcePicker()
     {
-        if (!gate)
+        var willOpen = !SourcePicker.IsOpen;
+        TargetPicker.IsOpen = false;
+
+        if (willOpen)
+        {
+            // Fresh detection so the keyboard special's sub-hint is current.
+            Relationship.RefreshKeyboardLayout();
+            SourcePicker.Filter = "";
+            SourcePicker.Refresh();
+        }
+
+        SourcePicker.IsOpen = willOpen;
+    }
+
+    [RelayCommand]
+    private void OpenTargetPicker()
+    {
+        if (!IsFullForm)
             return;
 
-        var willOpen = OpenPicker != kind;
-        OpenPicker = willOpen ? kind : LanguagePickerKind.None;
+        var willOpen = !TargetPicker.IsOpen;
+        SourcePicker.IsOpen = false;
 
-        // Clear the filter on open so previous search state doesn't carry over.
-        // The Filter setter triggers a list rebuild when the value actually changes;
-        // when it was already empty we rely on the picker's existing items (kept
-        // current via SelectSource/SelectTarget + UpdateForEngine).
         if (willOpen)
-            picker.Filter = "";
+        {
+            TargetPicker.Filter = "";
+            TargetPicker.Refresh();
+        }
+
+        TargetPicker.IsOpen = willOpen;
     }
 
+    /// <summary>Connector click — the single-action translation flip (spec §7).</summary>
     [RelayCommand]
     private void ToggleTranslation()
     {
-        TranslationEnabled = !TranslationEnabled;
+        Relationship.ToggleTranslation();
 
-        if (TranslationEnabled)
-        {
-            // On first enable, ensure a real target is set.
-            // Whisper has only one target (English); Gemma 4 prefers the most-recent.
-            if (LanguageCatalog.IsNoTranslation(SelectedTargetCode))
-                SelectedTargetCode = DefaultTargetForCurrentEngine();
-        }
-        else if (OpenPicker == LanguagePickerKind.Target)
-        {
-            // The target button just went disabled; collapse its picker.
-            OpenPicker = LanguagePickerKind.None;
-        }
-
-        _logger.LogInformation("Translation toggled: {Enabled}, target={Target}", TranslationEnabled, SelectedTargetCode);
-        _ = PersistTranslationStateAsync();
+        if (!Relationship.TranslationEnabled)
+            TargetPicker.IsOpen = false;
     }
 
-    private string DefaultTargetForCurrentEngine() =>
-        _capabilities.SupportsArbitraryTranslation
-            ? _targetRecent.FirstOrDefault() ?? LanguageCatalog.EnglishCode
-            : LanguageCatalog.EnglishCode;
+    // ----- Internals -----------------------------------------------------------
 
-    private void SelectSource(string code) =>
-        SelectInto(
-            code,
-            current: SelectedSourceCode,
-            apply: c => SelectedSourceCode = c,
-            recent: _sourceRecent,
-            updateRecent: list => _sourceRecent = list,
-            picker: SourcePicker,
-            settingsKey: SettingsKeys.SelectedSourceLanguage,
-            mruKey: SettingsKeys.RecentSourceLanguages);
-
-    private void SelectTarget(string code) =>
-        SelectInto(
-            code,
-            current: SelectedTargetCode,
-            apply: c => SelectedTargetCode = c,
-            recent: _targetRecent,
-            updateRecent: list => _targetRecent = list,
-            picker: TargetPicker,
-            settingsKey: SettingsKeys.SelectedTargetLanguage,
-            mruKey: SettingsKeys.RecentTargetLanguages);
-
-    /// <summary>
-    /// Shared logic for source/target selection: dedupe-no-op, promote the role MRU,
-    /// persist, refresh the picker, and collapse the open picker.
-    /// </summary>
-    private void SelectInto(
-        string code,
-        string current,
-        Action<string> apply,
-        List<string> recent,
-        Action<List<string>> updateRecent,
-        LanguagePickerViewModel picker,
-        string settingsKey,
-        string mruKey)
+    private void SelectSource(string code)
     {
-        if (string.Equals(code, current, StringComparison.OrdinalIgnoreCase))
+        Relationship.SelectSource(code);
+        SourcePicker.IsOpen = false;
+        SourcePicker.Refresh();
+    }
+
+    private void SelectTarget(string code)
+    {
+        Relationship.SelectTarget(code);
+        TargetPicker.IsOpen = false;
+        TargetPicker.Refresh();
+    }
+
+    private IReadOnlyList<LanguageSpecialRow> BuildSourceSpecials()
+    {
+        var specials = new List<LanguageSpecialRow>
         {
-            OpenPicker = LanguagePickerKind.None;
-            return;
+            new(LanguageCatalog.KeyboardLayoutCode,
+                "System keyboard layout",
+                Relationship.DetectedKeyboardLayout is { } layout
+                    ? $"Detected: {layout.FriendlyName}"
+                    : "Layout detection unavailable",
+                LanguageRowIcon.Keyboard),
+        };
+
+        if (Relationship.Capabilities.SupportsAutoDetect)
+        {
+            specials.Add(new LanguageSpecialRow(
+                LanguageCatalog.AutoDetectCode,
+                "Auto-detect",
+                "Let the model identify the language",
+                LanguageRowIcon.Sparkle));
         }
 
-        _logger.LogInformation("Language selected ({Key}): {Code}", settingsKey, code);
-        apply(code);
-
-        var updated = RecentLanguages.Add(recent, code).ToList();
-        var recentChanged = !updated.SequenceEqual(recent, StringComparer.OrdinalIgnoreCase);
-        if (recentChanged)
-            updateRecent(updated);
-
-        _ = PersistAsync(settingsKey, code, recentChanged ? mruKey : null, recentChanged ? updated : null);
-        picker.Refresh();
-        OpenPicker = LanguagePickerKind.None;
+        return specials;
     }
 
-    private async Task PersistAsync(string key, string code, string? mruKey, List<string>? mru)
+    private void OnRelationshipPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        await _settings.SetAsync(key, code);
-        if (mruKey is not null && mru is not null)
-            await _settings.SetAsync(mruKey, mru);
+        switch (e.PropertyName)
+        {
+            case nameof(LanguageRelationshipViewModel.TranslationEnabled):
+                OnPropertyChanged(nameof(TranslationSwitch));
+                OnPropertyChanged(nameof(IsConnectorOn));
+                OnPropertyChanged(nameof(IsConnectorOff));
+                OnPropertyChanged(nameof(TargetSubHint));
+                OnPropertyChanged(nameof(TargetTileText));
+                break;
 
-        await StopRecordingIfActiveAsync(key);
+            case nameof(LanguageRelationshipViewModel.SourceCode):
+                OnPropertyChanged(nameof(SourceTileText));
+                break;
+
+            case nameof(LanguageRelationshipViewModel.TargetCode):
+                OnPropertyChanged(nameof(TargetTileText));
+                break;
+
+            case nameof(LanguageRelationshipViewModel.Capabilities):
+            case nameof(LanguageRelationshipViewModel.Engine):
+                OnPropertyChanged(nameof(IsToggleForm));
+                OnPropertyChanged(nameof(IsFullForm));
+                OnPropertyChanged(nameof(IsNoneForm));
+                OnPropertyChanged(nameof(IsConnectorOn));
+                OnPropertyChanged(nameof(IsConnectorOff));
+                OnPropertyChanged(nameof(IsConnectorLocked));
+                OnPropertyChanged(nameof(ToggleSwitchLabel));
+                OnPropertyChanged(nameof(UnavailableNote));
+                break;
+        }
     }
 
-    private async Task PersistTranslationStateAsync()
+    private void OnRelationshipChanged(object? sender, EventArgs e)
     {
-        await _settings.SetAsync(SettingsKeys.TranslationEnabled, TranslationEnabled.ToString());
-        await _settings.SetAsync(SettingsKeys.SelectedTargetLanguage, SelectedTargetCode);
-
-        await StopRecordingIfActiveAsync(SettingsKeys.TranslationEnabled);
+        _ = StopRecordingIfActiveAsync();
     }
 
-    private async Task StopRecordingIfActiveAsync(string key)
+    private async Task StopRecordingIfActiveAsync()
     {
         if (_transcribeViewModel is { IsRecording: true })
         {
-            _logger.LogInformation("Stopping recording after language change ({Key})", key);
+            _logger.LogInformation("Stopping recording after language change");
             await _transcribeViewModel.StopRecordingAsync();
         }
     }

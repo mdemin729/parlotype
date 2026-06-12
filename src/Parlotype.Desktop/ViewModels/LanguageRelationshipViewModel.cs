@@ -62,7 +62,11 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         SpeechEngineCapabilities.For(SpeechEngine.Whisper);
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EngineDisplayName))]
     private SpeechEngine _engine = SpeechEngine.Whisper;
+
+    /// <summary>Short human name of the active engine ("Whisper", "Gemma 4").</summary>
+    public string EngineDisplayName => EngineName(Engine);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SourceDisplayLabel))]

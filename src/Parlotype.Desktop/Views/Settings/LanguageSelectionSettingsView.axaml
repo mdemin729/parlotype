@@ -5,71 +5,224 @@
              x:Class="Parlotype.Desktop.Views.Settings.LanguageSelectionSettingsView"
              x:DataType="vms:LanguageSelectionSettingsViewModel"
              x:CompileBindings="True">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <!-- Warn (translation unavailable) tokens per the redlines. -->
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="WarnForegroundBrush" Color="#E0A23A" />
+                    <SolidColorBrush x:Key="WarnBackgroundBrush" Color="#24E0A23A" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="WarnForegroundBrush" Color="#B9791B" />
+                    <SolidColorBrush x:Key="WarnBackgroundBrush" Color="#24E0A23A" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <UserControl.Styles>
-        <!-- Active language button gets a green focus border (matches prototype). -->
-        <Style Selector="Button.languageBtn">
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="MinWidth" Value="240" />
-            <Setter Property="Padding" Value="16,10" />
-            <Setter Property="BorderThickness" Value="2" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+        <!-- Picker field: icon tile + label + sub-hint, opens the popover. -->
+        <Style Selector="Button.pickerField">
+            <Setter Property="MinHeight" Value="60" />
+            <Setter Property="MinWidth" Value="210" />
+            <Setter Property="Padding" Value="14,13" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
         </Style>
-        <Style Selector="Button.languageBtn.active">
-            <Setter Property="BorderBrush" Value="#22C55E" />
+        <Style Selector="Button.pickerField.open">
+            <Setter Property="BorderBrush" Value="#378ADD" />
         </Style>
 
-        <!-- Arrow toggle: dimmed when translation is off. -->
-        <Style Selector="Button.arrow">
-            <Setter Property="Padding" Value="10,10" />
-            <Setter Property="MinWidth" Value="44" />
+        <!-- Connector pill: the translation on/off control (spec §1). -->
+        <Style Selector="Button.connector">
+            <Setter Property="Width" Value="54" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="CornerRadius" Value="19" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
-        <Style Selector="Button.arrow.off">
-            <Setter Property="Opacity" Value="0.35" />
+        <Style Selector="Button.connector.on">
+            <Setter Property="Background" Value="#378ADD" />
+        </Style>
+        <Style Selector="Button.connector.on TextBlock">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.connector.off">
+            <Setter Property="Opacity" Value="0.55" />
+        </Style>
+        <Style Selector="Button.connector.locked">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+
+        <Style Selector="TextBlock.fieldCaption">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="Margin" Value="2,0,0,4" />
         </Style>
     </UserControl.Styles>
 
-    <StackPanel Spacing="16">
+    <StackPanel Spacing="14">
         <TextBlock Text="Language" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Pick the spoken (source) language and, optionally, a translation target. The arrow toggles translation on and off."
+        <TextBlock Text="One relationship, read left to right: you speak the source, Parlotype types the target. The connector between them turns translation on and off."
                    Opacity="0.7" TextWrapping="Wrap" />
 
-        <!-- Source ↔ Target button row -->
-        <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
-            <StackPanel Spacing="4">
-                <TextBlock Text="Source language" Opacity="0.8" />
-                <Button Classes="languageBtn"
-                        Classes.active="{Binding IsSourcePickerOpen}"
-                        Command="{Binding OpenSourcePickerCommand}"
-                        Content="{Binding SourceButtonLabel}" />
+        <!-- Source | connector | target -->
+        <Grid ColumnDefinitions="*,Auto,*" Margin="0,6,0,0">
+
+            <!-- Source card -->
+            <StackPanel Grid.Column="0">
+                <TextBlock Classes="fieldCaption" Text="You speak" />
+                <Button x:Name="SourceField"
+                        Classes="pickerField"
+                        Classes.open="{Binding SourcePicker.IsOpen}"
+                        Command="{Binding OpenSourcePickerCommand}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border Grid.Column="0"
+                                Width="34" Height="34" CornerRadius="8"
+                                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SourceTileText}"
+                                       FontSize="12" FontWeight="SemiBold" Opacity="0.85"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="11,0,0,0"
+                                    VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="{Binding Relationship.SourceDisplayLabel}" FontSize="14" />
+                            <TextBlock Text="{Binding Relationship.SourceSubHint}"
+                                       FontSize="12" Opacity="0.6" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
             </StackPanel>
 
-            <Button Classes="arrow"
-                    Classes.off="{Binding !TranslationEnabled}"
+            <!-- Connector -->
+            <Button Grid.Column="1"
+                    Classes="connector"
+                    Classes.on="{Binding IsConnectorOn}"
+                    Classes.off="{Binding IsConnectorOff}"
+                    Classes.locked="{Binding IsConnectorLocked}"
+                    IsEnabled="{Binding !IsConnectorLocked}"
                     Command="{Binding ToggleTranslationCommand}"
-                    VerticalAlignment="Bottom"
+                    Margin="14,18,14,0"
+                    VerticalAlignment="Top"
                     ToolTip.Tip="Toggle translation">
-                <TextBlock Text="→" FontSize="18" />
+                <TextBlock Text="{Binding Relationship.ConnectorGlyph}" FontSize="17" />
             </Button>
 
-            <StackPanel Spacing="4">
-                <TextBlock Text="Target language" Opacity="0.8" />
-                <Button Classes="languageBtn"
-                        Classes.active="{Binding IsTargetPickerOpen}"
-                        IsEnabled="{Binding IsTargetButtonEnabled}"
-                        Command="{Binding OpenTargetPickerCommand}"
-                        Content="{Binding TargetButtonLabel}" />
-            </StackPanel>
-        </StackPanel>
+            <!-- Target side: form picked by the engine's capabilities (spec §4). -->
+            <StackPanel Grid.Column="2">
+                <TextBlock Classes="fieldCaption" Text="Parlotype types" />
 
-        <!-- "Translation paused" hint (Whisper + non-translation-capable model). -->
+                <!-- Toggle form (Whisper): a labelled switch, never a list. -->
+                <Border IsVisible="{Binding IsToggleForm}"
+                        MinHeight="60" CornerRadius="10"
+                        BorderThickness="1.5" Padding="14,13"
+                        BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding ToggleSwitchLabel}"
+                                   FontSize="14" VerticalAlignment="Center" />
+                        <ToggleSwitch Grid.Column="1"
+                                      IsChecked="{Binding TranslationSwitch, Mode=TwoWay}"
+                                      OnContent="" OffContent=""
+                                      VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </Grid>
+                </Border>
+
+                <!-- Full form (Gemma): picker field → popover. -->
+                <Button x:Name="TargetField"
+                        IsVisible="{Binding IsFullForm}"
+                        Classes="pickerField"
+                        Classes.open="{Binding TargetPicker.IsOpen}"
+                        Command="{Binding OpenTargetPickerCommand}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border Grid.Column="0"
+                                Width="34" Height="34" CornerRadius="8"
+                                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding TargetTileText}"
+                                       FontSize="12" FontWeight="SemiBold" Opacity="0.85"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="11,0,0,0"
+                                    VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="{Binding Relationship.TargetDisplayLabel}" FontSize="14" />
+                            <TextBlock Text="{Binding TargetSubHint}"
+                                       FontSize="12" Opacity="0.6" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <!-- None form: disabled card; the amber note below explains. -->
+                <Border IsVisible="{Binding IsNoneForm}"
+                        MinHeight="60" CornerRadius="10"
+                        BorderThickness="1.5" Padding="14,13" Opacity="0.5"
+                        BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border Grid.Column="0"
+                                Width="34" Height="34" CornerRadius="8"
+                                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="⊘" FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="11,0,0,0"
+                                    VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="Translation unavailable" FontSize="14" />
+                            <TextBlock Text="Not supported by this model"
+                                       FontSize="12" Opacity="0.7" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- Plain-language summary of the relationship (spec §7). -->
+        <TextBlock Text="{Binding Relationship.SummaryText}"
+                   FontSize="13" Opacity="0.75" TextWrapping="Wrap" />
+
+        <!-- "Translation paused" hint (Whisper + non-translation-capable model, ADR-033). -->
         <TextBlock Text="{Binding TranslationPausedNote}"
                    Foreground="{DynamicResource SystemAccentColor}"
                    FontSize="12" TextWrapping="Wrap"
-                   IsVisible="{Binding ShowTranslationPausedNote}" />
+                   IsVisible="{Binding Relationship.ShowTranslationPausedNote}" />
 
-        <!-- Inline picker (only one is visible at a time — each picker self-hosts
-             its IsVisible via LanguagePickerViewModel.IsOpen). -->
-        <settingsViews:LanguagePickerView DataContext="{Binding SourcePicker}" />
-        <settingsViews:LanguagePickerView DataContext="{Binding TargetPicker}" />
+        <!-- Amber unavailable note, naming the model (spec §4, none form only). -->
+        <Border IsVisible="{Binding IsNoneForm}"
+                Background="{DynamicResource WarnBackgroundBrush}"
+                CornerRadius="8" Padding="12,8">
+            <TextBlock Text="{Binding UnavailableNote}"
+                       Foreground="{DynamicResource WarnForegroundBrush}"
+                       FontSize="12" TextWrapping="Wrap" />
+        </Border>
+
+        <!-- Transient fallback toast (spec §8); auto-clears from the VM. -->
+        <Border Background="#29378ADD" BorderBrush="#378ADD" BorderThickness="1"
+                CornerRadius="8" Padding="12,8"
+                IsVisible="{Binding Relationship.ToastMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding Relationship.ToastMessage}"
+                       FontSize="12" TextWrapping="Wrap" />
+        </Border>
+
+        <!-- Floating popovers anchored to their fields (spec §6). -->
+        <Popup PlacementTarget="{Binding #SourceField}"
+               Placement="BottomEdgeAlignedLeft"
+               VerticalOffset="6"
+               IsLightDismissEnabled="True"
+               IsOpen="{Binding SourcePicker.IsOpen, Mode=TwoWay}">
+            <settingsViews:LanguagePickerView DataContext="{Binding SourcePicker}" />
+        </Popup>
+        <Popup PlacementTarget="{Binding #TargetField}"
+               Placement="BottomEdgeAlignedLeft"
+               VerticalOffset="6"
+               IsLightDismissEnabled="True"
+               IsOpen="{Binding TargetPicker.IsOpen, Mode=TwoWay}">
+            <settingsViews:LanguagePickerView DataContext="{Binding TargetPicker}" />
+        </Popup>
     </StackPanel>
 </UserControl>

@@ -199,6 +199,9 @@ public class App : Application
         services.AddSingleton<WhisperModelSettingsViewModel>();
         services.AddSingleton<RuntimeSettingsViewModel>();
         services.AddSingleton<WhisperOutputSettingsViewModel>();
+        // Shared source→target relationship consumed by the Language page (and the
+        // Transcribe quick picker in Phase 2) so the surfaces never drift.
+        services.AddSingleton<LanguageRelationshipViewModel>();
         services.AddSingleton<LanguageSelectionSettingsViewModel>();
         services.AddSingleton<Gemma4ModelSettingsViewModel>();
         services.AddSingleton<PromptSettingsViewModel>();

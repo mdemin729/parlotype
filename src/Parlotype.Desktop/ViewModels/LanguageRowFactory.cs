@@ -4,59 +4,88 @@ using Parlotype.Core.Speech;
 namespace Parlotype.Desktop.ViewModels;
 
 /// <summary>
-/// Builds the rows shown in a language picker. Pure presentation logic — the
-/// caller decides which catalog to display, which codes are "recent", and which
-/// command each row invokes. Used by <see cref="LanguagePickerViewModel"/> and
-/// (for now) by <c>LanguageSelectionSettingsViewModel</c>.
+/// A pinned special row offered above the searchable list (e.g. "System keyboard
+/// layout", "Auto-detect", "Off — no translation").
+/// </summary>
+public sealed record LanguageSpecialRow(
+    string Code, string Label, string? SubHint, LanguageRowIcon Icon);
+
+/// <summary>
+/// Builds the rows shown in a language picker popover. Pure presentation logic —
+/// the caller decides which catalog to display, which codes are "recent", which
+/// specials to pin, and which command each row invokes.
 ///
-/// <para>Rows are ordered as: optional leading sentinel (e.g. "Auto-detect" /
-/// "Default — no translation"), recent languages pinned to the top, then the
-/// remaining supported languages in catalog order. Each language appears once.
-/// The leading sentinel is hidden while a non-empty filter is active — it is a
-/// mode, not a language, and the user expects the search to scope to actual
-/// languages.</para>
+/// <para>At rest (no query): specials first, then — when the list is long enough
+/// to warrant search — a "Recent" group (role MRU ∩ supported) and an
+/// "All languages" group; short lists get flat rows with no headers. While a
+/// query is active, specials and the Recent cluster are hidden (the user is
+/// hunting a language at that point) and the filtered list is flat (spec §6).</para>
 /// </summary>
 public static class LanguageRowFactory
 {
     /// <summary>
+    /// Lists longer than this get a search box and Recent/All group labels;
+    /// shorter lists show neither (spec §6: "> 8 entries").
+    /// </summary>
+    public const int SearchThreshold = 8;
+
+    /// <summary>
     /// Builds an ordered, de-duplicated list of <see cref="LanguageDisplayItem"/>
-    /// rows for the given catalog + recent codes + filter text. The selection
+    /// rows for the given catalog + recents + specials + filter text. Selection
     /// state (<see cref="LanguageDisplayItem.IsSelected"/>) is left to the caller.
     /// </summary>
     public static IEnumerable<LanguageDisplayItem> Build(
         IReadOnlyList<LanguageInfo> supported,
         IReadOnlyList<string> recents,
-        (string Code, string Label)? leadingSentinel,
+        IReadOnlyList<LanguageSpecialRow> specials,
         string filter,
         ICommand selectCommand)
     {
-        if (leadingSentinel is { } sentinel && string.IsNullOrWhiteSpace(filter))
+        var searching = !string.IsNullOrWhiteSpace(filter);
+
+        if (searching)
         {
-            yield return new LanguageDisplayItem(
-                sentinel.Code, sentinel.Label, isRecent: false, selectCommand);
+            // Flat filtered list — no specials, no Recent cluster, no headers.
+            foreach (var info in supported)
+            {
+                if (Matches(info, filter))
+                    yield return LanguageDisplayItem.Language(info, isRecent: false, selectCommand);
+            }
+            yield break;
         }
 
+        foreach (var special in specials)
+        {
+            yield return LanguageDisplayItem.Special(
+                special.Code, special.Label, special.SubHint, special.Icon, selectCommand);
+        }
+
+        var grouped = supported.Count > SearchThreshold;
         var byCode = supported.ToDictionary(l => l.Code, StringComparer.OrdinalIgnoreCase);
         var pinned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        var recentRows = new List<LanguageDisplayItem>();
         foreach (var code in recents)
         {
-            if (byCode.TryGetValue(code, out var info)
-                && Matches(info, filter)
-                && pinned.Add(code))
-            {
-                yield return new LanguageDisplayItem(
-                    info.Code, LanguageCatalog.GetDisplayLabel(info.Code), isRecent: true, selectCommand);
-            }
+            if (byCode.TryGetValue(code, out var info) && pinned.Add(code))
+                recentRows.Add(LanguageDisplayItem.Language(info, isRecent: true, selectCommand));
         }
+
+        if (recentRows.Count > 0)
+        {
+            if (grouped)
+                yield return LanguageDisplayItem.Header("Recent");
+            foreach (var row in recentRows)
+                yield return row;
+        }
+
+        if (grouped)
+            yield return LanguageDisplayItem.Header("All languages");
 
         foreach (var info in supported)
         {
-            if (Matches(info, filter) && !pinned.Contains(info.Code))
-            {
-                yield return new LanguageDisplayItem(
-                    info.Code, LanguageCatalog.GetDisplayLabel(info.Code), isRecent: false, selectCommand);
-            }
+            if (!pinned.Contains(info.Code))
+                yield return LanguageDisplayItem.Language(info, isRecent: false, selectCommand);
         }
     }
 

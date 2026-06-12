@@ -23,7 +23,8 @@ public class SettingsWindowViewModelTests
         var model = new WhisperModelSettingsViewModel(settings);
         var runtime = new RuntimeSettingsViewModel(settings, nvidia, vulkan);
         var whisperOutput = new WhisperOutputSettingsViewModel(settings);
-        var language = new LanguageSelectionSettingsViewModel(settings);
+        var language = new LanguageSelectionSettingsViewModel(
+            new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService()));
         var gemma4Model = new Gemma4ModelSettingsViewModel(settings);
         var prompts = new PromptSettingsViewModel(new MockPromptTemplateRegistry());
         var llamaCpp = new LlamaCppSettingsViewModel(settings);
@@ -164,16 +165,16 @@ public class SettingsWindowViewModelTests
         vm.Language.ToggleTranslationCommand.Execute(null);
 
         // Base (default) supports translation — note stays hidden.
-        Assert.False(vm.Language.ShowTranslationPausedNote);
+        Assert.False(vm.Language.Relationship.ShowTranslationPausedNote);
 
         // Large v3 Turbo does not — the model change must propagate through the
         // SettingsWindowViewModel wiring and surface the paused note.
         vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.LargeV3Turbo);
-        Assert.True(vm.Language.ShowTranslationPausedNote);
+        Assert.True(vm.Language.Relationship.ShowTranslationPausedNote);
 
         // Switching back to a translation-capable model hides the note again.
         vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.Medium);
-        Assert.False(vm.Language.ShowTranslationPausedNote);
+        Assert.False(vm.Language.Relationship.ShowTranslationPausedNote);
     }
 
     private static void AssertHeader(SettingsNavItem item, string label)
