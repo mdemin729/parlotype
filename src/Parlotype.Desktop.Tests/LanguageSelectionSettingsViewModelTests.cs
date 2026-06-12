@@ -30,10 +30,10 @@ public class LanguageSelectionSettingsViewModelTests
     {
         var vm = await CreateAsync(new MockSettingsService());
 
-        Assert.True(vm.IsToggleForm);
-        Assert.False(vm.IsFullForm);
-        Assert.False(vm.IsNoneForm);
-        Assert.Equal("Translate to English", vm.ToggleSwitchLabel);
+        Assert.True(vm.Relationship.IsToggleForm);
+        Assert.False(vm.Relationship.IsFullForm);
+        Assert.False(vm.Relationship.IsNoneForm);
+        Assert.Equal("Translate to English", vm.Relationship.ToggleSwitchLabel);
     }
 
     [Fact]
@@ -41,9 +41,9 @@ public class LanguageSelectionSettingsViewModelTests
     {
         var vm = await CreateAsync(new MockSettingsService(), SpeechEngine.Gemma4);
 
-        Assert.True(vm.IsFullForm);
-        Assert.False(vm.IsToggleForm);
-        Assert.False(vm.IsNoneForm);
+        Assert.True(vm.Relationship.IsFullForm);
+        Assert.False(vm.Relationship.IsToggleForm);
+        Assert.False(vm.Relationship.IsNoneForm);
     }
 
     [Fact]
@@ -53,22 +53,22 @@ public class LanguageSelectionSettingsViewModelTests
 
         vm.UpdateForEngine(TranscribeOnlyEngine);
 
-        Assert.True(vm.IsNoneForm);
-        Assert.True(vm.IsConnectorLocked);
-        Assert.False(vm.IsConnectorOn);
-        Assert.Contains("can't translate", vm.UnavailableNote);
+        Assert.True(vm.Relationship.IsNoneForm);
+        Assert.True(vm.Relationship.IsConnectorLocked);
+        Assert.False(vm.Relationship.IsConnectorOn);
+        Assert.Contains("can't translate", vm.Relationship.UnavailableNote);
     }
 
     [Fact]
     public async Task EngineSwitch_MorphsFormInPlace()
     {
         var vm = await CreateAsync(new MockSettingsService());
-        Assert.True(vm.IsToggleForm);
+        Assert.True(vm.Relationship.IsToggleForm);
 
         vm.UpdateForEngine(SpeechEngine.Gemma4);
 
-        Assert.True(vm.IsFullForm);
-        Assert.False(vm.IsToggleForm);
+        Assert.True(vm.Relationship.IsFullForm);
+        Assert.False(vm.Relationship.IsToggleForm);
     }
 
     // ----- Connector / switch (FR-C1..C3) ----------------------------------------
@@ -78,11 +78,11 @@ public class LanguageSelectionSettingsViewModelTests
     {
         var settings = new MockSettingsService();
         var vm = await CreateAsync(settings);
-        Assert.True(vm.IsConnectorOff);
+        Assert.True(vm.Relationship.IsConnectorOff);
 
         vm.ToggleTranslationCommand.Execute(null);
 
-        Assert.True(vm.IsConnectorOn);
+        Assert.True(vm.Relationship.IsConnectorOn);
         Assert.True(vm.Relationship.TranslationEnabled);
         Assert.Equal("en", vm.Relationship.TargetCode);
     }
@@ -93,14 +93,14 @@ public class LanguageSelectionSettingsViewModelTests
         var settings = new MockSettingsService();
         var vm = await CreateAsync(settings);
 
-        vm.TranslationSwitch = true;
+        vm.Relationship.TranslationSwitch = true;
 
         Assert.True(vm.Relationship.TranslationEnabled);
         Assert.Equal("en", vm.Relationship.TargetCode);
         Assert.Equal(true.ToString(),
             await settings.GetAsync<string>(SettingsKeys.TranslationEnabled, TestContext.Current.CancellationToken));
 
-        vm.TranslationSwitch = false;
+        vm.Relationship.TranslationSwitch = false;
         Assert.False(vm.Relationship.TranslationEnabled);
     }
 

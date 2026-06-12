@@ -2,11 +2,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Parlotype.Desktop.ViewModels"
         xmlns:views="using:Parlotype.Desktop.Views"
+        xmlns:settingsViews="using:Parlotype.Desktop.Views.Settings"
         x:Class="Parlotype.Desktop.Views.TranscribeWindow"
         x:DataType="vm:TranscribeViewModel"
         x:CompileBindings="True"
         Title="Parlotype — Transcribe"
-        Width="240" Height="128"
+        Width="240" Height="184"
         CanResize="False"
         Topmost="True"
         WindowStartupLocation="CenterScreen">
@@ -15,6 +16,7 @@
         <SolidColorBrush x:Key="WaveformActiveBrush" Color="White" />
         <SolidColorBrush x:Key="WaveformIdleBrush" Color="White" />
         <SolidColorBrush x:Key="WaveformDisabledBrush" Color="#378ADD" />
+        <SolidColorBrush x:Key="WarnForegroundBrush" Color="#E0A23A" />
     </Window.Resources>
 
     <Window.Styles>
@@ -22,13 +24,40 @@
             <Setter Property="Background" Value="#378ADD" />
             <Setter Property="Foreground" Value="White" />
         </Style>
+
+        <!-- Quick-picker strip: miniature of the page relationship (spec §2.2). -->
+        <Style Selector="Button.chip">
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style Selector="Button.stripConnector">
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="MinWidth" Value="30" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.stripConnector.on">
+            <Setter Property="Background" Value="#378ADD" />
+        </Style>
+        <Style Selector="Button.stripConnector.on TextBlock">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="Button.stripConnector.off">
+            <Setter Property="Opacity" Value="0.55" />
+        </Style>
+        <Style Selector="Button.stripConnector.locked">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
     </Window.Styles>
 
     <Design.DataContext>
         <vm:TranscribeViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="*,Auto" Margin="24">
+    <Grid RowDefinitions="*,Auto,Auto" Margin="24,24,24,16">
         <StackPanel Grid.Row="0"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center"
@@ -69,10 +98,99 @@
             </Button>
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
+        <!-- Quick-picker strip: source · connector · target (spec §2.2). -->
+        <Border Name="LanguageStrip"
+                Grid.Row="1"
+                IsVisible="{Binding HasLanguageStrip}"
+                Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                CornerRadius="9" Padding="3"
+                HorizontalAlignment="Center"
+                Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="2">
+                <Button Classes="chip"
+                        Command="{Binding OpenLanguageFlyoutCommand}"
+                        Content="{Binding SourceShort}" />
+                <Button Classes="stripConnector"
+                        Classes.on="{Binding Relationship.IsConnectorOn}"
+                        Classes.off="{Binding Relationship.IsConnectorOff}"
+                        Classes.locked="{Binding Relationship.IsConnectorLocked}"
+                        IsEnabled="{Binding !Relationship.IsConnectorLocked}"
+                        Command="{Binding ToggleTranslationCommand}"
+                        ToolTip.Tip="Toggle translation">
+                    <TextBlock Text="{Binding Relationship.ConnectorGlyph}" FontSize="13" />
+                </Button>
+                <Button Classes="chip"
+                        Command="{Binding OpenLanguageFlyoutCommand}"
+                        Content="{Binding TargetShort}" />
+            </StackPanel>
+        </Border>
+
+        <TextBlock Grid.Row="2"
                    Text="{Binding StatusText}"
                    HorizontalAlignment="Center"
-                   FontSize="14" Opacity="0.7"
+                   FontSize="13" Opacity="0.7"
                    Margin="0,8,0,0" />
+
+        <!-- Language flyout: opens above the widget, leads with the target
+             control, source is read-only and routes to Settings (spec §2.2). -->
+        <Popup Grid.Row="1"
+               PlacementTarget="{Binding #LanguageStrip}"
+               Placement="TopEdgeAlignedLeft"
+               VerticalOffset="-8"
+               IsLightDismissEnabled="True"
+               IsOpen="{Binding IsLanguageFlyoutOpen, Mode=TwoWay}">
+            <Border Classes="popoverChrome" Width="268">
+                <StackPanel Spacing="8">
+
+                    <!-- Toggle form: labelled switch. -->
+                    <Grid ColumnDefinitions="*,Auto"
+                          IsVisible="{Binding Relationship.IsToggleForm}">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Relationship.ToggleSwitchLabel}"
+                                   FontSize="13" VerticalAlignment="Center" />
+                        <ToggleSwitch Grid.Column="1"
+                                      IsChecked="{Binding Relationship.TranslationSwitch, Mode=TwoWay}"
+                                      OnContent="" OffContent=""
+                                      VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </Grid>
+
+                    <!-- None form: short amber explanation. -->
+                    <TextBlock IsVisible="{Binding Relationship.IsNoneForm}"
+                               Text="{Binding Relationship.UnavailableNote}"
+                               Foreground="{DynamicResource WarnForegroundBrush}"
+                               FontSize="12" TextWrapping="Wrap" />
+
+                    <!-- Full form: the shared picker (header, search, Off row, list).
+                         IsVisible lives on the wrapper — the picker's DataContext is
+                         swapped to the picker VM, which has no Relationship. -->
+                    <Panel IsVisible="{Binding Relationship.IsFullForm}">
+                        <settingsViews:LanguagePickerView
+                            DataContext="{Binding TargetPicker}"
+                            MaxHeight="280" />
+                    </Panel>
+
+                    <Separator Opacity="0.4" />
+
+                    <!-- Read-only source row: editing the source lives in Settings. -->
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            Padding="8,6" CornerRadius="8"
+                            Command="{Binding GoToLanguageSettingsCommand}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Spacing="1">
+                                <TextBlock Text="You speak" FontSize="11" Opacity="0.55" />
+                                <TextBlock Text="{Binding Relationship.SourceDisplayLabel}"
+                                           FontSize="13" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1"
+                                       Text="Settings →"
+                                       FontSize="11" Opacity="0.55"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

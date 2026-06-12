@@ -20,6 +20,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private readonly ITextInjectionService? _textInjectionService;
     private readonly IAudioLevelProvider? _audioLevelProvider;
     private readonly IWindowManager _windowManager;
+    private readonly LanguageRelationshipViewModel? _relationship;
     private readonly ILogger<TranscribeViewModel> _logger;
 
     /// <summary>RMS threshold above which we consider speech active for visual feedback.</summary>
@@ -71,17 +72,134 @@ public partial class TranscribeViewModel : ViewModelBase
         IAudioPipeline? pipeline = null,
         ITextInjectionService? textInjectionService = null,
         IAudioLevelProvider? audioLevelProvider = null,
+        LanguageRelationshipViewModel? relationship = null,
         ILogger<TranscribeViewModel>? logger = null)
     {
         _windowManager = windowManager;
         _pipeline = pipeline;
         _textInjectionService = textInjectionService;
         _audioLevelProvider = audioLevelProvider;
+        _relationship = relationship;
         _logger = logger ?? NullLogger<TranscribeViewModel>.Instance;
+
+        if (_relationship is not null)
+        {
+            TargetPicker = new LanguagePickerViewModel(
+                header: "Translate to",
+                getSupported: () => _relationship.TargetLanguages,
+                getRecents: () => _relationship.TargetRecent,
+                getSelectedCode: () => _relationship.TranslationEnabled
+                    ? _relationship.TargetCode
+                    : LanguageCatalog.NoTranslationCode,
+                onSelect: SelectTargetFromFlyout,
+                getSpecials: () =>
+                    [new LanguageSpecialRow(
+                        LanguageCatalog.NoTranslationCode, "Off — no translation",
+                        SubHint: null, LanguageRowIcon.Off)]);
+
+            _relationship.PropertyChanged += OnRelationshipPropertyChanged;
+            // Recording must restart to pick up new languages, whichever surface
+            // changed them (this window's flyout or the Settings page).
+            _relationship.RelationshipChanged += (_, _) => _ = StopRecordingAsync();
+        }
     }
 
     /// <summary>Parameterless constructor for designer support only.</summary>
     public TranscribeViewModel() : this(new DesignWindowManager()) { }
+
+    // ----- Language quick-picker strip (spec §2.2, FR-W1..W5) -----------------
+
+    /// <summary>The shared relationship; null in designer/legacy-test contexts.</summary>
+    public LanguageRelationshipViewModel? Relationship => _relationship;
+
+    /// <summary>Strip + flyout render only when the relationship is wired.</summary>
+    public bool HasLanguageStrip => _relationship is not null;
+
+    /// <summary>Target picker embedded in the flyout (full form only).</summary>
+    public LanguagePickerViewModel? TargetPicker { get; }
+
+    [ObservableProperty]
+    private bool _isLanguageFlyoutOpen;
+
+    /// <summary>Compact source chip: detected/explicit language name or "Auto".</summary>
+    public string SourceShort
+    {
+        get
+        {
+            if (_relationship is null)
+                return "";
+            var code = _relationship.SourceCode;
+            if (LanguageCatalog.IsKeyboardLayout(code))
+            {
+                return _relationship.DetectedKeyboardLayout is { } layout
+                    ? LanguageCatalog.GetEnglishName(layout.LanguageCode)
+                    : "Keyboard";
+            }
+            return LanguageCatalog.IsAutoDetect(code) ? "Auto" : LanguageCatalog.GetEnglishName(code);
+        }
+    }
+
+    /// <summary>
+    /// Compact target chip: the target name while translating, otherwise the
+    /// source mirrored — "English = English" reads "typed as spoken".
+    /// </summary>
+    public string TargetShort =>
+        _relationship is null ? ""
+        : _relationship.TranslationEnabled && !_relationship.IsNoneForm
+            ? LanguageCatalog.GetEnglishName(_relationship.TargetCode)
+            : SourceShort;
+
+    [RelayCommand]
+    private void ToggleTranslation() => _relationship?.ToggleTranslation();
+
+    [RelayCommand]
+    private void OpenLanguageFlyout()
+    {
+        if (_relationship is null)
+            return;
+
+        var willOpen = !IsLanguageFlyoutOpen;
+        if (willOpen)
+        {
+            _relationship.RefreshKeyboardLayout();
+            if (TargetPicker is not null)
+            {
+                TargetPicker.Filter = "";
+                TargetPicker.Refresh();
+            }
+        }
+
+        IsLanguageFlyoutOpen = willOpen;
+    }
+
+    /// <summary>Source editing lives in Settings — the flyout row routes there.</summary>
+    [RelayCommand]
+    private void GoToLanguageSettings()
+    {
+        IsLanguageFlyoutOpen = false;
+        _windowManager.ShowSettings();
+    }
+
+    private void SelectTargetFromFlyout(string code)
+    {
+        _relationship?.SelectTarget(code);
+        IsLanguageFlyoutOpen = false;
+    }
+
+    private void OnRelationshipPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(LanguageRelationshipViewModel.SourceCode):
+            case nameof(LanguageRelationshipViewModel.DetectedKeyboardLayout):
+            case nameof(LanguageRelationshipViewModel.TranslationEnabled):
+            case nameof(LanguageRelationshipViewModel.TargetCode):
+            case nameof(LanguageRelationshipViewModel.Capabilities):
+                OnPropertyChanged(nameof(SourceShort));
+                OnPropertyChanged(nameof(TargetShort));
+                break;
+        }
+    }
 
     [RelayCommand]
     private async Task TogglePlayAsync()

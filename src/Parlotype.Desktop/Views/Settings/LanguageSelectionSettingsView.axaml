@@ -103,10 +103,10 @@
             <!-- Connector -->
             <Button Grid.Column="1"
                     Classes="connector"
-                    Classes.on="{Binding IsConnectorOn}"
-                    Classes.off="{Binding IsConnectorOff}"
-                    Classes.locked="{Binding IsConnectorLocked}"
-                    IsEnabled="{Binding !IsConnectorLocked}"
+                    Classes.on="{Binding Relationship.IsConnectorOn}"
+                    Classes.off="{Binding Relationship.IsConnectorOff}"
+                    Classes.locked="{Binding Relationship.IsConnectorLocked}"
+                    IsEnabled="{Binding !Relationship.IsConnectorLocked}"
                     Command="{Binding ToggleTranslationCommand}"
                     Margin="14,18,14,0"
                     VerticalAlignment="Top"
@@ -119,16 +119,16 @@
                 <TextBlock Classes="fieldCaption" Text="Parlotype types" />
 
                 <!-- Toggle form (Whisper): a labelled switch, never a list. -->
-                <Border IsVisible="{Binding IsToggleForm}"
+                <Border IsVisible="{Binding Relationship.IsToggleForm}"
                         MinHeight="60" CornerRadius="10"
                         BorderThickness="1.5" Padding="14,13"
                         BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}">
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Grid.Column="0"
-                                   Text="{Binding ToggleSwitchLabel}"
+                                   Text="{Binding Relationship.ToggleSwitchLabel}"
                                    FontSize="14" VerticalAlignment="Center" />
                         <ToggleSwitch Grid.Column="1"
-                                      IsChecked="{Binding TranslationSwitch, Mode=TwoWay}"
+                                      IsChecked="{Binding Relationship.TranslationSwitch, Mode=TwoWay}"
                                       OnContent="" OffContent=""
                                       VerticalAlignment="Center" Margin="10,0,0,0" />
                     </Grid>
@@ -136,7 +136,7 @@
 
                 <!-- Full form (Gemma): picker field → popover. -->
                 <Button x:Name="TargetField"
-                        IsVisible="{Binding IsFullForm}"
+                        IsVisible="{Binding Relationship.IsFullForm}"
                         Classes="pickerField"
                         Classes.open="{Binding TargetPicker.IsOpen}"
                         Command="{Binding OpenTargetPickerCommand}">
@@ -159,7 +159,7 @@
                 </Button>
 
                 <!-- None form: disabled card; the amber note below explains. -->
-                <Border IsVisible="{Binding IsNoneForm}"
+                <Border IsVisible="{Binding Relationship.IsNoneForm}"
                         MinHeight="60" CornerRadius="10"
                         BorderThickness="1.5" Padding="14,13" Opacity="0.5"
                         BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}">
@@ -193,10 +193,10 @@
                    IsVisible="{Binding Relationship.ShowTranslationPausedNote}" />
 
         <!-- Amber unavailable note, naming the model (spec §4, none form only). -->
-        <Border IsVisible="{Binding IsNoneForm}"
+        <Border IsVisible="{Binding Relationship.IsNoneForm}"
                 Background="{DynamicResource WarnBackgroundBrush}"
                 CornerRadius="8" Padding="12,8">
-            <TextBlock Text="{Binding UnavailableNote}"
+            <TextBlock Text="{Binding Relationship.UnavailableNote}"
                        Foreground="{DynamicResource WarnForegroundBrush}"
                        FontSize="12" TextWrapping="Wrap" />
         </Border>
@@ -215,14 +215,18 @@
                VerticalOffset="6"
                IsLightDismissEnabled="True"
                IsOpen="{Binding SourcePicker.IsOpen, Mode=TwoWay}">
-            <settingsViews:LanguagePickerView DataContext="{Binding SourcePicker}" />
+            <Border Classes="popoverChrome" Width="300">
+                <settingsViews:LanguagePickerView DataContext="{Binding SourcePicker}" />
+            </Border>
         </Popup>
         <Popup PlacementTarget="{Binding #TargetField}"
                Placement="BottomEdgeAlignedLeft"
                VerticalOffset="6"
                IsLightDismissEnabled="True"
                IsOpen="{Binding TargetPicker.IsOpen, Mode=TwoWay}">
-            <settingsViews:LanguagePickerView DataContext="{Binding TargetPicker}" />
+            <Border Classes="popoverChrome" Width="300">
+                <settingsViews:LanguagePickerView DataContext="{Binding TargetPicker}" />
+            </Border>
         </Popup>
     </StackPanel>
 </UserControl>

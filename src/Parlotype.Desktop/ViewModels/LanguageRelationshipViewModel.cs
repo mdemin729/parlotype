@@ -84,6 +84,9 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ConnectorGlyph))]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     [NotifyPropertyChangedFor(nameof(ShowTranslationPausedNote))]
+    [NotifyPropertyChangedFor(nameof(TranslationSwitch))]
+    [NotifyPropertyChangedFor(nameof(IsConnectorOn))]
+    [NotifyPropertyChangedFor(nameof(IsConnectorOff))]
     private bool _translationEnabled;
 
     /// <summary>
@@ -129,6 +132,40 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         : ConnectorState.Off;
 
     public string ConnectorGlyph => Connector == ConnectorState.On ? "→" : "=";
+
+    // Boolean projections of TargetForm / Connector for Classes.* and IsVisible
+    // bindings, shared by the Settings page and the Transcribe strip/flyout.
+    public bool IsToggleForm => TargetForm == TranslationForm.Toggle;
+    public bool IsFullForm => TargetForm == TranslationForm.Full;
+    public bool IsNoneForm => TargetForm == TranslationForm.None;
+    public bool IsConnectorOn => Connector == ConnectorState.On;
+    public bool IsConnectorOff => Connector == ConnectorState.Off;
+    public bool IsConnectorLocked => Connector == ConnectorState.Locked;
+
+    /// <summary>
+    /// Two-way surface for <c>ToggleSwitch</c> bindings. Routed through
+    /// <see cref="ToggleTranslation"/> so default-target selection and
+    /// persistence apply instead of a bare property write.
+    /// </summary>
+    public bool TranslationSwitch
+    {
+        get => TranslationEnabled;
+        set
+        {
+            if (value != TranslationEnabled)
+                ToggleTranslation();
+        }
+    }
+
+    /// <summary>Label for the toggle-form switch (e.g. "Translate to English").</summary>
+    public string ToggleSwitchLabel =>
+        Capabilities.FixedTranslationTargets.Count > 0
+            ? $"Translate to {LanguageCatalog.GetEnglishName(Capabilities.FixedTranslationTargets[0].Code)}"
+            : "Translate";
+
+    /// <summary>Amber inline note for the none form, naming the model (spec §4).</summary>
+    public string UnavailableNote =>
+        $"{EngineDisplayName} can't translate — Parlotype types exactly what you say.";
 
     /// <summary>Resting label for the source card.</summary>
     public string SourceDisplayLabel =>
@@ -433,6 +470,14 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         OnPropertyChanged(nameof(SummaryText));
         OnPropertyChanged(nameof(TargetLanguages));
         OnPropertyChanged(nameof(ShowTranslationPausedNote));
+        OnPropertyChanged(nameof(IsToggleForm));
+        OnPropertyChanged(nameof(IsFullForm));
+        OnPropertyChanged(nameof(IsNoneForm));
+        OnPropertyChanged(nameof(IsConnectorOn));
+        OnPropertyChanged(nameof(IsConnectorOff));
+        OnPropertyChanged(nameof(IsConnectorLocked));
+        OnPropertyChanged(nameof(ToggleSwitchLabel));
+        OnPropertyChanged(nameof(UnavailableNote));
     }
 
     private static string EngineName(SpeechEngine engine) => engine switch

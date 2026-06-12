@@ -5,6 +5,17 @@
              x:DataType="vm:AppViewModel">
     <Application.Styles>
         <FluentTheme />
+
+        <!-- Shared chrome for the language picker popovers (Settings page popups
+             and the Transcribe window flyout host their own width). -->
+        <Style Selector="Border.popoverChrome">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+            <Setter Property="BoxShadow" Value="0 8 24 0 #66000000" />
+        </Style>
     </Application.Styles>
 
     <TrayIcon.Icons>

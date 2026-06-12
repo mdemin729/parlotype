@@ -1,5 +1,7 @@
 using Avalonia.Headless.XUnit;
 using Parlotype.Core.Audio;
+using Parlotype.Core.Settings;
+using Parlotype.Core.Speech;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels;
 using Xunit;
@@ -246,5 +248,151 @@ public class TranscribeViewModelTests
         await Task.Delay(50);
 
         Assert.Equal(RecordingState.Idle, vm.RecordingState);
+    }
+}
+
+/// <summary>
+/// Phase 2: the quick-picker strip and language flyout on the Transcribe window
+/// (spec §2.2, FR-W1..W5). Recording/audio behaviour stays covered above.
+/// </summary>
+public class TranscribeLanguageStripTests
+{
+    private static async Task<(TranscribeViewModel Vm, LanguageRelationshipViewModel Relationship,
+        MockSettingsService Settings, MockWindowManager Wm)> CreateAsync(
+        SpeechEngine engine = SpeechEngine.Whisper,
+        KeyboardLayoutInfo? layout = null,
+        MockAudioPipeline? pipeline = null)
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechEngine, engine.ToString(), TestContext.Current.CancellationToken);
+        var relationship = new LanguageRelationshipViewModel(
+            settings, new MockKeyboardLayoutService { Result = layout });
+        await relationship.InitializeAsync(TestContext.Current.CancellationToken);
+
+        var wm = new MockWindowManager();
+        var vm = new TranscribeViewModel(wm, pipeline, relationship: relationship);
+        return (vm, relationship, settings, wm);
+    }
+
+    [AvaloniaFact]
+    public void NoRelationship_HidesStrip()
+    {
+        var vm = new TranscribeViewModel(new MockWindowManager());
+
+        Assert.False(vm.HasLanguageStrip);
+        Assert.Null(vm.TargetPicker);
+        Assert.Equal("", vm.SourceShort);
+    }
+
+    [AvaloniaFact]
+    public async Task Strip_ReflectsRelationshipAtRest()
+    {
+        var (vm, relationship, _, _) = await CreateAsync();
+
+        Assert.True(vm.HasLanguageStrip);
+        Assert.Equal("Auto", vm.SourceShort);
+        Assert.Equal("Auto", vm.TargetShort); // off → output mirrors spoken
+        Assert.False(relationship.IsConnectorOn);
+    }
+
+    [AvaloniaFact]
+    public async Task Strip_ShowsTargetName_WhenTranslating()
+    {
+        var (vm, relationship, _, _) = await CreateAsync(SpeechEngine.Gemma4);
+        relationship.SelectSource("ru");
+        relationship.SelectTarget("fr");
+
+        Assert.Equal("Russian", vm.SourceShort);
+        Assert.Equal("French", vm.TargetShort);
+    }
+
+    [AvaloniaFact]
+    public async Task Strip_KeyboardSource_ShowsDetectedLanguage()
+    {
+        var (vm, relationship, _, _) = await CreateAsync(
+            layout: new KeyboardLayoutInfo("de", "German (Germany)"));
+        relationship.SelectSource(LanguageCatalog.KeyboardLayoutCode);
+
+        Assert.Equal("German", vm.SourceShort);
+    }
+
+    [AvaloniaFact]
+    public async Task StripConnector_TogglesTranslation_OneClick()
+    {
+        var (vm, relationship, settings, _) = await CreateAsync();
+
+        vm.ToggleTranslationCommand.Execute(null);
+
+        Assert.True(relationship.TranslationEnabled);
+        Assert.Equal("English", vm.TargetShort);
+        Assert.Equal(true.ToString(),
+            await settings.GetAsync<string>(SettingsKeys.TranslationEnabled, TestContext.Current.CancellationToken));
+    }
+
+    [AvaloniaFact]
+    public async Task Flyout_OpensWithFreshPickerState()
+    {
+        var (vm, _, _, _) = await CreateAsync(SpeechEngine.Gemma4);
+        vm.TargetPicker!.Filter = "stale";
+
+        vm.OpenLanguageFlyoutCommand.Execute(null);
+
+        Assert.True(vm.IsLanguageFlyoutOpen);
+        Assert.Equal("", vm.TargetPicker.Filter);
+        // Off row leads the full-form picker.
+        Assert.Equal(LanguageCatalog.NoTranslationCode, vm.TargetPicker.Items[0].Code);
+    }
+
+    [AvaloniaFact]
+    public async Task Flyout_SelectTarget_EnablesTranslation_AndCloses()
+    {
+        var (vm, relationship, _, _) = await CreateAsync(SpeechEngine.Gemma4);
+        vm.OpenLanguageFlyoutCommand.Execute(null);
+
+        vm.TargetPicker!.SelectCommand.Execute("fr");
+
+        Assert.False(vm.IsLanguageFlyoutOpen);
+        Assert.True(relationship.TranslationEnabled);
+        Assert.Equal("fr", relationship.TargetCode);
+        Assert.Equal("French", vm.TargetShort);
+    }
+
+    [AvaloniaFact]
+    public async Task Flyout_SourceRow_RoutesToSettings_AndCloses()
+    {
+        var (vm, _, _, wm) = await CreateAsync();
+        vm.OpenLanguageFlyoutCommand.Execute(null);
+
+        vm.GoToLanguageSettingsCommand.Execute(null);
+
+        Assert.False(vm.IsLanguageFlyoutOpen);
+        Assert.Equal(1, wm.ShowSettingsCount);
+    }
+
+    [AvaloniaFact]
+    public async Task RelationshipChange_StopsActiveRecording()
+    {
+        var pipeline = new MockAudioPipeline();
+        var (vm, relationship, _, _) = await CreateAsync(pipeline: pipeline);
+        await vm.StartRecordingAsync();
+        Assert.True(vm.IsRecording);
+
+        // Change from any surface (here: as if the Settings page selected a source).
+        relationship.SelectSource("ru");
+        await Task.Delay(100);
+
+        Assert.False(vm.IsRecording);
+    }
+
+    [AvaloniaFact]
+    public async Task EngineSwitch_LocksStripConnector()
+    {
+        var (vm, relationship, _, _) = await CreateAsync();
+
+        relationship.SetEngine((SpeechEngine)999);
+
+        Assert.True(relationship.IsConnectorLocked);
+        Assert.Equal("=", relationship.ConnectorGlyph);
+        Assert.Equal(vm.SourceShort, vm.TargetShort); // output mirrors spoken
     }
 }

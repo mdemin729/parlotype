@@ -10,13 +10,13 @@ namespace Parlotype.Desktop.ViewModels.Settings;
 /// Settings → Language page: a thin presentation wrapper over the shared
 /// <see cref="LanguageRelationshipViewModel"/> (which owns all state,
 /// persistence, and fallback logic — see spec §7/§8). This VM contributes only
-/// what is page-specific: the two picker popovers, the target's form-dependent
-/// rendering flags (toggle / full / none), the connector CSS-class booleans,
-/// and recording-stop on selection changes.
+/// what is page-specific: the two picker popovers and a handful of tile/sub-hint
+/// strings. Recording-stop on language changes is handled by
+/// <see cref="TranscribeViewModel"/> itself via the relationship's
+/// <see cref="LanguageRelationshipViewModel.RelationshipChanged"/> event.
 /// </summary>
 public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewModelBase
 {
-    private readonly TranscribeViewModel? _transcribeViewModel;
     private readonly ILogger<LanguageSelectionSettingsViewModel> _logger;
 
     public override string Title => "Language";
@@ -30,11 +30,9 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
 
     public LanguageSelectionSettingsViewModel(
         LanguageRelationshipViewModel relationship,
-        TranscribeViewModel? transcribeViewModel = null,
         ILogger<LanguageSelectionSettingsViewModel>? logger = null)
     {
         Relationship = relationship;
-        _transcribeViewModel = transcribeViewModel;
         _logger = logger ?? NullLogger<LanguageSelectionSettingsViewModel>.Instance;
 
         SourcePicker = new LanguagePickerViewModel(
@@ -59,7 +57,6 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
                     SubHint: null, LanguageRowIcon.Off)]);
 
         Relationship.PropertyChanged += OnRelationshipPropertyChanged;
-        Relationship.RelationshipChanged += OnRelationshipChanged;
 
         // Fire-and-forget — idempotent; log faults so a corrupt settings.json
         // doesn't fail silently. (The relationship may already be initialized by
@@ -69,45 +66,9 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
             TaskContinuationOptions.OnlyOnFaulted);
     }
 
-    // ----- Form / connector rendering flags --------------------------------
-
-    /// <summary>Whisper-style: exactly off + one fixed target ⇒ a switch, no list.</summary>
-    public bool IsToggleForm => Relationship.TargetForm == TranslationForm.Toggle;
-
-    /// <summary>LLM-style arbitrary targets ⇒ picker button + popover.</summary>
-    public bool IsFullForm => Relationship.TargetForm == TranslationForm.Full;
-
-    /// <summary>Engine can't translate ⇒ disabled card + amber note + locked connector.</summary>
-    public bool IsNoneForm => Relationship.TargetForm == TranslationForm.None;
-
-    public bool IsConnectorOn => Relationship.Connector == ConnectorState.On;
-    public bool IsConnectorOff => Relationship.Connector == ConnectorState.Off;
-    public bool IsConnectorLocked => Relationship.Connector == ConnectorState.Locked;
-
-    /// <summary>
-    /// Two-way surface for the toggle-form switch. Routed through
-    /// <see cref="LanguageRelationshipViewModel.ToggleTranslation"/> so default
-    /// targets and persistence apply.
-    /// </summary>
-    public bool TranslationSwitch
-    {
-        get => Relationship.TranslationEnabled;
-        set
-        {
-            if (value != Relationship.TranslationEnabled)
-                Relationship.ToggleTranslation();
-        }
-    }
-
-    /// <summary>Label for the toggle-form switch (e.g. "Translate to English").</summary>
-    public string ToggleSwitchLabel =>
-        Relationship.Capabilities.FixedTranslationTargets.Count > 0
-            ? $"Translate to {LanguageCatalog.GetEnglishName(Relationship.Capabilities.FixedTranslationTargets[0].Code)}"
-            : "Translate";
-
-    /// <summary>Amber inline note for the none form, naming the model (spec §4).</summary>
-    public string UnavailableNote =>
-        $"{Relationship.EngineDisplayName} can't translate — Parlotype types exactly what you say.";
+    // ----- Page-specific rendering helpers ----------------------------------
+    // (Form flags, connector booleans, the switch surface, and the toggle/none
+    // strings live on the shared Relationship VM — both surfaces bind there.)
 
     /// <summary>Sub-hint under the full-form target field.</summary>
     public string TargetSubHint =>
@@ -143,7 +104,7 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
         SourcePicker.Refresh();
         TargetPicker.Refresh();
 
-        if (TargetPicker.IsOpen && !IsFullForm)
+        if (TargetPicker.IsOpen && !Relationship.IsFullForm)
             TargetPicker.IsOpen = false;
     }
 
@@ -173,7 +134,7 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
     [RelayCommand]
     private void OpenTargetPicker()
     {
-        if (!IsFullForm)
+        if (!Relationship.IsFullForm)
             return;
 
         var willOpen = !TargetPicker.IsOpen;
@@ -243,9 +204,6 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
         switch (e.PropertyName)
         {
             case nameof(LanguageRelationshipViewModel.TranslationEnabled):
-                OnPropertyChanged(nameof(TranslationSwitch));
-                OnPropertyChanged(nameof(IsConnectorOn));
-                OnPropertyChanged(nameof(IsConnectorOff));
                 OnPropertyChanged(nameof(TargetSubHint));
                 OnPropertyChanged(nameof(TargetTileText));
                 break;
@@ -257,32 +215,7 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
             case nameof(LanguageRelationshipViewModel.TargetCode):
                 OnPropertyChanged(nameof(TargetTileText));
                 break;
-
-            case nameof(LanguageRelationshipViewModel.Capabilities):
-            case nameof(LanguageRelationshipViewModel.Engine):
-                OnPropertyChanged(nameof(IsToggleForm));
-                OnPropertyChanged(nameof(IsFullForm));
-                OnPropertyChanged(nameof(IsNoneForm));
-                OnPropertyChanged(nameof(IsConnectorOn));
-                OnPropertyChanged(nameof(IsConnectorOff));
-                OnPropertyChanged(nameof(IsConnectorLocked));
-                OnPropertyChanged(nameof(ToggleSwitchLabel));
-                OnPropertyChanged(nameof(UnavailableNote));
-                break;
         }
     }
 
-    private void OnRelationshipChanged(object? sender, EventArgs e)
-    {
-        _ = StopRecordingIfActiveAsync();
-    }
-
-    private async Task StopRecordingIfActiveAsync()
-    {
-        if (_transcribeViewModel is { IsRecording: true })
-        {
-            _logger.LogInformation("Stopping recording after language change");
-            await _transcribeViewModel.StopRecordingAsync();
-        }
-    }
 }
