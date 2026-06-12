@@ -16,7 +16,8 @@ public static class RecentLanguages
     /// duplicates removed (case-insensitive), and the result capped at
     /// <paramref name="max"/>. The special sentinels
     /// (<see cref="LanguageCatalog.AutoDetectCode"/> /
-    /// <see cref="LanguageCatalog.NoTranslationCode"/>) and blank codes are ignored.
+    /// <see cref="LanguageCatalog.NoTranslationCode"/> /
+    /// <see cref="LanguageCatalog.KeyboardLayoutCode"/>) and blank codes are ignored.
     /// </summary>
     public static IReadOnlyList<string> Add(
         IEnumerable<string>? existing, string? code, int max = DefaultMax)
@@ -25,7 +26,8 @@ public static class RecentLanguages
 
         if (string.IsNullOrWhiteSpace(code)
             || LanguageCatalog.IsAutoDetect(code)
-            || LanguageCatalog.IsNoTranslation(code))
+            || LanguageCatalog.IsNoTranslation(code)
+            || LanguageCatalog.IsKeyboardLayout(code))
         {
             return Dedupe(current, max);
         }

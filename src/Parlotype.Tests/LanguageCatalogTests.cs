@@ -70,6 +70,23 @@ public class LanguageCatalogTests
     {
         Assert.Equal(expected, LanguageCatalog.IsNoTranslation(code));
     }
+
+    [Theory]
+    [InlineData("keyboard", true)]
+    [InlineData("KEYBOARD", true)]
+    [InlineData("", false)]   // blank means auto, never keyboard — it's an explicit opt-in
+    [InlineData(null, false)]
+    [InlineData("en", false)]
+    public void IsKeyboardLayout_RecognisesSentinel(string? code, bool expected)
+    {
+        Assert.Equal(expected, LanguageCatalog.IsKeyboardLayout(code));
+    }
+
+    [Fact]
+    public void TryGet_KeyboardSentinel_ReturnsNull()
+    {
+        Assert.Null(LanguageCatalog.TryGet(LanguageCatalog.KeyboardLayoutCode));
+    }
 }
 
 public class LanguageCapabilitiesTests
@@ -94,6 +111,100 @@ public class LanguageCapabilitiesTests
         Assert.True(caps.SupportsArbitraryTranslation);
         Assert.Null(caps.SupportedSourceLanguages);
         Assert.Same(LanguageCatalog.AllLanguages, caps.EffectiveSourceLanguages);
+    }
+
+    // Engine → target form map per §Spec 11: Whisper = Toggle, Gemma 4 = Full,
+    // transcribe-only (no targets, no arbitrary) = None.
+    [Fact]
+    public void TranslationForm_Whisper_IsToggle()
+    {
+        Assert.Equal(TranslationForm.Toggle, SpeechEngineCapabilities.For(SpeechEngine.Whisper).TranslationForm);
+    }
+
+    [Fact]
+    public void TranslationForm_Gemma4_IsFull()
+    {
+        Assert.Equal(TranslationForm.Full, SpeechEngineCapabilities.For(SpeechEngine.Gemma4).TranslationForm);
+    }
+
+    [Fact]
+    public void TranslationForm_NoTargetsNoArbitrary_IsNone()
+    {
+        var caps = new LanguageCapabilities(
+            SupportsAutoDetect: true,
+            SupportedSourceLanguages: null,
+            SupportsArbitraryTranslation: false,
+            FixedTranslationTargets: []);
+
+        Assert.Equal(TranslationForm.None, caps.TranslationForm);
+    }
+
+    [Fact]
+    public void TranslationForm_ArbitraryWinsOverFixedTargets()
+    {
+        var caps = new LanguageCapabilities(
+            SupportsAutoDetect: true,
+            SupportedSourceLanguages: null,
+            SupportsArbitraryTranslation: true,
+            FixedTranslationTargets: [LanguageCatalog.TryGet("en")!]);
+
+        Assert.Equal(TranslationForm.Full, caps.TranslationForm);
+    }
+}
+
+public class SourceLanguageResolverTests
+{
+    private static readonly KeyboardLayoutInfo EnglishUs = new("en", "English (United States)");
+
+    [Fact]
+    public void Resolve_ExplicitCode_PassesThrough()
+    {
+        Assert.Equal("ru", SourceLanguageResolver.Resolve("ru", EnglishUs));
+    }
+
+    [Fact]
+    public void Resolve_AutoCode_PassesThrough()
+    {
+        Assert.Equal("auto", SourceLanguageResolver.Resolve("auto", EnglishUs));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Resolve_BlankCode_FallsBackToAuto(string? code)
+    {
+        Assert.Equal(LanguageCatalog.AutoDetectCode, SourceLanguageResolver.Resolve(code, EnglishUs));
+    }
+
+    [Fact]
+    public void Resolve_KeyboardSentinel_UsesDetectedLayout()
+    {
+        Assert.Equal("en", SourceLanguageResolver.Resolve("keyboard", EnglishUs));
+    }
+
+    [Fact]
+    public void Resolve_KeyboardSentinel_NoDetection_FallsBackToAuto()
+    {
+        Assert.Equal(LanguageCatalog.AutoDetectCode, SourceLanguageResolver.Resolve("keyboard", null));
+    }
+
+    [Fact]
+    public void Resolve_KeyboardSentinel_DetectedLanguageUnsupported_FallsBackToAuto()
+    {
+        // A layout language outside the engine's source list must not leak through.
+        var layout = new KeyboardLayoutInfo("zz", "Imaginary (ZZ)");
+        var result = SourceLanguageResolver.Resolve("keyboard", layout, LanguageCatalog.WhisperLanguages);
+
+        Assert.Equal(LanguageCatalog.AutoDetectCode, result);
+    }
+
+    [Fact]
+    public void Resolve_KeyboardSentinel_DetectedLanguageSupported_ChecksCaseInsensitively()
+    {
+        var layout = new KeyboardLayoutInfo("RU", "Russian (Russia)");
+        var result = SourceLanguageResolver.Resolve("keyboard", layout, LanguageCatalog.WhisperLanguages);
+
+        Assert.Equal("RU", result);
     }
 }
 
@@ -123,6 +234,7 @@ public class RecentLanguagesTests
     [Theory]
     [InlineData("auto")]
     [InlineData("none")]
+    [InlineData("keyboard")]
     [InlineData("")]
     [InlineData(null)]
     public void Add_IgnoresSentinelsAndBlanks(string? code)

@@ -30,6 +30,17 @@ public sealed record LanguageCapabilities(
     /// <summary>The effective source-language list (full list when unconstrained).</summary>
     public IReadOnlyList<LanguageInfo> EffectiveSourceLanguages =>
         SupportedSourceLanguages ?? LanguageCatalog.AllLanguages;
+
+    /// <summary>
+    /// The form the target-language control takes: arbitrary translation ⇒
+    /// <see cref="TranslationForm.Full"/>; a single fixed target ⇒
+    /// <see cref="TranslationForm.Toggle"/>; otherwise the engine cannot
+    /// translate ⇒ <see cref="TranslationForm.None"/>.
+    /// </summary>
+    public TranslationForm TranslationForm =>
+        SupportsArbitraryTranslation ? TranslationForm.Full
+        : FixedTranslationTargets.Count == 1 ? TranslationForm.Toggle
+        : TranslationForm.None;
 }
 
 /// <summary>Resolves <see cref="LanguageCapabilities"/> for each speech engine.</summary>
@@ -60,6 +71,10 @@ public static class SpeechEngineCapabilities
             SupportsArbitraryTranslation: true,
             FixedTranslationTargets: []),
 
+        // Fallback shape, also what a future transcribe-only engine (no translation
+        // task at all, e.g. Parakeet-style ASR) would declare: no arbitrary
+        // translation and no fixed targets ⇒ TranslationForm.None, which the UI
+        // renders as a disabled target with an explanatory note.
         _ => new LanguageCapabilities(
             SupportsAutoDetect: true,
             SupportedSourceLanguages: null,
