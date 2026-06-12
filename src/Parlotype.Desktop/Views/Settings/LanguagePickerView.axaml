@@ -28,14 +28,9 @@
         </Style>
     </UserControl.Styles>
 
-    <Border Width="300"
-            CornerRadius="10"
-            BorderThickness="1"
-            Padding="10"
-            Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-            BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-            BoxShadow="0 8 24 0 #66000000">
-        <StackPanel Spacing="8">
+    <!-- Chrome (Border, width, shadow) is owned by the host popup/flyout so the
+         page (300px) and the Transcribe flyout (268px) can size it differently. -->
+    <StackPanel Spacing="8">
             <TextBlock Text="{Binding Header}" FontSize="13" Opacity="0.85" Margin="2,0,0,0" />
 
             <!-- Search appears only for long lists (> 8 entries). -->
@@ -108,6 +103,5 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-        </StackPanel>
-    </Border>
+    </StackPanel>
 </UserControl>
