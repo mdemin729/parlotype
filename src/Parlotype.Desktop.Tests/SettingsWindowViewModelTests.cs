@@ -177,6 +177,22 @@ public class SettingsWindowViewModelTests
         Assert.False(vm.Language.Relationship.ShowTranslationPausedNote);
     }
 
+    [Fact]
+    public void NavigateTo_Language_SelectsLanguageSection_OverridingPriorSelection()
+    {
+        var vm = BuildViewModel();
+
+        // Simulate the window having been left on another page.
+        var hotkeyRow = vm.NavItems.Single(n => n.Section is HotkeySettingsViewModel);
+        vm.SelectedNavItem = hotkeyRow;
+        Assert.Same(vm.Hotkey, vm.SelectedSection);
+
+        vm.NavigateTo(SettingsSection.Language);
+
+        Assert.Same(vm.Language, vm.SelectedSection);
+        Assert.Equal("Language", vm.SelectedNavItem!.Label);
+    }
+
     private static void AssertHeader(SettingsNavItem item, string label)
     {
         Assert.True(item.IsHeader, $"Expected header '{label}' but row was a section.");

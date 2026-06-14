@@ -38,7 +38,7 @@ public partial class AppViewModel : ViewModelBase
     private sealed class DesignWindowManager : IWindowManager
     {
         public void ShowTranscribe(bool activate = true) { }
-        public void ShowSettings() { }
+        public void ShowSettings(SettingsSection? section = null) { }
         public void HideTranscribe() { }
         public void Exit() { }
     }

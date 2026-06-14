@@ -42,7 +42,7 @@ internal sealed class WindowManager : IWindowManager
             _transcribe.Activate();
     });
 
-    public void ShowSettings() => Dispatcher.UIThread.Post(() =>
+    public void ShowSettings(SettingsSection? section = null) => Dispatcher.UIThread.Post(() =>
     {
         if (_settings is null || _settings.PlatformImpl is null)
         {
@@ -56,6 +56,9 @@ internal sealed class WindowManager : IWindowManager
                 _settings?.Hide();
             };
         }
+
+        if (section is not null && _settings.DataContext is SettingsWindowViewModel vm)
+            vm.NavigateTo(section.Value);
 
         _settings.Show();
         _settings.WindowState = WindowState.Normal;
