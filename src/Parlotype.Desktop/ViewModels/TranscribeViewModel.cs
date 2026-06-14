@@ -101,6 +101,14 @@ public partial class TranscribeViewModel : ViewModelBase
             // Recording must restart to pick up new languages, whichever surface
             // changed them (this window's flyout or the Settings page).
             _relationship.RelationshipChanged += (_, _) => _ = StopRecordingAsync();
+
+            // Load persisted languages so the strip reflects real state at
+            // startup, not defaults. Idempotent with the Settings page's call —
+            // whichever surface is built first performs the one load.
+            RelationshipInitialization = _relationship.InitializeAsync();
+            RelationshipInitialization.ContinueWith(
+                t => _logger.LogError(t.Exception, "Language relationship initialization failed"),
+                TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 
@@ -114,6 +122,13 @@ public partial class TranscribeViewModel : ViewModelBase
 
     /// <summary>Strip + flyout render only when the relationship is wired.</summary>
     public bool HasLanguageStrip => _relationship is not null;
+
+    /// <summary>
+    /// The persisted-state load kicked off in the constructor. Exposed so hosts
+    /// and tests can await first-load completion; <see cref="Task.CompletedTask"/>
+    /// when no relationship is wired.
+    /// </summary>
+    public Task RelationshipInitialization { get; } = Task.CompletedTask;
 
     /// <summary>Target picker embedded in the flyout (full form only).</summary>
     public LanguagePickerViewModel? TargetPicker { get; }
@@ -177,7 +192,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private void GoToLanguageSettings()
     {
         IsLanguageFlyoutOpen = false;
-        _windowManager.ShowSettings();
+        _windowManager.ShowSettings(SettingsSection.Language);
     }
 
     private void SelectTargetFromFlyout(string code)
@@ -319,7 +334,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private sealed class DesignWindowManager : IWindowManager
     {
         public void ShowTranscribe(bool activate = true) { }
-        public void ShowSettings() { }
+        public void ShowSettings(SettingsSection? section = null) { }
         public void HideTranscribe() { }
         public void Exit() { }
     }

@@ -391,11 +391,27 @@ public class LanguageRelationshipViewModelTests
     }
 
     [Fact]
-    public async Task TargetDisplayLabel_ShowsDefault_BeforeFirstSelection()
+    public async Task TargetDisplayLabel_ShowsSameAsSource_WhenTranslationOff()
     {
         var (vm, _, _) = await CreateAsync();
 
-        Assert.Equal("English", vm.TargetDisplayLabel);
+        Assert.False(vm.TranslationEnabled);
+        Assert.Equal("Same as source", vm.TargetDisplayLabel);
+    }
+
+    [Fact]
+    public async Task TargetDisplayLabel_RevertsToSameAsSource_WhenTranslationDisabled()
+    {
+        // Repro: Gemma, source French, target Russian, then disable translation.
+        var (vm, _, _) = await CreateAsync(SpeechEngine.Gemma4);
+        vm.SelectSource("fr");
+        vm.SelectTarget("ru");
+        Assert.Equal(LanguageCatalog.GetDisplayLabel("ru"), vm.TargetDisplayLabel);
+
+        vm.ToggleTranslation();
+
+        Assert.False(vm.TranslationEnabled);
+        Assert.Equal("Same as source", vm.TargetDisplayLabel);
     }
 
     // ----- Keyboard layout refresh ----------------------------------------------

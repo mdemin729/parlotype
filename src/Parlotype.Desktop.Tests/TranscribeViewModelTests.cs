@@ -307,6 +307,31 @@ public class TranscribeLanguageStripTests
     }
 
     [AvaloniaFact]
+    public async Task Strip_LoadsPersistedLanguages_OnConstruction()
+    {
+        // Regression: the strip must reflect persisted state at startup, not
+        // defaults ("Auto = Auto"). The VM — not a pre-call — must trigger the
+        // shared relationship's first load.
+        var ct = TestContext.Current.CancellationToken;
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Gemma4.ToString(), ct);
+        await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, "ru", ct);
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, "fr", ct);
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, true.ToString(), ct);
+
+        var relationship = new LanguageRelationshipViewModel(
+            settings, new MockKeyboardLayoutService());
+        // Deliberately NOT pre-initialized — the TranscribeViewModel owns it.
+        var vm = new TranscribeViewModel(new MockWindowManager(), relationship: relationship);
+
+        await vm.RelationshipInitialization;
+
+        Assert.Equal("Russian", vm.SourceShort);
+        Assert.Equal("French", vm.TargetShort);
+        Assert.True(relationship.IsConnectorOn);
+    }
+
+    [AvaloniaFact]
     public async Task Strip_KeyboardSource_ShowsDetectedLanguage()
     {
         var (vm, relationship, _, _) = await CreateAsync(
@@ -367,6 +392,7 @@ public class TranscribeLanguageStripTests
 
         Assert.False(vm.IsLanguageFlyoutOpen);
         Assert.Equal(1, wm.ShowSettingsCount);
+        Assert.Equal(SettingsSection.Language, wm.LastSettingsSection);
     }
 
     [AvaloniaFact]

@@ -87,6 +87,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(TranslationSwitch))]
     [NotifyPropertyChangedFor(nameof(IsConnectorOn))]
     [NotifyPropertyChangedFor(nameof(IsConnectorOff))]
+    [NotifyPropertyChangedFor(nameof(TargetDisplayLabel))]
     private bool _translationEnabled;
 
     /// <summary>
@@ -184,13 +185,14 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
             : "Spoken language";
 
     /// <summary>
-    /// Resting label for the target card. Shows the last-used target even while
-    /// translation is off so the user can see what re-enabling restores.
+    /// Resting label for the target card. While translation is off the output
+    /// matches the spoken language, so the card reads "Same as source" rather
+    /// than echoing a stale target that contradicts the summary line.
     /// </summary>
     public string TargetDisplayLabel =>
-        LanguageCatalog.IsNoTranslation(TargetCode)
-            ? LanguageCatalog.GetDisplayLabel(DefaultTargetCode())
-            : LanguageCatalog.GetDisplayLabel(TargetCode);
+        TranslationEnabled && !LanguageCatalog.IsNoTranslation(TargetCode)
+            ? LanguageCatalog.GetDisplayLabel(TargetCode)
+            : "Same as source";
 
     /// <summary>Plain-language restatement of the relationship (spec §7).</summary>
     public string SummaryText
@@ -478,6 +480,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         OnPropertyChanged(nameof(IsConnectorLocked));
         OnPropertyChanged(nameof(ToggleSwitchLabel));
         OnPropertyChanged(nameof(UnavailableNote));
+        OnPropertyChanged(nameof(TargetDisplayLabel));
     }
 
     private static string EngineName(SpeechEngine engine) => engine switch

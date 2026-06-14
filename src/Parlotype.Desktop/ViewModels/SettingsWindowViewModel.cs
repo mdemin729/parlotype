@@ -150,4 +150,25 @@ public partial class SettingsWindowViewModel : ViewModelBase
             llamaCpp.RefreshServerInfoCommand.Execute(null);
         }
     }
+
+    /// <summary>
+    /// Deep-links the nav selection to a specific section, so external callers
+    /// (e.g. the Transcribe strip) can open the window on a chosen page rather
+    /// than wherever the user last left it. No-op if the section is not
+    /// currently visible for the active engine.
+    /// </summary>
+    public void NavigateTo(SettingsSection section)
+    {
+        var target = section switch
+        {
+            SettingsSection.Language => (SettingsSectionViewModelBase)Language,
+            _ => null,
+        };
+        if (target is null)
+            return;
+
+        var navItem = NavItems.FirstOrDefault(n => n.Section == target);
+        if (navItem is not null)
+            SelectedNavItem = navItem;
+    }
 }
