@@ -3,6 +3,7 @@ using Parlotype.Core.Speech;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels;
 using Xunit;
+using Avalonia.Headless.XUnit;
 
 namespace Parlotype.Desktop.Tests;
 
@@ -426,5 +427,69 @@ public class LanguageRelationshipViewModelTests
         vm.RefreshKeyboardLayout();
 
         Assert.Equal("de", vm.DetectedKeyboardLayout?.LanguageCode);
+    }
+
+    // ----- Live polling (Alt+Shift keeps the detected layout current) -----------
+
+    private static async Task<LanguageRelationshipViewModel> CreateWithSourceAsync(
+        string sourceCode, KeyboardLayoutInfo? layout = null)
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, sourceCode, TestContext.Current.CancellationToken);
+        var vm = new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService { Result = layout });
+        await vm.InitializeAsync(TestContext.Current.CancellationToken);
+        return vm;
+    }
+
+    [AvaloniaFact]
+    public async Task LivePolling_InactiveForNonKeyboardSource()
+    {
+        var (vm, _, _) = await CreateAsync();
+
+        vm.BeginLivePolling();
+
+        Assert.False(vm.IsLayoutPollActive);
+    }
+
+    [AvaloniaFact]
+    public async Task LivePolling_ActivatesAndStopsForKeyboardSource()
+    {
+        var vm = await CreateWithSourceAsync(LanguageCatalog.KeyboardLayoutCode);
+
+        vm.BeginLivePolling();
+        Assert.True(vm.IsLayoutPollActive);
+
+        vm.EndLivePolling();
+        Assert.False(vm.IsLayoutPollActive);
+    }
+
+    [AvaloniaFact]
+    public async Task LivePolling_RefcountBalancesMultipleSurfaces()
+    {
+        var vm = await CreateWithSourceAsync(LanguageCatalog.KeyboardLayoutCode);
+
+        vm.BeginLivePolling();
+        vm.BeginLivePolling();
+        vm.EndLivePolling();
+
+        Assert.True(vm.IsLayoutPollActive); // one surface still visible
+
+        vm.EndLivePolling();
+        Assert.False(vm.IsLayoutPollActive);
+    }
+
+    [AvaloniaFact]
+    public async Task LivePolling_FollowsSourceCodeChanges()
+    {
+        var (vm, _, _) = await CreateAsync();
+
+        vm.BeginLivePolling();
+        Assert.False(vm.IsLayoutPollActive); // auto source — nothing to detect
+
+        vm.SelectSource(LanguageCatalog.KeyboardLayoutCode);
+        Assert.True(vm.IsLayoutPollActive);
+
+        vm.SelectSource("en");
+        Assert.False(vm.IsLayoutPollActive);
     }
 }

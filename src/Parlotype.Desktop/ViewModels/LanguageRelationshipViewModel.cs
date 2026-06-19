@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -46,6 +47,17 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     private CancellationTokenSource? _toastCts;
     private bool _suppressToasts;
     private bool _initialized;
+
+    private DispatcherTimer? _layoutPollTimer;
+    private int _livePollSubscribers;
+
+    /// <summary>
+    /// How often live polling re-detects the OS keyboard layout while a surface
+    /// that displays it is visible. Keyboard-layout changes (e.g. Alt+Shift)
+    /// raise no event a background tray app can observe, so the displayed
+    /// "Detected: …" hint is kept current by polling instead.
+    /// </summary>
+    private static readonly TimeSpan LayoutPollInterval = TimeSpan.FromMilliseconds(500);
 
     /// <summary>Toast lifetime before auto-clear. Shortened in tests.</summary>
     internal TimeSpan ToastDuration { get; set; } = TimeSpan.FromSeconds(4);
@@ -285,8 +297,76 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         SetWhisperModel(model);
     }
 
-    /// <summary>Re-detects the OS keyboard layout (e.g. when a picker opens).</summary>
-    public void RefreshKeyboardLayout() => DetectedKeyboardLayout = _keyboardLayout.Detect();
+    /// <summary>
+    /// Re-detects the OS keyboard layout (e.g. when a picker opens or on each live
+    /// poll tick). Logs only when the detected layout actually changes, since this
+    /// is called ~twice a second while a surface that displays it is visible.
+    /// </summary>
+    public void RefreshKeyboardLayout()
+    {
+        var previous = DetectedKeyboardLayout;
+        var current = _keyboardLayout.Detect();
+        if (current == previous)
+            return;
+
+        DetectedKeyboardLayout = current;
+        _logger.LogDebug("Detected keyboard layout changed: {Code} ({Name})",
+            current?.LanguageCode ?? "(none)", current?.FriendlyName ?? "(none)");
+    }
+
+    /// <summary>
+    /// Registers interest in live keyboard-layout updates from a visible surface
+    /// (the Language settings page or the Transcribe strip). Reference-counted, so
+    /// the shared timer runs while at least one surface is visible. Balance every
+    /// call with <see cref="EndLivePolling"/>.
+    /// </summary>
+    public void BeginLivePolling()
+    {
+        _livePollSubscribers++;
+        UpdateLayoutPollState();
+    }
+
+    /// <summary>Releases a <see cref="BeginLivePolling"/> registration.</summary>
+    public void EndLivePolling()
+    {
+        if (_livePollSubscribers > 0)
+            _livePollSubscribers--;
+        UpdateLayoutPollState();
+    }
+
+    /// <summary>Whether the live-poll timer is currently ticking (diagnostics/tests).</summary>
+    public bool IsLayoutPollActive => _layoutPollTimer?.IsEnabled == true;
+
+    // The poll only has work to do while the source is the keyboard sentinel —
+    // any other source has no detected layout to keep current.
+    private bool ShouldPollLayout =>
+        _livePollSubscribers > 0 && LanguageCatalog.IsKeyboardLayout(SourceCode);
+
+    private void UpdateLayoutPollState()
+    {
+        if (ShouldPollLayout)
+        {
+            _layoutPollTimer ??= CreateLayoutPollTimer();
+            if (!_layoutPollTimer.IsEnabled)
+            {
+                RefreshKeyboardLayout(); // immediate, don't wait a full interval
+                _layoutPollTimer.Start();
+            }
+        }
+        else
+        {
+            _layoutPollTimer?.Stop();
+        }
+    }
+
+    private DispatcherTimer CreateLayoutPollTimer()
+    {
+        var timer = new DispatcherTimer { Interval = LayoutPollInterval };
+        timer.Tick += (_, _) => RefreshKeyboardLayout();
+        return timer;
+    }
+
+    partial void OnSourceCodeChanged(string value) => UpdateLayoutPollState();
 
     // ----- Engine / model switches (spec §8 fallbacks) ---------------------
 
