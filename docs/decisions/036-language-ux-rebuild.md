@@ -119,6 +119,40 @@ prototype (plans/2026-06-08-language-ux-rebuild, answering the
 - `LanguageRelationshipViewModel` is dense (state machine + derivations), but
   it replaces equivalent logic previously smeared across the page VM.
 
+## Amendment — live keyboard-layout detection
+
+The original implementation refreshed the displayed "System keyboard layout"
+source language at only three discrete moments (startup, source-picker open,
+Transcribe flyout open), so switching layouts (Alt+Shift) while a surface was
+already visible produced no UI change.
+
+Fixed by a reference-counted ~500 ms `DispatcherTimer` in
+`LanguageRelationshipViewModel` (`BeginLivePolling`/`EndLivePolling`), gated on a
+visible subscriber **and** `LanguageCatalog.IsKeyboardLayout(SourceCode)`. The
+Settings page and Transcribe window subscribe on attach/open and release on
+detach/close. Each tick re-runs `Win32KeyboardLayoutService.Detect()`.
+
+Detection reads the keyboard layout of the **focused input control's thread** of
+the foreground application. Keyboard layouts are per-thread on Windows, so the
+naive `GetWindowThreadProcessId(GetForegroundWindow())` is insufficient for modern
+packaged / XAML-island apps (e.g. the Windows 11 Notepad), which spread their UI
+across many threads: the top-level frame window runs on one thread (whose layout
+is stale — it never processes the Alt+Shift change) while the text-input control
+runs on another. `Win32KeyboardLayoutService.ResolveInputThread()` uses
+`GetGUIThreadInfo(foregroundThread).hwndFocus` to drill from the frame thread into
+the window that actually holds keyboard focus and reads *that* thread's layout.
+For classic single-threaded apps the focus window lives on the same thread, so
+behaviour is unchanged.
+
+This was diagnosed empirically: enumerating the Windows 11 Notepad's windows
+showed 12 threads for one process, with the `'Notepad'` frame thread reporting a
+stale `en` while the `'NotepadTextBox'` input thread held the live `ru`;
+`GetKeyboardLayout` itself reads any thread's layout accurately — the earlier bug
+was reading the wrong (frame) thread.
+
+No new Core interface, csproj dependency, or `PlatformServiceExtensions` entry;
+detection still degrades to null off-Windows.
+
 ## References
 
 - ADR-021 — Whisper translation to English
