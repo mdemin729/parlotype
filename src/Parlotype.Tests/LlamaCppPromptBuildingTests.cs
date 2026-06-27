@@ -20,95 +20,86 @@ public class LlamaCppPromptBuildingTests
         public KeyboardLayoutInfo? Detect() => result;
     }
 
-    private static readonly PromptTemplate Prompt =
-        new("p1", "Test", "Transcribe the {language} audio.");
+    // Custom (single-body) prompt — no translation/auto-detect bodies.
+    private static readonly PromptTemplate CustomPrompt =
+        new("p1", "Test", "Transcribe the {speech_lang} audio.");
+
+    // Built-in default carries all three bodies.
+    private static readonly PromptTemplate BuiltInPrompt =
+        new("builtin", "Default", "Transcribe in {speech_lang}.",
+            IsBuiltIn: true,
+            TranslationText: "Transcribe in {speech_lang} and translate into {text_lang}.",
+            AutoDetectText: "Detect the language and transcribe.");
+
+    private static FakeSettings Settings(string? source = null, string? target = null, bool? translation = null)
+    {
+        var s = new FakeSettings();
+        if (source is not null) s.Values[SettingsKeys.SelectedSourceLanguage] = source;
+        if (target is not null) s.Values[SettingsKeys.SelectedTargetLanguage] = target;
+        if (translation is not null) s.Values[SettingsKeys.TranslationEnabled] = translation.Value.ToString();
+        return s;
+    }
 
     [Fact]
-    public async Task NoLanguageSettings_RendersDefaultLanguage_NoTranslation()
+    public async Task NoLanguageSettings_RendersAutoDetectedLanguage_NoTranslation()
     {
         var vm = CreateRecognizer(new FakeSettings());
 
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
 
-        Assert.Equal("Transcribe the English audio.", text);
+        Assert.Equal("Transcribe the the detected language audio.", text);
     }
 
     [Fact]
     public async Task ExplicitSource_RendersSourceLanguageName()
     {
-        var settings = new FakeSettings();
-        settings.Values[SettingsKeys.SelectedSourceLanguage] = "ru";
+        var vm = CreateRecognizer(Settings(source: "ru"));
 
-        var vm = CreateRecognizer(settings);
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
 
         Assert.Equal("Transcribe the Russian audio.", text);
-    }
-
-    [Fact]
-    public async Task AutoSource_FallsBackToDefaultLanguage()
-    {
-        var settings = new FakeSettings();
-        settings.Values[SettingsKeys.SelectedSourceLanguage] = LanguageCatalog.AutoDetectCode;
-
-        var vm = CreateRecognizer(settings);
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
-
-        Assert.Equal("Transcribe the English audio.", text);
     }
 
     [Fact]
     public async Task KeyboardSource_RendersDetectedLayoutLanguage()
     {
-        var settings = new FakeSettings();
-        settings.Values[SettingsKeys.SelectedSourceLanguage] = LanguageCatalog.KeyboardLayoutCode;
+        var vm = CreateRecognizer(
+            Settings(source: LanguageCatalog.KeyboardLayoutCode),
+            new KeyboardLayoutInfo("ru", "Russian (Russia)"));
 
-        var vm = CreateRecognizer(settings, new KeyboardLayoutInfo("ru", "Russian (Russia)"));
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
 
         Assert.Equal("Transcribe the Russian audio.", text);
     }
 
     [Fact]
-    public async Task KeyboardSource_DetectionUnavailable_FallsBackToDefaultLanguage()
+    public async Task KeyboardSource_DetectionUnavailable_RendersAutoDetectedLanguage()
     {
-        var settings = new FakeSettings();
-        settings.Values[SettingsKeys.SelectedSourceLanguage] = LanguageCatalog.KeyboardLayoutCode;
+        var vm = CreateRecognizer(
+            Settings(source: LanguageCatalog.KeyboardLayoutCode), keyboardLayout: null);
 
-        var vm = CreateRecognizer(settings, keyboardLayout: null);
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
 
-        Assert.Equal("Transcribe the English audio.", text);
+        Assert.Equal("Transcribe the the detected language audio.", text);
     }
 
     [Fact]
-    public async Task TargetLanguage_AppendsTranslationInstruction_WhenTranslationEnabled()
+    public async Task CustomPrompt_AppendsTranslationInstruction_WhenToggleOnAndTargetDiffers()
     {
-        var settings = new FakeSettings();
-        settings.Values[SettingsKeys.SelectedSourceLanguage] = "ru";
-        settings.Values[SettingsKeys.SelectedTargetLanguage] = "fr";
-        settings.Values[SettingsKeys.TranslationEnabled] = true.ToString();
+        var vm = CreateRecognizer(Settings("ru", "fr", translation: true));
 
-        var vm = CreateRecognizer(settings);
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
 
         Assert.StartsWith("Transcribe the Russian audio.", text);
         Assert.Contains("translate the transcript into French", text);
     }
 
     [Fact]
-    public async Task TargetLanguage_SkipsTranslation_WhenTranslationDisabled()
+    public async Task CustomPrompt_SkipsTranslation_WhenToggleOff()
     {
-        // TranslationEnabled is the master gate — even with an explicit non-"none"
-        // target, the prompt must not append the translation instruction when the
-        // user has toggled translation off.
-        var settings = new FakeSettings();
-        settings.Values[SettingsKeys.SelectedSourceLanguage] = "ru";
-        settings.Values[SettingsKeys.SelectedTargetLanguage] = "fr";
-        settings.Values[SettingsKeys.TranslationEnabled] = false.ToString();
+        var vm = CreateRecognizer(Settings("ru", "fr", translation: false));
 
-        var vm = CreateRecognizer(settings);
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
 
         Assert.DoesNotContain("translate", text, StringComparison.OrdinalIgnoreCase);
     }
@@ -116,14 +107,84 @@ public class LlamaCppPromptBuildingTests
     [Fact]
     public async Task NoneTarget_DoesNotAppendTranslation()
     {
-        var settings = new FakeSettings();
-        settings.Values[SettingsKeys.SelectedTargetLanguage] = LanguageCatalog.NoTranslationCode;
-        settings.Values[SettingsKeys.TranslationEnabled] = true.ToString();
+        var vm = CreateRecognizer(
+            Settings("ru", LanguageCatalog.NoTranslationCode, translation: true));
 
-        var vm = CreateRecognizer(settings);
-        var text = await vm.BuildPromptTextAsync(Prompt, CancellationToken.None);
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
 
         Assert.DoesNotContain("translate", text, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task SameSourceAndTarget_DoesNotTranslate()
+    {
+        var vm = CreateRecognizer(Settings("en", "en", translation: true));
+
+        var text = await vm.BuildPromptTextAsync(CustomPrompt, CancellationToken.None);
+
+        Assert.DoesNotContain("translate", text, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task BuiltIn_KnownSource_NoTarget_UsesTranscriptionBody()
+    {
+        var vm = CreateRecognizer(Settings(source: "ru"));
+
+        var text = await vm.BuildPromptTextAsync(BuiltInPrompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe in Russian.", text);
+    }
+
+    [Fact]
+    public async Task BuiltIn_KnownSource_Target_ToggleOn_UsesTranslationBody()
+    {
+        var vm = CreateRecognizer(Settings("ru", "en", translation: true));
+
+        var text = await vm.BuildPromptTextAsync(BuiltInPrompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe in Russian and translate into English.", text);
+    }
+
+    [Fact]
+    public async Task BuiltIn_KnownSource_Target_ToggleOff_UsesTranscriptionBody()
+    {
+        var vm = CreateRecognizer(Settings("ru", "en", translation: false));
+
+        var text = await vm.BuildPromptTextAsync(BuiltInPrompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe in Russian.", text);
+    }
+
+    [Fact]
+    public async Task BuiltIn_AutoSource_NoTarget_UsesAutoDetectBody()
+    {
+        var vm = CreateRecognizer(Settings(source: LanguageCatalog.AutoDetectCode));
+
+        var text = await vm.BuildPromptTextAsync(BuiltInPrompt, CancellationToken.None);
+
+        Assert.Equal("Detect the language and transcribe.", text);
+    }
+
+    [Fact]
+    public async Task BuiltIn_AutoSource_Target_ToggleOn_UsesTranslationBody_WithDetectedLanguage()
+    {
+        var vm = CreateRecognizer(
+            Settings(LanguageCatalog.AutoDetectCode, "fr", translation: true));
+
+        var text = await vm.BuildPromptTextAsync(BuiltInPrompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe in the detected language and translate into French.", text);
+    }
+
+    [Fact]
+    public async Task BuiltIn_AutoSource_Target_ToggleOff_UsesAutoDetectBody()
+    {
+        var vm = CreateRecognizer(
+            Settings(LanguageCatalog.AutoDetectCode, "fr", translation: false));
+
+        var text = await vm.BuildPromptTextAsync(BuiltInPrompt, CancellationToken.None);
+
+        Assert.Equal("Detect the language and transcribe.", text);
     }
 
     private sealed class FakeSettings : ISettingsService

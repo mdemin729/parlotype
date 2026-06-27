@@ -4,6 +4,7 @@
 
 | Plan | Completed | Description |
 |------|-----------|-------------|
+| [2026-06-27-gemma4-source-target-prompts](2026-06-27-gemma4-source-target-prompts/) | 2026-06-27 | Gemma 4 prompts use `{speech_lang}`/`{text_lang}` (retiring `{language}`); built-in default gains translation + auto-detect bodies (3-body `PromptTemplate`); custom prompts stay single-body with code-appended translation; recognizer source/target selection matrix; keeps `TranslationEnabled` toggle (ADR-037) |
 | [2026-06-08-language-ux-rebuild](2026-06-08-language-ux-rebuild/) | 2026-06-11 | Language UX rebuild (ADR-036, supersedes ADR-035 UX): keyboard-layout source (`IKeyboardLayoutService` + Win32 P/Invoke), `TranslationForm` model-driven target forms (toggle/full/none), shared `LanguageRelationshipViewModel`, floating popover pickers, summary + engine-switch fallback toasts, Transcribe quick-picker strip + flyout |
 | [2026-05-25-translation-model-capability](2026-05-25-translation-model-capability/) | 2026-05-25 | Gate Whisper translation by model capability (`SupportsTranslation`); disable toggle + model-list hint for `*En` and Large v3 Turbo, preserving user preference (ADR-033) |
 | [2026-05-25-language-selection](2026-05-25-language-selection/) | 2026-05-25 | Source & target language selection: source picker (both engines) + Gemma 4 arbitrary-target translation; `LanguageCatalog`/`LanguageCapabilities`/`RecentLanguages` (ADR-034) |

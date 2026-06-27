@@ -7,7 +7,7 @@
              x:CompileBindings="True">
     <StackPanel Spacing="12">
         <TextBlock Text="Prompts" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Manage the instruction sent to the Gemma 4 engine for each transcription. The {language} placeholder is replaced with the source language automatically."
+        <TextBlock Text="Manage the instruction sent to the Gemma 4 engine for each transcription. The {speech_lang} placeholder is replaced with the spoken language automatically. When translation is enabled and the output language differs, a translation instruction is added automatically."
                    Opacity="0.7" TextWrapping="Wrap" />
 
         <!-- Prompt list (hidden while editing) -->
@@ -91,7 +91,7 @@
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      MinHeight="120" />
-            <TextBlock Text="Tip: use {language} where the source language should appear."
+            <TextBlock Text="Tip: use {speech_lang} where the spoken language should appear."
                        FontSize="12" Opacity="0.6" />
 
             <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">

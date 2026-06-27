@@ -41,7 +41,7 @@ public class PromptSettingsViewModelTests
         Assert.True(vm.IsEditing);
 
         vm.EditingName = "My prompt";
-        vm.EditingText = "Transcribe {language}.";
+        vm.EditingText = "Transcribe {speech_lang}.";
         await vm.SavePromptCommand.ExecuteAsync(null);
 
         Assert.False(vm.IsEditing);
@@ -171,7 +171,7 @@ public class PromptSettingsViewModelTests
     }
 
     [Fact]
-    public void NewPrompt_PrePopulatesEditingTextWithLanguageToken()
+    public void NewPrompt_PrePopulatesEditingTextWithSpeechLanguageToken()
     {
         var vm = BuildViewModel();
 
@@ -179,7 +179,7 @@ public class PromptSettingsViewModelTests
 
         Assert.True(vm.IsEditing);
         Assert.Empty(vm.EditingName);
-        Assert.Contains(PromptTemplate.LanguageToken, vm.EditingText, StringComparison.Ordinal);
+        Assert.Contains(PromptTemplate.SpeechLanguageToken, vm.EditingText, StringComparison.Ordinal);
     }
 
     [Fact]

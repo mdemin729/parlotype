@@ -25,7 +25,7 @@ public sealed class JsonPromptTemplateRegistryTests : IDisposable
     private JsonPromptTemplateRegistry NewRegistry() =>
         new(_dir, _settings, NullLogger<JsonPromptTemplateRegistry>.Instance);
 
-    private static PromptTemplate UserPrompt(string id = "u1", string name = "Custom", string text = "Do {language}.") =>
+    private static PromptTemplate UserPrompt(string id = "u1", string name = "Custom", string text = "Do {speech_lang}.") =>
         new(id, name, text);
 
     [Fact]
@@ -120,17 +120,42 @@ public sealed class JsonPromptTemplateRegistryTests : IDisposable
     }
 
     [Fact]
-    public void Render_SubstitutesLanguageToken()
+    public void Substitute_ReplacesSpeechAndTextTokens()
     {
-        var prompt = new PromptTemplate("x", "x", "Transcribe {language} into {language}.");
+        const string body = "Transcribe {speech_lang} and translate into {text_lang}.";
+        Assert.Equal(
+            "Transcribe French and translate into German.",
+            PromptTemplate.Substitute(body, "French", "German"));
+    }
+
+    [Fact]
+    public void Render_SubstitutesSpeechToken()
+    {
+        var prompt = new PromptTemplate("x", "x", "Transcribe {speech_lang} into {speech_lang}.");
         Assert.Equal("Transcribe French into French.", prompt.Render("French"));
     }
 
     [Fact]
-    public void Render_NoLanguage_UsesDefault()
+    public void BuiltInDefault_ExposesAllThreeBodies()
     {
-        var prompt = new PromptTemplate("x", "x", "Speak {language}.");
-        Assert.Equal($"Speak {PromptTemplate.DefaultLanguage}.", prompt.Render());
+        var builtIn = JsonPromptTemplateRegistry.BuiltInDefault;
+        Assert.Contains(PromptTemplate.SpeechLanguageToken, builtIn.Text, StringComparison.Ordinal);
+        Assert.NotNull(builtIn.TranslationText);
+        Assert.Contains(PromptTemplate.TextLanguageToken, builtIn.TranslationText!, StringComparison.Ordinal);
+        Assert.NotNull(builtIn.AutoDetectText);
+    }
+
+    [Fact]
+    public async Task LegacyUserJson_LoadsWithNullOptionalBodies()
+    {
+        await File.WriteAllTextAsync(
+            Path.Combine(_dir, JsonPromptTemplateRegistry.FileName),
+            """[{"id":"u1","name":"Old","text":"Transcribe {speech_lang}.","isBuiltIn":false}]""");
+
+        var loaded = await NewRegistry().GetAsync("u1");
+        Assert.NotNull(loaded);
+        Assert.Null(loaded!.TranslationText);
+        Assert.Null(loaded.AutoDetectText);
     }
 
     [Fact]

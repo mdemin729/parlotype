@@ -86,7 +86,7 @@ public partial class PromptSettingsViewModel : SettingsSectionViewModelBase
     {
         _editingId = null;
         EditingName = string.Empty;
-        EditingText = $"Transcribe the following speech in {PromptTemplate.LanguageToken} verbatim. " +
+        EditingText = $"Transcribe the following speech in {PromptTemplate.SpeechLanguageToken} verbatim. " +
                       "Only output the transcription.";
         IsEditing = true;
     }

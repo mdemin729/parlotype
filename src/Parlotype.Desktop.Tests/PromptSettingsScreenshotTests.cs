@@ -86,10 +86,10 @@ public class PromptSettingsScreenshotTests : IClassFixture<PromptSettingsScreens
     {
         var registry = new MockPromptTemplateRegistry();
         await registry.AddOrUpdateAsync(
-            new PromptTemplate("u1", "Formal transcription", "Transcribe formally in {language}."),
+            new PromptTemplate("u1", "Formal transcription", "Transcribe formally in {speech_lang}."),
             CancellationToken.None);
         await registry.AddOrUpdateAsync(
-            new PromptTemplate("u2", "Medical dictation", "Transcribe medical speech in {language} verbatim."),
+            new PromptTemplate("u2", "Medical dictation", "Transcribe medical speech in {speech_lang} verbatim."),
             CancellationToken.None);
         var vm = new PromptSettingsViewModel(registry);
         await SettleAsync();
@@ -142,7 +142,7 @@ public class PromptSettingsScreenshotTests : IClassFixture<PromptSettingsScreens
         steps.Add(new ScenarioStep(
             "User clicks 'New prompt'. The list is hidden and the inline editor appears. " +
             "The Name field is empty. The Prompt text field is pre-populated with the default template " +
-            "(containing '{language}'). A tip below reads 'Tip: use {language} where the source language " +
+            "(containing '{speech_lang}'). A tip below reads 'Tip: use {speech_lang} where the spoken language " +
             "should appear.' Save and Cancel buttons are visible.",
             screenshot2));
 
@@ -153,7 +153,7 @@ public class PromptSettingsScreenshotTests : IClassFixture<PromptSettingsScreens
 
         Assert.True(vm.IsEditing);
         Assert.Empty(vm.EditingName);
-        Assert.Contains("{language}", vm.EditingText, StringComparison.Ordinal);
+        Assert.Contains("{speech_lang}", vm.EditingText, StringComparison.Ordinal);
     }
 
     [AvaloniaFact]
@@ -161,7 +161,7 @@ public class PromptSettingsScreenshotTests : IClassFixture<PromptSettingsScreens
     {
         var registry = new MockPromptTemplateRegistry();
         await registry.AddOrUpdateAsync(
-            new PromptTemplate("u1", "My Custom Prompt", "Transcribe carefully in {language}."),
+            new PromptTemplate("u1", "My Custom Prompt", "Transcribe carefully in {speech_lang}."),
             CancellationToken.None);
         var vm = new PromptSettingsViewModel(registry);
         await SettleAsync();
@@ -194,6 +194,6 @@ public class PromptSettingsScreenshotTests : IClassFixture<PromptSettingsScreens
 
         Assert.True(vm.IsEditing);
         Assert.Equal("My Custom Prompt", vm.EditingName);
-        Assert.Equal("Transcribe carefully in {language}.", vm.EditingText);
+        Assert.Equal("Transcribe carefully in {speech_lang}.", vm.EditingText);
     }
 }

@@ -13,7 +13,7 @@ public sealed class MockPromptTemplateRegistry : IPromptTemplateRegistry
     public const string BuiltInId = "builtin-default";
 
     public static readonly PromptTemplate BuiltIn = new(
-        BuiltInId, "Default (verbatim transcription)", "Transcribe in {language}.", IsBuiltIn: true);
+        BuiltInId, "Default (verbatim transcription)", "Transcribe in {speech_lang}.", IsBuiltIn: true);
 
     public int SetActiveCallCount;
 
