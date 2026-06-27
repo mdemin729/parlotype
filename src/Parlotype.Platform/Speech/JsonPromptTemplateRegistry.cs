@@ -22,10 +22,18 @@ public sealed class JsonPromptTemplateRegistry : IPromptTemplateRegistry
     internal static readonly PromptTemplate BuiltInDefault = new(
         Id: BuiltInDefaultId,
         Name: "Default (verbatim transcription)",
-        Text: "Transcribe the following speech segment in {language} into {language} text. " +
+        Text: "Transcribe the following speech segment in {speech_lang} into {speech_lang} text. " +
               "Only output the transcription, with no newlines. " +
               "When transcribing numbers, write the digits.",
-        IsBuiltIn: true);
+        IsBuiltIn: true,
+        TranslationText:
+            "Transcribe the following speech segment spoken in {speech_lang} and translate it into {text_lang}. " +
+            "Only output the {text_lang} text, with no newlines. " +
+            "When writing numbers, write the digits.",
+        AutoDetectText:
+            "Detect the language being spoken and transcribe the speech in that same language. " +
+            "Only output the transcription, with no newlines. " +
+            "When transcribing numbers, write the digits.");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

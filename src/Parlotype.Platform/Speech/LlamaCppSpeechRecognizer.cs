@@ -218,11 +218,19 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     }
 
     /// <summary>
-    /// Renders the active prompt with the user's selected source language and, when
-    /// a translation target is selected, appends an instruction to translate the
-    /// transcript into that language. The LLM performs both transcription and
-    /// translation in a single call (no separate ASR step required).
+    /// Builds the text prompt for the active template by selecting the body that
+    /// matches the resolved spoken (source) and output (target) languages.
     /// </summary>
+    /// <remarks>
+    /// <para>Translation is needed when the <see cref="SettingsKeys.TranslationEnabled"/>
+    /// toggle is on, a real target language is selected, and it differs from the
+    /// resolved source (auto-detect source counts as different).</para>
+    /// <para>The built-in default carries dedicated translation and auto-detect
+    /// bodies; a custom prompt has a single body, so the translation instruction is
+    /// appended in code. <c>{speech_lang}</c> renders to "the detected language"
+    /// when the source is auto-detect. Transcription and translation happen in one
+    /// LLM call (no separate ASR step).</para>
+    /// </remarks>
     internal async Task<string> BuildPromptTextAsync(PromptTemplate activePrompt, CancellationToken cancellationToken)
     {
         // Migration is run from AudioPipelineService.CacheSettingsAsync (every recognizer
@@ -235,24 +243,44 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         var translationEnabledStr = await _settings.GetAsync<string>(SettingsKeys.TranslationEnabled, cancellationToken);
         var translationEnabled = bool.TryParse(translationEnabledStr, out var te) && te;
 
-        // Resolve the keyboard-layout sentinel to the detected layout language
-        // (falls back to auto when detection is unavailable), then render
-        // {language} with the source language name. When auto-detect (or
-        // unknown), PromptTemplate falls back to its default language.
+        // Resolve the keyboard-layout sentinel to the detected layout language, then
+        // settle on the spoken (source) language. {speech_lang} renders to the
+        // resolved language name, or "the detected language" when auto-detect.
         var detectedLayout = LanguageCatalog.IsKeyboardLayout(sourceCode) ? _keyboardLayout.Detect() : null;
         var resolvedSource = SourceLanguageResolver.Resolve(sourceCode, detectedLayout);
-        var sourceName = LanguageCatalog.IsAutoDetect(resolvedSource) ? null : LanguageCatalog.GetEnglishName(resolvedSource);
-        var promptText = activePrompt.Render(sourceName);
+        var sourceIsAuto = LanguageCatalog.IsAutoDetect(resolvedSource);
+        var speechName = sourceIsAuto
+            ? PromptTemplate.AutoDetectedLanguageName
+            : LanguageCatalog.GetEnglishName(resolvedSource);
 
-        if (translationEnabled && !LanguageCatalog.IsNoTranslation(targetCode))
+        // Translation is gated by the same toggle as Whisper, plus a real target
+        // that differs from the source.
+        var hasRealTarget = !string.IsNullOrWhiteSpace(targetCode) && !LanguageCatalog.IsNoTranslation(targetCode);
+        var targetDiffersFromSource = sourceIsAuto ||
+            !string.Equals(resolvedSource, targetCode, StringComparison.OrdinalIgnoreCase);
+        var translationNeeded = translationEnabled && hasRealTarget && targetDiffersFromSource;
+
+        if (translationNeeded)
         {
             var targetName = LanguageCatalog.GetEnglishName(targetCode);
-            promptText +=
+
+            // Built-in default has a dedicated translation body; custom prompts
+            // render their single body and get the instruction appended.
+            if (activePrompt.TranslationText is { } translationBody)
+                return PromptTemplate.Substitute(translationBody, speechName, targetName);
+
+            var transcribed = PromptTemplate.Substitute(activePrompt.Text, speechName);
+            return transcribed +
                 $"\n\nThen translate the transcript into {targetName}. " +
                 $"Respond with only the {targetName} translation and no other text.";
         }
 
-        return promptText;
+        // No translation: the built-in default has a dedicated auto-detect body for
+        // an unknown spoken language; otherwise render the transcription body.
+        if (sourceIsAuto && activePrompt.AutoDetectText is { } autoBody)
+            return PromptTemplate.Substitute(autoBody, speechName);
+
+        return PromptTemplate.Substitute(activePrompt.Text, speechName);
     }
 
     public async Task UnloadAsync()

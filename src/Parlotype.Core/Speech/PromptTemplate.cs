@@ -2,36 +2,74 @@ namespace Parlotype.Core.Speech;
 
 /// <summary>
 /// A named, reusable transcription prompt for the Gemma 4 (llama.cpp) engine.
-/// The <see cref="Text"/> may contain the <see cref="LanguageToken"/>
-/// placeholder, which <see cref="Render"/> substitutes with a source-language
-/// name at transcription time.
 /// </summary>
+/// <remarks>
+/// Bodies may contain two placeholders, substituted at transcription time:
+/// <list type="bullet">
+///   <item><see cref="SpeechLanguageToken"/> — the spoken (source) language name;
+///   renders to <see cref="AutoDetectedLanguageName"/> when the source is
+///   auto-detect.</item>
+///   <item><see cref="TextLanguageToken"/> — the output (target) language name,
+///   meaningful only when translating.</item>
+/// </list>
+/// Terminology map for maintainers: <c>speech</c> = source language,
+/// <c>text</c> = target language.
+///
+/// <para>
+/// Custom (user) prompts use a single body (<see cref="Text"/>). The
+/// <strong>built-in default</strong> additionally carries
+/// <see cref="TranslationText"/> (source + target) and
+/// <see cref="AutoDetectText"/> (no tokens); the recognizer selects the body per
+/// the resolved source/target pair. Both extra bodies are <see langword="null"/>
+/// for custom prompts.
+/// </para>
+/// </remarks>
 public sealed record PromptTemplate(
     string Id,
     string Name,
     string Text,
-    bool IsBuiltIn = false)
+    bool IsBuiltIn = false,
+    string? TranslationText = null,
+    string? AutoDetectText = null)
 {
     /// <summary>
-    /// Placeholder inside <see cref="Text"/> replaced with the source language
-    /// when the prompt is rendered. A future shared setting will derive this
-    /// from the active keyboard layout; for now <see cref="DefaultLanguage"/>
-    /// is used.
+    /// Placeholder replaced with the spoken (source) language name. Renders to
+    /// <see cref="AutoDetectedLanguageName"/> when the source is auto-detect.
     /// </summary>
-    public const string LanguageToken = "{language}";
+    public const string SpeechLanguageToken = "{speech_lang}";
 
     /// <summary>
-    /// Fallback source-language name substituted for <see cref="LanguageToken"/>
-    /// until the keyboard-layout language setting exists. Single source of truth
-    /// so that future work has one obvious seam to replace.
+    /// Placeholder replaced with the output (target) language name. Only present
+    /// in translation bodies.
     /// </summary>
-    public const string DefaultLanguage = "English";
+    public const string TextLanguageToken = "{text_lang}";
 
     /// <summary>
-    /// Returns <see cref="Text"/> with every <see cref="LanguageToken"/>
-    /// replaced by <paramref name="language"/> (or <see cref="DefaultLanguage"/>
-    /// when none is supplied).
+    /// Value substituted for <see cref="SpeechLanguageToken"/> when the source
+    /// language is auto-detect (unknown at prompt-build time).
     /// </summary>
-    public string Render(string? language = null) =>
-        Text.Replace(LanguageToken, string.IsNullOrWhiteSpace(language) ? DefaultLanguage : language, StringComparison.Ordinal);
+    public const string AutoDetectedLanguageName = "the detected language";
+
+    /// <summary>
+    /// Substitutes the language placeholders in <paramref name="body"/>. A
+    /// <see langword="null"/> argument leaves the corresponding token untouched.
+    /// </summary>
+    public static string Substitute(string body, string? speechLanguage = null, string? textLanguage = null)
+    {
+        ArgumentNullException.ThrowIfNull(body);
+
+        var result = body;
+        if (speechLanguage is not null)
+            result = result.Replace(SpeechLanguageToken, speechLanguage, StringComparison.Ordinal);
+        if (textLanguage is not null)
+            result = result.Replace(TextLanguageToken, textLanguage, StringComparison.Ordinal);
+        return result;
+    }
+
+    /// <summary>
+    /// Convenience over <see cref="Substitute(string, string?, string?)"/> applied
+    /// to this prompt's <see cref="Text"/> body.
+    /// </summary>
+    public string Render(string? speechLanguage = null, string? textLanguage = null) =>
+        Substitute(Text, speechLanguage, textLanguage);
 }
