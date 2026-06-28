@@ -10,12 +10,19 @@ public sealed class MockAudioPipeline : IAudioPipeline
     public bool IsRunning { get; private set; }
     public int StartCount { get; private set; }
     public int StopCount { get; private set; }
+    public int PrewarmCount { get; private set; }
 
     /// <summary>When set, <see cref="StartAsync"/> will throw this exception.</summary>
     public Exception? ThrowOnStart { get; set; }
 
     /// <summary>When set, <see cref="StartAsync"/> will delay for this duration before completing.</summary>
     public TimeSpan? StartDelay { get; set; }
+
+    public Task PrewarmAsync(CancellationToken cancellationToken = default)
+    {
+        PrewarmCount++;
+        return Task.CompletedTask;
+    }
 
     public async Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default)
     {

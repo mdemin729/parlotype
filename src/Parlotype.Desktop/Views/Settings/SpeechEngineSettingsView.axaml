@@ -54,5 +54,16 @@
                 The model files (~10 GB) will be downloaded on first use.
             </TextBlock>
         </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,8" />
+
+        <!-- Preload model on startup (opt-in, ADR-038) -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding PreloadModelOnStartupEnabled, Mode=TwoWay}"
+                          OnContent="Preload model on startup"
+                          OffContent="Load model on first use" />
+            <TextBlock TextWrapping="Wrap" Opacity="0.6" FontSize="12"
+                       Text="When enabled, the speech model loads in the background at app startup so your first recording starts instantly. Uses extra memory while idle. Takes effect on next launch." />
+        </StackPanel>
     </StackPanel>
 </UserControl>

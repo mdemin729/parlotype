@@ -95,24 +95,29 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 
         await WhisperRuntimeBootstrap.EnsureInitializedAsync(_settings, _logger);
 
-        try
+        // Factory + processor build are synchronous and CPU-bound — run them off
+        // the calling thread so the UI thread stays free and the spinner animates.
+        await Task.Run(() =>
         {
-            _factory = WhisperFactory.FromPath(modelPath);
-        }
-        catch (Exception ex) when (runtimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
-        {
-            throw new RuntimeUnavailableException(
-                runtimePreference,
-                $"Whisper.net failed to load the '{runtimePreference}' runtime. The native libraries may be missing or incompatible.",
-                ex);
-        }
+            try
+            {
+                _factory = WhisperFactory.FromPath(modelPath);
+            }
+            catch (Exception ex) when (runtimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
+            {
+                throw new RuntimeUnavailableException(
+                    runtimePreference,
+                    $"Whisper.net failed to load the '{runtimePreference}' runtime. The native libraries may be missing or incompatible.",
+                    ex);
+            }
 
-        _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
-        AssertLoadedRuntimeMatches(runtimePreference);
+            _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
+            AssertLoadedRuntimeMatches(runtimePreference);
 
-        _processor = _factory.CreateBuilder()
-            .WithLanguage("auto")
-            .Build();
+            _processor = _factory.CreateBuilder()
+                .WithLanguage("auto")
+                .Build();
+        }, cancellationToken).ConfigureAwait(false);
 
         IsReady = true;
         _logger.LogInformation("Whisper model loaded successfully");
@@ -140,46 +145,54 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 
         var modelPath = await _downloadService.EnsureModelAsync(options.Model, cancellationToken);
 
-        WhisperRuntimeBootstrap.Initialize(options.RuntimePreference, _logger);
-
-        try
+        // Native runtime init + factory + processor build are synchronous and
+        // CPU-bound. Run them off the calling thread so the UI thread stays free
+        // and the loading spinner keeps animating. (The llama.cpp engine loads via
+        // an out-of-process server, so it never blocked the UI in the first place.)
+        await Task.Run(() =>
         {
-            _factory = WhisperFactory.FromPath(modelPath);
-        }
-        catch (Exception ex) when (options.RuntimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
-        {
-            throw new RuntimeUnavailableException(
-                options.RuntimePreference,
-                $"Whisper.net failed to load the '{options.RuntimePreference}' runtime. The native libraries may be missing or incompatible.",
-                ex);
-        }
-        _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
-        AssertLoadedRuntimeMatches(options.RuntimePreference);
+            WhisperRuntimeBootstrap.Initialize(options.RuntimePreference, _logger);
 
-        var builder = _factory.CreateBuilder()
-            .WithLanguage(options.Language)
-            .WithTemperature(options.Temperature);
+            try
+            {
+                _factory = WhisperFactory.FromPath(modelPath);
+            }
+            catch (Exception ex) when (options.RuntimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
+            {
+                throw new RuntimeUnavailableException(
+                    options.RuntimePreference,
+                    $"Whisper.net failed to load the '{options.RuntimePreference}' runtime. The native libraries may be missing or incompatible.",
+                    ex);
+            }
+            _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
+            AssertLoadedRuntimeMatches(options.RuntimePreference);
 
-        if (options.Threads is not null)
-            builder.WithThreads(options.Threads.Value);
+            var builder = _factory.CreateBuilder()
+                .WithLanguage(options.Language)
+                .WithTemperature(options.Temperature);
 
-        if (options.BeamSize > 1)
-        {
-            var beamStrategy = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();
-            beamStrategy.WithBeamSize(options.BeamSize);
-        }
-        else
-        {
-            builder.WithGreedySamplingStrategy();
-        }
+            if (options.Threads is not null)
+                builder.WithThreads(options.Threads.Value);
 
-        if (options.TranslateToEnglish)
-            builder.WithTranslate();
+            if (options.BeamSize > 1)
+            {
+                var beamStrategy = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();
+                beamStrategy.WithBeamSize(options.BeamSize);
+            }
+            else
+            {
+                builder.WithGreedySamplingStrategy();
+            }
 
-        if (!string.IsNullOrEmpty(options.InitialPrompt))
-            builder.WithPrompt(options.InitialPrompt);
+            if (options.TranslateToEnglish)
+                builder.WithTranslate();
 
-        _processor = builder.Build();
+            if (!string.IsNullOrEmpty(options.InitialPrompt))
+                builder.WithPrompt(options.InitialPrompt);
+
+            _processor = builder.Build();
+        }, cancellationToken).ConfigureAwait(false);
+
         _currentOptions = options;
         IsReady = true;
         _logger.LogInformation("Whisper model loaded successfully");

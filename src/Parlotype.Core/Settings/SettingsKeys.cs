@@ -15,6 +15,13 @@ public static class SettingsKeys
     public const string FilterProfanity = "FilterProfanity";
 
     /// <summary>
+    /// Opt-in toggle for warming the speech model in the background at app
+    /// startup so the first record press is instant. Default false — when unset
+    /// or false, no prewarm runs and the model loads on first use (ADR-038).
+    /// </summary>
+    public const string PrewarmModelOnStartup = "PrewarmModelOnStartup";
+
+    /// <summary>
     /// Legacy Whisper-only translate-to-English flag (ADR-021). Superseded by
     /// <see cref="TranslationEnabled"/> + <see cref="SelectedTargetLanguage"/>.
     /// Still read once on startup so existing installations migrate cleanly; no

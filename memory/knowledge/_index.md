@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-06-18
+last_updated: 2026-06-27
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -41,6 +41,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[brand-positioning]] | Parlotype is positioned as **Local by default. Cloud by choice.** — single app, local-default, opt-in cloud (BYOK); tagline preserved; replaces "privacy-first" wording (ADR-032) | 2026-05-25 |
 | [[win32-keyboard-layout]] | Windows keyboard layouts are per-thread — query the foreground window's thread, then drill to its focused input thread via `GetGUIThreadInfo.hwndFocus` (multi-thread apps like Win11 Notepad); HKL low word = LANGID; transient LANGIDs (0x2000 range) throw `CultureNotFoundException` | 2026-06-18 |
 | [[avalonia-popup-patterns]] | Headless `CaptureRenderedFrame` excludes the popup layer (screenshot popover content directly); setting `DataContext` on an element rebases its other bindings (wrap in a Panel); light dismiss consumes the anchor click so button-toggled popups work without extra state | 2026-06-11 |
+| [[whisper-ui-thread-loading]] | `WhisperFactory.FromPath` + processor `Build()` are synchronous/CPU-bound despite the async method; wrap in `Task.Run` or they freeze the UI thread and any `DispatcherTimer` loading animation (ADR-038) | 2026-06-27 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

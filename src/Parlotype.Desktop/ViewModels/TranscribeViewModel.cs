@@ -61,11 +61,24 @@ public partial class TranscribeViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isActive;
 
+    /// <summary>True while the speech model is loading (for button styling/spinner).</summary>
+    [ObservableProperty]
+    private bool _isLoading;
+
     partial void OnRecordingStateChanged(RecordingState value)
     {
+        IsLoading = value == RecordingState.Loading;
         IsIdle = value == RecordingState.Idle;
         IsActive = value == RecordingState.Active;
     }
+
+    /// <summary>
+    /// How long a model load may run before the loading spinner is shown. A hot
+    /// (already-loaded) model starts almost instantly, so deferring the spinner by
+    /// this much avoids a one-frame icon flicker; only genuine cold loads cross it.
+    /// Settable so tests can tune the threshold.
+    /// </summary>
+    public TimeSpan LoadingSpinnerDelay { get; set; } = TimeSpan.FromMilliseconds(200);
 
     public TranscribeViewModel(
         IWindowManager windowManager,
@@ -228,6 +241,27 @@ public partial class TranscribeViewModel : ViewModelBase
     [RelayCommand]
     private void OpenSettings() => _windowManager.ShowSettings();
 
+    /// <summary>
+    /// Loads the speech model in the background so the first record press is
+    /// instant. Best-effort and silent — failures are logged, not surfaced, and
+    /// a cold load still falls back to the on-button loading spinner. Safe to call
+    /// repeatedly; the pipeline de-duplicates the heavy load.
+    /// </summary>
+    public async Task PrewarmAsync()
+    {
+        if (_pipeline is null || IsRecording)
+            return;
+
+        try
+        {
+            await _pipeline.PrewarmAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Speech model prewarm failed; first record press will load on demand");
+        }
+    }
+
     public async Task StartRecordingAsync()
     {
         if (_pipeline is null || IsRecording)
@@ -238,8 +272,19 @@ public partial class TranscribeViewModel : ViewModelBase
             _pipeline.TranscriptionAvailable += OnTranscriptionAvailable;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged += OnAudioLevelChanged;
-            StatusText = "Loading model...";
-            await _pipeline.StartAsync(PipelineMode.Batch);
+
+            var startTask = _pipeline.StartAsync(PipelineMode.Batch);
+
+            // Defer the spinner: a hot model starts almost instantly, so only show
+            // the loading state when the load actually outlasts the threshold —
+            // otherwise the icon would flash for a single frame.
+            if (await Task.WhenAny(startTask, Task.Delay(LoadingSpinnerDelay)) != startTask)
+            {
+                RecordingState = RecordingState.Loading;
+                StatusText = "Loading model...";
+            }
+
+            await startTask;
             IsRecording = true;
             RecordingState = RecordingState.Idle;
             StatusText = "Recording...";

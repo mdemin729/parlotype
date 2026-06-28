@@ -7,9 +7,10 @@ using Parlotype.Core.Audio;
 namespace Parlotype.Desktop.Views;
 
 /// <summary>
-/// Custom control that visualises three recording states:
+/// Custom control that visualises recording states:
 /// <list type="bullet">
 ///   <item><see cref="RecordingState.Disabled"/> — static microphone icon</item>
+///   <item><see cref="RecordingState.Loading"/> — rotating arc spinner (model loading)</item>
 ///   <item><see cref="RecordingState.Idle"/> — gently breathing bars (silence)</item>
 ///   <item><see cref="RecordingState.Active"/> — animated multi-frequency wave (speech)</item>
 /// </list>
@@ -99,6 +100,9 @@ public class WaveformView : Control
             case RecordingState.Disabled:
                 RenderMicIcon(ctx);
                 break;
+            case RecordingState.Loading:
+                RenderSpinner(ctx);
+                break;
             case RecordingState.Idle:
                 RenderBars(ctx, idle: true);
                 break;
@@ -150,6 +154,37 @@ public class WaveformView : Control
             var rect = new Rect(x, y, barW, barH);
             ctx.DrawRectangle(brush, null, rect, rx, rx);
         }
+    }
+
+    /// <summary>
+    /// Draws a rotating arc spinner while the speech model loads. Uses the shared
+    /// animation phase so it spins smoothly on the existing 16ms timer.
+    /// </summary>
+    private void RenderSpinner(DrawingContext ctx)
+    {
+        var brush = ResolveBrush("WaveformActiveBrush", FallbackActiveBrush);
+        var cx = Bounds.Width / 2;
+        var cy = Bounds.Height / 2;
+        var r = Math.Min(Bounds.Width, Bounds.Height) * 0.30;
+
+        // Rotation derived from the shared phase (faster for a lively spinner).
+        var rotation = _phase * 5.0;
+        const double sweep = Math.PI * 1.5; // 270° arc
+        var a0 = rotation;
+        var a1 = rotation + sweep;
+
+        var p0 = new Point(cx + r * Math.Cos(a0), cy + r * Math.Sin(a0));
+        var p1 = new Point(cx + r * Math.Cos(a1), cy + r * Math.Sin(a1));
+
+        var geo = new StreamGeometry();
+        using (var gc = geo.Open())
+        {
+            gc.BeginFigure(p0, false);
+            gc.ArcTo(p1, new Size(r, r), 0, isLargeArc: sweep > Math.PI, SweepDirection.Clockwise);
+        }
+
+        var pen = new Pen(brush, 4, lineCap: PenLineCap.Round);
+        ctx.DrawGeometry(null, pen, geo);
     }
 
     private void RenderMicIcon(DrawingContext ctx)

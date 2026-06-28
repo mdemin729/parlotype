@@ -1,3 +1,4 @@
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels.Settings;
@@ -70,5 +71,47 @@ public class SpeechEngineSettingsViewModelTests
 
         var saved = await settings.GetAsync<string>("SpeechEngine", TestContext.Current.CancellationToken);
         Assert.Equal("Gemma4", saved);
+    }
+
+    [Fact]
+    public void Prewarm_DefaultsToFalse_WhenUnset()
+    {
+        var settings = new MockSettingsService();
+        var vm = new SpeechEngineSettingsViewModel(settings);
+
+        Assert.False(vm.PreloadModelOnStartupEnabled);
+    }
+
+    [Fact]
+    public async Task Prewarm_LoadsPersistedTrue()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.PrewarmModelOnStartup, true.ToString(), ct);
+
+        var vm = new SpeechEngineSettingsViewModel(settings);
+
+        // InitializeAsync is fire-and-forget — give it a moment to load.
+        await Task.Delay(100, ct);
+
+        Assert.True(vm.PreloadModelOnStartupEnabled);
+    }
+
+    [Fact]
+    public async Task Prewarm_TogglePersistsSetting()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var settings = new MockSettingsService();
+        var vm = new SpeechEngineSettingsViewModel(settings);
+
+        vm.PreloadModelOnStartupEnabled = true;
+        await Task.Delay(50, ct);
+        Assert.Equal(true.ToString(),
+            await settings.GetAsync<string>(SettingsKeys.PrewarmModelOnStartup, ct));
+
+        vm.PreloadModelOnStartupEnabled = false;
+        await Task.Delay(50, ct);
+        Assert.Equal(false.ToString(),
+            await settings.GetAsync<string>(SettingsKeys.PrewarmModelOnStartup, ct));
     }
 }

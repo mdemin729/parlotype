@@ -27,9 +27,23 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     [ObservableProperty]
     private bool _isGemma4Selected;
 
+    /// <summary>
+    /// Opt-in: warm the speech model in the background at app startup so the
+    /// first record press is instant. Off by default; takes effect on next
+    /// launch (ADR-038).
+    /// </summary>
+    [ObservableProperty]
+    private bool _preloadModelOnStartupEnabled;
+
     partial void OnSelectedEngineChanged(SpeechEngine value)
     {
         IsGemma4Selected = value == SpeechEngine.Gemma4;
+    }
+
+    partial void OnPreloadModelOnStartupEnabledChanged(bool value)
+    {
+        _logger.LogInformation("Preload model on startup: {Enabled}", value);
+        _ = _settings.SetAsync(SettingsKeys.PrewarmModelOnStartup, value.ToString());
     }
 
     public SpeechEngineSettingsViewModel(
@@ -66,6 +80,10 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
             ? parsed
             : SpeechEngine.Whisper;
         Apply(engine);
+
+        var savedPrewarm = await _settings.GetAsync<string>(SettingsKeys.PrewarmModelOnStartup);
+        if (bool.TryParse(savedPrewarm, out var prewarm))
+            PreloadModelOnStartupEnabled = prewarm;
     }
 
     [RelayCommand]
