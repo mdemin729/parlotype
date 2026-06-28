@@ -67,7 +67,35 @@ public class App : Application
         _ = Task.Run(() => LogNvidiaEnvironmentAsync(_services));
         _ = Task.Run(() => LogVulkanEnvironmentAsync(_services));
 
+        // Warm the speech model in the background so the user's first record press
+        // is instant instead of blocking on a cold model load. Best-effort — the
+        // on-button loading spinner still covers any cold start.
+        _ = Task.Run(() => PrewarmSpeechModelAsync(_services));
+
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task PrewarmSpeechModelAsync(IServiceProvider provider)
+    {
+        var logger = provider.GetRequiredService<ILogger<App>>();
+        try
+        {
+            // Opt-in (ADR-038): skip prewarm unless the user enabled it in Settings.
+            var settings = provider.GetRequiredService<ISettingsService>();
+            var saved = await settings.GetAsync<string>(SettingsKeys.PrewarmModelOnStartup);
+            if (!bool.TryParse(saved, out var enabled) || !enabled)
+            {
+                logger.LogInformation("Speech-model prewarm disabled — loading on first use");
+                return;
+            }
+
+            logger.LogInformation("Speech-model prewarm enabled — warming in background");
+            await provider.GetRequiredService<TranscribeViewModel>().PrewarmAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Background speech-model prewarm failed");
+        }
     }
 
     private static async Task LogVulkanEnvironmentAsync(IServiceProvider provider)

@@ -127,25 +127,82 @@ public class TranscribeViewModelTests
     }
 
     [AvaloniaFact]
-    public async Task StartRecording_ShowsLoadingStatus_DuringPipelineStart()
+    public async Task StartRecording_ColdModel_ShowsSpinner()
     {
         var pipeline = new MockAudioPipeline
         {
-            StartDelay = TimeSpan.FromMilliseconds(200)
+            StartDelay = TimeSpan.FromMilliseconds(300)
         };
-        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline)
+        {
+            LoadingSpinnerDelay = TimeSpan.FromMilliseconds(20)
+        };
 
-        var startTask = vm.StartRecordingAsync();
+        var observed = new List<RecordingState>();
+        vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(TranscribeViewModel.RecordingState))
+                observed.Add(vm.RecordingState);
+        };
 
-        // While pipeline is still starting, status should show loading message
-        Assert.Equal("Loading model...", vm.StatusText);
-        Assert.False(vm.IsRecording);
+        await vm.StartRecordingAsync();
 
-        await startTask;
-
-        // After pipeline started, status should show recording
+        // The load outlasted the spinner delay, so Loading must have been shown.
+        Assert.Contains(RecordingState.Loading, observed);
         Assert.Equal("Recording...", vm.StatusText);
         Assert.True(vm.IsRecording);
+        Assert.False(vm.IsLoading);
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_HotModel_DoesNotFlashSpinner()
+    {
+        // Instant start (no StartDelay) simulates an already-loaded, hot model.
+        var pipeline = new MockAudioPipeline();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        var observed = new List<RecordingState>();
+        vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(TranscribeViewModel.RecordingState))
+                observed.Add(vm.RecordingState);
+        };
+
+        await vm.StartRecordingAsync();
+
+        // The hot start completed before the spinner delay — no Loading flicker.
+        Assert.DoesNotContain(RecordingState.Loading, observed);
+        Assert.Equal("Recording...", vm.StatusText);
+        Assert.True(vm.IsRecording);
+        Assert.False(vm.IsLoading);
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task Prewarm_DelegatesToPipeline()
+    {
+        var pipeline = new MockAudioPipeline();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        await vm.PrewarmAsync();
+
+        Assert.Equal(1, pipeline.PrewarmCount);
+        // Prewarm must not start recording or alter the resting visual state.
+        Assert.False(vm.IsRecording);
+        Assert.False(vm.IsLoading);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task Prewarm_NoPipeline_IsNoOp()
+    {
+        var vm = new TranscribeViewModel(new MockWindowManager());
+
+        await vm.PrewarmAsync();
+
+        Assert.False(vm.IsRecording);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
     }
 
     [AvaloniaFact]

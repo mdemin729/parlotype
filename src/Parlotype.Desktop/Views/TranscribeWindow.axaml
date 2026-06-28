@@ -25,6 +25,13 @@
             <Setter Property="Foreground" Value="White" />
         </Style>
 
+        <!-- Model is loading: same blue chrome as recording so the white spinner
+             reads clearly, signalling "working" rather than an idle, dead button. -->
+        <Style Selector="Button.loading">
+            <Setter Property="Background" Value="#378ADD" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+
         <!-- Quick-picker strip: miniature of the page relationship (spec §2.2). -->
         <Style Selector="Button.chip">
             <Setter Property="Padding" Value="8,4" />
@@ -66,6 +73,7 @@
 
             <Button Name="RecordButton"
                     Classes.recording="{Binding IsRecording}"
+                    Classes.loading="{Binding IsLoading}"
                     Command="{Binding TogglePlayCommand}"
                     Width="112" Height="56"
                     CornerRadius="28"

@@ -114,14 +114,16 @@ User-facing `RuntimePreference` (`Parlotype.Core/Speech/`) maps to Whisper.net's
 
 Real-time visual feedback showing whether the user is speaking. See [[decisions/_index|ADR-023]].
 
-- **Core**: `IAudioLevelProvider` (event `LevelChanged`, property `CurrentLevel`), `AudioLevelEventArgs`, `RecordingState` enum (`Disabled`, `Idle`, `Active`)
-- **Platform**: `AudioPipelineService` implements `IAudioLevelProvider` — computes RMS on each audio chunk via `PublishAudioLevel()`, fires event. DI forwards via `sp.GetRequiredService<IAudioPipeline>()` cast.
+- **Core**: `IAudioLevelProvider` (event `LevelChanged`, property `CurrentLevel`), `AudioLevelEventArgs`, `RecordingState` enum (`Disabled`, `Loading`, `Idle`, `Active`). `IAudioPipeline.PrewarmAsync` (default no-op) pre-loads the model — see [[decisions/_index|ADR-038]]
+- **Platform**: `AudioPipelineService` implements `IAudioLevelProvider` — computes RMS on each audio chunk via `PublishAudioLevel()`, fires event. DI forwards via `sp.GetRequiredService<IAudioPipeline>()` cast. `PrewarmAsync` + `StartAsync` share `EnsureModelInitializedAsync` under a `SemaphoreSlim _initLock`.
 - **Desktop**: `WaveformView` custom `Control` with `DrawingContext` rendering:
   - **Disabled**: microphone icon via `StreamGeometry`
+  - **Loading**: rotating 270° arc spinner (shared `_phase`) while the model loads
   - **Idle**: 13 white bars with gentle sine-wave breathing animation
   - **Active**: 13 white bars with decorative multi-frequency wave animation (amplitude 0.6 default)
   - 60 fps `DispatcherTimer`, attached/detached with visual tree
 - **State machine** in `TranscribeViewModel`:
+  - `RecordingState.Loading` + `IsLoading` set while `StartAsync` awaits a cold model load; `PrewarmAsync` warms it silently in the background (kicked off from `App`)
   - EMA-smoothed RMS (attack 0.4, decay 0.05) compared against threshold 0.005
   - 1200ms hold-off keeps Active state through natural speech pauses
-  - Button turns blue `#378ADD` when recording (Idle or Active)
+  - Button turns blue `#378ADD` when recording (Idle or Active) or loading

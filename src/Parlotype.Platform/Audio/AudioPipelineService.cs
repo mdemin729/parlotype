@@ -27,6 +27,10 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     private Task? _processingTask;
     private bool _disposed;
 
+    /// <summary>Serialises model initialisation so a background prewarm and an
+    /// interactive start never load the model (or mutate cached settings) concurrently.</summary>
+    private readonly SemaphoreSlim _initLock = new(1, 1);
+
     // Incremental VAD state for batch mode
     private int _vadProcessedUpTo;
     private readonly List<VadSpeechSegment> _accumulatedSegments = [];
@@ -77,6 +81,17 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         _logger = logger;
     }
 
+    public async Task PrewarmAsync(CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (IsRunning)
+            return;
+
+        await EnsureModelInitializedAsync(cancellationToken);
+        _logger.LogInformation("Pipeline prewarmed: speech model ready");
+    }
+
     public async Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -86,13 +101,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
         _mode = mode;
 
-        // Snapshot settings for this recording session
-        await CacheSettingsAsync(cancellationToken);
-
-        if (_whisperOptions is not null)
-            await _recognizer.InitializeAsync(_whisperOptions, cancellationToken);
-        else if (!_recognizer.IsReady)
-            await _recognizer.InitializeAsync(cancellationToken);
+        await EnsureModelInitializedAsync(cancellationToken);
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _capture.DataAvailable += OnAudioDataAvailable;
@@ -101,6 +110,30 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         await _capture.StartAsync(null, cancellationToken);
         IsRunning = true;
         _logger.LogInformation("Pipeline starting in {Mode} mode", _mode);
+    }
+
+    /// <summary>
+    /// Snapshots settings and loads the speech model under <see cref="_initLock"/>.
+    /// Idempotent when the recognizer is already loaded with matching options, so a
+    /// prewarm followed by an interactive start performs the heavy load only once.
+    /// </summary>
+    private async Task EnsureModelInitializedAsync(CancellationToken cancellationToken)
+    {
+        await _initLock.WaitAsync(cancellationToken);
+        try
+        {
+            // Snapshot settings for this recording session
+            await CacheSettingsAsync(cancellationToken);
+
+            if (_whisperOptions is not null)
+                await _recognizer.InitializeAsync(_whisperOptions, cancellationToken);
+            else if (!_recognizer.IsReady)
+                await _recognizer.InitializeAsync(cancellationToken);
+        }
+        finally
+        {
+            _initLock.Release();
+        }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -448,5 +481,13 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
         if (IsRunning)
             await StopAsync();
+
+        // A fire-and-forget background prewarm may still hold _initLock during a
+        // multi-second cold load. Drain it before disposing so its finally-block
+        // Release() doesn't run against a disposed semaphore. If it can't be
+        // acquired quickly (a slow load), skip Dispose — a SemaphoreSlim needs no
+        // disposal unless its AvailableWaitHandle was used, which it never is here.
+        if (await _initLock.WaitAsync(TimeSpan.FromSeconds(5)))
+            _initLock.Dispose();
     }
 }

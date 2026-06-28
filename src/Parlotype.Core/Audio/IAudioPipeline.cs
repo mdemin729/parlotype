@@ -7,6 +7,13 @@ namespace Parlotype.Core.Audio;
 /// </summary>
 public interface IAudioPipeline : IAsyncDisposable
 {
+    /// <summary>
+    /// Loads the speech model ahead of time so the first <see cref="StartAsync"/>
+    /// call is instant rather than blocking on a cold model load. Best-effort and
+    /// safe to call multiple times; does not start audio capture. No-op by default.
+    /// </summary>
+    Task PrewarmAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
     /// <summary>Starts the audio pipeline with the specified mode.</summary>
     Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default);
 
