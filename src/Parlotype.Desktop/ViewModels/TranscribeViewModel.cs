@@ -32,6 +32,14 @@ public partial class TranscribeViewModel : ViewModelBase
     /// <summary>Timestamp of the last above-threshold audio level sample.</summary>
     private DateTime _lastSpeechTime;
 
+    /// <summary>
+    /// In-flight <see cref="StartRecordingAsync"/>, if any. Lets a stop request
+    /// that arrives during the (possibly long) model load wait for the start to
+    /// finish instead of being dropped because IsRecording is still false.
+    /// All access happens on the UI thread.
+    /// </summary>
+    private Task? _startTask;
+
     /// <summary>Smoothed RMS level for stable state transitions (EMA).</summary>
     private float _smoothedRms;
 
@@ -264,16 +272,30 @@ public partial class TranscribeViewModel : ViewModelBase
 
     public async Task StartRecordingAsync()
     {
-        if (_pipeline is null || IsRecording)
+        if (_pipeline is null || IsRecording || _startTask is not null)
             return;
 
+        var startTask = StartRecordingCoreAsync(_pipeline);
+        _startTask = startTask;
         try
         {
-            _pipeline.TranscriptionAvailable += OnTranscriptionAvailable;
+            await startTask;
+        }
+        finally
+        {
+            _startTask = null;
+        }
+    }
+
+    private async Task StartRecordingCoreAsync(IAudioPipeline pipeline)
+    {
+        try
+        {
+            pipeline.TranscriptionAvailable += OnTranscriptionAvailable;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged += OnAudioLevelChanged;
 
-            var startTask = _pipeline.StartAsync(PipelineMode.Batch);
+            var startTask = pipeline.StartAsync(PipelineMode.Batch);
 
             // Defer the spinner: a hot model starts almost instantly, so only show
             // the loading state when the load actually outlasts the threshold —
@@ -292,7 +314,7 @@ public partial class TranscribeViewModel : ViewModelBase
         catch (RuntimeUnavailableException ex)
         {
             _logger.LogWarning(ex, "Whisper runtime '{Runtime}' unavailable", ex.Requested);
-            _pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
@@ -302,7 +324,7 @@ public partial class TranscribeViewModel : ViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to start recording");
-            _pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
@@ -313,7 +335,16 @@ public partial class TranscribeViewModel : ViewModelBase
 
     public async Task StopRecordingAsync()
     {
-        if (_pipeline is null || !IsRecording)
+        if (_pipeline is null)
+            return;
+
+        // In Push-to-Talk the key release can arrive while the initial model
+        // load is still running and IsRecording is not yet true. Wait for the
+        // in-flight start to settle so the stop isn't silently dropped.
+        if (_startTask is { } startTask)
+            await startTask;
+
+        if (!IsRecording)
             return;
 
         try
