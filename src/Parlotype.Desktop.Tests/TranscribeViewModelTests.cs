@@ -222,6 +222,66 @@ public class TranscribeViewModelTests
     }
 
     [AvaloniaFact]
+    public async Task StopRecording_DuringSlowStart_StillStops()
+    {
+        // Regression: in Push-to-Talk the very first key release lands while the
+        // cold model is still loading. The stop must wait for the in-flight start
+        // and then actually stop, instead of no-oping on IsRecording == false and
+        // leaving the recording stuck on.
+        var pipeline = new MockAudioPipeline
+        {
+            StartDelay = TimeSpan.FromMilliseconds(300)
+        };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        var startTask = vm.StartRecordingAsync();
+        await Task.Delay(50); // release arrives mid-load
+        await vm.StopRecordingAsync();
+        await startTask;
+
+        Assert.False(vm.IsRecording);
+        Assert.Equal(1, pipeline.StartCount);
+        Assert.Equal(1, pipeline.StopCount);
+        Assert.False(pipeline.IsRunning);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal("Ready", vm.StatusText);
+    }
+
+    [AvaloniaFact]
+    public async Task StopRecording_DuringFailedStart_DoesNotStopPipeline()
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            ThrowOnStart = new InvalidOperationException("mic unavailable")
+        };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        var startTask = vm.StartRecordingAsync();
+        await vm.StopRecordingAsync();
+        await startTask;
+
+        Assert.False(vm.IsRecording);
+        Assert.Equal(0, pipeline.StopCount);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_Reentrant_StartsPipelineOnce()
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            StartDelay = TimeSpan.FromMilliseconds(200)
+        };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        var first = vm.StartRecordingAsync();
+        var second = vm.StartRecordingAsync();
+        await Task.WhenAll(first, second);
+
+        Assert.True(vm.IsRecording);
+        Assert.Equal(1, pipeline.StartCount);
+    }
+
+    [AvaloniaFact]
     public async Task StopRecording_UnsubscribesFromAudioLevel()
     {
         var pipeline = new MockAudioPipeline();
