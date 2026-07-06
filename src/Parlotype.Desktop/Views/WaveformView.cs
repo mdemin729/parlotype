@@ -196,28 +196,30 @@ public class WaveformView : Control
 
         // Mic body
         var micGeo = new StreamGeometry();
+        var topRadius = 5;
         using (var gc = micGeo.Open())
         {
-            gc.BeginFigure(new Point(cx - 7, cy - 12), true);
-            gc.ArcTo(new Point(cx + 7, cy - 12), new Size(7, 7), 0, false, SweepDirection.Clockwise);
-            gc.LineTo(new Point(cx + 7, cy + 6));
-            gc.ArcTo(new Point(cx - 7, cy + 6), new Size(7, 7), 0, false, SweepDirection.Clockwise);
+            gc.BeginFigure(new Point(cx - topRadius, cy - topRadius - 5), true);
+            gc.ArcTo(new Point(cx + topRadius, cy - topRadius - 5), new Size(topRadius, topRadius), 0, false, SweepDirection.Clockwise);
+            gc.LineTo(new Point(cx + topRadius, cy + topRadius - 1));
+            gc.ArcTo(new Point(cx - topRadius, cy + topRadius - 1), new Size(topRadius, topRadius), 0, false, SweepDirection.Clockwise);
             gc.EndFigure(true);
         }
         ctx.DrawGeometry(brush, null, micGeo);
 
-        const int radii = 10;
+        int radii = topRadius + 3;
         // Arc below mic
         var arcGeo = new StreamGeometry();
         using (var gc = arcGeo.Open())
         {
-            gc.BeginFigure(new Point(cx - radii, cy + 6), false);
-            gc.ArcTo(new Point(cx + radii, cy + 6), new Size(radii, radii), 0, false, SweepDirection.CounterClockwise);
+            gc.BeginFigure(new Point(cx - radii, cy + topRadius - 1), false);
+            gc.ArcTo(new Point(cx + radii, cy + topRadius - 1), new Size(radii, radii), 0, false, SweepDirection.CounterClockwise);
         }
         ctx.DrawGeometry(null, pen, arcGeo);
 
         // Stem + base line
-        ctx.DrawLine(pen, new Point(cx, cy + 16), new Point(cx, cy + 22));
-        ctx.DrawLine(pen, new Point(cx - 7, cy + 22), new Point(cx + 7, cy + 22));
+        var baseY = cy + topRadius + 13;
+        ctx.DrawLine(pen, new Point(cx, cy + topRadius + 9), new Point(cx, baseY));
+        ctx.DrawLine(pen, new Point(cx - topRadius, baseY), new Point(cx + topRadius, baseY));
     }
 }

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Вариант C — Мини-карточка (≈172×96)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #3b4a63 0%, #22293a 100%);
+    overflow: hidden;
+  }
+  .fake-app {
+    position: absolute; inset: 60px 80px 60px 80px;
+    background: #f5f5f7; border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    padding: 48px; color: #999; font-size: 14px; line-height: 1.7;
+  }
+  .fake-app h1 { color: #555; font-size: 20px; margin-bottom: 16px; }
+  .note {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    color: rgba(255,255,255,.75); font-size: 12px; text-align: center;
+  }
+
+  /* ===== Виджет: мини-карточка ===== */
+  .widget {
+    position: absolute; top: 120px; left: 50%;
+    width: 172px; height: 96px;
+    background: #ececee;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.2);
+    padding: 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    cursor: grab; user-select: none;
+  }
+  .widget.dragging { cursor: grabbing; }
+
+  .row-top { display: flex; gap: 6px; flex: 1; }
+
+  /* Кнопка записи с waveform (уменьшенная версия текущей) */
+  .rec-btn {
+    flex: 1; height: 100%; border: none; border-radius: 22px;
+    background: #dcdcdf; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .rec-btn:hover { background: #d0d0d4; }
+  .widget.recording .rec-btn { background: #378ADD; }
+  .wave { display: flex; align-items: center; gap: 3px; height: 22px; }
+  .wave span {
+    width: 3px; height: 6px; border-radius: 2px; background: #378ADD;
+  }
+  .widget.recording .wave span { background: #fff; animation: bounce 1s ease-in-out infinite; }
+  .wave span:nth-child(2) { animation-delay: .1s; height: 13px; }
+  .wave span:nth-child(3) { animation-delay: .2s; height: 20px; }
+  .wave span:nth-child(4) { animation-delay: .3s; height: 11px; }
+  .wave span:nth-child(5) { animation-delay: .4s; height: 16px; }
+  .wave span:nth-child(6) { animation-delay: .5s; height: 8px; }
+  @keyframes bounce { 0%,100% { transform: scaleY(.5); } 50% { transform: scaleY(1.4); } }
+
+  .gear {
+    width: 44px; height: 100%; flex: none;
+    border: none; border-radius: 22px; background: #dcdcdf; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; color: #222;
+  }
+  .gear:hover { background: #d0d0d4; }
+
+  /* Нижняя строка: языки + статус-точка, всё в одной полосе */
+  .row-bottom {
+    height: 30px; border-radius: 15px; background: #dcdcdf;
+    display: flex; align-items: center; padding: 0 6px; gap: 2px;
+  }
+  .lang-flex { display: flex; align-items: center; gap: 2px; flex: 1; justify-content: center; }
+  .row-bottom button {
+    border: none; background: transparent; cursor: pointer;
+    font-size: 11px; font-weight: 600; color: #333;
+    padding: 4px 7px; border-radius: 12px;
+  }
+  .row-bottom button:hover { background: rgba(0,0,0,.08); }
+  .row-bottom .conn { font-weight: 400; color: #666; min-width: 22px; }
+  .row-bottom .conn.on { background: #378ADD; color: #fff; }
+
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex: none;
+    background: #4caf50;
+  }
+  .widget.recording .status-dot { background: #e53935; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  .status-tip {
+    position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+    background: rgba(30,30,30,.92); color: #fff; font-size: 11px;
+    padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity .15s;
+  }
+  .widget:hover .status-tip { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="fake-app">
+  <h1>Документ пользователя (для масштаба)</h1>
+  <p>Мини-карточка 172×96 px — та же вертикальная компоновка, что сейчас,
+     но без заголовка и на ~62 % меньше по площади (сейчас 240×184).
+     Строка статуса заменена точкой-индикатором в языковой полосе;
+     полный текст статуса — в tooltip при наведении.</p>
+</div>
+
+<div class="widget" id="w" style="transform: translateX(-50%);">
+  <span class="status-tip" id="tip">Ready</span>
+
+  <div class="row-top">
+    <button class="rec-btn" title="Начать/остановить запись">
+      <div class="wave">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </button>
+    <button class="gear" title="Настройки">&#9881;</button>
+  </div>
+
+  <div class="row-bottom">
+    <span class="status-dot" title="Ready"></span>
+    <div class="lang-flex">
+      <button title="Язык источника">English</button>
+      <button class="conn" id="conn" title="Переключить перевод">=</button>
+      <button title="Язык назначения">English</button>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  Вариант C — мини-карточка 172×96: привычная компоновка текущего окна,
+  ужатая в два ряда. Перетаскивание — за любую некнопочную область.
+</div>
+
+<script>
+  const w = document.getElementById('w');
+
+  w.querySelector('.rec-btn').addEventListener('click', () => {
+    w.classList.toggle('recording');
+    const t = w.classList.contains('recording') ? 'Recording…' : 'Ready';
+    document.getElementById('tip').textContent = t;
+    w.querySelector('.status-dot').title = t;
+  });
+
+  const conn = document.getElementById('conn');
+  conn.addEventListener('click', () => {
+    conn.classList.toggle('on');
+    conn.textContent = conn.classList.contains('on') ? '→' : '=';
+  });
+
+  // Drag anywhere, кроме кнопок
+  let drag = null;
+  w.addEventListener('mousedown', e => {
+    if (e.target.closest('button')) return;
+    drag = { dx: e.clientX - w.offsetLeft, dy: e.clientY - w.offsetTop };
+    w.style.transform = 'none';
+    w.classList.add('dragging');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    w.style.left = (e.clientX - drag.dx) + 'px';
+    w.style.top  = (e.clientY - drag.dy) + 'px';
+  });
+  window.addEventListener('mouseup', () => { drag = null; w.classList.remove('dragging'); });
+</script>
+</body>
+</html>

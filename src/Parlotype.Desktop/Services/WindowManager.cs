@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using Parlotype.Core.Settings;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.Views;
 
@@ -19,7 +20,7 @@ internal sealed class WindowManager : IWindowManager
         _services = services;
     }
 
-    public void ShowTranscribe(bool activate = true) => Dispatcher.UIThread.Post(() =>
+    public void ShowTranscribe(bool activate = true) => Dispatcher.UIThread.Post(async () =>
     {
         if (_transcribe is null || !_transcribe.IsVisible && _transcribe.PlatformImpl is null)
         {
@@ -33,6 +34,10 @@ internal sealed class WindowManager : IWindowManager
                 e.Cancel = true;
                 _transcribe?.Hide();
             };
+            // The window is frameless and user-positioned via its grip strip;
+            // reopen it where the user left it (ADR-040).
+            await _transcribe.RestorePositionAsync(
+                _services.GetRequiredService<IWindowStateService>());
         }
 
         _transcribe.ShowActivated = activate;
