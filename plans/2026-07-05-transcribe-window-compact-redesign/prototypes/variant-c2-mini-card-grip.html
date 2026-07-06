@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Вариант C2 — Мини-карточка с грипом (≈172×112)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #3b4a63 0%, #22293a 100%);
+    overflow: hidden;
+  }
+  .fake-app {
+    position: absolute; inset: 60px 80px 60px 80px;
+    background: #f5f5f7; border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    padding: 48px; color: #999; font-size: 14px; line-height: 1.7;
+  }
+  .fake-app h1 { color: #555; font-size: 20px; margin-bottom: 16px; }
+  .note {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    color: rgba(255,255,255,.75); font-size: 12px; text-align: center;
+  }
+
+  /* ===== Виджет: мини-карточка с грипом (стиль Windows Voice Typing) ===== */
+  .widget {
+    position: absolute; top: 120px; left: 50%;
+    width: 172px; height: 112px;
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.30), 0 1px 3px rgba(0,0,0,.15);
+    display: flex; flex-direction: column;
+    user-select: none;
+  }
+
+  /* Заголовочная зона: только она перетаскивает окно */
+  .grip-zone {
+    height: 18px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    cursor: grab;
+  }
+  .grip-zone.dragging { cursor: grabbing; }
+  .grip-zone .grip {
+    width: 40px; height: 4px; border-radius: 2px;
+    background: #9a9a9a;
+  }
+  .grip-zone:hover .grip { background: #7a7a7a; }
+  .close {
+    position: absolute; top: 2px; right: 4px;
+    width: 20px; height: 20px;
+    border: none; border-radius: 5px; background: transparent;
+    cursor: pointer; color: #555; font-size: 12px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .close:hover { background: rgba(0,0,0,.08); }
+
+  .body { flex: 1; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 6px; }
+  .row-top { display: flex; gap: 6px; flex: 1; }
+
+  /* Кнопка записи с waveform */
+  .rec-btn {
+    flex: 1; height: 100%; border: none; border-radius: 22px;
+    background: #e2e2e4; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .rec-btn:hover { background: #d6d6d9; }
+  .widget.recording .rec-btn { background: #378ADD; }
+  .wave { display: flex; align-items: center; gap: 3px; height: 22px; }
+  .wave span {
+    width: 3px; height: 6px; border-radius: 2px; background: #378ADD;
+  }
+  .widget.recording .wave span { background: #fff; animation: bounce 1s ease-in-out infinite; }
+  .wave span:nth-child(2) { animation-delay: .1s; height: 13px; }
+  .wave span:nth-child(3) { animation-delay: .2s; height: 20px; }
+  .wave span:nth-child(4) { animation-delay: .3s; height: 11px; }
+  .wave span:nth-child(5) { animation-delay: .4s; height: 16px; }
+  .wave span:nth-child(6) { animation-delay: .5s; height: 8px; }
+  @keyframes bounce { 0%,100% { transform: scaleY(.5); } 50% { transform: scaleY(1.4); } }
+
+  .gear {
+    width: 44px; height: 100%; flex: none;
+    border: none; border-radius: 22px; background: #e2e2e4; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; color: #222;
+  }
+  .gear:hover { background: #d6d6d9; }
+
+  /* Нижняя строка: только языки, без статус-индикатора */
+  .row-bottom {
+    height: 30px; border-radius: 15px; background: #e2e2e4;
+    display: flex; align-items: center; justify-content: center; padding: 0 6px; gap: 2px;
+  }
+  .row-bottom button {
+    border: none; background: transparent; cursor: pointer;
+    font-size: 11px; font-weight: 600; color: #333;
+    padding: 4px 7px; border-radius: 12px;
+  }
+  .row-bottom button:hover { background: rgba(0,0,0,.08); }
+  .row-bottom .conn { font-weight: 400; color: #666; min-width: 22px; }
+  .row-bottom .conn.on { background: #378ADD; color: #fff; }
+
+  /* Статус — только tooltip при наведении на виджет */
+  .status-tip {
+    position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+    background: rgba(30,30,30,.92); color: #fff; font-size: 11px;
+    padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity .15s .3s;
+  }
+  .widget:hover .status-tip { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="fake-app">
+  <h1>Документ пользователя (для масштаба)</h1>
+  <p>Мини-карточка 172×112 px в стиле Windows Voice Typing: сверху узкая
+     заголовочная зона с грипом (серая полоска) — <b>только она</b> перетаскивает
+     окно — и крестиком, скрывающим виджет. Статус («Ready» / «Recording…»)
+     показывается только в tooltip при наведении на виджет.</p>
+</div>
+
+<div class="widget" id="w" style="transform: translateX(-50%);">
+  <span class="status-tip" id="tip">Ready</span>
+
+  <div class="grip-zone" id="grip" title="Перетащить окно">
+    <div class="grip"></div>
+    <button class="close" title="Скрыть окно">&#10005;</button>
+  </div>
+
+  <div class="body">
+    <div class="row-top">
+      <button class="rec-btn" title="Начать/остановить запись">
+        <div class="wave">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </button>
+      <button class="gear" title="Настройки">&#9881;</button>
+    </div>
+
+    <div class="row-bottom">
+      <button title="Язык источника">English</button>
+      <button class="conn" id="conn" title="Переключить перевод">=</button>
+      <button title="Язык назначения">English</button>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  Вариант C2 — мини-карточка 172×112 с грип-полоской. Перетаскивание работает
+  <b>только за верхнюю зону с полоской</b>; тело окна не перетаскивается.
+</div>
+
+<script>
+  const w = document.getElementById('w');
+  const grip = document.getElementById('grip');
+
+  w.querySelector('.rec-btn').addEventListener('click', () => {
+    w.classList.toggle('recording');
+    document.getElementById('tip').textContent =
+      w.classList.contains('recording') ? 'Recording…' : 'Ready';
+  });
+
+  const conn = document.getElementById('conn');
+  conn.addEventListener('click', () => {
+    conn.classList.toggle('on');
+    conn.textContent = conn.classList.contains('on') ? '→' : '=';
+  });
+
+  w.querySelector('.close').addEventListener('click', () => {
+    w.style.display = 'none';
+    setTimeout(() => { w.style.display = ''; }, 1500); // в прототипе возвращаем через 1.5 с
+  });
+
+  // Drag ТОЛЬКО за грип-зону (крестик исключён)
+  let drag = null;
+  grip.addEventListener('mousedown', e => {
+    if (e.target.closest('button')) return;
+    drag = { dx: e.clientX - w.offsetLeft, dy: e.clientY - w.offsetTop };
+    w.style.transform = 'none';
+    grip.classList.add('dragging');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    w.style.left = (e.clientX - drag.dx) + 'px';
+    w.style.top  = (e.clientY - drag.dy) + 'px';
+  });
+  window.addEventListener('mouseup', () => { drag = null; grip.classList.remove('dragging'); });
+</script>
+</body>
+</html>

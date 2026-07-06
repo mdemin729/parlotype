@@ -38,6 +38,10 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
         services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
+        // Deliberately separate from ISettingsService's settings.json — window
+        // chrome state (position) changes far more often (every drag) and must
+        // never share a file/lock with user-configured settings (ADR-040).
+        services.AddSingleton<IWindowStateService, JsonWindowStateService>();
         services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromHours(1) });
         services.AddSingleton<StreamingFileDownloader>();
         services.AddSingleton<HttpModelDownloadService>();
