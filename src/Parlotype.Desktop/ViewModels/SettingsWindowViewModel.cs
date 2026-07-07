@@ -30,6 +30,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public WhisperOutputSettingsViewModel WhisperOutput { get; }
     public LanguageSelectionSettingsViewModel Language { get; }
     public Gemma4ModelSettingsViewModel Gemma4Model { get; }
+    public ParakeetModelSettingsViewModel ParakeetModel { get; }
     public PromptSettingsViewModel Prompts { get; }
     public LlamaCppSettingsViewModel LlamaCpp { get; }
     public HotkeySettingsViewModel Hotkey { get; }
@@ -44,6 +45,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         WhisperOutputSettingsViewModel whisperOutput,
         LanguageSelectionSettingsViewModel language,
         Gemma4ModelSettingsViewModel gemma4Model,
+        ParakeetModelSettingsViewModel parakeetModel,
         PromptSettingsViewModel prompts,
         LlamaCppSettingsViewModel llamaCpp,
         HotkeySettingsViewModel hotkey,
@@ -57,6 +59,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         WhisperOutput = whisperOutput;
         Language = language;
         Gemma4Model = gemma4Model;
+        ParakeetModel = parakeetModel;
         Prompts = prompts;
         LlamaCpp = llamaCpp;
         Hotkey = hotkey;
@@ -74,6 +77,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             runtime,
             whisperOutput,
             gemma4Model,
+            parakeetModel,
             prompts,
             llamaCpp,
             hotkey,

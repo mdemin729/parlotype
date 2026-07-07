@@ -51,7 +51,7 @@ public static class CsvFormatter
         {
             sb.Append(Escape(result.Configuration.Name)).Append(',');
             sb.Append(Escape(result.Configuration.ModelDisplayName)).Append(',');
-            sb.Append(result.Configuration.IsLlamaCpp ? "-" : result.Configuration.EffectiveWhisper.BeamSize.ToString(CultureInfo.InvariantCulture)).Append(',');
+            sb.Append(result.Configuration.BeamSizeDisplay).Append(',');
             sb.Append(result.Configuration.Vad.Enabled ? "true" : "false").Append(',');
             sb.Append(result.Summary.AverageWer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');
             sb.Append(result.Summary.AverageCer.ToString("F2", CultureInfo.InvariantCulture)).Append(',');

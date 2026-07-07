@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-07-06
+last_updated: 2026-07-07
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -43,6 +43,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[avalonia-popup-patterns]] | Headless `CaptureRenderedFrame` excludes the popup layer (screenshot popover content directly); setting `DataContext` on an element rebases its other bindings (wrap in a Panel); light dismiss consumes the anchor click so button-toggled popups work without extra state | 2026-06-11 |
 | [[whisper-ui-thread-loading]] | `WhisperFactory.FromPath` + processor `Build()` are synchronous/CPU-bound despite the async method; wrap in `Task.Run` or they freeze the UI thread and any `DispatcherTimer` loading animation (ADR-038) | 2026-06-27 |
 | [[avalonia12-frameless-window]] | Avalonia 12: `SystemDecorations` obsolete → `WindowDecorations` enum; frameless rounded corners need transparent window + root Border; `BeginMoveDrag` blocks until drop on Windows (persist position after it returns); headless `Screens.All` is actually populated (one real virtual screen), verified empirically | 2026-07-06 |
+| [[sherpa-onnx-quirks]] | org.k2fsa.sherpa.onnx NuGet is CPU-only (GPU needs source build); config objects use public fields; NeMo transducer results carry no confidence/language; `AcceptWaveform` auto-resamples with stderr log; load/decode are synchronous — wrap in `Task.Run` | 2026-07-07 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

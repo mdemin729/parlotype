@@ -1,0 +1,12 @@
+{
+  "name": "smoke-test-parakeet",
+  "description": "Quick smoke test with the Parakeet TDT 0.6B v3 (INT8) engine",
+  "datasets": ["smoke-test"],
+  "repetitions": 1,
+  "parakeet": {
+    "modelId": "parakeet-tdt-0.6b-v3-int8"
+  },
+  "vad": {
+    "enabled": false
+  }
+}

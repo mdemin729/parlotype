@@ -220,6 +220,7 @@ public class App : Application
             services.AddSingleton<ITextInjectionService, ClipboardTextInjectionService>();
 
         services.AddSingleton<Gemma4ModelDownloadDialogService>();
+        services.AddSingleton<ParakeetModelDownloadDialogService>();
 
         services.AddSingleton<SpeechEngineSettingsViewModel>();
         services.AddSingleton<MicrophoneSettingsViewModel>();
@@ -232,6 +233,7 @@ public class App : Application
         services.AddSingleton<LanguageRelationshipViewModel>();
         services.AddSingleton<LanguageSelectionSettingsViewModel>();
         services.AddSingleton<Gemma4ModelSettingsViewModel>();
+        services.AddSingleton<ParakeetModelSettingsViewModel>();
         services.AddSingleton<PromptSettingsViewModel>();
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();

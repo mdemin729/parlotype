@@ -26,13 +26,14 @@ public class SettingsWindowViewModelTests
         var language = new LanguageSelectionSettingsViewModel(
             new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService()));
         var gemma4Model = new Gemma4ModelSettingsViewModel(settings);
+        var parakeetModel = new ParakeetModelSettingsViewModel(settings);
         var prompts = new PromptSettingsViewModel(new MockPromptTemplateRegistry());
         var llamaCpp = new LlamaCppSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
         var theme = new ThemeSettingsViewModel(settings);
 
         return new SettingsWindowViewModel(
-            engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, prompts, llamaCpp, hotkey, theme);
+            engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, parakeetModel, prompts, llamaCpp, hotkey, theme);
     }
 
     [Fact]
@@ -77,6 +78,26 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Gemma 4 model"),
             n => AssertSection(n, "Prompts"),
             n => AssertSection(n, "llama.cpp server"),
+            n => AssertHeader(n, "Input"),
+            n => AssertSection(n, "Hotkey"),
+            n => AssertHeader(n, "Appearance"),
+            n => AssertSection(n, "Theme"));
+    }
+
+    [Fact]
+    public void NavItems_WithParakeetActive_HideWhisperAndGemmaRows_AndShowParakeetModel()
+    {
+        var vm = BuildViewModel();
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Parakeet);
+
+        Assert.Collection(vm.NavItems,
+            n => AssertHeader(n, "Audio"),
+            n => AssertSection(n, "Microphone"),
+            n => AssertSection(n, "Silence timeout"),
+            n => AssertHeader(n, "Speech engine"),
+            n => AssertSection(n, "Engine"),
+            n => AssertSection(n, "Language"),
+            n => AssertSection(n, "Parakeet model"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkey"),
             n => AssertHeader(n, "Appearance"),

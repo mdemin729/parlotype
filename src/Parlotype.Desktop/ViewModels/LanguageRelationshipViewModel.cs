@@ -567,6 +567,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     {
         SpeechEngine.Whisper => "Whisper",
         SpeechEngine.Gemma4 => "Gemma 4",
+        SpeechEngine.Parakeet => "Parakeet",
         _ => engine.ToString(),
     };
 

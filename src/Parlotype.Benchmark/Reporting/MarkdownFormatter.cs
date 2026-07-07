@@ -17,7 +17,7 @@ public static class MarkdownFormatter
         sb.AppendLine($"**Run ID:** {result.RunId}  ");
         sb.AppendLine($"**Timestamp:** {result.Timestamp:yyyy-MM-dd HH:mm:ss UTC}  ");
         sb.AppendLine($"**Model:** {result.Configuration.ModelDisplayName}  ");
-        sb.AppendLine($"**Language:** {(result.Configuration.IsLlamaCpp ? "en (llama.cpp)" : result.Configuration.EffectiveWhisper.Language)}  ");
+        sb.AppendLine($"**Language:** {result.Configuration.LanguageDisplay}  ");
         sb.AppendLine($"**VAD:** {(result.Configuration.Vad.Enabled ? "Enabled" : "Disabled")}  ");
         sb.AppendLine();
 
@@ -145,7 +145,7 @@ public static class MarkdownFormatter
 
         foreach (var result in results)
         {
-            sb.AppendLine($"| {result.Configuration.Name} | {result.Configuration.ModelDisplayName} | {(result.Configuration.IsLlamaCpp ? "-" : result.Configuration.EffectiveWhisper.BeamSize.ToString())} | {(result.Configuration.Vad.Enabled ? "✓" : "✗")} | {Fmt(result.Summary.AverageWer)} | {Fmt(result.Summary.AverageCer)} | {result.Summary.AverageRtf.ToString("F3", CultureInfo.InvariantCulture)} | {Fmt(result.Summary.TotalProcessingTimeMs, "F0")} | {Fmt(result.Summary.PeakRamMb, "F0")} |");
+            sb.AppendLine($"| {result.Configuration.Name} | {result.Configuration.ModelDisplayName} | {result.Configuration.BeamSizeDisplay} | {(result.Configuration.Vad.Enabled ? "✓" : "✗")} | {Fmt(result.Summary.AverageWer)} | {Fmt(result.Summary.AverageCer)} | {result.Summary.AverageRtf.ToString("F3", CultureInfo.InvariantCulture)} | {Fmt(result.Summary.TotalProcessingTimeMs, "F0")} | {Fmt(result.Summary.PeakRamMb, "F0")} |");
         }
 
         return sb.ToString();

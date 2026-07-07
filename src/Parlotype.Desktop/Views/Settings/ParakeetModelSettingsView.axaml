@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.ParakeetModelSettingsView"
+             x:DataType="vms:ParakeetModelSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Parakeet model" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="NVIDIA Parakeet runs fully on the CPU — no GPU needed. It transcribes 25 European languages (detected automatically) with punctuation and capitalization."
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <ItemsControl ItemsSource="{Binding ModelOptions}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ParakeetModelDisplayItem">
+                    <Border Padding="0,2" Margin="0,2">
+                        <Grid ColumnDefinitions="11,*,Auto,Auto,Auto">
+                            <!-- Selection indicator -->
+                            <Border Grid.Column="0"
+                                    Width="3" Height="16" CornerRadius="1.5"
+                                    Background="{DynamicResource SystemAccentColor}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding IsSelected}" />
+
+                            <!-- Name (click to select) -->
+                            <Button Grid.Column="1"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    Background="Transparent"
+                                    Padding="6,8"
+                                    Command="{Binding SelectCommand}"
+                                    CommandParameter="{Binding ModelId}">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <TextBlock Text="{Binding DisplayName}"
+                                               FontSize="14"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="Installed"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource SystemAccentColor}"
+                                               VerticalAlignment="Center"
+                                               IsVisible="{Binding IsInstalled}" />
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Disk size -->
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding DiskSize}"
+                                       FontSize="13" Opacity="0.5"
+                                       VerticalAlignment="Center"
+                                       Margin="12,0,0,0" />
+
+                            <!-- Download (when not installed) -->
+                            <Button Grid.Column="3"
+                                    Content="Download"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DownloadCommand}"
+                                    CommandParameter="{Binding ModelId}"
+                                    IsVisible="{Binding !IsInstalled}" />
+
+                            <!-- Delete (when installed) -->
+                            <Button Grid.Column="4"
+                                    Content="Delete"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DeleteCommand}"
+                                    CommandParameter="{Binding ModelId}"
+                                    IsVisible="{Binding IsInstalled}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

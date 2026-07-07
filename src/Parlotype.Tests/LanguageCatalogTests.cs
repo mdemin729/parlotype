@@ -128,6 +128,40 @@ public class LanguageCapabilitiesTests
     }
 
     [Fact]
+    public void Parakeet_UsesFixedSet_AndNoTranslation()
+    {
+        var caps = SpeechEngineCapabilities.For(SpeechEngine.Parakeet);
+
+        Assert.True(caps.SupportsAutoDetect);
+        Assert.False(caps.SupportsArbitraryTranslation);
+        Assert.Same(LanguageCatalog.ParakeetLanguages, caps.SupportedSourceLanguages);
+        Assert.Empty(caps.FixedTranslationTargets);
+    }
+
+    [Fact]
+    public void TranslationForm_Parakeet_IsNone()
+    {
+        Assert.Equal(TranslationForm.None, SpeechEngineCapabilities.For(SpeechEngine.Parakeet).TranslationForm);
+    }
+
+    [Fact]
+    public void ParakeetLanguages_Has25Entries_AllFromWhisperCatalog()
+    {
+        Assert.Equal(25, LanguageCatalog.ParakeetLanguages.Count);
+        Assert.All(LanguageCatalog.ParakeetLanguages,
+            l => Assert.Contains(l, LanguageCatalog.WhisperLanguages));
+    }
+
+    [Fact]
+    public void ParakeetLanguages_StartsWithEnglish_AndHasNoDuplicates()
+    {
+        Assert.Equal("en", LanguageCatalog.ParakeetLanguages[0].Code);
+        Assert.Equal(
+            LanguageCatalog.ParakeetLanguages.Count,
+            LanguageCatalog.ParakeetLanguages.Select(l => l.Code).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
     public void TranslationForm_NoTargetsNoArbitrary_IsNone()
     {
         var caps = new LanguageCapabilities(

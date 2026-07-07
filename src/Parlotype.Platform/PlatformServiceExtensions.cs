@@ -24,6 +24,7 @@ public static class PlatformServiceExtensions
         // InitializeAsync time and forwards to the correct one.
         services.AddSingleton<WhisperSpeechRecognizer>();
         services.AddSingleton<LlamaCppSpeechRecognizer>();
+        services.AddSingleton<ParakeetSpeechRecognizer>();
         // The recognizer also surfaces ILlamaCppServerLifecycle so the
         // installer can stop the sidecar before deleting its files
         // (Windows file-lock release on uninstall/switch).
@@ -46,6 +47,7 @@ public static class PlatformServiceExtensions
         services.AddSingleton<StreamingFileDownloader>();
         services.AddSingleton<HttpModelDownloadService>();
         services.AddSingleton<Gemma4ModelDownloadService>();
+        services.AddSingleton<ParakeetModelDownloadService>();
         services.AddSingleton<ILlamaServerCatalog, GitHubLlamaServerCatalog>();
         // Register the installer as a concrete singleton too so a Desktop
         // wrapper can inject it directly while still resolving as

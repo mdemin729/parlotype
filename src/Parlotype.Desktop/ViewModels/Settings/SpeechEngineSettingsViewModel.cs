@@ -27,6 +27,10 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     [ObservableProperty]
     private bool _isGemma4Selected;
 
+    /// <summary>True when Parakeet is the selected engine (for conditional UI).</summary>
+    [ObservableProperty]
+    private bool _isParakeetSelected;
+
     /// <summary>
     /// Opt-in: warm the speech model in the background at app startup so the
     /// first record press is instant. Off by default; takes effect on next
@@ -38,6 +42,7 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     partial void OnSelectedEngineChanged(SpeechEngine value)
     {
         IsGemma4Selected = value == SpeechEngine.Gemma4;
+        IsParakeetSelected = value == SpeechEngine.Parakeet;
     }
 
     partial void OnPreloadModelOnStartupEnabledChanged(bool value)
@@ -64,6 +69,9 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
                 SelectEngineCommand),
             new(SpeechEngine.Gemma4, "Gemma 4 (Experimental)",
                 "Google Gemma 4 E4B via llama.cpp. Requires ~10 GB download. English only. Best on clean speech.",
+                SelectEngineCommand),
+            new(SpeechEngine.Parakeet, "Parakeet v3 (Fast)",
+                "NVIDIA Parakeet via ONNX. ~670 MB download. 25 European languages, auto-detected. Fastest engine — runs on any CPU, no GPU needed. No translation.",
                 SelectEngineCommand),
         ];
 

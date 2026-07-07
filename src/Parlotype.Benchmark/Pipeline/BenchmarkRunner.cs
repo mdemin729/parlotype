@@ -42,6 +42,13 @@ public sealed class BenchmarkRunner
             progress?.Report("Starting llama-server (Gemma 4)...");
             await _recognizer.InitializeAsync(cancellationToken);
         }
+        else if (config.IsParakeet)
+        {
+            // Model selection comes from settings (Program.cs injects an
+            // in-memory settings service seeded from the benchmark config).
+            progress?.Report("Loading Parakeet model...");
+            await _recognizer.InitializeAsync(cancellationToken);
+        }
         else
         {
             var whisper = config.EffectiveWhisper;
