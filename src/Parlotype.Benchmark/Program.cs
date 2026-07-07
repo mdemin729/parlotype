@@ -104,6 +104,10 @@ runCommand.SetAction(async parseResult =>
             AnsiConsole.MarkupLine("[yellow]Warning: --gpu false is not supported for the Gemma4 " +
                 "(llama.cpp) engine. llama-server controls GPU usage internally. Ignoring.[/]");
         }
+        else if (benchmarkConfig.IsParakeet)
+        {
+            // Parakeet (sherpa-onnx) is CPU-only — nothing to override.
+        }
         else
         {
             var w = benchmarkConfig.EffectiveWhisper;
@@ -155,6 +159,16 @@ runCommand.SetAction(async parseResult =>
             }));
         // Model must already be present on disk; no download service needed.
     }
+    else if (benchmarkConfig.IsParakeet)
+    {
+        // Override ISettingsService so ParakeetSpeechRecognizer reads the model
+        // from the benchmark config rather than the user's settings.json.
+        services.AddSingleton<ISettingsService>(new InMemorySettingsService(
+            new Dictionary<string, string?>
+            {
+                [SettingsKeys.SelectedParakeetModel] = benchmarkConfig.Parakeet!.ModelId,
+            }));
+    }
     else
     {
         services.AddSingleton<IModelDownloadService, HeadlessModelDownloadService>();
@@ -168,6 +182,23 @@ runCommand.SetAction(async parseResult =>
         // Resolve the concrete type directly so we bypass DelegatingSpeechRecognizer,
         // which would read SpeechEngine from settings and might route to Whisper.
         recognizer = serviceProvider.GetRequiredService<LlamaCppSpeechRecognizer>();
+    }
+    else if (benchmarkConfig.IsParakeet)
+    {
+        // Headless download when missing (files are small next to Gemma; the
+        // Whisper path auto-downloads too, so Parakeet matches that UX).
+        var parakeetModel = ParakeetModelInfo.GetById(benchmarkConfig.Parakeet!.ModelId)
+            ?? throw new InvalidOperationException(
+                $"Unknown Parakeet model id '{benchmarkConfig.Parakeet!.ModelId}'. " +
+                $"Known ids: {string.Join(", ", ParakeetModelInfo.All.Select(m => m.ModelId))}");
+        var parakeetDownloader = serviceProvider.GetRequiredService<ParakeetModelDownloadService>();
+        if (!parakeetDownloader.IsModelCached(parakeetModel))
+        {
+            AnsiConsole.MarkupLine($"[yellow]Downloading Parakeet model {Markup.Escape(parakeetModel.DisplayName)} ({parakeetModel.DiskSize})...[/]");
+            await parakeetDownloader.DownloadModelAsync(parakeetModel, progress: null, CancellationToken.None);
+        }
+
+        recognizer = serviceProvider.GetRequiredService<ParakeetSpeechRecognizer>();
     }
     else
     {

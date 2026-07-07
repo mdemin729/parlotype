@@ -3,11 +3,23 @@ title: Key Subsystems
 type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging]
-last_updated: 2026-05-31
-summary: Text injection, global hotkeys, settings, logging, and model management subsystems
+last_updated: 2026-07-07
+summary: Speech engines, text injection, global hotkeys, settings, logging, and model management subsystems
 ---
 
 # Key Subsystems
+
+## Speech Engines
+
+Three local engines behind one `ISpeechRecognizer` contract; `DelegatingSpeechRecognizer` (registered as the singleton) resolves the concrete recognizer via `SpeechRecognizerFactory` from the `SpeechEngine` setting at `InitializeAsync` time.
+
+| Engine | Recognizer | Runtime | Download | Languages | Translation |
+|--------|-----------|---------|----------|-----------|-------------|
+| Whisper (default) | `WhisperSpeechRecognizer` | Whisper.net in-process (CUDA/Vulkan/CPU, ADR-012/022) | per-model GGML (~75 MB–3 GB) | ~99, source selectable | to English (Toggle) |
+| Gemma 4 | `LlamaCppSpeechRecognizer` | llama-server sidecar, Vulkan (ADR-025) | GGUF + mmproj (~6–15 GB) | full list (LLM) | arbitrary (Full) |
+| Parakeet v3 | `ParakeetSpeechRecognizer` | sherpa-onnx in-process, CPU-only INT8 (ADR-041) | 4 ONNX files (~670 MB) | 25 European, always auto-detected | none (`TranslationForm.None`) |
+
+Engine-scoped settings sections hide via `RestrictToEngine` (ADR-028). Model hot-swap for all engines via `UnloadAsync` (ADR-017); prewarm + loading spinner apply engine-agnostically through the delegating recognizer (ADR-038).
 
 ## Text Injection
 
@@ -64,6 +76,8 @@ Pipeline: `IModelDownloadService` (Core) → `HttpModelDownloadService` (Platfor
 - `WhisperModelInfo` holds static metadata (display name, disk size, SHA hash)
 - Model choice persisted via `SettingsKeys.SelectedWhisperModel`
 - Tests use `HeadlessModelDownloadService` (downloads without UI)
+- Gemma 4: `Gemma4ModelInfo` catalog + `Gemma4ModelDownloadService` + `Gemma4ModelDownloadDialogService` (ADR-029); persisted via `SettingsKeys.SelectedGemma4Model`
+- Parakeet: `ParakeetModelInfo` catalog + `ParakeetModelDownloadService` + `ParakeetModelDownloadDialogService` (ADR-041); per-model subdir `models/<modelId>/` because upstream file names are generic; persisted via `SettingsKeys.SelectedParakeetModel`
 
 ## NVIDIA/CUDA Environment Detection
 

@@ -76,6 +76,21 @@ public static class LanguageCatalog
             .Select(x => new LanguageInfo(x.Code, x.Name, ResolveNativeName(x.Code, x.Name)))
             .ToArray();
 
+    // The 25 European languages of Parakeet TDT 0.6B v3 (all are also Whisper
+    // languages, so entries are reused from the Whisper list). Order follows the
+    // model card: https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
+    private static readonly string[] ParakeetCodes =
+    [
+        "en", "es", "fr", "ru", "de", "it", "pl", "uk", "ro", "nl", "hu", "el",
+        "sv", "cs", "bg", "pt", "sk", "hr", "da", "fi", "lt", "sl", "lv", "et", "mt",
+    ];
+
+    private static readonly IReadOnlyList<LanguageInfo> ParakeetList =
+        ParakeetCodes
+            .Select(code => WhisperList.First(l =>
+                string.Equals(l.Code, code, StringComparison.OrdinalIgnoreCase)))
+            .ToArray();
+
     private static readonly IReadOnlyList<LanguageInfo> AllList = BuildAllLanguages();
 
     private static readonly IReadOnlyDictionary<string, LanguageInfo> ByCode =
@@ -86,6 +101,9 @@ public static class LanguageCatalog
 
     /// <summary>The fixed set of languages Whisper recognises.</summary>
     public static IReadOnlyList<LanguageInfo> WhisperLanguages => WhisperList;
+
+    /// <summary>The fixed set of 25 European languages Parakeet TDT v3 recognises.</summary>
+    public static IReadOnlyList<LanguageInfo> ParakeetLanguages => ParakeetList;
 
     /// <summary>
     /// The full list of languages from the .NET runtime's culture data, used as a

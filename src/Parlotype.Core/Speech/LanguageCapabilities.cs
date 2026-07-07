@@ -71,8 +71,17 @@ public static class SpeechEngineCapabilities
             SupportsArbitraryTranslation: true,
             FixedTranslationTargets: []),
 
-        // Fallback shape, also what a future transcribe-only engine (no translation
-        // task at all, e.g. Parakeet-style ASR) would declare: no arbitrary
+        // Parakeet TDT v3: transcribe-only ASR. Always auto-detects among its 25
+        // European languages (the model has no language-forcing parameter — a
+        // selected source language is informational only). No translation task ⇒
+        // TranslationForm.None, rendered as a disabled target with a note.
+        SpeechEngine.Parakeet => new LanguageCapabilities(
+            SupportsAutoDetect: true,
+            SupportedSourceLanguages: LanguageCatalog.ParakeetLanguages,
+            SupportsArbitraryTranslation: false,
+            FixedTranslationTargets: []),
+
+        // Fallback shape for any future transcribe-only engine: no arbitrary
         // translation and no fixed targets ⇒ TranslationForm.None, which the UI
         // renders as a disabled target with an explanatory note.
         _ => new LanguageCapabilities(

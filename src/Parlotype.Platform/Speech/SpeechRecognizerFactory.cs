@@ -41,6 +41,7 @@ public sealed class SpeechRecognizerFactory
         return engine switch
         {
             SpeechEngine.Gemma4 => _services.GetRequiredService<LlamaCppSpeechRecognizer>(),
+            SpeechEngine.Parakeet => _services.GetRequiredService<ParakeetSpeechRecognizer>(),
             _ => _services.GetRequiredService<WhisperSpeechRecognizer>(),
         };
     }

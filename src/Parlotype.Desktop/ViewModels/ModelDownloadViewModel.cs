@@ -96,4 +96,15 @@ public partial class ModelDownloadViewModel : ViewModelBase
             itemName: modelName,
             itemSize: modelSize,
             statusText: $"Download \"{modelName}\" ({modelSize}, includes vision projector) from the internet?");
+
+    /// <summary>
+    /// Adapter for the Parakeet download path (encoder + decoder + joiner +
+    /// tokens, reported as one combined download).
+    /// </summary>
+    public static ModelDownloadViewModel ForParakeetModel(string modelName, string modelSize) =>
+        new(
+            title: "Model Download",
+            itemName: modelName,
+            itemSize: modelSize,
+            statusText: $"Download \"{modelName}\" ({modelSize}) from the internet?");
 }

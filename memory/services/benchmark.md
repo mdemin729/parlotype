@@ -4,8 +4,8 @@ type: service-profile
 status: active
 tags: [benchmark, cli, wer, cer, quality, gemma4, llamacpp]
 criticality: medium
-last_updated: 2026-05-21
-summary: Console CLI for evaluating transcription quality with WER/CER/RTF metrics — supports Whisper and Gemma 4 (llama.cpp) engines
+last_updated: 2026-07-07
+summary: Console CLI for evaluating transcription quality with WER/CER/RTF metrics — supports Whisper, Gemma 4 (llama.cpp), and Parakeet (sherpa-onnx) engines
 ---
 
 # Parlotype.Benchmark
@@ -14,7 +14,7 @@ summary: Console CLI for evaluating transcription quality with WER/CER/RTF metri
 Command-line tool for measuring and tracking transcription quality. Supports historical runs, comparisons, parameter sweeps, repetition stability analysis, and CI regression detection.
 
 ## Key Paths
-- `src/Parlotype.Benchmark/Configuration/` — config models, sweep expansion (`SweepConfig`, `SweepExpander`)
+- `src/Parlotype.Benchmark/Configuration/` — config models, sweep expansion (`SweepConfig`, `SweepExpander`). Engine sections are mutually exclusive: `whisper` (default), `llamaCpp`, or `parakeet` (`ParakeetConfig { modelId }`; headless auto-download when missing; sample config `datasets/parakeet-smoke-config.json` — ADR-041)
 - `src/Parlotype.Benchmark/Metrics/` — WER/CER/RTF calculators, text normalization
 - `src/Parlotype.Benchmark/Pipeline/` — benchmark execution pipeline, `PipelineSimulator` (real-time flush behaviour)
 - `src/Parlotype.Benchmark/Results/` — SQLite index (`benchmarks.db`), result models

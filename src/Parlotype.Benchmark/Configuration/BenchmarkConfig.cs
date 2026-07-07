@@ -24,6 +24,9 @@ public sealed class BenchmarkConfig
     [JsonPropertyName("llamaCpp")]
     public LlamaCppConfig? LlamaCpp { get; init; }
 
+    [JsonPropertyName("parakeet")]
+    public ParakeetConfig? Parakeet { get; init; }
+
     [JsonPropertyName("vad")]
     public VadConfig Vad { get; init; } = new();
 
@@ -31,18 +34,42 @@ public sealed class BenchmarkConfig
     [JsonIgnore]
     public bool IsLlamaCpp => LlamaCpp is not null;
 
-    /// <summary>Returns the effective Whisper config, defaulting if neither engine is specified.</summary>
+    /// <summary>Returns true when the Parakeet (sherpa-onnx) backend is selected.</summary>
+    [JsonIgnore]
+    public bool IsParakeet => Parakeet is not null;
+
+    /// <summary>Returns true when the (default) Whisper backend is selected.</summary>
+    [JsonIgnore]
+    public bool IsWhisper => !IsLlamaCpp && !IsParakeet;
+
+    /// <summary>Display-friendly language setting (Whisper is the only engine with one).</summary>
+    [JsonIgnore]
+    public string LanguageDisplay =>
+        IsLlamaCpp ? "en (llama.cpp)"
+        : IsParakeet ? "auto (Parakeet)"
+        : EffectiveWhisper.Language;
+
+    /// <summary>Display-friendly beam size ("-" for engines without one).</summary>
+    [JsonIgnore]
+    public string BeamSizeDisplay =>
+        IsWhisper ? EffectiveWhisper.BeamSize.ToString(System.Globalization.CultureInfo.InvariantCulture) : "-";
+
+    /// <summary>Returns the effective Whisper config, defaulting if no other engine is specified.</summary>
     [JsonIgnore]
     public WhisperConfig EffectiveWhisper => Whisper ?? new WhisperConfig();
 
     /// <summary>Returns a display-friendly engine name.</summary>
     [JsonIgnore]
-    public string EngineName => IsLlamaCpp ? "Gemma4" : "Whisper";
+    public string EngineName =>
+        IsLlamaCpp ? "Gemma4"
+        : IsParakeet ? "Parakeet"
+        : "Whisper";
 
     /// <summary>Returns a display-friendly model identifier.</summary>
     [JsonIgnore]
-    public string ModelDisplayName => IsLlamaCpp
-        ? LlamaCpp!.ModelId
+    public string ModelDisplayName =>
+        IsLlamaCpp ? LlamaCpp!.ModelId
+        : IsParakeet ? Parakeet!.ModelId
         : EffectiveWhisper.Model.ToString();
 }
 
@@ -117,4 +144,13 @@ public sealed class LlamaCppConfig
     /// <c>%LOCALAPPDATA%/parlotype/llama-server</c>.</summary>
     [JsonPropertyName("serverFolder")]
     public string? ServerFolder { get; init; }
+}
+
+/// <summary>Configuration for the Parakeet (sherpa-onnx) engine in benchmark runs.</summary>
+public sealed class ParakeetConfig
+{
+    /// <summary>Parakeet catalog model ID. Must match a
+    /// <see cref="Parlotype.Core.Speech.ParakeetModelInfo"/> catalog entry.</summary>
+    [JsonPropertyName("modelId")]
+    public string ModelId { get; init; } = "parakeet-tdt-0.6b-v3-int8";
 }
