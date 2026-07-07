@@ -21,4 +21,5 @@
 
 | Plan | Created | Description |
 |------|---------|-------------|
+| [2026-07-06-parakeet-v3-engine](2026-07-06-parakeet-v3-engine/) | 2026-07-06 | Add NVIDIA Parakeet TDT 0.6B v3 as a third speech engine via sherpa-onnx (in-process, CPU INT8, ~670 MB, 25 European languages, auto-detect, no translation) — faster than Whisper without a GPU |
 | [2026-05-01-pipeline-settings-alignment](2026-05-01-pipeline-settings-alignment/) | 2026-05-01 | Align pipeline defaults with ADR-011 benchmark recommendations (Medium model, language=en, beam=1) |
