@@ -15,7 +15,7 @@ namespace Parlotype.Platform.Speech;
 public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
 {
     private readonly ISettingsService _settings;
-    private readonly ParakeetModelDownloadService? _downloader;
+    private readonly IParakeetModelProvider? _modelProvider;
     private readonly ILogger<ParakeetSpeechRecognizer> _logger;
     private readonly SemaphoreSlim _initLock = new(1, 1);
     private OfflineRecognizer? _recognizer;
@@ -29,10 +29,10 @@ public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
     public ParakeetSpeechRecognizer(
         ISettingsService settings,
         ILogger<ParakeetSpeechRecognizer> logger,
-        ParakeetModelDownloadService? downloader = null)
+        IParakeetModelProvider? modelProvider = null)
     {
         _settings = settings;
-        _downloader = downloader;
+        _modelProvider = modelProvider;
         _logger = logger;
     }
 
@@ -64,10 +64,12 @@ public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
                 .ToList();
             if (missing.Count > 0)
             {
-                // As the default engine, first use must "just work": download
-                // silently, mirroring Whisper's SilentModelDownloadService path.
-                // The caller's loading state (ADR-038 spinner) covers the wait.
-                if (_downloader is null)
+                // As the default engine, first use must "just work": ensure via
+                // the provider — the Desktop one shows the shared download
+                // dialog with progress + Cancel (ADR-042, same as Whisper's
+                // IModelDownloadService path); it throws
+                // OperationCanceledException when the user declines.
+                if (_modelProvider is null)
                 {
                     throw new InvalidOperationException(
                         $"Parakeet model '{model.DisplayName}' is not downloaded " +
@@ -76,9 +78,9 @@ public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
                 }
 
                 _logger.LogInformation(
-                    "Parakeet model {ModelId} missing ({Count} files) — downloading {Size}",
+                    "Parakeet model {ModelId} missing ({Count} files) — ensuring download ({Size})",
                     model.ModelId, missing.Count, model.DiskSize);
-                await _downloader.DownloadModelAsync(model, progress: null, cancellationToken);
+                await _modelProvider.EnsureModelAsync(model, cancellationToken);
             }
 
             _logger.LogInformation("Initializing Parakeet model: {Model}", model.ModelId);

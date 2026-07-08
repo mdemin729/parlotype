@@ -102,7 +102,7 @@ public partial class ParakeetModelSettingsViewModel : SettingsSectionViewModelBa
             return;
 
         _logger.LogInformation("Download requested for Parakeet model: {ModelId}", modelId);
-        await _downloadDialog.EnsureModelAsync(model);
+        await _downloadDialog.TryEnsureModelAsync(model);
         RefreshInstalledState();
     }
 

@@ -48,24 +48,30 @@ default and left the language UI unchanged. Two problems surfaced:
   `LanguageRelationshipViewModel.InitializeAsync`. Existing installations are
   unaffected — an explicit `SpeechEngine=Whisper` in settings.json still wins.
 - The engine list reorders to Parakeet ("Recommended") / Whisper / Gemma 4.
-- `ParakeetSpeechRecognizer` now **auto-downloads** the ~670 MB model when
-  missing (optional `ParakeetModelDownloadService` ctor dependency), mirroring
-  Whisper's silent-download path — a default engine must not throw
-  "download it first in Settings" on the first record press. The ADR-038
-  loading spinner covers the wait.
+- `ParakeetSpeechRecognizer` now downloads the ~670 MB model on first use via
+  a new `IParakeetModelProvider` Core contract (optional ctor dependency) — a
+  default engine must not throw "download it first in Settings" on the first
+  record press. The Platform implementation (`ParakeetModelDownloadService`)
+  ensures headlessly for benchmark/CLI; the Desktop app re-registers the
+  interface with `ParakeetModelDownloadDialogService` (last-wins DI, same
+  trick as `ILlamaServerInstaller`), so the first record press opens the
+  **shared model-download dialog with a progress bar and Cancel** — the exact
+  pattern Whisper uses through `IModelDownloadService` /
+  `ModelDownloadDialogService`. Decline/cancel surfaces as
+  `OperationCanceledException` and the recording start aborts cleanly.
 
 ## Consequences
 
 ### Positive
 - First-run experience: fastest engine, no GPU needed, model fetched on demand
+  with visible progress and the option to cancel
 - No dead UI: every visible language control now does something
 - Default Transcribe widget is 30 px shorter (88 px), matching its actual content
 - Engine round-trips no longer clobber stored language preferences
 
 ### Negative
-- First record press on a fresh install triggers a ~670 MB silent download
-  behind the loading spinner (parity with Whisper's silent model download, but
-  larger); no visible progress in the widget
+- First record press on a fresh install interposes a consent dialog + ~670 MB
+  download before anything is transcribed
 - Users who want Whisper's 99-language coverage or translation must switch
   engines in Settings — the language features are invisible until they do
 - `SettingsSectionViewModelBase` now has two visibility mechanisms

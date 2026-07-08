@@ -30,9 +30,13 @@ than Whisper in runtime use. Implemented ADR-042 in
   spec-§8 fallbacks (and persists nothing) for choice-less engines — unlike
   the None-form fallback which flips `TranslationEnabled` off
 - **Parakeet default**: unset-setting fallbacks only (explicit
-  `SpeechEngine=Whisper` untouched); Parakeet-first "Recommended" card;
-  recognizer silently auto-downloads the ~670 MB model on first use (parity
-  with Whisper's silent download — default engine must not error into Settings)
+  `SpeechEngine=Whisper` untouched); Parakeet-first "Recommended" card
+- **First-use download goes through the shared dialog** (user chose dialog over
+  a silent download/tooltip): new Core `IParakeetModelProvider` — Platform
+  headless impl for benchmark/CLI, Desktop re-registers the dialog service
+  (last-wins DI, ILlamaServerInstaller trick); progress bar + Cancel; decline ⇒
+  `OperationCanceledException`, recording start aborts cleanly (same contract
+  as Whisper's `ModelDownloadDialogService`)
 
 ## Facts Learned
 
@@ -57,6 +61,7 @@ None. 732 tests green, zero warnings.
 ## Next Action
 
 Manual smoke test in the running app remains outstanding from ADR-041: fresh
-default now exercises Parakeet — verify first record press triggers the silent
-download + spinner, dictation injects text, and the widget shows compact (88 px,
-no strip) with the Language page absent until switching to Whisper.
+default now exercises Parakeet — verify first record press opens the download
+dialog (progress + Cancel), dictation injects text after download, and the
+widget shows compact (88 px, no strip) with the Language page absent until
+switching to Whisper. Also verify Cancel aborts the recording start cleanly.
