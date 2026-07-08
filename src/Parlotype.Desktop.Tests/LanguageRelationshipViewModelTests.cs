@@ -291,6 +291,35 @@ public class LanguageRelationshipViewModelTests
     }
 
     [Fact]
+    public async Task SetEngine_Parakeet_PreservesSourceAndTranslation_NoToast()
+    {
+        // Parakeet has no language choices at all — the language settings are
+        // ignored, no UI shows them, and (unlike the None-form fallback) nothing
+        // is clobbered: the user's Gemma setup survives the round trip (ADR-042).
+        var (vm, settings, _) = await CreateAsync(SpeechEngine.Gemma4);
+        vm.SelectSource("ga");   // Irish: valid for Gemma, outside Parakeet's 25
+        vm.SelectTarget("fr");
+        Assert.True(vm.TranslationEnabled);
+
+        vm.SetEngine(SpeechEngine.Parakeet);
+
+        Assert.False(vm.HasLanguageChoices);
+        Assert.Equal("ga", vm.SourceCode);
+        Assert.Equal("fr", vm.TargetCode);
+        Assert.True(vm.TranslationEnabled);
+        Assert.Null(vm.ToastMessage);
+
+        vm.SetEngine(SpeechEngine.Gemma4);
+
+        Assert.True(vm.HasLanguageChoices);
+        Assert.Equal("ga", vm.SourceCode);
+        Assert.Equal("fr", vm.TargetCode);
+        Assert.True(vm.TranslationEnabled);
+        Assert.Equal("ga",
+            await settings.GetAsync<string>(SettingsKeys.SelectedSourceLanguage, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task SetEngine_NoneForm_TurnsTranslationOff_WithToast()
     {
         var (vm, settings, _) = await CreateAsync();

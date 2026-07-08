@@ -71,8 +71,8 @@ Whisper stays the default engine. Full details: [research.md](research.md) and
 
 ## Deferred (follow-up candidates)
 
-- Language-page hint that Parakeet always auto-detects (a selected source
-  language is currently accepted but ignored by the engine; the existing
-  ADR-036 fallback toast + `TranslationForm.None` note cover the target side)
+- ~~Language-page hint that Parakeet always auto-detects~~ — resolved by
+  [2026-07-07-parakeet-default-language-ux](../2026-07-07-parakeet-default-language-ux/)
+  (ADR-042): the language UI now hides entirely for Parakeet
 - Manual in-app dictation pass (hotkey → injected text) — engine path is
   exercised end-to-end by the benchmark; UI wiring covered by headless tests

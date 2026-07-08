@@ -22,6 +22,14 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
     public override string Title => "Language";
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
 
+    /// <summary>
+    /// The page only appears when the active engine offers a language choice.
+    /// Engines that always auto-detect and cannot translate (Parakeet) would
+    /// render nothing but ignored pickers, so the page is hidden for them.
+    /// </summary>
+    public override bool IsVisibleFor(SpeechEngine engine) =>
+        SpeechEngineCapabilities.For(engine).HasLanguageChoices;
+
     /// <summary>The shared source → target relationship (state + derivations).</summary>
     public LanguageRelationshipViewModel Relationship { get; }
 

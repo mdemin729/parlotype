@@ -114,7 +114,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         var previousSection = SelectedNavItem?.Section;
 
         var visible = _allSections
-            .Where(s => s.RestrictToEngine is null || s.RestrictToEngine == activeEngine)
+            .Where(s => s.IsVisibleFor(activeEngine))
             .ToList();
 
         NavItems.Clear();

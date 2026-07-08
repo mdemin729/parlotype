@@ -20,4 +20,14 @@ public abstract class SettingsSectionViewModelBase : ViewModelBase
     /// active. Null means the section is always visible.
     /// </summary>
     public virtual SpeechEngine? RestrictToEngine => null;
+
+    /// <summary>
+    /// Whether this section should appear in the navigation while
+    /// <paramref name="engine"/> is active. Defaults to the
+    /// <see cref="RestrictToEngine"/> rule; override for visibility that
+    /// depends on engine capabilities rather than a single engine identity
+    /// (e.g. the Language page hides for engines with no language choices).
+    /// </summary>
+    public virtual bool IsVisibleFor(SpeechEngine engine) =>
+        RestrictToEngine is null || RestrictToEngine == engine;
 }

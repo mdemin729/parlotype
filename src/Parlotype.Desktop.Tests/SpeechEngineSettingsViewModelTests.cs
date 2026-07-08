@@ -9,24 +9,25 @@ namespace Parlotype.Desktop.Tests;
 public class SpeechEngineSettingsViewModelTests
 {
     [Fact]
-    public void EngineOptions_ContainsThreeEntries()
+    public void EngineOptions_ContainsThreeEntries_ParakeetFirst()
     {
         var settings = new MockSettingsService();
         var vm = new SpeechEngineSettingsViewModel(settings);
 
         Assert.Equal(3, vm.EngineOptions.Length);
-        Assert.Equal("Whisper", vm.EngineOptions[0].DisplayName);
-        Assert.Equal("Gemma 4 (Experimental)", vm.EngineOptions[1].DisplayName);
-        Assert.Equal("Parakeet v3 (Fast)", vm.EngineOptions[2].DisplayName);
+        Assert.Equal("Parakeet v3 (Recommended)", vm.EngineOptions[0].DisplayName);
+        Assert.Equal("Whisper", vm.EngineOptions[1].DisplayName);
+        Assert.Equal("Gemma 4 (Experimental)", vm.EngineOptions[2].DisplayName);
     }
 
     [Fact]
-    public void DefaultEngine_IsWhisper()
+    public void DefaultEngine_IsParakeet()
     {
         var settings = new MockSettingsService();
         var vm = new SpeechEngineSettingsViewModel(settings);
 
-        Assert.Equal(SpeechEngine.Whisper, vm.SelectedEngine);
+        Assert.Equal(SpeechEngine.Parakeet, vm.SelectedEngine);
+        Assert.True(vm.IsParakeetSelected);
         Assert.False(vm.IsGemma4Selected);
     }
 
@@ -40,12 +41,13 @@ public class SpeechEngineSettingsViewModelTests
 
         Assert.Equal(SpeechEngine.Gemma4, vm.SelectedEngine);
         Assert.True(vm.IsGemma4Selected);
-        Assert.True(vm.EngineOptions[1].IsSelected);
+        Assert.False(vm.IsParakeetSelected);
+        Assert.True(vm.EngineOptions[2].IsSelected);
         Assert.False(vm.EngineOptions[0].IsSelected);
     }
 
     [Fact]
-    public void SelectEngine_BackToWhisper_UpdatesSelection()
+    public void SelectEngine_Whisper_UpdatesSelection()
     {
         var settings = new MockSettingsService();
         var vm = new SpeechEngineSettingsViewModel(settings);
@@ -55,23 +57,25 @@ public class SpeechEngineSettingsViewModelTests
 
         Assert.Equal(SpeechEngine.Whisper, vm.SelectedEngine);
         Assert.False(vm.IsGemma4Selected);
-        Assert.True(vm.EngineOptions[0].IsSelected);
-        Assert.False(vm.EngineOptions[1].IsSelected);
+        Assert.False(vm.IsParakeetSelected);
+        Assert.True(vm.EngineOptions[1].IsSelected);
+        Assert.False(vm.EngineOptions[0].IsSelected);
     }
 
     [Fact]
-    public void SelectEngine_Parakeet_UpdatesSelection()
+    public void SelectEngine_BackToParakeet_UpdatesSelection()
     {
         var settings = new MockSettingsService();
         var vm = new SpeechEngineSettingsViewModel(settings);
 
+        vm.SelectEngineCommand.Execute(SpeechEngine.Whisper);
         vm.SelectEngineCommand.Execute(SpeechEngine.Parakeet);
 
         Assert.Equal(SpeechEngine.Parakeet, vm.SelectedEngine);
         Assert.True(vm.IsParakeetSelected);
         Assert.False(vm.IsGemma4Selected);
-        Assert.True(vm.EngineOptions[2].IsSelected);
-        Assert.False(vm.EngineOptions[0].IsSelected);
+        Assert.True(vm.EngineOptions[0].IsSelected);
+        Assert.False(vm.EngineOptions[1].IsSelected);
     }
 
     [Fact]
@@ -80,6 +84,7 @@ public class SpeechEngineSettingsViewModelTests
         var settings = new MockSettingsService();
         var vm = new SpeechEngineSettingsViewModel(settings);
 
+        vm.SelectEngineCommand.Execute(SpeechEngine.Whisper);
         vm.SelectEngineCommand.Execute(SpeechEngine.Parakeet);
 
         await Task.Delay(100, TestContext.Current.CancellationToken);

@@ -17,7 +17,14 @@ namespace Parlotype.Desktop.Views;
 /// </summary>
 public partial class TranscribeWindow : Window
 {
+    /// <summary>Height with the language quick-picker strip (ADR-040 design C2).</summary>
+    private const double FullHeight = 118;
+
+    /// <summary>Height without the strip — engines with no language choices (Parakeet).</summary>
+    private const double CompactHeight = 88;
+
     private IWindowStateService? _positionStore;
+    private TranscribeViewModel? _viewModel;
 
     public TranscribeWindow()
     {
@@ -26,9 +33,36 @@ public partial class TranscribeWindow : Window
         Closed += (_, _) => (DataContext as TranscribeViewModel)?.Relationship?.EndLivePolling();
         // WindowManager cancels Closing and hides instead; persist before either.
         Closing += (_, _) => _ = SavePositionAsync();
+        DataContextChanged += (_, _) => AttachViewModel(DataContext as TranscribeViewModel);
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    private void AttachViewModel(TranscribeViewModel? viewModel)
+    {
+        if (_viewModel is not null)
+            _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+
+        _viewModel = viewModel;
+        if (_viewModel is not null)
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+
+        UpdateHeightForStrip();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TranscribeViewModel.HasLanguageStrip))
+            UpdateHeightForStrip();
+    }
+
+    /// <summary>
+    /// The widget is fixed-size (no SizeToContent, ADR-040), so hiding the
+    /// language strip must shrink the window explicitly or it leaves a blank
+    /// band at the bottom.
+    /// </summary>
+    private void UpdateHeightForStrip() =>
+        Height = _viewModel?.HasLanguageStrip == true ? FullHeight : CompactHeight;
 
     /// <summary>
     /// Wires position persistence and applies the saved position when it is

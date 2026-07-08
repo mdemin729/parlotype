@@ -141,8 +141,12 @@ public partial class TranscribeViewModel : ViewModelBase
     /// <summary>The shared relationship; null in designer/legacy-test contexts.</summary>
     public LanguageRelationshipViewModel? Relationship => _relationship;
 
-    /// <summary>Strip + flyout render only when the relationship is wired.</summary>
-    public bool HasLanguageStrip => _relationship is not null;
+    /// <summary>
+    /// Strip + flyout render only when the relationship is wired and the active
+    /// engine actually offers a language choice — Parakeet (auto-detect only,
+    /// no translation) hides the strip so the widget stays compact.
+    /// </summary>
+    public bool HasLanguageStrip => _relationship is { HasLanguageChoices: true };
 
     /// <summary>
     /// The persisted-state load kicked off in the constructor. Exposed so hosts
@@ -230,9 +234,16 @@ public partial class TranscribeViewModel : ViewModelBase
             case nameof(LanguageRelationshipViewModel.DetectedKeyboardLayout):
             case nameof(LanguageRelationshipViewModel.TranslationEnabled):
             case nameof(LanguageRelationshipViewModel.TargetCode):
+                OnPropertyChanged(nameof(SourceShort));
+                OnPropertyChanged(nameof(TargetShort));
+                break;
+
             case nameof(LanguageRelationshipViewModel.Capabilities):
                 OnPropertyChanged(nameof(SourceShort));
                 OnPropertyChanged(nameof(TargetShort));
+                // Engine switches can add/remove the strip (e.g. Parakeet has
+                // no language choices) — the window resizes on this change.
+                OnPropertyChanged(nameof(HasLanguageStrip));
                 break;
         }
     }

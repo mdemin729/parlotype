@@ -138,6 +138,26 @@ public class LanguageCapabilitiesTests
         Assert.Empty(caps.FixedTranslationTargets);
     }
 
+    // Parakeet always auto-detects (no language-forcing parameter) and cannot
+    // translate ⇒ no language choice exists, so all language UI hides (ADR-042).
+    [Fact]
+    public void Parakeet_HasNoLanguageChoices()
+    {
+        var caps = SpeechEngineCapabilities.For(SpeechEngine.Parakeet);
+
+        Assert.False(caps.SupportsSourceSelection);
+        Assert.False(caps.HasLanguageChoices);
+    }
+
+    [Fact]
+    public void WhisperAndGemma_HaveLanguageChoices()
+    {
+        Assert.True(SpeechEngineCapabilities.For(SpeechEngine.Whisper).SupportsSourceSelection);
+        Assert.True(SpeechEngineCapabilities.For(SpeechEngine.Whisper).HasLanguageChoices);
+        Assert.True(SpeechEngineCapabilities.For(SpeechEngine.Gemma4).SupportsSourceSelection);
+        Assert.True(SpeechEngineCapabilities.For(SpeechEngine.Gemma4).HasLanguageChoices);
+    }
+
     [Fact]
     public void TranslationForm_Parakeet_IsNone()
     {
