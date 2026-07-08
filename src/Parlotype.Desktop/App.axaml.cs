@@ -221,6 +221,11 @@ public class App : Application
 
         services.AddSingleton<Gemma4ModelDownloadDialogService>();
         services.AddSingleton<ParakeetModelDownloadDialogService>();
+        // Override Platform's headless IParakeetModelProvider with the dialog
+        // wrapper (last registration wins) so the recognizer's first-use model
+        // download shows progress and can be cancelled (ADR-042) — the same
+        // trick as ILlamaServerInstaller above.
+        services.AddSingleton<IParakeetModelProvider>(sp => sp.GetRequiredService<ParakeetModelDownloadDialogService>());
 
         services.AddSingleton<SpeechEngineSettingsViewModel>();
         services.AddSingleton<MicrophoneSettingsViewModel>();

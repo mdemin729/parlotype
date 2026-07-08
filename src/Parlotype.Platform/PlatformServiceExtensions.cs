@@ -48,6 +48,10 @@ public static class PlatformServiceExtensions
         services.AddSingleton<HttpModelDownloadService>();
         services.AddSingleton<Gemma4ModelDownloadService>();
         services.AddSingleton<ParakeetModelDownloadService>();
+        // Headless default; the Desktop app re-registers IParakeetModelProvider
+        // with a dialog-based wrapper (last registration wins), same pattern as
+        // ILlamaServerInstaller above.
+        services.AddSingleton<IParakeetModelProvider>(sp => sp.GetRequiredService<ParakeetModelDownloadService>());
         services.AddSingleton<ILlamaServerCatalog, GitHubLlamaServerCatalog>();
         // Register the installer as a concrete singleton too so a Desktop
         // wrapper can inject it directly while still resolving as

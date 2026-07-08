@@ -48,8 +48,10 @@ into Settings).
 - [x] Default: Parakeet fallback in `SpeechRecognizerFactory`,
       `SpeechEngineSettingsViewModel`, `LanguageRelationshipViewModel`;
       Parakeet-first card order; enum docs
-- [x] Platform: recognizer auto-download via optional
-      `ParakeetModelDownloadService` dependency
+- [x] Platform: recognizer first-use model ensure via new Core
+      `IParakeetModelProvider` — headless `ParakeetModelDownloadService`
+      (Platform default) overridden by the Desktop download dialog with
+      progress + Cancel (last-wins DI); decline ⇒ `OperationCanceledException`
 - [x] Tests: 732 green — updated engine-order/default/nav/chrome tests; new
       coverage for capability flags, strip hide/reappear, window resize,
       preference-preserving round trip

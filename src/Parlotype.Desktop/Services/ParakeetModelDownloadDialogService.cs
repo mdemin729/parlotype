@@ -13,8 +13,11 @@ namespace Parlotype.Desktop.Services;
 /// Shows a modal confirmation dialog with a progress bar before downloading a
 /// Parakeet model (encoder + decoder + joiner + tokens). Mirrors
 /// <see cref="Gemma4ModelDownloadDialogService"/> but targets the Parakeet catalog.
+/// Also the Desktop <see cref="IParakeetModelProvider"/>: the recognizer's
+/// first-use download goes through this dialog so the user sees progress and
+/// can cancel (ADR-042), exactly like Whisper's <see cref="ModelDownloadDialogService"/>.
 /// </summary>
-public sealed class ParakeetModelDownloadDialogService
+public sealed class ParakeetModelDownloadDialogService : IParakeetModelProvider
 {
     private readonly ParakeetModelDownloadService _downloader;
     private readonly ILogger<ParakeetModelDownloadDialogService> _logger;
@@ -29,9 +32,10 @@ public sealed class ParakeetModelDownloadDialogService
 
     /// <summary>
     /// Ensures the model's files are present, prompting the user to download
-    /// if not. Returns true when the model is cached on completion.
+    /// if not. Returns true when the model is cached on completion, false when
+    /// the user declined or cancelled.
     /// </summary>
-    public async Task<bool> EnsureModelAsync(ParakeetModelInfo model, CancellationToken cancellationToken = default)
+    public async Task<bool> TryEnsureModelAsync(ParakeetModelInfo model, CancellationToken cancellationToken = default)
     {
         if (_downloader.IsModelCached(model))
             return true;
@@ -43,6 +47,18 @@ public sealed class ParakeetModelDownloadDialogService
         }
 
         return await ShowDialogAndDownloadAsync(model, cancellationToken);
+    }
+
+    /// <summary>
+    /// <see cref="IParakeetModelProvider"/> contract used by the recognizer's
+    /// first-use path: decline/cancel surfaces as
+    /// <see cref="OperationCanceledException"/> (same contract as the Whisper
+    /// dialog service) so the recording start aborts cleanly.
+    /// </summary>
+    public async Task EnsureModelAsync(ParakeetModelInfo model, CancellationToken cancellationToken = default)
+    {
+        if (!await TryEnsureModelAsync(model, cancellationToken))
+            throw new OperationCanceledException("Parakeet model download was cancelled.");
     }
 
     private async Task<bool> ShowDialogAndDownloadAsync(ParakeetModelInfo model, CancellationToken cancellationToken)

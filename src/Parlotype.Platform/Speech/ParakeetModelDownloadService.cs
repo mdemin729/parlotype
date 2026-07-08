@@ -5,9 +5,12 @@ namespace Parlotype.Platform.Speech;
 
 /// <summary>
 /// Downloads Parakeet ONNX model files (encoder + decoder + joiner + tokens)
-/// from HuggingFace into the model's cache directory.
+/// from HuggingFace into the model's cache directory. Also the headless
+/// <see cref="IParakeetModelProvider"/> (no dialog) used by the benchmark and
+/// tests; the Desktop app overrides the interface registration with a
+/// dialog-based provider (ADR-042).
 /// </summary>
-public sealed class ParakeetModelDownloadService
+public sealed class ParakeetModelDownloadService : IParakeetModelProvider
 {
     private static readonly SemaphoreSlim DownloadLock = new(1, 1);
 
@@ -27,6 +30,12 @@ public sealed class ParakeetModelDownloadService
     /// <summary>Returns true when all four model files are cached locally.</summary>
     public bool IsModelCached(ParakeetModelInfo model) =>
         model.FileNames.All(f => File.Exists(GetFilePath(model, f)));
+
+    /// <summary>Headless ensure: downloads missing files without any UI.</summary>
+    public Task EnsureModelAsync(ParakeetModelInfo model, CancellationToken cancellationToken = default) =>
+        IsModelCached(model)
+            ? Task.CompletedTask
+            : DownloadModelAsync(model, progress: null, cancellationToken);
 
     /// <summary>
     /// Downloads any missing model files. Reports a single cumulative progress
