@@ -32,7 +32,31 @@ public class TranscribeWindowChromeTests
         Assert.False(window.CanResize);
         Assert.True(window.Topmost);
         Assert.Equal(172, window.Width);
+        // No relationship wired ⇒ no language strip ⇒ compact height.
+        Assert.Equal(88, window.Height);
+
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public async Task Window_ResizesWithLanguageStrip_PerEngine()
+    {
+        // Seed the persisted engine: the VM constructor kicks the relationship's
+        // InitializeAsync, which applies the engine read from settings.
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechEngine, Core.Speech.SpeechEngine.Whisper.ToString());
+        var relationship = new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService());
+
+        var vm = new TranscribeViewModel(new MockWindowManager(), relationship: relationship);
+        await vm.RelationshipInitialization;
+        var window = new TranscribeWindow { DataContext = vm };
+
+        // Whisper offers language choices ⇒ strip shown ⇒ full height.
         Assert.Equal(118, window.Height);
+
+        // Parakeet has no language choices ⇒ strip hidden ⇒ window compacts.
+        relationship.SetEngine(Core.Speech.SpeechEngine.Parakeet);
+        Assert.Equal(88, window.Height);
 
         window.Close();
     }

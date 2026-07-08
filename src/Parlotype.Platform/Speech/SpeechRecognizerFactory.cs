@@ -34,15 +34,15 @@ public sealed class SpeechRecognizerFactory
         var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);
         var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var parsed)
             ? parsed
-            : SpeechEngine.Whisper;
+            : SpeechEngine.Parakeet;
 
         _logger.LogInformation("Resolved speech engine: {Engine}", engine);
 
         return engine switch
         {
+            SpeechEngine.Whisper => _services.GetRequiredService<WhisperSpeechRecognizer>(),
             SpeechEngine.Gemma4 => _services.GetRequiredService<LlamaCppSpeechRecognizer>(),
-            SpeechEngine.Parakeet => _services.GetRequiredService<ParakeetSpeechRecognizer>(),
-            _ => _services.GetRequiredService<WhisperSpeechRecognizer>(),
+            _ => _services.GetRequiredService<ParakeetSpeechRecognizer>(),
         };
     }
 }

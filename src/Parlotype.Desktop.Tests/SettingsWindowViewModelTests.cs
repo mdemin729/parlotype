@@ -40,6 +40,8 @@ public class SettingsWindowViewModelTests
     public void NavItems_WithWhisperActive_AreOrderedByCategoryWithHeaders()
     {
         var vm = BuildViewModel();
+        // Parakeet is the default engine — Whisper must be selected explicitly.
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Whisper);
 
         Assert.Collection(vm.NavItems,
             n => AssertHeader(n, "Audio"),
@@ -85,10 +87,12 @@ public class SettingsWindowViewModelTests
     }
 
     [Fact]
-    public void NavItems_WithParakeetActive_HideWhisperAndGemmaRows_AndShowParakeetModel()
+    public void NavItems_WithParakeetActive_HideWhisperGemmaAndLanguageRows_AndShowParakeetModel()
     {
+        // Parakeet is the default — no explicit selection needed. The Language
+        // page is hidden too: the engine auto-detects and cannot translate, so
+        // it offers no language choice at all.
         var vm = BuildViewModel();
-        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Parakeet);
 
         Assert.Collection(vm.NavItems,
             n => AssertHeader(n, "Audio"),
@@ -96,7 +100,6 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Silence timeout"),
             n => AssertHeader(n, "Speech engine"),
             n => AssertSection(n, "Engine"),
-            n => AssertSection(n, "Language"),
             n => AssertSection(n, "Parakeet model"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkey"),
@@ -165,6 +168,7 @@ public class SettingsWindowViewModelTests
     public void SwitchingEngine_FallsBackToFirstSection_WhenSelectionIsHidden()
     {
         var vm = BuildViewModel();
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Whisper);
 
         var runtimeRow = vm.NavItems.Single(n => n.Section is RuntimeSettingsViewModel);
         vm.SelectedNavItem = runtimeRow;
@@ -181,6 +185,8 @@ public class SettingsWindowViewModelTests
     public void SelectingNonTranslatingModel_FlipsPausedNoteOnLanguagePage()
     {
         var vm = BuildViewModel();
+        // The paused note is a Whisper concern; Parakeet (default) hides the page.
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Whisper);
 
         // Translation has to be on for the paused note to be reachable.
         vm.Language.ToggleTranslationCommand.Execute(null);
@@ -202,6 +208,8 @@ public class SettingsWindowViewModelTests
     public void NavigateTo_Language_SelectsLanguageSection_OverridingPriorSelection()
     {
         var vm = BuildViewModel();
+        // The Language page only exists for engines with language choices.
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Whisper);
 
         // Simulate the window having been left on another page.
         var hotkeyRow = vm.NavItems.Single(n => n.Section is HotkeySettingsViewModel);

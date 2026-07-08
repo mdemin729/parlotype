@@ -413,6 +413,19 @@ public class TranscribeLanguageStripTests
     }
 
     [AvaloniaFact]
+    public async Task Strip_HiddenForParakeet_ReappearsOnEngineSwitch()
+    {
+        // Parakeet offers no language choice (auto-detect only, no translation)
+        // so the strip hides entirely; switching to Whisper brings it back.
+        var (vm, relationship, _, _) = await CreateAsync(SpeechEngine.Parakeet);
+
+        Assert.False(vm.HasLanguageStrip);
+
+        relationship.SetEngine(SpeechEngine.Whisper);
+        Assert.True(vm.HasLanguageStrip);
+    }
+
+    [AvaloniaFact]
     public async Task Strip_ShowsTargetName_WhenTranslating()
     {
         var (vm, relationship, _, _) = await CreateAsync(SpeechEngine.Gemma4);

@@ -21,15 +21,31 @@ namespace Parlotype.Core.Speech;
 /// is false. Empty when the engine handles translation through a separate setting
 /// (Whisper uses its existing "Translate to English" toggle).
 /// </param>
+/// <param name="SupportsSourceSelection">
+/// Whether picking a source language has any effect. False for engines that
+/// always auto-detect with no language-forcing parameter (e.g. Parakeet) —
+/// <see cref="SupportedSourceLanguages"/> then only documents what the engine
+/// can transcribe, and source pickers should not be offered.
+/// </param>
 public sealed record LanguageCapabilities(
     bool SupportsAutoDetect,
     IReadOnlyList<LanguageInfo>? SupportedSourceLanguages,
     bool SupportsArbitraryTranslation,
-    IReadOnlyList<LanguageInfo> FixedTranslationTargets)
+    IReadOnlyList<LanguageInfo> FixedTranslationTargets,
+    bool SupportsSourceSelection = true)
 {
     /// <summary>The effective source-language list (full list when unconstrained).</summary>
     public IReadOnlyList<LanguageInfo> EffectiveSourceLanguages =>
         SupportedSourceLanguages ?? LanguageCatalog.AllLanguages;
+
+    /// <summary>
+    /// Whether the engine offers any language choice at all — a selectable
+    /// source or any translation control. When false, language UI (Settings
+    /// page, Transcribe quick-picker strip) should be hidden entirely rather
+    /// than shown with options the engine would silently ignore.
+    /// </summary>
+    public bool HasLanguageChoices =>
+        SupportsSourceSelection || TranslationForm != TranslationForm.None;
 
     /// <summary>
     /// The form the target-language control takes: arbitrary translation ⇒
@@ -72,14 +88,16 @@ public static class SpeechEngineCapabilities
             FixedTranslationTargets: []),
 
         // Parakeet TDT v3: transcribe-only ASR. Always auto-detects among its 25
-        // European languages (the model has no language-forcing parameter — a
-        // selected source language is informational only). No translation task ⇒
-        // TranslationForm.None, rendered as a disabled target with a note.
+        // European languages — the model has no language-forcing parameter, so
+        // no source selection is offered (the list only documents coverage) and
+        // there is no translation task. HasLanguageChoices is false ⇒ language
+        // UI is hidden entirely for this engine.
         SpeechEngine.Parakeet => new LanguageCapabilities(
             SupportsAutoDetect: true,
             SupportedSourceLanguages: LanguageCatalog.ParakeetLanguages,
             SupportsArbitraryTranslation: false,
-            FixedTranslationTargets: []),
+            FixedTranslationTargets: [],
+            SupportsSourceSelection: false),
 
         // Fallback shape for any future transcribe-only engine: no arbitrary
         // translation and no fixed targets ⇒ TranslationForm.None, which the UI

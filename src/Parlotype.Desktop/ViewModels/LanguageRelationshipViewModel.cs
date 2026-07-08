@@ -71,11 +71,11 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
 
     /// <summary>The active engine's language capabilities.</summary>
     public LanguageCapabilities Capabilities { get; private set; } =
-        SpeechEngineCapabilities.For(SpeechEngine.Whisper);
+        SpeechEngineCapabilities.For(SpeechEngine.Parakeet);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(EngineDisplayName))]
-    private SpeechEngine _engine = SpeechEngine.Whisper;
+    private SpeechEngine _engine = SpeechEngine.Parakeet;
 
     /// <summary>Short human name of the active engine ("Whisper", "Gemma 4").</summary>
     public string EngineDisplayName => EngineName(Engine);
@@ -138,6 +138,13 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
 
     /// <summary>The form the target control takes for the active engine.</summary>
     public TranslationForm TargetForm => Capabilities.TranslationForm;
+
+    /// <summary>
+    /// Whether the active engine offers any language choice. When false
+    /// (Parakeet: auto-detect only, no translation) every language surface —
+    /// the Settings page and the Transcribe strip — hides entirely.
+    /// </summary>
+    public bool HasLanguageChoices => Capabilities.HasLanguageChoices;
 
     public ConnectorState Connector =>
         TargetForm == TranslationForm.None ? ConnectorState.Locked
@@ -280,7 +287,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         RefreshKeyboardLayout();
 
         var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine, ct);
-        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var e) ? e : SpeechEngine.Whisper;
+        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var e) ? e : SpeechEngine.Parakeet;
 
         _suppressToasts = true;
         try
@@ -390,6 +397,13 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         Engine = engine;
         Capabilities = SpeechEngineCapabilities.For(engine);
         NotifyCapabilityDerived();
+
+        // Engines with no language choices (Parakeet) ignore the language
+        // settings entirely and show no language UI, so nothing needs to fall
+        // back — and deliberately nothing is persisted, so the user's source /
+        // translation setup survives a round-trip through such an engine.
+        if (!Capabilities.HasLanguageChoices)
+            return;
 
         var engineName = EngineName(engine);
 
@@ -547,6 +561,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(Capabilities));
         OnPropertyChanged(nameof(TargetForm));
+        OnPropertyChanged(nameof(HasLanguageChoices));
         OnPropertyChanged(nameof(Connector));
         OnPropertyChanged(nameof(ConnectorGlyph));
         OnPropertyChanged(nameof(SummaryText));
