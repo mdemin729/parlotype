@@ -7,7 +7,7 @@
              x:CompileBindings="True">
     <StackPanel Spacing="12">
         <TextBlock Text="Parakeet model" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="NVIDIA Parakeet runs fully on the CPU — no GPU needed. It transcribes 25 European languages (detected automatically) with punctuation and capitalization."
+        <TextBlock Text="NVIDIA Parakeet runs fully on the CPU — no GPU needed. It transcribes 25 European languages (detected automatically) with punctuation and capitalization. INT8 is the recommended default: small and fast. Full precision (fp32) is slightly more accurate but 4× larger and slower to decode."
                    Opacity="0.7" TextWrapping="Wrap" />
 
         <ItemsControl ItemsSource="{Binding ModelOptions}">
