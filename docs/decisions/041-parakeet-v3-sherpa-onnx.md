@@ -50,11 +50,26 @@ official sherpa-onnx .NET bindings — no sidecar process.
 | Engine | Avg WER | Avg CER | Avg RTF | Model load | Peak RAM |
 |--------|--------:|--------:|--------:|-----------:|---------:|
 | Parakeet TDT v3 INT8 (CPU) | 5.6 % | 2.5 % | 0.072 | 3.3 s | 918 MB |
+| Parakeet TDT v3 fp32 (CPU) | 1.9 % | 1.1 % | 0.121 | 5.8 s | 2 635 MB |
 | Whisper Base (Vulkan GPU) | 3.6 % | 1.8 % | 0.032 | 0.9 s | 431 MB |
 
 The English-heavy smoke set favors Whisper Base on GPU; Parakeet's INT8 CPU
 numbers are its selling point (no GPU needed), and its published multilingual
-WER beats Whisper large-v3. The 16.7 % outlier was the Russian-accented sample.
+WER beats Whisper large-v3. The 16.7 % INT8 outlier was the Russian-accented
+sample — full precision recovers most of that loss (see amendment below).
+
+## Amendment (2026-07-08): full-precision (fp32) catalog entry
+
+`ParakeetModelInfo` gained a second entry, `parakeet-tdt-0.6b-v3-fp32`
+(`csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3`, ~2.6 GB), selectable in
+Settings → Parakeet model alongside the INT8 default. The fp32 encoder ships
+as a small graph (`encoder.onnx`, 42 MB) plus an **ONNX external-data weights
+file** (`encoder.weights`, 2.44 GB) — `ParakeetModelInfo` carries an optional
+`EncoderWeightsFileName` so download/cache/delete handle the extra file; both
+must sit in the same directory for onnxruntime to resolve the relative
+reference. Measured on the smoke set: WER 5.6 % → 1.9 % (the accented sample
+drives the gain), at ~2× decode time and ~3× RAM. INT8 remains the default;
+fp32 is for users who trade disk/RAM for accuracy on accented speech.
 
 ## Consequences
 

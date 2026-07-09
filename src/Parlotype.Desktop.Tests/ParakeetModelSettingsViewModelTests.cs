@@ -44,6 +44,43 @@ public class ParakeetModelSettingsViewModelTests
     }
 
     [Fact]
+    public async Task SelectModel_Fp32_UpdatesSelectionAndPersists()
+    {
+        var settings = new MockSettingsService();
+        var vm = new ParakeetModelSettingsViewModel(settings);
+        await Task.Yield();
+
+        vm.SelectModelCommand.Execute(ParakeetModelInfo.TdtV3Fp32.ModelId);
+        await Task.Yield();
+
+        Assert.Equal(ParakeetModelInfo.TdtV3Fp32.ModelId, vm.SelectedModelId);
+        Assert.True(vm.ModelOptions.Single(m => m.ModelId == ParakeetModelInfo.TdtV3Fp32.ModelId).IsSelected);
+        Assert.False(vm.ModelOptions.Single(m => m.ModelId == ParakeetModelInfo.TdtV3Int8.ModelId).IsSelected);
+
+        var persisted = await settings.GetAsync<string>(SettingsKeys.SelectedParakeetModel,
+            TestContext.Current.CancellationToken);
+        Assert.Equal(ParakeetModelInfo.TdtV3Fp32.ModelId, persisted);
+    }
+
+    [Fact]
+    public async Task SelectModel_UnloadsRecognizerWhenReady()
+    {
+        var settings = new MockSettingsService();
+        var recognizer = new MockSpeechRecognizer();
+        await recognizer.InitializeAsync(TestContext.Current.CancellationToken);
+        Assert.True(recognizer.IsReady);
+
+        var vm = new ParakeetModelSettingsViewModel(settings, recognizer: recognizer);
+        await Task.Yield();
+
+        vm.SelectModelCommand.Execute(ParakeetModelInfo.TdtV3Fp32.ModelId);
+        await Task.Yield();
+
+        Assert.False(recognizer.IsReady);
+        Assert.Equal(1, recognizer.UnloadCount);
+    }
+
+    [Fact]
     public void Section_IsRestrictedToParakeetEngine()
     {
         var settings = new MockSettingsService();

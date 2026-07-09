@@ -31,7 +31,7 @@ public class ParakeetModelInfoTests
     }
 
     [Fact]
-    public void FileNames_ContainsAllFourFiles_LargestFirst()
+    public void FileNames_Int8_ContainsFourFiles_LargestFirst()
     {
         var model = ParakeetModelInfo.TdtV3Int8;
 
@@ -39,6 +39,35 @@ public class ParakeetModelInfoTests
             [model.EncoderFileName, model.DecoderFileName, model.JoinerFileName, model.TokensFileName],
             model.FileNames);
         Assert.Equal(4, model.FileNames.Count);
+        Assert.Null(model.EncoderWeightsFileName);
+    }
+
+    [Fact]
+    public void FileNames_Fp32_IncludesExternalEncoderWeights()
+    {
+        var model = ParakeetModelInfo.TdtV3Fp32;
+
+        // The fp32 encoder is a small graph + ONNX external-data weights file;
+        // both must download into the same directory or onnxruntime cannot
+        // resolve the relative reference.
+        Assert.Equal("encoder.weights", model.EncoderWeightsFileName);
+        Assert.Equal(
+            [model.EncoderWeightsFileName!, model.EncoderFileName, model.DecoderFileName, model.JoinerFileName, model.TokensFileName],
+            model.FileNames);
+        Assert.Equal(5, model.FileNames.Count);
+    }
+
+    [Fact]
+    public void GetById_ResolvesFp32Variant()
+    {
+        Assert.Equal(ParakeetModelInfo.TdtV3Fp32, ParakeetModelInfo.GetById("parakeet-tdt-0.6b-v3-fp32"));
+    }
+
+    [Fact]
+    public void Default_IsInt8_AndListedFirst()
+    {
+        Assert.Equal(ParakeetModelInfo.TdtV3Int8, ParakeetModelInfo.Default);
+        Assert.Equal(ParakeetModelInfo.TdtV3Int8, ParakeetModelInfo.All[0]);
     }
 
     [Fact]
