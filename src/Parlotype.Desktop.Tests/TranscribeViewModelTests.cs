@@ -119,6 +119,22 @@ public class TranscribeViewModelTests
     }
 
     [AvaloniaFact]
+    public async Task ActiveEngine_LiveSelectionDuringInitialization_TakesPrecedence()
+    {
+        var settings = new DelayedSpeechEngineSettingsService(SpeechEngine.Parakeet.ToString());
+        var vm = new TranscribeViewModel(new MockWindowManager(), settings: settings);
+        await settings.WaitForReadAsync();
+
+        vm.SetActiveEngine(SpeechEngine.XaiGrok);
+        settings.CompleteRead();
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(SpeechEngine.XaiGrok, vm.ActiveEngine);
+        Assert.True(vm.IsCloudEngineActive);
+        Assert.Equal("Cloud: xAI Grok", vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
     public async Task ActiveEngine_UnparsableSetting_FallsBackToParakeet()
     {
         var settings = new MockSettingsService();
@@ -477,6 +493,31 @@ public class TranscribeViewModelTests
         await Task.Delay(50);
 
         Assert.Equal(RecordingState.Idle, vm.RecordingState);
+    }
+
+    private sealed class DelayedSpeechEngineSettingsService(string engine) : ISettingsService
+    {
+        private readonly TaskCompletionSource<bool> _readStarted =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource<bool> _readCompletion =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public Task WaitForReadAsync() => _readStarted.Task;
+
+        public void CompleteRead() => _readCompletion.TrySetResult(true);
+
+        public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
+        {
+            if (key != SettingsKeys.SpeechEngine)
+                return default;
+
+            _readStarted.TrySetResult(true);
+            await _readCompletion.Task.WaitAsync(cancellationToken);
+            return (T?)(object?)engine;
+        }
+
+        public Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
     }
 }
 
