@@ -239,6 +239,7 @@ public class App : Application
         services.AddSingleton<LanguageSelectionSettingsViewModel>();
         services.AddSingleton<Gemma4ModelSettingsViewModel>();
         services.AddSingleton<ParakeetModelSettingsViewModel>();
+        services.AddSingleton<CloudProviderSettingsViewModel>();
         services.AddSingleton<PromptSettingsViewModel>();
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();

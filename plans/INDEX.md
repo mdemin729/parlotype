@@ -18,7 +18,7 @@
 
 | Plan | Started | Description |
 |------|---------|-------------|
-| _none_ | | |
+| [2026-07-09-cloud-speech-providers](2026-07-09-cloud-speech-providers/) | 2026-07-09 | First two opt-in cloud engines (ADR-043): `SpeechEngine.OpenAiCompatible` (OpenAI/Groq/any compatible host via base-URL setting) + `SpeechEngine.XaiGrok`; batch multipart WAV upload, BYOK keys in `ISecretStore`/`DpapiSecretStore` (`secrets.json`, DPAPI on Windows), Cloud providers settings section, persistent Cloud badge on TranscribeWindow (ADR-032 commitment #3) |
 
 ## Planned
 

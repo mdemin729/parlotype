@@ -38,6 +38,9 @@
         <DataTemplate DataType="vms:ParakeetModelSettingsViewModel">
             <v:ParakeetModelSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:CloudProviderSettingsViewModel">
+            <v:CloudProviderSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:PromptSettingsViewModel">
             <v:PromptSettingsView />
         </DataTemplate>

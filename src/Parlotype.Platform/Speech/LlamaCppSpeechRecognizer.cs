@@ -165,7 +165,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         if (!IsReady || _httpClient is null)
             throw new InvalidOperationException("Recognizer is not initialized. Call InitializeAsync first.");
 
-        var wavBytes = EncodeWav(samples.Span, sampleRate: 16_000);
+        var wavBytes = WavEncoder.Encode(samples.Span, sampleRate: 16_000);
         var base64 = Convert.ToBase64String(wavBytes);
 
         var activePrompt = await _prompts.GetActiveAsync(cancellationToken);
@@ -443,44 +443,5 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         {
             _logger.LogDebug(ex, "Error draining llama-server {Label} stream", label);
         }
-    }
-
-    /// <summary>Encodes float PCM samples into a 16-bit mono WAV byte array.</summary>
-    internal static byte[] EncodeWav(ReadOnlySpan<float> samples, int sampleRate)
-    {
-        const int bitsPerSample = 16;
-        const int numChannels = 1;
-        const int bytesPerSample = bitsPerSample / 8;
-        var dataSize = samples.Length * bytesPerSample;
-
-        using var ms = new MemoryStream(44 + dataSize);
-        using var bw = new BinaryWriter(ms);
-
-        // RIFF header
-        bw.Write("RIFF"u8);
-        bw.Write(36 + dataSize);
-        bw.Write("WAVE"u8);
-
-        // fmt chunk
-        bw.Write("fmt "u8);
-        bw.Write(16);
-        bw.Write((short)1); // PCM
-        bw.Write((short)numChannels);
-        bw.Write(sampleRate);
-        bw.Write(sampleRate * numChannels * bytesPerSample);
-        bw.Write((short)(numChannels * bytesPerSample));
-        bw.Write((short)bitsPerSample);
-
-        // data chunk
-        bw.Write("data"u8);
-        bw.Write(dataSize);
-
-        for (int i = 0; i < samples.Length; i++)
-        {
-            var clamped = Math.Clamp(samples[i], -1.0f, 1.0f);
-            bw.Write((short)(clamped * 32767));
-        }
-
-        return ms.ToArray();
     }
 }

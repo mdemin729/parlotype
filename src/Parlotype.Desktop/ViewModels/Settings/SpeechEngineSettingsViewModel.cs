@@ -33,6 +33,14 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     [ObservableProperty]
     private bool _isParakeetSelected = true;
 
+    /// <summary>True when the OpenAI-compatible cloud engine is selected (for conditional UI).</summary>
+    [ObservableProperty]
+    private bool _isOpenAiCompatSelected;
+
+    /// <summary>True when the xAI Grok cloud engine is selected (for conditional UI).</summary>
+    [ObservableProperty]
+    private bool _isXaiGrokSelected;
+
     /// <summary>
     /// Opt-in: warm the speech model in the background at app startup so the
     /// first record press is instant. Off by default; takes effect on next
@@ -45,6 +53,8 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     {
         IsGemma4Selected = value == SpeechEngine.Gemma4;
         IsParakeetSelected = value == SpeechEngine.Parakeet;
+        IsOpenAiCompatSelected = value == SpeechEngine.OpenAiCompatible;
+        IsXaiGrokSelected = value == SpeechEngine.XaiGrok;
     }
 
     partial void OnPreloadModelOnStartupEnabledChanged(bool value)
@@ -74,6 +84,12 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
                 SelectEngineCommand),
             new(SpeechEngine.Gemma4, "Gemma 4 (Experimental)",
                 "Google Gemma 4 E4B via llama.cpp. Requires ~10 GB download. English only. Best on clean speech.",
+                SelectEngineCommand),
+            new(SpeechEngine.OpenAiCompatible, "OpenAI-compatible (Cloud)",
+                "Cloud transcription via your own OpenAI, Groq, or compatible API key. Audio is sent to the configured provider — nothing runs locally. Fast even on weak hardware. Opt-in; configure your key under Cloud providers below.",
+                SelectEngineCommand),
+            new(SpeechEngine.XaiGrok, "xAI Grok (Cloud)",
+                "xAI Grok Speech-to-Text via your own xAI API key. Audio is sent to xAI — nothing runs locally. Fast even on weak hardware. Opt-in; configure your key under Cloud providers below.",
                 SelectEngineCommand),
         ];
 
@@ -129,6 +145,11 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
         SelectedEngine = type;
         foreach (var item in EngineOptions)
             item.IsSelected = item.Type == type;
+
+        // Keep the Transcribe window's cloud-active badge (ADR-032) correct both
+        // at startup and on every switch — see SetActiveEngine's docs for why
+        // this is a direct call rather than a constructor dependency.
+        _transcribeViewModel?.SetActiveEngine(type);
     }
 
     private sealed class DesignSettingsService : ISettingsService

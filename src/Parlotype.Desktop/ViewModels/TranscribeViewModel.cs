@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Audio;
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Core.TextInjection;
 using Parlotype.Desktop.Services;
@@ -21,6 +22,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private readonly IAudioLevelProvider? _audioLevelProvider;
     private readonly IWindowManager _windowManager;
     private readonly LanguageRelationshipViewModel? _relationship;
+    private readonly ISettingsService? _settings;
     private readonly ILogger<TranscribeViewModel> _logger;
 
     /// <summary>RMS threshold above which we consider speech active for visual feedback.</summary>
@@ -73,6 +75,61 @@ public partial class TranscribeViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isLoading;
 
+    /// <summary>
+    /// The currently active speech engine. Loaded from settings during this
+    /// VM's own initialization (the Transcribe window exists before the
+    /// Settings window is ever opened, so it cannot rely on anyone else for
+    /// its startup state), then kept in sync by
+    /// <see cref="Settings.SpeechEngineSettingsViewModel"/> calling
+    /// <see cref="SetActiveEngine"/> directly on every live engine switch (the
+    /// same pattern it already uses to stop recording / unload the recognizer
+    /// on an engine change). Drives the cloud-active indicator (ADR-032
+    /// commitment #3) in the Transcribe window.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCloudEngineActive))]
+    [NotifyPropertyChangedFor(nameof(CloudProviderLabel))]
+    private SpeechEngine _activeEngine = SpeechEngine.Parakeet;
+
+    /// <summary>True when a bring-your-own-key cloud engine is active — audio leaves this machine.</summary>
+    public bool IsCloudEngineActive =>
+        ActiveEngine is SpeechEngine.OpenAiCompatible or SpeechEngine.XaiGrok;
+
+    /// <summary>Persistent transparency badge text naming the active cloud provider (ADR-032), or null when local.</summary>
+    public string? CloudProviderLabel => ActiveEngine switch
+    {
+        SpeechEngine.OpenAiCompatible => "Cloud: OpenAI-compatible",
+        SpeechEngine.XaiGrok => "Cloud: xAI Grok",
+        _ => null,
+    };
+
+    /// <summary>
+    /// Sets the active engine for the cloud-indicator badge. Called by
+    /// <see cref="Settings.SpeechEngineSettingsViewModel"/> — not injected the
+    /// other way around, since that VM already depends on this one and a
+    /// reverse constructor dependency would be circular.
+    /// </summary>
+    public void SetActiveEngine(SpeechEngine engine) => ActiveEngine = engine;
+
+    /// <summary>
+    /// Reads the persisted engine so the cloud badge is correct from the very
+    /// first frame — without requiring the Settings window (and thus
+    /// <see cref="Settings.SpeechEngineSettingsViewModel"/>) to have ever been
+    /// constructed. Same parse-with-Parakeet-fallback used across the codebase.
+    /// </summary>
+    private async Task InitializeActiveEngineAsync()
+    {
+        if (_settings is null)
+            return;
+
+        // Direct property set (no dispatcher hop) — the same pattern every other
+        // VM's fire-and-forget InitializeAsync uses for [ObservableProperty] fields.
+        var saved = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);
+        ActiveEngine = Enum.TryParse<SpeechEngine>(saved, ignoreCase: true, out var parsed)
+            ? parsed
+            : SpeechEngine.Parakeet;
+    }
+
     partial void OnRecordingStateChanged(RecordingState value)
     {
         IsLoading = value == RecordingState.Loading;
@@ -94,6 +151,7 @@ public partial class TranscribeViewModel : ViewModelBase
         ITextInjectionService? textInjectionService = null,
         IAudioLevelProvider? audioLevelProvider = null,
         LanguageRelationshipViewModel? relationship = null,
+        ISettingsService? settings = null,
         ILogger<TranscribeViewModel>? logger = null)
     {
         _windowManager = windowManager;
@@ -101,7 +159,18 @@ public partial class TranscribeViewModel : ViewModelBase
         _textInjectionService = textInjectionService;
         _audioLevelProvider = audioLevelProvider;
         _relationship = relationship;
+        _settings = settings;
         _logger = logger ?? NullLogger<TranscribeViewModel>.Instance;
+
+        // Self-sufficient badge state at startup: the Transcribe window is
+        // created before (and independently of) the Settings window, so waiting
+        // for SpeechEngineSettingsViewModel's push would leave a cloud engine
+        // undisclosed until the user happens to open Settings — violating
+        // ADR-032 commitment #3. Fire-and-forget like other VM initializers;
+        // faults are logged, and the Parakeet default stands until the load lands.
+        _ = InitializeActiveEngineAsync().ContinueWith(
+            t => _logger.LogError(t.Exception, "Active engine initialization failed"),
+            TaskContinuationOptions.OnlyOnFaulted);
 
         if (_relationship is not null)
         {

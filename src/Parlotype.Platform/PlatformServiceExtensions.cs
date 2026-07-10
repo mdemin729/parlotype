@@ -25,6 +25,11 @@ public static class PlatformServiceExtensions
         services.AddSingleton<WhisperSpeechRecognizer>();
         services.AddSingleton<LlamaCppSpeechRecognizer>();
         services.AddSingleton<ParakeetSpeechRecognizer>();
+        // Opt-in cloud providers (ADR-032, bring-your-own-key). Registered as
+        // concrete singletons like the local engines above; SpeechRecognizerFactory
+        // resolves the one matching the configured SpeechEngine setting.
+        services.AddSingleton<OpenAiCompatibleSpeechRecognizer>();
+        services.AddSingleton<XaiGrokSpeechRecognizer>();
         // The recognizer also surfaces ILlamaCppServerLifecycle so the
         // installer can stop the sidecar before deleting its files
         // (Windows file-lock release on uninstall/switch).
@@ -39,6 +44,9 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
         services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
+        // API keys for the opt-in cloud providers live outside settings.json,
+        // encrypted at rest where the OS supports it (ADR-032).
+        services.AddSingleton<ISecretStore, DpapiSecretStore>();
         // Deliberately separate from ISettingsService's settings.json — window
         // chrome state (position) changes far more often (every drag) and must
         // never share a file/lock with user-configured settings (ADR-040).

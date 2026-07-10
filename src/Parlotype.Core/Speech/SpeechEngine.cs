@@ -17,5 +17,23 @@ public enum SpeechEngine
     /// fastest engine; 25 European languages, always auto-detected;
     /// transcribe-only (no translation). Default (ADR-042).
     /// </summary>
-    Parakeet
+    Parakeet,
+
+    /// <summary>
+    /// Cloud transcription via the OpenAI transcription REST protocol
+    /// (<c>POST {baseUrl}/audio/transcriptions</c>) — works against OpenAI
+    /// itself, Groq, or any other OpenAI-compatible host reachable via a
+    /// configurable base URL. Opt-in, bring-your-own-key: audio and the API
+    /// key leave this machine and go directly to the configured host
+    /// (ADR-032, "Local by default. Cloud by choice.").
+    /// </summary>
+    OpenAiCompatible,
+
+    /// <summary>
+    /// Cloud transcription via xAI's Grok Speech-to-Text REST API
+    /// (<c>POST {baseUrl}/stt</c>). Opt-in, bring-your-own-key: audio and the
+    /// API key leave this machine and go directly to xAI (ADR-032, "Local by
+    /// default. Cloud by choice.").
+    /// </summary>
+    XaiGrok
 }

@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.CloudProviderSettingsView"
+             x:DataType="vms:CloudProviderSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="Cloud providers" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock TextWrapping="Wrap" Opacity="0.7">
+            Bring your own API key. When a cloud engine is active, your audio recordings are sent to the
+            configured provider for transcription — nothing runs locally for that engine. Billing is directly
+            between you and the provider; Parlotype is not a billing intermediary (ADR-032, "Local by default.
+            Cloud by choice.").
+        </TextBlock>
+
+        <!-- ============================================================
+             OpenAI-compatible
+             ============================================================ -->
+        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                CornerRadius="6" Padding="16">
+            <StackPanel Spacing="10">
+                <TextBlock Text="OpenAI-compatible" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock Text="Works with OpenAI, Groq, or any other host that implements the OpenAI transcription API."
+                           Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Base URL" FontSize="12" Opacity="0.7" />
+                    <TextBox Text="{Binding OpenAiBaseUrl, Mode=TwoWay}"
+                             PlaceholderText="{x:Static vms:CloudProviderSettingsViewModel.DefaultOpenAiBaseUrl}" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Model" FontSize="12" Opacity="0.7" />
+                    <TextBox Text="{Binding OpenAiModel, Mode=TwoWay}"
+                             PlaceholderText="{x:Static vms:CloudProviderSettingsViewModel.DefaultOpenAiModel}" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="API key" FontSize="12" Opacity="0.7" />
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding OpenAiKeyEntry, Mode=TwoWay}"
+                                 PasswordChar="*"
+                                 PlaceholderText="sk-…"
+                                 Margin="0,0,8,0" />
+                        <Button Grid.Column="1" Content="Save"
+                                Command="{Binding SaveOpenAiKeyCommand}"
+                                Padding="12,6" Margin="0,0,4,0" />
+                        <Button Grid.Column="2" Content="Remove"
+                                Command="{Binding RemoveOpenAiKeyCommand}"
+                                Padding="12,6" />
+                    </Grid>
+                    <TextBlock Text="{Binding OpenAiKeyStatus}"
+                               FontSize="12" Opacity="0.6" Margin="0,2,0,0" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ============================================================
+             xAI Grok
+             ============================================================ -->
+        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                CornerRadius="6" Padding="16">
+            <StackPanel Spacing="10">
+                <TextBlock Text="xAI Grok" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock Text="xAI's Grok Speech-to-Text API."
+                           Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Base URL" FontSize="12" Opacity="0.7" />
+                    <TextBox Text="{Binding XaiBaseUrl, Mode=TwoWay}"
+                             PlaceholderText="{x:Static vms:CloudProviderSettingsViewModel.DefaultXaiBaseUrl}" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Model" FontSize="12" Opacity="0.7" />
+                    <TextBox Text="{Binding XaiModel, Mode=TwoWay}"
+                             PlaceholderText="{x:Static vms:CloudProviderSettingsViewModel.DefaultXaiModel}" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="API key" FontSize="12" Opacity="0.7" />
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding XaiKeyEntry, Mode=TwoWay}"
+                                 PasswordChar="*"
+                                 PlaceholderText="xai-…"
+                                 Margin="0,0,8,0" />
+                        <Button Grid.Column="1" Content="Save"
+                                Command="{Binding SaveXaiKeyCommand}"
+                                Padding="12,6" Margin="0,0,4,0" />
+                        <Button Grid.Column="2" Content="Remove"
+                                Command="{Binding RemoveXaiKeyCommand}"
+                                Padding="12,6" />
+                    </Grid>
+                    <TextBlock Text="{Binding XaiKeyStatus}"
+                               FontSize="12" Opacity="0.6" Margin="0,2,0,0" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

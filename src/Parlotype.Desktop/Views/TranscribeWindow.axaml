@@ -67,6 +67,13 @@
             <Setter Property="Padding" Value="0" />
             <Setter Property="CornerRadius" Value="5" />
         </Style>
+
+        <!-- ADR-032 transparency indicator: always visible while a cloud engine
+             is active. Small footprint by design — the window is a fixed
+             172x118 frameless card — with the full provider name in the tooltip. -->
+        <Style Selector="Border.cloudBadge">
+            <Setter Property="Background" Value="#378ADD" />
+        </Style>
     </Window.Styles>
 
     <Design.DataContext>
@@ -97,6 +104,23 @@
                         VerticalAlignment="Center"
                         Background="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
             </Border>
+
+            <!-- Cloud-active indicator (ADR-032 commitment #3): always visible while
+                 a cloud engine is selected, naming the provider via tooltip since the
+                 172px-wide frameless card has no room for the full label inline. -->
+            <Border Name="CloudBadge"
+                    Grid.Row="0"
+                    Classes="cloudBadge"
+                    IsVisible="{Binding IsCloudEngineActive}"
+                    CornerRadius="7"
+                    Padding="5,2"
+                    Margin="6,3,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    ToolTip.Tip="{Binding CloudProviderLabel}">
+                <TextBlock Text="Cloud" FontSize="10" FontWeight="SemiBold" Foreground="White" />
+            </Border>
+
             <Button Name="CloseButton"
                     Grid.Row="0"
                     Classes="windowClose"

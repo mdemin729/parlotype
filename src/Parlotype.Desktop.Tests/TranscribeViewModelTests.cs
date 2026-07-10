@@ -22,6 +22,118 @@ public class TranscribeViewModelTests
     }
 
     [AvaloniaFact]
+    public void ActiveEngine_DefaultsToParakeet_CloudIndicatorHidden()
+    {
+        var vm = new TranscribeViewModel(new MockWindowManager());
+
+        Assert.Equal(SpeechEngine.Parakeet, vm.ActiveEngine);
+        Assert.False(vm.IsCloudEngineActive);
+        Assert.Null(vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
+    public void SetActiveEngine_LocalEngines_CloudIndicatorHidden()
+    {
+        var vm = new TranscribeViewModel(new MockWindowManager());
+
+        vm.SetActiveEngine(SpeechEngine.Whisper);
+        Assert.False(vm.IsCloudEngineActive);
+        Assert.Null(vm.CloudProviderLabel);
+
+        vm.SetActiveEngine(SpeechEngine.Gemma4);
+        Assert.False(vm.IsCloudEngineActive);
+        Assert.Null(vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
+    public void SetActiveEngine_OpenAiCompatible_ShowsCloudIndicator()
+    {
+        var vm = new TranscribeViewModel(new MockWindowManager());
+
+        vm.SetActiveEngine(SpeechEngine.OpenAiCompatible);
+
+        Assert.True(vm.IsCloudEngineActive);
+        Assert.Equal("Cloud: OpenAI-compatible", vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
+    public void SetActiveEngine_XaiGrok_ShowsCloudIndicator()
+    {
+        var vm = new TranscribeViewModel(new MockWindowManager());
+
+        vm.SetActiveEngine(SpeechEngine.XaiGrok);
+
+        Assert.True(vm.IsCloudEngineActive);
+        Assert.Equal("Cloud: xAI Grok", vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
+    public void SetActiveEngine_SwitchingBackToLocal_HidesCloudIndicator()
+    {
+        var vm = new TranscribeViewModel(new MockWindowManager());
+
+        vm.SetActiveEngine(SpeechEngine.XaiGrok);
+        Assert.True(vm.IsCloudEngineActive);
+
+        vm.SetActiveEngine(SpeechEngine.Parakeet);
+
+        Assert.False(vm.IsCloudEngineActive);
+        Assert.Null(vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
+    public async Task ActiveEngine_LoadsPersistedCloudEngine_WithoutSettingsWindow()
+    {
+        // Regression (ADR-032 commitment #3): the Transcribe window exists before
+        // the Settings window is ever opened, so the badge must be correct from
+        // the VM's own settings read — no SpeechEngineSettingsViewModel involved.
+        var settings = new MockSettingsService();
+        await settings.SetAsync(
+            SettingsKeys.SpeechEngine, SpeechEngine.XaiGrok.ToString(),
+            TestContext.Current.CancellationToken);
+
+        var vm = new TranscribeViewModel(new MockWindowManager(), settings: settings);
+
+        // InitializeActiveEngineAsync is fire-and-forget — give it a moment.
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(SpeechEngine.XaiGrok, vm.ActiveEngine);
+        Assert.True(vm.IsCloudEngineActive);
+        Assert.Equal("Cloud: xAI Grok", vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
+    public async Task ActiveEngine_LoadsPersistedLocalEngine_BadgeStaysHidden()
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(
+            SettingsKeys.SpeechEngine, SpeechEngine.Whisper.ToString(),
+            TestContext.Current.CancellationToken);
+
+        var vm = new TranscribeViewModel(new MockWindowManager(), settings: settings);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(SpeechEngine.Whisper, vm.ActiveEngine);
+        Assert.False(vm.IsCloudEngineActive);
+        Assert.Null(vm.CloudProviderLabel);
+    }
+
+    [AvaloniaFact]
+    public async Task ActiveEngine_UnparsableSetting_FallsBackToParakeet()
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(
+            SettingsKeys.SpeechEngine, "NotARealEngine",
+            TestContext.Current.CancellationToken);
+
+        var vm = new TranscribeViewModel(new MockWindowManager(), settings: settings);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(SpeechEngine.Parakeet, vm.ActiveEngine);
+        Assert.False(vm.IsCloudEngineActive);
+    }
+
+    [AvaloniaFact]
     public async Task TogglePlay_NoPipeline_LeavesNotRecording()
     {
         var wm = new MockWindowManager();

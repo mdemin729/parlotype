@@ -57,4 +57,48 @@ public static class SettingsKeys
     public const string LlamaCppPort = "LlamaCppPort";
     public const string LlamaCppActiveInstall = "LlamaCppActiveInstall";
     public const string ActivePromptId = "ActivePromptId";
+
+    /// <summary>
+    /// Base URL for the OpenAI-compatible cloud transcription provider
+    /// (<see cref="Speech.SpeechEngine.OpenAiCompatible"/>, ADR-032). Defaults to
+    /// <c>https://api.openai.com/v1</c> when unset; pointing this at another host
+    /// (e.g. Groq) is how the same engine serves multiple OpenAI-protocol providers.
+    /// </summary>
+    public const string OpenAiCompatBaseUrl = "OpenAiCompatBaseUrl";
+
+    /// <summary>
+    /// Model id sent to the OpenAI-compatible transcription endpoint (e.g.
+    /// <c>gpt-4o-mini-transcribe</c>, <c>whisper-1</c>). Defaults to
+    /// <c>gpt-4o-mini-transcribe</c> when unset.
+    /// </summary>
+    public const string OpenAiCompatModel = "OpenAiCompatModel";
+
+    /// <summary>
+    /// Base URL for the xAI Grok cloud transcription provider
+    /// (<see cref="Speech.SpeechEngine.XaiGrok"/>, ADR-032). Defaults to
+    /// <c>https://api.x.ai/v1</c> when unset.
+    /// </summary>
+    public const string XaiGrokBaseUrl = "XaiGrokBaseUrl";
+
+    /// <summary>
+    /// Model id sent to the xAI Grok transcription endpoint. Defaults to
+    /// <c>grok-stt</c> when unset.
+    /// </summary>
+    public const string XaiGrokModel = "XaiGrokModel";
+
+    /// <summary>
+    /// <see cref="ISecretStore"/> key name for the OpenAI-compatible provider's
+    /// API key. The value itself lives in <see cref="ISecretStore"/>
+    /// (encrypted at rest where the OS supports it), never in settings.json —
+    /// this constant is only the lookup key.
+    /// </summary>
+    public const string OpenAiCompatApiKey = "OpenAiCompatApiKey";
+
+    /// <summary>
+    /// <see cref="ISecretStore"/> key name for the xAI Grok provider's API key.
+    /// The value itself lives in <see cref="ISecretStore"/> (encrypted at rest
+    /// where the OS supports it), never in settings.json — this constant is
+    /// only the lookup key.
+    /// </summary>
+    public const string XaiGrokApiKey = "XaiGrokApiKey";
 }
