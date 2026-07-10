@@ -24,6 +24,8 @@ public partial class TranscribeViewModel : ViewModelBase
     private readonly LanguageRelationshipViewModel? _relationship;
     private readonly ISettingsService? _settings;
     private readonly ILogger<TranscribeViewModel> _logger;
+    private readonly object _activeEngineLock = new();
+    private bool _hasLiveActiveEngine;
 
     /// <summary>RMS threshold above which we consider speech active for visual feedback.</summary>
     private const float SpeechThreshold = 0.005f;
@@ -109,7 +111,14 @@ public partial class TranscribeViewModel : ViewModelBase
     /// other way around, since that VM already depends on this one and a
     /// reverse constructor dependency would be circular.
     /// </summary>
-    public void SetActiveEngine(SpeechEngine engine) => ActiveEngine = engine;
+    public void SetActiveEngine(SpeechEngine engine)
+    {
+        lock (_activeEngineLock)
+        {
+            _hasLiveActiveEngine = true;
+            ActiveEngine = engine;
+        }
+    }
 
     /// <summary>
     /// Reads the persisted engine so the cloud badge is correct from the very
@@ -125,9 +134,17 @@ public partial class TranscribeViewModel : ViewModelBase
         // Direct property set (no dispatcher hop) — the same pattern every other
         // VM's fire-and-forget InitializeAsync uses for [ObservableProperty] fields.
         var saved = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);
-        ActiveEngine = Enum.TryParse<SpeechEngine>(saved, ignoreCase: true, out var parsed)
+        var savedEngine = Enum.TryParse<SpeechEngine>(saved, ignoreCase: true, out var parsed)
             ? parsed
             : SpeechEngine.Parakeet;
+
+        lock (_activeEngineLock)
+        {
+            if (_hasLiveActiveEngine)
+                return;
+
+            ActiveEngine = savedEngine;
+        }
     }
 
     partial void OnRecordingStateChanged(RecordingState value)
