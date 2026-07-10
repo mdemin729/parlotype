@@ -42,6 +42,8 @@ public sealed class SpeechRecognizerFactory
         {
             SpeechEngine.Whisper => _services.GetRequiredService<WhisperSpeechRecognizer>(),
             SpeechEngine.Gemma4 => _services.GetRequiredService<LlamaCppSpeechRecognizer>(),
+            SpeechEngine.OpenAiCompatible => _services.GetRequiredService<OpenAiCompatibleSpeechRecognizer>(),
+            SpeechEngine.XaiGrok => _services.GetRequiredService<XaiGrokSpeechRecognizer>(),
             _ => _services.GetRequiredService<ParakeetSpeechRecognizer>(),
         };
     }

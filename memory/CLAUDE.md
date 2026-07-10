@@ -8,7 +8,7 @@ summary: Root router for AI agent orientation in the Parlotype voice-to-text pro
 
 # Parlotype — Agent Memory Vault
 
-Parlotype is a local-first, privacy-focused voice-to-text desktop app. All speech recognition runs on-device: Parakeet TDT v3 via sherpa-onnx (default, CPU-only — ADR-041/042), Whisper.net, or Gemma 4 via llama.cpp. Built with .NET 10 + Avalonia UI.
+Parlotype is a local-by-default voice-to-text desktop app. On-device speech recognition is the default: Parakeet TDT v3 via sherpa-onnx (default engine, CPU-only — ADR-041/042), Whisper.net, or Gemma 4 via llama.cpp. Two opt-in BYOK cloud engines ship as well — OpenAI-compatible and xAI Grok STT (ADR-032/043). Built with .NET 10 + Avalonia UI.
 
 ## Quick Commands
 

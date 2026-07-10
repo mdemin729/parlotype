@@ -27,13 +27,15 @@ public class SettingsWindowViewModelTests
             new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService()));
         var gemma4Model = new Gemma4ModelSettingsViewModel(settings);
         var parakeetModel = new ParakeetModelSettingsViewModel(settings);
+        var cloudProviders = new CloudProviderSettingsViewModel(settings, new MockSecretStore());
         var prompts = new PromptSettingsViewModel(new MockPromptTemplateRegistry());
         var llamaCpp = new LlamaCppSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
         var theme = new ThemeSettingsViewModel(settings);
 
         return new SettingsWindowViewModel(
-            engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, parakeetModel, prompts, llamaCpp, hotkey, theme);
+            engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, parakeetModel,
+            cloudProviders, prompts, llamaCpp, hotkey, theme);
     }
 
     [Fact]
@@ -105,6 +107,47 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Hotkey"),
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"));
+    }
+
+    [Fact]
+    public void NavItems_WithOpenAiCompatActive_ShowCloudProviders()
+    {
+        var vm = BuildViewModel();
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.OpenAiCompatible);
+
+        // The engine still offers a source-language choice (it forwards an
+        // ISO-639-1 code or auto-detects), so the Language page stays visible
+        // too — only translation-specific UI (Whisper/Gemma4-only sections) drops.
+        Assert.Collection(vm.NavItems,
+            n => AssertHeader(n, "Audio"),
+            n => AssertSection(n, "Microphone"),
+            n => AssertSection(n, "Silence timeout"),
+            n => AssertHeader(n, "Speech engine"),
+            n => AssertSection(n, "Engine"),
+            n => AssertSection(n, "Language"),
+            n => AssertSection(n, "Cloud providers"),
+            n => AssertHeader(n, "Input"),
+            n => AssertSection(n, "Hotkey"),
+            n => AssertHeader(n, "Appearance"),
+            n => AssertSection(n, "Theme"));
+    }
+
+    [Fact]
+    public void NavItems_WithXaiGrokActive_ShowCloudProviders()
+    {
+        var vm = BuildViewModel();
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.XaiGrok);
+
+        var cloudRow = vm.NavItems.Single(n => !n.IsHeader && n.Section is CloudProviderSettingsViewModel);
+        Assert.Equal("Cloud providers", cloudRow.Label);
+    }
+
+    [Fact]
+    public void NavItems_WithParakeetActive_HideCloudProviders()
+    {
+        var vm = BuildViewModel();
+
+        Assert.DoesNotContain(vm.NavItems, n => n.Section is CloudProviderSettingsViewModel);
     }
 
     [Fact]

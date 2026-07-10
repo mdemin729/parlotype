@@ -99,6 +99,26 @@ public static class SpeechEngineCapabilities
             FixedTranslationTargets: [],
             SupportsSourceSelection: false),
 
+        // OpenAI-compatible cloud provider (ADR-032): the OpenAI transcription
+        // endpoint auto-detects or accepts a forced ISO-639-1 language, and its
+        // models are Whisper-family, so the same curated ~98-language set applies.
+        // Transcribe-only — translation is a separate OpenAI endpoint this engine
+        // does not call.
+        SpeechEngine.OpenAiCompatible => new LanguageCapabilities(
+            SupportsAutoDetect: true,
+            SupportedSourceLanguages: LanguageCatalog.WhisperLanguages,
+            SupportsArbitraryTranslation: false,
+            FixedTranslationTargets: []),
+
+        // xAI Grok STT (ADR-032): auto-detects or accepts a forced language across
+        // its full published set, which this catalog does not curate separately —
+        // null falls back to the full runtime-derived language list. Transcribe-only.
+        SpeechEngine.XaiGrok => new LanguageCapabilities(
+            SupportsAutoDetect: true,
+            SupportedSourceLanguages: null,
+            SupportsArbitraryTranslation: false,
+            FixedTranslationTargets: []),
+
         // Fallback shape for any future transcribe-only engine: no arbitrary
         // translation and no fixed targets ⇒ TranslationForm.None, which the UI
         // renders as a disabled target with an explanatory note.

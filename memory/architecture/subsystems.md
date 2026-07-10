@@ -11,13 +11,17 @@ summary: Speech engines, text injection, global hotkeys, settings, logging, and 
 
 ## Speech Engines
 
-Three local engines behind one `ISpeechRecognizer` contract; `DelegatingSpeechRecognizer` (registered as the singleton) resolves the concrete recognizer via `SpeechRecognizerFactory` from the `SpeechEngine` setting at `InitializeAsync` time.
+Three local engines + two opt-in cloud engines (ADR-032/043) behind one `ISpeechRecognizer` contract; `DelegatingSpeechRecognizer` (registered as the singleton) resolves the concrete recognizer via `SpeechRecognizerFactory` from the `SpeechEngine` setting at `InitializeAsync` time.
 
 | Engine | Recognizer | Runtime | Download | Languages | Translation |
 |--------|-----------|---------|----------|-----------|-------------|
 | **Parakeet v3 (default, ADR-042)** | `ParakeetSpeechRecognizer` | sherpa-onnx in-process, CPU-only INT8 (ADR-041) | 4 ONNX files (~670 MB), auto-downloaded on first use | 25 European, always auto-detected — no language UI shown | none |
 | Whisper | `WhisperSpeechRecognizer` | Whisper.net in-process (CUDA/Vulkan/CPU, ADR-012/022) | per-model GGML (~75 MB–3 GB) | ~99, source selectable | to English (Toggle) |
 | Gemma 4 | `LlamaCppSpeechRecognizer` | llama-server sidecar, Vulkan (ADR-025) | GGUF + mmproj (~6–15 GB) | full list (LLM) | arbitrary (Full) |
+| OpenAI-compatible (cloud, ADR-043) | `OpenAiCompatibleSpeechRecognizer` | HTTPS multipart batch to `{base}/audio/transcriptions` — OpenAI, Groq, any compatible host | none (BYOK API key in `ISecretStore`) | Whisper set, source selectable | none |
+| xAI Grok (cloud, ADR-043) | `XaiGrokSpeechRecognizer` | HTTPS multipart batch to `{base}/stt` (custom xAI schema) | none (BYOK API key in `ISecretStore`) | full list, source selectable | none |
+
+Cloud engines are strictly opt-in (never default), fail initialization with an actionable error when no API key is stored, and light a persistent "Cloud" badge on the Transcribe window while active (ADR-032 transparency commitment). Utterance audio is WAV-encoded (`WavEncoder`) and POSTed per transcription; text post-processing stays centralized in `AudioPipelineService` for all five engines.
 
 Engine-scoped settings sections hide via `RestrictToEngine` (ADR-028) or the capability-driven `IsVisibleFor` override (ADR-042 — the Language page hides for engines whose `LanguageCapabilities.HasLanguageChoices` is false, and the Transcribe widget's language strip hides + the window compacts 118→88 px). Model hot-swap for all engines via `UnloadAsync` (ADR-017); prewarm + loading spinner apply engine-agnostically through the delegating recognizer (ADR-038).
 
@@ -48,6 +52,7 @@ Two implementations of `ITextInjectionService`:
 - `ISettingsService` (Core) → `JsonSettingsService` (Platform)
 - Persists to `%LOCALAPPDATA%/parlotype/settings.json`
 - Thread-safe via `SemaphoreSlim`
+- Secrets are separate: `ISecretStore` (Core) → `DpapiSecretStore` (Platform) → `%LOCALAPPDATA%/parlotype/secrets.json`, DPAPI-encrypted per value on Windows, base64 + one-time warning elsewhere; cloud API keys only, never in `settings.json` (ADR-043)
 
 ## Language & Translation
 

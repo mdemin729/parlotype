@@ -3,14 +3,14 @@ using Xunit;
 
 namespace Parlotype.Tests;
 
-public class LlamaCppSpeechRecognizerTests
+public class WavEncoderTests
 {
     [Fact]
-    public void EncodeWav_ProduceValidWavHeader()
+    public void Encode_ProducesValidWavHeader()
     {
         // 1 second of silence at 16kHz
         var samples = new float[16_000];
-        var wav = LlamaCppSpeechRecognizer.EncodeWav(samples, sampleRate: 16_000);
+        var wav = WavEncoder.Encode(samples, sampleRate: 16_000);
 
         // RIFF header: 44 bytes + data
         Assert.True(wav.Length >= 44);
@@ -52,10 +52,10 @@ public class LlamaCppSpeechRecognizerTests
     }
 
     [Fact]
-    public void EncodeWav_ClampsValues()
+    public void Encode_ClampsValues()
     {
         var samples = new float[] { 2.0f, -2.0f, 0.5f, -0.5f };
-        var wav = LlamaCppSpeechRecognizer.EncodeWav(samples, sampleRate: 16_000);
+        var wav = WavEncoder.Encode(samples, sampleRate: 16_000);
 
         // Read the PCM16 values from data section (offset 44)
         var s0 = BitConverter.ToInt16(wav, 44);
@@ -73,9 +73,9 @@ public class LlamaCppSpeechRecognizerTests
     }
 
     [Fact]
-    public void EncodeWav_EmptySamples_ProducesValidHeader()
+    public void Encode_EmptySamples_ProducesValidHeader()
     {
-        var wav = LlamaCppSpeechRecognizer.EncodeWav(ReadOnlySpan<float>.Empty, sampleRate: 16_000);
+        var wav = WavEncoder.Encode(ReadOnlySpan<float>.Empty, sampleRate: 16_000);
 
         Assert.Equal(44, wav.Length); // Header only, no data
         var dataSize = BitConverter.ToInt32(wav, 40);
