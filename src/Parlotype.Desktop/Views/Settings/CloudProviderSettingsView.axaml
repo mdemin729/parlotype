@@ -36,22 +36,53 @@
                 </StackPanel>
 
                 <StackPanel Spacing="4">
-                    <TextBlock Text="API key" FontSize="12" Opacity="0.7" />
-                    <Grid ColumnDefinitions="*,Auto,Auto">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="API key" FontSize="12" Opacity="0.7" />
+                        <TextBlock Grid.Column="1" Text="✓ Saved"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SystemAccentColor}"
+                                   IsVisible="{Binding ShowOpenAiKeySaved}" />
+                    </Grid>
+
+                    <!-- Saved: read-only mask + Change / Remove -->
+                    <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding ShowOpenAiKeySaved}">
                         <TextBox Grid.Column="0"
-                                 Text="{Binding OpenAiKeyEntry, Mode=TwoWay}"
-                                 PasswordChar="*"
-                                 PlaceholderText="sk-…"
+                                 Text="{x:Static vms:CloudProviderSettingsViewModel.KeyMask}"
+                                 IsReadOnly="True"
                                  Margin="0,0,8,0" />
-                        <Button Grid.Column="1" Content="Save"
-                                Command="{Binding SaveOpenAiKeyCommand}"
+                        <Button Grid.Column="1" Content="Change"
+                                Command="{Binding ChangeOpenAiKeyCommand}"
                                 Padding="12,6" Margin="0,0,4,0" />
                         <Button Grid.Column="2" Content="Remove"
                                 Command="{Binding RemoveOpenAiKeyCommand}"
                                 Padding="12,6" />
                     </Grid>
-                    <TextBlock Text="{Binding OpenAiKeyStatus}"
-                               FontSize="12" Opacity="0.6" Margin="0,2,0,0" />
+
+                    <!-- Empty / editing: password entry with reveal toggle + Save / Cancel -->
+                    <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding ShowOpenAiKeyEntry}">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding OpenAiKeyEntry, Mode=TwoWay}"
+                                 PasswordChar="●"
+                                 RevealPassword="{Binding IsOpenAiKeyRevealed}"
+                                 PlaceholderText="sk-…"
+                                 Margin="0,0,8,0">
+                            <TextBox.InnerRightContent>
+                                <ToggleButton IsChecked="{Binding IsOpenAiKeyRevealed, Mode=TwoWay}"
+                                              Content="👁"
+                                              Background="Transparent"
+                                              BorderThickness="0"
+                                              Padding="6,0"
+                                              ToolTip.Tip="Show / hide key" />
+                            </TextBox.InnerRightContent>
+                        </TextBox>
+                        <Button Grid.Column="1" Content="Save"
+                                Command="{Binding SaveOpenAiKeyCommand}"
+                                Padding="12,6" Margin="0,0,4,0" />
+                        <Button Grid.Column="2" Content="Cancel"
+                                Command="{Binding CancelEditOpenAiKeyCommand}"
+                                IsVisible="{Binding CanCancelOpenAiEdit}"
+                                Padding="12,6" />
+                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -79,22 +110,53 @@
                 </StackPanel>
 
                 <StackPanel Spacing="4">
-                    <TextBlock Text="API key" FontSize="12" Opacity="0.7" />
-                    <Grid ColumnDefinitions="*,Auto,Auto">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="API key" FontSize="12" Opacity="0.7" />
+                        <TextBlock Grid.Column="1" Text="✓ Saved"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SystemAccentColor}"
+                                   IsVisible="{Binding ShowXaiKeySaved}" />
+                    </Grid>
+
+                    <!-- Saved: read-only mask + Change / Remove -->
+                    <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding ShowXaiKeySaved}">
                         <TextBox Grid.Column="0"
-                                 Text="{Binding XaiKeyEntry, Mode=TwoWay}"
-                                 PasswordChar="*"
-                                 PlaceholderText="xai-…"
+                                 Text="{x:Static vms:CloudProviderSettingsViewModel.KeyMask}"
+                                 IsReadOnly="True"
                                  Margin="0,0,8,0" />
-                        <Button Grid.Column="1" Content="Save"
-                                Command="{Binding SaveXaiKeyCommand}"
+                        <Button Grid.Column="1" Content="Change"
+                                Command="{Binding ChangeXaiKeyCommand}"
                                 Padding="12,6" Margin="0,0,4,0" />
                         <Button Grid.Column="2" Content="Remove"
                                 Command="{Binding RemoveXaiKeyCommand}"
                                 Padding="12,6" />
                     </Grid>
-                    <TextBlock Text="{Binding XaiKeyStatus}"
-                               FontSize="12" Opacity="0.6" Margin="0,2,0,0" />
+
+                    <!-- Empty / editing: password entry with reveal toggle + Save / Cancel -->
+                    <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding ShowXaiKeyEntry}">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding XaiKeyEntry, Mode=TwoWay}"
+                                 PasswordChar="●"
+                                 RevealPassword="{Binding IsXaiKeyRevealed}"
+                                 PlaceholderText="xai-…"
+                                 Margin="0,0,8,0">
+                            <TextBox.InnerRightContent>
+                                <ToggleButton IsChecked="{Binding IsXaiKeyRevealed, Mode=TwoWay}"
+                                              Content="👁"
+                                              Background="Transparent"
+                                              BorderThickness="0"
+                                              Padding="6,0"
+                                              ToolTip.Tip="Show / hide key" />
+                            </TextBox.InnerRightContent>
+                        </TextBox>
+                        <Button Grid.Column="1" Content="Save"
+                                Command="{Binding SaveXaiKeyCommand}"
+                                Padding="12,6" Margin="0,0,4,0" />
+                        <Button Grid.Column="2" Content="Cancel"
+                                Command="{Binding CancelEditXaiKeyCommand}"
+                                IsVisible="{Binding CanCancelXaiEdit}"
+                                Padding="12,6" />
+                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Border>

@@ -6,6 +6,7 @@ namespace Parlotype.Desktop.Tests.Mocks;
 public sealed class MockAudioPipeline : IAudioPipeline
 {
     public event EventHandler<TranscriptionEventArgs>? TranscriptionAvailable;
+    public event EventHandler<TranscriptionErrorEventArgs>? TranscriptionFailed;
 
     public bool IsRunning { get; private set; }
     public int StartCount { get; private set; }
@@ -48,6 +49,9 @@ public sealed class MockAudioPipeline : IAudioPipeline
         {
             Result = new TranscriptionResult { Text = text }
         });
+
+    public void RaiseTranscriptionFailed(Exception exception) =>
+        TranscriptionFailed?.Invoke(this, new TranscriptionErrorEventArgs { Exception = exception });
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

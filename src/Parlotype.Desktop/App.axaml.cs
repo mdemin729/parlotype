@@ -249,6 +249,7 @@ public class App : Application
         services.AddSingleton<AppViewModel>();
 
         services.AddSingleton<IWindowManager, WindowManager>();
+        services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddSingleton<HotkeyCoordinator>();
 
         return services.BuildServiceProvider();

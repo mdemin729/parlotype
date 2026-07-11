@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Parlotype.Desktop.ViewModels"
+        x:Class="Parlotype.Desktop.Views.ConfirmationDialog"
+        x:DataType="vm:ConfirmationDialogViewModel"
+        x:CompileBindings="True"
+        Title="{Binding Title}"
+        Width="400"
+        SizeToContent="Height"
+        CanResize="False"
+        Topmost="True"
+        WindowStartupLocation="CenterOwner">
+
+    <Design.DataContext>
+        <vm:ConfirmationDialogViewModel />
+    </Design.DataContext>
+
+    <Border Padding="24">
+        <StackPanel Spacing="16">
+
+            <TextBlock Text="{Binding Message}"
+                       TextWrapping="Wrap"
+                       FontSize="14" />
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="8">
+
+                <Button Name="ConfirmButton"
+                        Content="{Binding ConfirmText}"
+                        Classes="accent"
+                        MinWidth="90"
+                        HorizontalContentAlignment="Center" />
+
+                <Button Name="CancelButton"
+                        Content="{Binding CancelText}"
+                        IsVisible="{Binding HasCancel}"
+                        MinWidth="90"
+                        HorizontalContentAlignment="Center" />
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</Window>

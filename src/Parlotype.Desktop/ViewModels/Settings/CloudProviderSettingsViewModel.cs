@@ -31,6 +31,13 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
     /// <summary>Default model id shown as the xAI Grok field's watermark when unset.</summary>
     public const string DefaultXaiModel = "grok-stt";
 
+    /// <summary>
+    /// Fixed-length dot mask shown for a stored key. Deliberately a constant —
+    /// it does not reflect the real key or its length, so nothing is read back
+    /// from the secret store to render it.
+    /// </summary>
+    public const string KeyMask = "●●●●●●●●●●●●●●●●";
+
     private readonly ISettingsService _settings;
     private readonly ISecretStore _secrets;
     private readonly ILogger<CloudProviderSettingsViewModel> _logger;
@@ -58,9 +65,32 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(OpenAiKeyStatus))]
+    [NotifyPropertyChangedFor(nameof(ShowOpenAiKeyEntry))]
+    [NotifyPropertyChangedFor(nameof(ShowOpenAiKeySaved))]
+    [NotifyPropertyChangedFor(nameof(CanCancelOpenAiEdit))]
     private bool _hasOpenAiKey;
 
+    /// <summary>True while the user is entering a replacement for an already-stored key (Change clicked).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowOpenAiKeyEntry))]
+    [NotifyPropertyChangedFor(nameof(ShowOpenAiKeySaved))]
+    [NotifyPropertyChangedFor(nameof(CanCancelOpenAiEdit))]
+    private bool _isEditingOpenAiKey;
+
+    /// <summary>Eye toggle: when true the entry box reveals the key being typed.</summary>
+    [ObservableProperty]
+    private bool _isOpenAiKeyRevealed;
+
     public string OpenAiKeyStatus => HasOpenAiKey ? "Key saved" : "No key";
+
+    /// <summary>Show the editable entry row: no key yet, or replacing an existing one.</summary>
+    public bool ShowOpenAiKeyEntry => !HasOpenAiKey || IsEditingOpenAiKey;
+
+    /// <summary>Show the read-only masked "saved" row.</summary>
+    public bool ShowOpenAiKeySaved => HasOpenAiKey && !IsEditingOpenAiKey;
+
+    /// <summary>Offer Cancel only when a stored key exists to fall back to.</summary>
+    public bool CanCancelOpenAiEdit => HasOpenAiKey && IsEditingOpenAiKey;
 
     // ----- xAI Grok ------------------------------------------------------------
 
@@ -76,9 +106,32 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(XaiKeyStatus))]
+    [NotifyPropertyChangedFor(nameof(ShowXaiKeyEntry))]
+    [NotifyPropertyChangedFor(nameof(ShowXaiKeySaved))]
+    [NotifyPropertyChangedFor(nameof(CanCancelXaiEdit))]
     private bool _hasXaiKey;
 
+    /// <summary>True while the user is entering a replacement for an already-stored key (Change clicked).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowXaiKeyEntry))]
+    [NotifyPropertyChangedFor(nameof(ShowXaiKeySaved))]
+    [NotifyPropertyChangedFor(nameof(CanCancelXaiEdit))]
+    private bool _isEditingXaiKey;
+
+    /// <summary>Eye toggle: when true the entry box reveals the key being typed.</summary>
+    [ObservableProperty]
+    private bool _isXaiKeyRevealed;
+
     public string XaiKeyStatus => HasXaiKey ? "Key saved" : "No key";
+
+    /// <summary>Show the editable entry row: no key yet, or replacing an existing one.</summary>
+    public bool ShowXaiKeyEntry => !HasXaiKey || IsEditingXaiKey;
+
+    /// <summary>Show the read-only masked "saved" row.</summary>
+    public bool ShowXaiKeySaved => HasXaiKey && !IsEditingXaiKey;
+
+    /// <summary>Offer Cancel only when a stored key exists to fall back to.</summary>
+    public bool CanCancelXaiEdit => HasXaiKey && IsEditingXaiKey;
 
     public CloudProviderSettingsViewModel(
         ISettingsService settings,
@@ -141,14 +194,37 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
 
         await _secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, key);
         OpenAiKeyEntry = "";
+        IsEditingOpenAiKey = false;
+        IsOpenAiKeyRevealed = false;
         HasOpenAiKey = true;
         _logger.LogInformation("OpenAI-compatible API key saved");
+    }
+
+    /// <summary>Reveals the entry row over an existing key so the user can enter a replacement.</summary>
+    [RelayCommand]
+    private void ChangeOpenAiKey()
+    {
+        OpenAiKeyEntry = "";
+        IsOpenAiKeyRevealed = false;
+        IsEditingOpenAiKey = true;
+    }
+
+    /// <summary>Abandons a replacement, keeping the stored key and returning to the saved view.</summary>
+    [RelayCommand]
+    private void CancelEditOpenAiKey()
+    {
+        OpenAiKeyEntry = "";
+        IsOpenAiKeyRevealed = false;
+        IsEditingOpenAiKey = false;
     }
 
     [RelayCommand]
     private async Task RemoveOpenAiKeyAsync()
     {
         await _secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, null);
+        OpenAiKeyEntry = "";
+        IsEditingOpenAiKey = false;
+        IsOpenAiKeyRevealed = false;
         HasOpenAiKey = false;
         _logger.LogInformation("OpenAI-compatible API key removed");
     }
@@ -162,14 +238,37 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
 
         await _secrets.SetAsync(SettingsKeys.XaiGrokApiKey, key);
         XaiKeyEntry = "";
+        IsEditingXaiKey = false;
+        IsXaiKeyRevealed = false;
         HasXaiKey = true;
         _logger.LogInformation("xAI Grok API key saved");
+    }
+
+    /// <summary>Reveals the entry row over an existing key so the user can enter a replacement.</summary>
+    [RelayCommand]
+    private void ChangeXaiKey()
+    {
+        XaiKeyEntry = "";
+        IsXaiKeyRevealed = false;
+        IsEditingXaiKey = true;
+    }
+
+    /// <summary>Abandons a replacement, keeping the stored key and returning to the saved view.</summary>
+    [RelayCommand]
+    private void CancelEditXaiKey()
+    {
+        XaiKeyEntry = "";
+        IsXaiKeyRevealed = false;
+        IsEditingXaiKey = false;
     }
 
     [RelayCommand]
     private async Task RemoveXaiKeyAsync()
     {
         await _secrets.SetAsync(SettingsKeys.XaiGrokApiKey, null);
+        XaiKeyEntry = "";
+        IsEditingXaiKey = false;
+        IsXaiKeyRevealed = false;
         HasXaiKey = false;
         _logger.LogInformation("xAI Grok API key removed");
     }

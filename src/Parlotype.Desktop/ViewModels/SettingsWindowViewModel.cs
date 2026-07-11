@@ -170,6 +170,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         var target = section switch
         {
             SettingsSection.Language => (SettingsSectionViewModelBase)Language,
+            SettingsSection.CloudProviders => CloudProviders,
             _ => null,
         };
         if (target is null)

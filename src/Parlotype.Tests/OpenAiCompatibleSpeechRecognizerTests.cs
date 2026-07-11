@@ -131,8 +131,10 @@ public sealed class OpenAiCompatibleSpeechRecognizerTests
     {
         var recognizer = Create(new ScriptedHandler());
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => recognizer.InitializeAsync());
+        // Typed exception so the UI can route the user to the cloud settings.
+        var ex = await Assert.ThrowsAsync<CloudProviderNotConfiguredException>(() => recognizer.InitializeAsync());
 
+        Assert.Equal(SpeechEngine.OpenAiCompatible, ex.Engine);
         Assert.Contains("No API key configured for the OpenAI-compatible provider", ex.Message);
         Assert.Contains("Settings", ex.Message);
     }
@@ -264,30 +266,97 @@ public sealed class OpenAiCompatibleSpeechRecognizerTests
     }
 
     [Fact]
-    public async Task TranscribeAsync_Unauthorized_ThrowsMentioningRejectedKey()
+    public async Task TranscribeAsync_Unauthorized_ThrowsKeyRejected()
     {
         var handler = new ScriptedHandler();
         handler.EnqueueJson(HttpStatusCode.Unauthorized, """{"error":"invalid_api_key"}""");
         var (recognizer, _, _) = await CreateInitializedAsync(handler);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+        var ex = await Assert.ThrowsAsync<CloudSpeechTranscriptionException>(
             () => recognizer.TranscribeAsync(new float[16_000]));
 
-        Assert.Contains("API key rejected", ex.Message);
+        Assert.Equal(CloudSpeechErrorKind.KeyRejected, ex.Kind);
+        Assert.Contains("rejected the API key", ex.Message);
+        Assert.Contains("invalid_api_key", ex.Message);
+        Assert.Contains("Settings", ex.Message);
     }
 
     [Fact]
-    public async Task TranscribeAsync_ServerError_ThrowsWithStatusAndBody()
+    public async Task TranscribeAsync_ServerError_ThrowsProviderUnavailable()
     {
         var handler = new ScriptedHandler();
         handler.EnqueueJson(HttpStatusCode.InternalServerError, """{"error":"boom"}""");
         var (recognizer, _, _) = await CreateInitializedAsync(handler);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+        var ex = await Assert.ThrowsAsync<CloudSpeechTranscriptionException>(
             () => recognizer.TranscribeAsync(new float[16_000]));
 
+        Assert.Equal(CloudSpeechErrorKind.ProviderUnavailable, ex.Kind);
         Assert.Contains("500", ex.Message);
         Assert.Contains("boom", ex.Message);
+        Assert.Contains("try again", ex.Message);
+    }
+
+    [Fact]
+    public async Task TranscribeAsync_QuotaExceeded_ParsesOpenAiErrorEnvelope()
+    {
+        // Real-world OpenAI 429 insufficient_quota envelope — the exception
+        // message must carry the parsed message, not the raw JSON dump.
+        var handler = new ScriptedHandler();
+        handler.EnqueueJson((HttpStatusCode)429, """
+            {
+              "error": {
+                "message": "You exceeded your current quota, please check your plan and billing details.",
+                "type": "insufficient_quota",
+                "param": null,
+                "code": "insufficient_quota"
+              }
+            }
+            """);
+        var (recognizer, _, _) = await CreateInitializedAsync(handler);
+
+        var ex = await Assert.ThrowsAsync<CloudSpeechTranscriptionException>(
+            () => recognizer.TranscribeAsync(new float[16_000]));
+
+        Assert.Equal(CloudSpeechErrorKind.QuotaExceeded, ex.Kind);
+        Assert.Contains("quota exceeded", ex.Message);
+        Assert.Contains("plan and billing", ex.Message);
+        Assert.Contains("You exceeded your current quota", ex.Message);
+        Assert.DoesNotContain("\"error\"", ex.Message); // no raw JSON leakage
+    }
+
+    [Fact]
+    public async Task TranscribeAsync_RateLimited_ClassifiedAsTransient()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueJson((HttpStatusCode)429, """
+            {"error":{"message":"Rate limit reached for requests","type":"requests","code":"rate_limit_exceeded"}}
+            """);
+        var (recognizer, _, _) = await CreateInitializedAsync(handler);
+
+        var ex = await Assert.ThrowsAsync<CloudSpeechTranscriptionException>(
+            () => recognizer.TranscribeAsync(new float[16_000]));
+
+        Assert.Equal(CloudSpeechErrorKind.RateLimited, ex.Kind);
+        Assert.Contains("rate limit reached", ex.Message);
+        Assert.Contains("Rate limit reached for requests", ex.Message);
+    }
+
+    [Fact]
+    public async Task TranscribeAsync_NonJsonErrorBody_FallsBackToRawText()
+    {
+        var handler = new ScriptedHandler();
+        handler.Enqueue(_ => new HttpResponseMessage(HttpStatusCode.BadGateway)
+        {
+            Content = new StringContent("upstream connect error", Encoding.UTF8, "text/plain"),
+        });
+        var (recognizer, _, _) = await CreateInitializedAsync(handler);
+
+        var ex = await Assert.ThrowsAsync<CloudSpeechTranscriptionException>(
+            () => recognizer.TranscribeAsync(new float[16_000]));
+
+        Assert.Equal(CloudSpeechErrorKind.ProviderUnavailable, ex.Kind);
+        Assert.Contains("upstream connect error", ex.Message);
     }
 
     [Fact]

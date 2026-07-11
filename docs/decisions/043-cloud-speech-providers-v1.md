@@ -92,6 +92,51 @@ New Core contract `ISecretStore` (get/set; null-or-empty value removes), impleme
 - No streaming transport: unusable for future live-caption features without a second
   implementation round (accepted; research shows batch is right for dictation).
 
+## Amendment (2026-07-10) — Not-configured error surfacing
+
+Pressing Record with a cloud engine selected but no API key stored used to fail
+silently (log-only; the button popped back to "Ready"). Now:
+
+- The missing-key failure is a typed Core exception,
+  `CloudProviderNotConfiguredException` (derives from `InvalidOperationException`,
+  carries the `SpeechEngine`) — same pattern as `RuntimeUnavailableException`.
+- `TranscribeViewModel.StartRecordingCoreAsync` catches it specifically, sets a
+  "Cloud provider not configured" status, and shows a modal dialog with the
+  provider's message and an **Open settings** action. The dialog is deliberately
+  fire-and-forget so a push-to-talk key release (which awaits the in-flight start
+  task per ADR-039) is never blocked on a modal.
+- Confirming opens Settings deep-linked to the Cloud providers section via a new
+  `SettingsSection.CloudProviders` member (`SettingsWindowViewModel.NavigateTo`).
+- New reusable Desktop dialog infrastructure: `ConfirmationDialog` window +
+  `IUserDialogService`/`UserDialogService` (UI-thread marshaling and owner-window
+  resolution follow `ModelDownloadDialogService`).
+
+## Amendment (2026-07-10) — Provider error surfacing
+
+Cloud transcription failures (429 quota/rate-limit, 5xx, rejected key) previously
+died in `AudioPipelineService.ProcessQueueAsync`'s catch (log-only) with no user
+signal. Now:
+
+- `CloudSpeechHttpError` parses the provider's error envelope (OpenAI
+  `{"error":{"message":…,"code":…}}` and variants) instead of dumping raw JSON,
+  and classifies the failure into `CloudSpeechErrorKind` (KeyRejected /
+  QuotaExceeded / RateLimited / ProviderUnavailable / Other) from the HTTP status
+  + error code (e.g. 429 `insufficient_quota` ⇒ QuotaExceeded vs. plain 429 ⇒
+  RateLimited). It throws a typed `CloudSpeechTranscriptionException` (Core,
+  derives from `InvalidOperationException`) carrying the kind, provider name, and
+  a user-presentable message.
+- `IAudioPipeline` gains a `TranscriptionFailed` event
+  (`TranscriptionErrorEventArgs`), raised by the pipeline when a queued utterance
+  fails. Recording keeps running (the pipeline is unaffected) — the event only
+  informs subscribers.
+- `TranscribeViewModel` subscribes and, for `CloudSpeechTranscriptionException`,
+  sets a concise `StatusText` and shows a dialog: a rejected key offers "Open
+  settings" (deep link to Cloud providers, reusing the not-configured flow);
+  other kinds show an informational message (`IUserDialogService.ShowMessageAsync`,
+  a single-button variant of the confirmation dialog). A single-flight guard
+  (`_isCloudErrorDialogOpen`) prevents one dialog stacking per failed utterance.
+  Non-cloud (local engine) failures keep their prior log-only behaviour.
+
 ### Out of scope (deferred)
 
 - Azure / Google / Amazon providers (research: higher BYOK friction; add on demand).

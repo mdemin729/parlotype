@@ -8,4 +8,10 @@ public enum SettingsSection
 {
     /// <summary>The Language selection section.</summary>
     Language,
+
+    /// <summary>
+    /// The Cloud providers section (base URL / model / API key for the opt-in
+    /// cloud engines, ADR-043). Only visible while a cloud engine is selected.
+    /// </summary>
+    CloudProviders,
 }
