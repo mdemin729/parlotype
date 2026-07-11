@@ -158,6 +158,20 @@ public class LanguageCapabilitiesTests
         Assert.True(SpeechEngineCapabilities.For(SpeechEngine.Gemma4).HasLanguageChoices);
     }
 
+    // Cloud engines always auto-detect (no language-forcing parameter is sent)
+    // and cannot translate ⇒ like Parakeet, all language UI hides (ADR-043).
+    [Fact]
+    public void CloudEngines_HaveNoLanguageChoices()
+    {
+        foreach (var engine in new[] { SpeechEngine.OpenAiCompatible, SpeechEngine.XaiGrok })
+        {
+            var caps = SpeechEngineCapabilities.For(engine);
+            Assert.False(caps.SupportsSourceSelection);
+            Assert.False(caps.HasLanguageChoices);
+            Assert.Equal(TranslationForm.None, caps.TranslationForm);
+        }
+    }
+
     [Fact]
     public void TranslationForm_Parakeet_IsNone()
     {

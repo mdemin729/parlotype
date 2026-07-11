@@ -111,6 +111,21 @@ silently (log-only; the button popped back to "Ready"). Now:
   `IUserDialogService`/`UserDialogService` (UI-thread marshaling and owner-window
   resolution follow `ModelDownloadDialogService`).
 
+## Amendment (2026-07-10) — Cloud engines are auto-detect-only (no language UI)
+
+Originally the cloud engines offered source-language selection (a `language`
+form field was sent when a concrete source was chosen). Simplified: like
+Parakeet (ADR-042), both cloud engines now always auto-detect —
+`SupportsSourceSelection` is false, so `HasLanguageChoices` is false and all
+language UI (Language settings page, Transcribe-window language strip) hides;
+the transcribe widget compacts to its 88 px height. Consequently the
+recognizers no longer send a `language` part at all (`CloudSpeechLanguageResolver`
+deleted, `IKeyboardLayoutService` dependency dropped) — a leftover
+`SelectedSourceLanguage` from a local engine must not silently force a language
+on cloud requests the user can no longer see or change. The supported-language
+lists remain in `SpeechEngineCapabilities` purely as coverage documentation.
+Revisit if users ask for explicit language forcing on cloud providers.
+
 ## Amendment (2026-07-10) — Provider error surfacing
 
 Cloud transcription failures (429 quota/rate-limit, 5xx, rejected key) previously

@@ -115,16 +115,15 @@ public class SettingsWindowViewModelTests
         var vm = BuildViewModel();
         vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.OpenAiCompatible);
 
-        // The engine still offers a source-language choice (it forwards an
-        // ISO-639-1 code or auto-detects), so the Language page stays visible
-        // too — only translation-specific UI (Whisper/Gemma4-only sections) drops.
+        // Cloud engines always auto-detect and cannot translate — like Parakeet
+        // they have no language choices (ADR-043), so the Language page hides;
+        // the Cloud providers section shows instead.
         Assert.Collection(vm.NavItems,
             n => AssertHeader(n, "Audio"),
             n => AssertSection(n, "Microphone"),
             n => AssertSection(n, "Silence timeout"),
             n => AssertHeader(n, "Speech engine"),
             n => AssertSection(n, "Engine"),
-            n => AssertSection(n, "Language"),
             n => AssertSection(n, "Cloud providers"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkey"),
