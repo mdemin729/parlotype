@@ -32,7 +32,6 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
 
     private readonly ISettingsService _settings;
     private readonly ISecretStore _secrets;
-    private readonly IKeyboardLayoutService _keyboardLayout;
     private readonly ILogger<XaiGrokSpeechRecognizer> _logger;
     private readonly SemaphoreSlim _initLock = new(1, 1);
 
@@ -56,12 +55,10 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
     public XaiGrokSpeechRecognizer(
         ISettingsService settings,
         ISecretStore secrets,
-        IKeyboardLayoutService keyboardLayout,
         ILogger<XaiGrokSpeechRecognizer> logger)
     {
         _settings = settings;
         _secrets = secrets;
-        _keyboardLayout = keyboardLayout;
         _logger = logger;
     }
 
@@ -118,24 +115,20 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
             throw new InvalidOperationException("Recognizer is not initialized. Call InitializeAsync first.");
 
         var wavBytes = WavEncoder.Encode(samples.Span, SampleRate);
-        // xAI Grok publishes its own language set rather than reusing Whisper's
-        // curated list (SpeechEngineCapabilities.For(SpeechEngine.XaiGrok) passes
-        // null = full catalog), so no supported-list filter is applied here either.
-        var languageCode = await CloudSpeechLanguageResolver.ResolveAsync(
-            _settings, _keyboardLayout, supported: null, cancellationToken);
 
         using var fileContent = new ByteArrayContent(wavBytes);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("audio/wav");
 
+        // No "language" part on purpose: the engine always auto-detects.
+        // Language UI is hidden for cloud engines (SupportsSourceSelection is
+        // false, ADR-043), so forcing a language from a setting the user can't
+        // see would be surprising.
         using var content = new MultipartFormDataContent
         {
             { fileContent, "file", "audio.wav" },
             { new StringContent(_model), "model" },
             { new StringContent("json"), "format" },
         };
-
-        if (languageCode is not null)
-            content.Add(new StringContent(languageCode), "language");
 
         _logger.LogDebug(
             "Transcribing {SampleCount} samples via {Provider} ({BaseUrl}, model: {Model})",

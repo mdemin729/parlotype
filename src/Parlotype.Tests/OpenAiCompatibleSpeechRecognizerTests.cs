@@ -106,7 +106,6 @@ public sealed class OpenAiCompatibleSpeechRecognizerTests
         var recognizer = new OpenAiCompatibleSpeechRecognizer(
             settings ?? new FakeSettingsService(),
             secrets ?? new FakeSecretStore(),
-            new NoOpKeyboardLayoutService(),
             NullLogger<OpenAiCompatibleSpeechRecognizer>.Instance)
         {
             MessageHandlerOverride = handler,
@@ -216,30 +215,15 @@ public sealed class OpenAiCompatibleSpeechRecognizerTests
     }
 
     [Fact]
-    public async Task TranscribeAsync_ConcreteSourceLanguage_AddsLanguagePart()
+    public async Task TranscribeAsync_NeverSendsLanguagePart_EvenWithPersistedSourceLanguage()
     {
+        // Cloud engines always auto-detect (SupportsSourceSelection is false,
+        // language UI hidden — ADR-043): a leftover SelectedSourceLanguage from
+        // a local engine must not silently force a language on cloud requests.
         var handler = new ScriptedHandler();
         handler.EnqueueJson(HttpStatusCode.OK, """{"text":"hello"}""");
         var settings = new FakeSettingsService();
         await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, "ru");
-        var secrets = new FakeSecretStore();
-        await secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, "sk-test-key");
-
-        var recognizer = Create(handler, settings, secrets);
-        await recognizer.InitializeAsync();
-        await recognizer.TranscribeAsync(new float[16_000]);
-
-        var request = Assert.Single(handler.Requests);
-        Assert.Equal("ru", ExtractFormPartValue(request.Body, "language"));
-    }
-
-    [Fact]
-    public async Task TranscribeAsync_AutoSourceLanguage_OmitsLanguagePart()
-    {
-        var handler = new ScriptedHandler();
-        handler.EnqueueJson(HttpStatusCode.OK, """{"text":"hello"}""");
-        var settings = new FakeSettingsService();
-        await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, "auto");
         var secrets = new FakeSecretStore();
         await secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, "sk-test-key");
 

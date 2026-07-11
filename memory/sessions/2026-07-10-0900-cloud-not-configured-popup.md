@@ -49,6 +49,17 @@ Added a typed failure + popup + Settings deep link.
   `plans/INDEX.md` moved to Completed
 - Knowledge: xUnit ThrowsAsync exactness noted here; not vault-worthy standalone
 
+## Follow-ups landed later the same day
+- Provider error surfacing (2nd ADR-043 amendment): OpenAI error-envelope parsing →
+  `CloudSpeechErrorKind`/`CloudSpeechTranscriptionException`, `IAudioPipeline.TranscriptionFailed`
+  event, per-kind dialogs in `TranscribeViewModel`.
+- API-key field UX: masked saved state (`KeyMask` ●×16) + "✓ Saved" badge + Change/Cancel +
+  reveal eye toggle (`RevealPassword` + `InnerRightContent`).
+- Cloud engines made auto-detect-only (3rd amendment): `SupportsSourceSelection: false` ⇒
+  language UI hides like Parakeet, widget compacts; recognizers stopped sending the `language`
+  part; `CloudSpeechLanguageResolver` deleted, `IKeyboardLayoutService` dep dropped from both
+  cloud recognizers.
+
 ## Next Action
 Uncommitted changes are on `claude/cranky-sammet-d148a2` awaiting a commit request.
 Candidate next work: manual click-through of the popup flow, or the ADR-043
