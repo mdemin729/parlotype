@@ -86,7 +86,8 @@ public sealed class OpenAiCompatibleSpeechRecognizer : ISpeechRecognizer
 
             var apiKey = await _secrets.GetAsync(SettingsKeys.OpenAiCompatApiKey, cancellationToken);
             if (string.IsNullOrWhiteSpace(apiKey))
-                throw new InvalidOperationException(
+                throw new CloudProviderNotConfiguredException(
+                    SpeechEngine.OpenAiCompatible,
                     "No API key configured for the OpenAI-compatible provider. " +
                     "Add one in Settings → Speech engine.");
 

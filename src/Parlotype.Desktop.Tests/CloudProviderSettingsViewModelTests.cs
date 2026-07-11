@@ -183,6 +183,105 @@ public class CloudProviderSettingsViewModelTests
     }
 
     [Fact]
+    public async Task NoKey_ShowsEntryRow_NotSavedRow()
+    {
+        var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), new MockSecretStore());
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.True(vm.ShowOpenAiKeyEntry);
+        Assert.False(vm.ShowOpenAiKeySaved);
+        Assert.False(vm.CanCancelOpenAiEdit);
+    }
+
+    [Fact]
+    public async Task ExistingKey_ShowsSavedRow_NotEntryRow()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secrets = new MockSecretStore();
+        await secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, "sk-existing", ct);
+        var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), secrets);
+        await Task.Delay(100, ct);
+
+        Assert.True(vm.ShowOpenAiKeySaved);
+        Assert.False(vm.ShowOpenAiKeyEntry);
+        Assert.False(vm.CanCancelOpenAiEdit);
+    }
+
+    [Fact]
+    public async Task ChangeOpenAiKey_RevealsEntry_KeepsStoredKey_OffersCancel()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secrets = new MockSecretStore();
+        await secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, "sk-existing", ct);
+        var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), secrets);
+        await Task.Delay(100, ct);
+
+        vm.ChangeOpenAiKeyCommand.Execute(null);
+
+        Assert.True(vm.ShowOpenAiKeyEntry);
+        Assert.False(vm.ShowOpenAiKeySaved);
+        Assert.True(vm.CanCancelOpenAiEdit);
+        Assert.True(vm.HasOpenAiKey); // key still stored while replacing
+        Assert.Equal("sk-existing", await secrets.GetAsync(SettingsKeys.OpenAiCompatApiKey, ct));
+    }
+
+    [Fact]
+    public async Task CancelEditOpenAiKey_ReturnsToSaved_ClearsEntry_KeepsKey()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secrets = new MockSecretStore();
+        await secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, "sk-existing", ct);
+        var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), secrets);
+        await Task.Delay(100, ct);
+
+        vm.ChangeOpenAiKeyCommand.Execute(null);
+        vm.OpenAiKeyEntry = "sk-typed-but-abandoned";
+        vm.CancelEditOpenAiKeyCommand.Execute(null);
+
+        Assert.True(vm.ShowOpenAiKeySaved);
+        Assert.False(vm.ShowOpenAiKeyEntry);
+        Assert.Equal("", vm.OpenAiKeyEntry);
+        Assert.Equal("sk-existing", await secrets.GetAsync(SettingsKeys.OpenAiCompatApiKey, ct));
+    }
+
+    [Fact]
+    public async Task SaveOpenAiKey_FromEditing_ReturnsToSaved_ResetsEditingAndReveal()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secrets = new MockSecretStore();
+        await secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, "sk-old", ct);
+        var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), secrets);
+        await Task.Delay(100, ct);
+
+        vm.ChangeOpenAiKeyCommand.Execute(null);
+        vm.IsOpenAiKeyRevealed = true;
+        vm.OpenAiKeyEntry = "sk-new";
+        await vm.SaveOpenAiKeyCommand.ExecuteAsync(null);
+
+        Assert.Equal("sk-new", await secrets.GetAsync(SettingsKeys.OpenAiCompatApiKey, ct));
+        Assert.True(vm.ShowOpenAiKeySaved);
+        Assert.False(vm.IsEditingOpenAiKey);
+        Assert.False(vm.IsOpenAiKeyRevealed);
+        Assert.Equal("", vm.OpenAiKeyEntry);
+    }
+
+    [Fact]
+    public async Task RemoveXaiKey_ReturnsToEntryState()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secrets = new MockSecretStore();
+        await secrets.SetAsync(SettingsKeys.XaiGrokApiKey, "xai-existing", ct);
+        var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), secrets);
+        await Task.Delay(100, ct);
+
+        await vm.RemoveXaiKeyCommand.ExecuteAsync(null);
+
+        Assert.True(vm.ShowXaiKeyEntry);
+        Assert.False(vm.ShowXaiKeySaved);
+        Assert.False(vm.IsEditingXaiKey);
+    }
+
+    [Fact]
     public void IsVisibleFor_CloudEngines_True()
     {
         var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), new MockSecretStore());

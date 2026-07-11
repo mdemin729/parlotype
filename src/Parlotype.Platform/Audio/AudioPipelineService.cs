@@ -58,6 +58,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     public bool IsRunning { get; private set; }
 
     public event EventHandler<TranscriptionEventArgs>? TranscriptionAvailable;
+    public event EventHandler<TranscriptionErrorEventArgs>? TranscriptionFailed;
 
     /// <inheritdoc />
     public float CurrentLevel { get; private set; }
@@ -379,6 +380,9 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error during transcription");
+                    // The pipeline keeps running (later utterances may succeed);
+                    // subscribers surface the failure to the user (ADR-043 amendment).
+                    TranscriptionFailed?.Invoke(this, new TranscriptionErrorEventArgs { Exception = ex });
                 }
             }
             else if (cancellationToken.IsCancellationRequested)

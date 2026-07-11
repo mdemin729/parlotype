@@ -265,6 +265,32 @@ public class SettingsWindowViewModelTests
         Assert.Equal("Language", vm.SelectedNavItem!.Label);
     }
 
+    [Fact]
+    public void NavigateTo_CloudProviders_SelectsCloudSection_WhenCloudEngineActive()
+    {
+        var vm = BuildViewModel();
+        // The Cloud providers page only exists while a cloud engine is selected —
+        // exactly the state in the not-configured error flow that deep-links here.
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.XaiGrok);
+
+        vm.NavigateTo(SettingsSection.CloudProviders);
+
+        Assert.Same(vm.CloudProviders, vm.SelectedSection);
+        Assert.Equal("Cloud providers", vm.SelectedNavItem!.Label);
+    }
+
+    [Fact]
+    public void NavigateTo_CloudProviders_NoOp_WhenLocalEngineActive()
+    {
+        var vm = BuildViewModel();
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Whisper);
+        var before = vm.SelectedNavItem;
+
+        vm.NavigateTo(SettingsSection.CloudProviders);
+
+        Assert.Same(before, vm.SelectedNavItem);
+    }
+
     private static void AssertHeader(SettingsNavItem item, string label)
     {
         Assert.True(item.IsHeader, $"Expected header '{label}' but row was a section.");

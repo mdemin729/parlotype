@@ -25,4 +25,10 @@ public interface IAudioPipeline : IAsyncDisposable
 
     /// <summary>Raised when a transcription result is available.</summary>
     event EventHandler<TranscriptionEventArgs> TranscriptionAvailable;
+
+    /// <summary>
+    /// Raised when transcribing a queued utterance fails. The pipeline keeps
+    /// running; subscribers can surface the error to the user (ADR-043 amendment).
+    /// </summary>
+    event EventHandler<TranscriptionErrorEventArgs> TranscriptionFailed;
 }

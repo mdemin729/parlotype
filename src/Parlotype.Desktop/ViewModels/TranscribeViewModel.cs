@@ -23,6 +23,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private readonly IWindowManager _windowManager;
     private readonly LanguageRelationshipViewModel? _relationship;
     private readonly ISettingsService? _settings;
+    private readonly IUserDialogService? _dialogService;
     private readonly ILogger<TranscribeViewModel> _logger;
     private readonly object _activeEngineLock = new();
     private bool _hasLiveActiveEngine;
@@ -169,6 +170,7 @@ public partial class TranscribeViewModel : ViewModelBase
         IAudioLevelProvider? audioLevelProvider = null,
         LanguageRelationshipViewModel? relationship = null,
         ISettingsService? settings = null,
+        IUserDialogService? dialogService = null,
         ILogger<TranscribeViewModel>? logger = null)
     {
         _windowManager = windowManager;
@@ -177,6 +179,7 @@ public partial class TranscribeViewModel : ViewModelBase
         _audioLevelProvider = audioLevelProvider;
         _relationship = relationship;
         _settings = settings;
+        _dialogService = dialogService;
         _logger = logger ?? NullLogger<TranscribeViewModel>.Instance;
 
         // Self-sufficient badge state at startup: the Transcribe window is
@@ -389,6 +392,7 @@ public partial class TranscribeViewModel : ViewModelBase
         try
         {
             pipeline.TranscriptionAvailable += OnTranscriptionAvailable;
+            pipeline.TranscriptionFailed += OnTranscriptionFailed;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged += OnAudioLevelChanged;
 
@@ -412,21 +416,71 @@ public partial class TranscribeViewModel : ViewModelBase
         {
             _logger.LogWarning(ex, "Whisper runtime '{Runtime}' unavailable", ex.Requested);
             pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            pipeline.TranscriptionFailed -= OnTranscriptionFailed;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
             RecordingState = RecordingState.Disabled;
             StatusText = $"{ex.Requested} runtime not available — change in Settings";
         }
+        catch (CloudProviderNotConfiguredException ex)
+        {
+            // Must precede the generic catch — this derives from
+            // InvalidOperationException. A cloud engine without an API key is a
+            // user-fixable state, so besides resetting like the generic path we
+            // route the user to the Cloud providers settings via a dialog.
+            _logger.LogWarning(ex, "Cloud engine {Engine} is not configured", ex.Engine);
+            pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            pipeline.TranscriptionFailed -= OnTranscriptionFailed;
+            if (_audioLevelProvider is not null)
+                _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
+            IsRecording = false;
+            RecordingState = RecordingState.Disabled;
+            StatusText = "Cloud provider not configured";
+
+            // Fire-and-forget on purpose: StopRecordingAsync awaits _startTask
+            // (ADR-039), so awaiting a modal dialog here would make a
+            // push-to-talk key release hang until the dialog is dismissed.
+            _ = ShowCloudProviderConfigDialogAsync(ex);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to start recording");
             pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            pipeline.TranscriptionFailed -= OnTranscriptionFailed;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
             RecordingState = RecordingState.Disabled;
             StatusText = "Ready";
+        }
+    }
+
+    /// <summary>
+    /// Tells the user why recording could not start (cloud engine selected but
+    /// no API key stored) and, on confirmation, opens the Settings window on
+    /// the Cloud providers section. No-op without a dialog service (design
+    /// mode / tests that don't care about the dialog).
+    /// </summary>
+    private async Task ShowCloudProviderConfigDialogAsync(CloudProviderNotConfiguredException ex)
+    {
+        if (_dialogService is null)
+            return;
+
+        try
+        {
+            var openSettings = await _dialogService.ShowConfirmationAsync(
+                "Cloud provider not configured",
+                ex.Message,
+                confirmText: "Open settings",
+                cancelText: "Cancel");
+
+            if (openSettings)
+                _windowManager.ShowSettings(SettingsSection.CloudProviders);
+        }
+        catch (Exception dialogEx)
+        {
+            _logger.LogError(dialogEx, "Failed to show cloud-provider configuration dialog");
         }
     }
 
@@ -455,6 +509,7 @@ public partial class TranscribeViewModel : ViewModelBase
         finally
         {
             _pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            _pipeline.TranscriptionFailed -= OnTranscriptionFailed;
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
@@ -477,6 +532,81 @@ public partial class TranscribeViewModel : ViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to inject transcribed text");
+        }
+    }
+
+    /// <summary>
+    /// Guards against stacking one error dialog per failed utterance — while a
+    /// dialog is up, further failures only update <see cref="StatusText"/>.
+    /// Touched exclusively on the UI thread.
+    /// </summary>
+    private bool _isCloudErrorDialogOpen;
+
+    /// <summary>
+    /// Surfaces cloud transcription failures (quota exhausted, rate limit,
+    /// rejected key, provider outage — ADR-043 amendment). The pipeline keeps
+    /// recording, so this must not stop anything; it informs. Raised from the
+    /// pipeline's background processing task, hence the dispatcher hop.
+    /// </summary>
+    private void OnTranscriptionFailed(object? sender, TranscriptionErrorEventArgs e)
+    {
+        if (e.Exception is not CloudSpeechTranscriptionException cloudEx)
+            return; // local-engine failures keep their existing log-only behaviour
+
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            StatusText = cloudEx.Kind switch
+            {
+                CloudSpeechErrorKind.KeyRejected => "Cloud API key rejected — check Settings",
+                CloudSpeechErrorKind.QuotaExceeded => "Cloud quota exceeded — check plan & billing",
+                CloudSpeechErrorKind.RateLimited => "Cloud rate limit reached — try again shortly",
+                CloudSpeechErrorKind.ProviderUnavailable => "Cloud provider unavailable — try again shortly",
+                _ => "Cloud transcription failed",
+            };
+
+            if (_isCloudErrorDialogOpen)
+                return;
+
+            _isCloudErrorDialogOpen = true;
+            _ = ShowCloudTranscriptionErrorDialogAsync(cloudEx);
+        });
+    }
+
+    /// <summary>
+    /// Fire-and-forget dialog for a failed cloud transcription. A rejected key
+    /// is user-fixable in Settings, so that kind gets an "Open settings"
+    /// action (deep link to Cloud providers); everything else is informational.
+    /// </summary>
+    private async Task ShowCloudTranscriptionErrorDialogAsync(CloudSpeechTranscriptionException ex)
+    {
+        try
+        {
+            if (_dialogService is null)
+                return;
+
+            if (ex.Kind == CloudSpeechErrorKind.KeyRejected)
+            {
+                var openSettings = await _dialogService.ShowConfirmationAsync(
+                    "Cloud transcription failed",
+                    ex.Message,
+                    confirmText: "Open settings",
+                    cancelText: "Cancel");
+
+                if (openSettings)
+                    _windowManager.ShowSettings(SettingsSection.CloudProviders);
+            }
+            else
+            {
+                await _dialogService.ShowMessageAsync("Cloud transcription failed", ex.Message, "OK");
+            }
+        }
+        catch (Exception dialogEx)
+        {
+            _logger.LogError(dialogEx, "Failed to show cloud transcription error dialog");
+        }
+        finally
+        {
+            _isCloudErrorDialogOpen = false;
         }
     }
 

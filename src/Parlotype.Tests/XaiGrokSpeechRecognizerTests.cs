@@ -130,8 +130,10 @@ public sealed class XaiGrokSpeechRecognizerTests
     {
         var recognizer = Create(new ScriptedHandler());
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => recognizer.InitializeAsync());
+        // Typed exception so the UI can route the user to the cloud settings.
+        var ex = await Assert.ThrowsAsync<CloudProviderNotConfiguredException>(() => recognizer.InitializeAsync());
 
+        Assert.Equal(SpeechEngine.XaiGrok, ex.Engine);
         Assert.Contains("No API key configured for the xAI Grok provider", ex.Message);
         Assert.Contains("Settings", ex.Message);
     }
@@ -275,28 +277,31 @@ public sealed class XaiGrokSpeechRecognizerTests
     }
 
     [Fact]
-    public async Task TranscribeAsync_Unauthorized_ThrowsMentioningRejectedKey()
+    public async Task TranscribeAsync_Unauthorized_ThrowsKeyRejected()
     {
         var handler = new ScriptedHandler();
         handler.EnqueueJson(HttpStatusCode.Unauthorized, """{"error":"invalid_api_key"}""");
         var (recognizer, _, _) = await CreateInitializedAsync(handler);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+        var ex = await Assert.ThrowsAsync<CloudSpeechTranscriptionException>(
             () => recognizer.TranscribeAsync(new float[16_000]));
 
-        Assert.Contains("API key rejected", ex.Message);
+        Assert.Equal(CloudSpeechErrorKind.KeyRejected, ex.Kind);
+        Assert.Contains("rejected the API key", ex.Message);
+        Assert.Contains("invalid_api_key", ex.Message);
     }
 
     [Fact]
-    public async Task TranscribeAsync_ServerError_ThrowsWithStatusAndBody()
+    public async Task TranscribeAsync_ServerError_ThrowsProviderUnavailable()
     {
         var handler = new ScriptedHandler();
         handler.EnqueueJson(HttpStatusCode.InternalServerError, """{"error":"boom"}""");
         var (recognizer, _, _) = await CreateInitializedAsync(handler);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+        var ex = await Assert.ThrowsAsync<CloudSpeechTranscriptionException>(
             () => recognizer.TranscribeAsync(new float[16_000]));
 
+        Assert.Equal(CloudSpeechErrorKind.ProviderUnavailable, ex.Kind);
         Assert.Contains("500", ex.Message);
         Assert.Contains("boom", ex.Message);
     }

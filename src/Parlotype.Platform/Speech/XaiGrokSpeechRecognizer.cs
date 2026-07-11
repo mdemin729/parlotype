@@ -86,7 +86,8 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
 
             var apiKey = await _secrets.GetAsync(SettingsKeys.XaiGrokApiKey, cancellationToken);
             if (string.IsNullOrWhiteSpace(apiKey))
-                throw new InvalidOperationException(
+                throw new CloudProviderNotConfiguredException(
+                    SpeechEngine.XaiGrok,
                     "No API key configured for the xAI Grok provider. Add one in Settings → Speech engine.");
 
             _httpClient?.Dispose();

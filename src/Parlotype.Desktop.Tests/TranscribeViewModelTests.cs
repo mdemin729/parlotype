@@ -350,6 +350,150 @@ public class TranscribeViewModelTests
     }
 
     [AvaloniaFact]
+    public async Task StartRecording_CloudProviderNotConfigured_ShowsDialogAndOpensSettings()
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            ThrowOnStart = new CloudProviderNotConfiguredException(
+                SpeechEngine.XaiGrok, "No API key configured for the xAI Grok provider.")
+        };
+        var wm = new MockWindowManager();
+        var dialog = new MockUserDialogService { ConfirmationResult = true };
+        var vm = new TranscribeViewModel(wm, pipeline, dialogService: dialog);
+
+        await vm.StartRecordingAsync();
+        await Task.Delay(100, TestContext.Current.CancellationToken); // dialog task is fire-and-forget
+
+        Assert.False(vm.IsRecording);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal("Cloud provider not configured", vm.StatusText);
+        Assert.Equal(1, dialog.ShowConfirmationCount);
+        Assert.Equal("Cloud provider not configured", dialog.LastTitle);
+        Assert.Contains("No API key configured", dialog.LastMessage);
+        Assert.Equal(1, wm.ShowSettingsCount);
+        Assert.Equal(SettingsSection.CloudProviders, wm.LastSettingsSection);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_CloudProviderNotConfigured_DialogCancelled_DoesNotOpenSettings()
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            ThrowOnStart = new CloudProviderNotConfiguredException(
+                SpeechEngine.OpenAiCompatible, "No API key configured for the OpenAI-compatible provider.")
+        };
+        var wm = new MockWindowManager();
+        var dialog = new MockUserDialogService { ConfirmationResult = false };
+        var vm = new TranscribeViewModel(wm, pipeline, dialogService: dialog);
+
+        await vm.StartRecordingAsync();
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, dialog.ShowConfirmationCount);
+        Assert.Equal(0, wm.ShowSettingsCount);
+    }
+
+    [AvaloniaFact]
+    public async Task TranscriptionFailed_QuotaExceeded_ShowsMessageDialog_RecordingContinues()
+    {
+        var pipeline = new MockAudioPipeline();
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+        await vm.StartRecordingAsync();
+
+        pipeline.RaiseTranscriptionFailed(new CloudSpeechTranscriptionException(
+            CloudSpeechErrorKind.QuotaExceeded,
+            "OpenAI-compatible provider",
+            "OpenAI-compatible provider: API quota exceeded — check your plan and billing with the provider."));
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.True(vm.IsRecording); // informational only — recording keeps running
+        Assert.Equal("Cloud quota exceeded — check plan & billing", vm.StatusText);
+        Assert.Equal(1, dialog.ShowMessageCount);
+        Assert.Equal(0, dialog.ShowConfirmationCount);
+        Assert.Equal("Cloud transcription failed", dialog.LastTitle);
+        Assert.Contains("quota exceeded", dialog.LastMessage);
+    }
+
+    [AvaloniaFact]
+    public async Task TranscriptionFailed_KeyRejected_OffersOpenSettings()
+    {
+        var pipeline = new MockAudioPipeline();
+        var wm = new MockWindowManager();
+        var dialog = new MockUserDialogService { ConfirmationResult = true };
+        var vm = new TranscribeViewModel(wm, pipeline, dialogService: dialog);
+        await vm.StartRecordingAsync();
+
+        pipeline.RaiseTranscriptionFailed(new CloudSpeechTranscriptionException(
+            CloudSpeechErrorKind.KeyRejected, "xAI Grok", "xAI Grok rejected the API key (HTTP 401)."));
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal("Cloud API key rejected — check Settings", vm.StatusText);
+        Assert.Equal(1, dialog.ShowConfirmationCount);
+        Assert.Equal(0, dialog.ShowMessageCount);
+        Assert.Equal(1, wm.ShowSettingsCount);
+        Assert.Equal(SettingsSection.CloudProviders, wm.LastSettingsSection);
+    }
+
+    [AvaloniaFact]
+    public async Task TranscriptionFailed_NonCloudError_StaysSilent()
+    {
+        var pipeline = new MockAudioPipeline();
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+        await vm.StartRecordingAsync();
+
+        pipeline.RaiseTranscriptionFailed(new InvalidOperationException("local whisper hiccup"));
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, dialog.ShowMessageCount);
+        Assert.Equal(0, dialog.ShowConfirmationCount);
+        Assert.Equal("Recording...", vm.StatusText);
+    }
+
+    [AvaloniaFact]
+    public async Task TranscriptionFailed_WhileDialogOpen_DoesNotStackDialogs()
+    {
+        var pipeline = new MockAudioPipeline();
+        var dialog = new MockUserDialogService { Gate = new TaskCompletionSource() };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+        await vm.StartRecordingAsync();
+
+        var error = new CloudSpeechTranscriptionException(
+            CloudSpeechErrorKind.RateLimited, "OpenAI-compatible provider", "rate limit reached");
+        pipeline.RaiseTranscriptionFailed(error);
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        pipeline.RaiseTranscriptionFailed(error); // arrives while the first dialog is still up
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, dialog.ShowMessageCount);
+
+        dialog.Gate.SetResult(); // dismiss; a later failure may show a new dialog
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        pipeline.RaiseTranscriptionFailed(error);
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, dialog.ShowMessageCount);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_GenericFailure_DoesNotShowDialog()
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            ThrowOnStart = new InvalidOperationException("mic unavailable")
+        };
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+
+        await vm.StartRecordingAsync();
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, dialog.ShowConfirmationCount);
+        Assert.Equal("Ready", vm.StatusText);
+    }
+
+    [AvaloniaFact]
     public async Task StopRecording_DuringSlowStart_StillStops()
     {
         // Regression: in Push-to-Talk the very first key release lands while the

@@ -68,7 +68,8 @@ public class CloudProviderScreenshotTests : IClassFixture<CloudProviderScreensho
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
             "Default state: no base URL, model, or API key has been configured for either provider. " +
-            "Both text fields show their default value as a watermark placeholder, and both key rows read \"No key\".",
+            "Both text fields show their default value as a watermark placeholder, and both key rows show " +
+            "the editable password entry (with a show/hide eye toggle) and a Save button.",
             screenshot));
 
         _report.AddScenario(new Scenario(
@@ -110,13 +111,48 @@ public class CloudProviderScreenshotTests : IClassFixture<CloudProviderScreensho
         var view3 = new CloudProviderSettingsView();
         var screenshot3 = await ScreenshotHelper.CaptureBase64Async(view3, vm);
         steps.Add(new ScenarioStep(
-            "User clicks Save. The key is written to the secret store, the entry field is cleared " +
-            "(the raw key is never displayed again), and the status text now reads \"Key saved\".",
+            "User clicks Save. The key is written to the secret store; the OpenAI-compatible row flips to its " +
+            "saved state — a read-only ●●●● mask (fixed length, never the real key), an accent-colored " +
+            "\"✓ Saved\" badge, and Change / Remove buttons.",
             screenshot3));
 
         _report.AddScenario(new Scenario(
             "Save an API Key",
-            "User enters and saves an OpenAI-compatible API key. The entry field clears and the status updates.",
+            "User enters and saves an OpenAI-compatible API key. The row switches to the masked saved state.",
+            steps));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_ChangeExistingKey()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secrets = new MockSecretStore();
+        await secrets.SetAsync(SettingsKeys.OpenAiCompatApiKey, "sk-existing-key", ct);
+        var vm = new CloudProviderSettingsViewModel(new MockSettingsService(), secrets);
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+
+        var view1 = new CloudProviderSettingsView();
+        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view1, vm);
+        steps.Add(new ScenarioStep(
+            "Saved state: OpenAI-compatible shows the masked ●●●● display, the \"✓ Saved\" badge, and " +
+            "Change / Remove. xAI Grok has no key, so it shows the entry field.",
+            screenshot1));
+
+        vm.ChangeOpenAiKeyCommand.Execute(null);
+        await SettleAsync();
+
+        var view2 = new CloudProviderSettingsView();
+        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
+        steps.Add(new ScenarioStep(
+            "User clicks Change. The OpenAI-compatible row returns to the editable entry field (eye toggle + Save), " +
+            "now with a Cancel button that abandons the replacement and keeps the stored key.",
+            screenshot2));
+
+        _report.AddScenario(new Scenario(
+            "Change an Existing Key",
+            "Replacing a stored key: Change reveals the entry with a Cancel fallback; the old key stays until a new one is saved.",
             steps));
     }
 
@@ -143,8 +179,9 @@ public class CloudProviderScreenshotTests : IClassFixture<CloudProviderScreensho
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
             "Fully configured state: both providers have a custom base URL and model persisted " +
-            "(OpenAI-compatible pointed at Groq; xAI Grok at its default), and both report \"Key saved\". " +
-            "The raw key values are never shown — only the saved/not-saved status.",
+            "(OpenAI-compatible pointed at Groq; xAI Grok at its default), and both show the masked " +
+            "saved state with a \"✓ Saved\" badge and Change / Remove buttons. " +
+            "The raw key values are never shown — only the fixed-length mask.",
             screenshot));
 
         _report.AddScenario(new Scenario(

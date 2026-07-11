@@ -1,9 +1,9 @@
 ---
 title: Cloud speech providers — OpenAI-compatible client + xAI Grok STT
-status: in-progress
+status: completed
 created: 2026-07-09
 started: 2026-07-09
-completed:
+completed: 2026-07-10
 ---
 
 # Cloud speech providers — OpenAI-compatible client + xAI Grok STT
@@ -37,9 +37,12 @@ task), reviewed and integrated by the coordinating session.
 
 ## Workplan
 
-- [ ] Task A — Core contracts + Platform recognizers + secret store + tests
-- [ ] Review A (build, tests, request-shape review)
-- [ ] Task B — Desktop settings UI + cloud indicator + headless/screenshot tests
-- [ ] Review B (build, tests, UI review)
-- [ ] ADR-043 + memory vault updates + INDEX.md
-- [ ] Final: zero-warning build, full test pass
+- [x] Task A — Core contracts + Platform recognizers + secret store + tests
+- [x] Review A (build, tests, request-shape review)
+- [x] Task B — Desktop settings UI + cloud indicator + headless/screenshot tests
+- [x] Review B (build, tests, UI review — found + fixed badge-at-startup bug)
+- [x] ADR-043 + memory vault updates + INDEX.md
+- [x] Final: zero-warning build, full test pass
+- [x] Follow-up (2026-07-10, ADR-043 amendment): not-configured error popup —
+      `CloudProviderNotConfiguredException` + `ConfirmationDialog`/`IUserDialogService`
+      + `SettingsSection.CloudProviders` deep link from the record-start failure
