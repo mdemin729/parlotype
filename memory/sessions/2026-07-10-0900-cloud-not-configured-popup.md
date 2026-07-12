@@ -4,7 +4,7 @@ type: session
 status: complete
 tags: [cloud-providers, ux, error-handling]
 created: 2026-07-10
-summary: "Record-start with an unconfigured cloud engine now shows a ConfirmationDialog with an Open-settings deep link instead of failing silently (ADR-043 amendment)."
+summary: "Full-day arc on cloud speech providers: not-configured popup, provider error surfacing, masked API-key UX, auto-detect-only language UI, and a reusable SplitButton-style ApiKeyBox control (ADR-043, 4 amendments)."
 ---
 
 # Session: 2026-07-10 — Cloud-not-configured error popup
@@ -52,16 +52,33 @@ Added a typed failure + popup + Settings deep link.
 ## Follow-ups landed later the same day
 - Provider error surfacing (2nd ADR-043 amendment): OpenAI error-envelope parsing →
   `CloudSpeechErrorKind`/`CloudSpeechTranscriptionException`, `IAudioPipeline.TranscriptionFailed`
-  event, per-kind dialogs in `TranscribeViewModel`.
-- API-key field UX: masked saved state (`KeyMask` ●×16) + "✓ Saved" badge + Change/Cancel +
-  reveal eye toggle (`RevealPassword` + `InnerRightContent`).
+  event, per-kind dialogs in `TranscribeViewModel`. Commit `66c5869`.
+- API-key field UX v1: masked saved state (`KeyMask` ●×16) + "✓ Saved" badge + Change/Cancel +
+  reveal eye toggle (initially `RevealPassword` + `TextBox.InnerRightContent`). Same commit.
 - Cloud engines made auto-detect-only (3rd amendment): `SupportsSourceSelection: false` ⇒
   language UI hides like Parakeet, widget compacts; recognizers stopped sending the `language`
   part; `CloudSpeechLanguageResolver` deleted, `IKeyboardLayoutService` dep dropped from both
-  cloud recognizers.
+  cloud recognizers. Commit `f10ceb8`.
+- API-key field UX v2 — `ApiKeyBox` component: the `InnerRightContent` eye button looked like
+  a floating emoji glued onto the field. Replaced with a dedicated `ApiKeyBox` UserControl
+  modeled on Fluent `SplitButton`'s anatomy (one shared frame: chrome-less inner `TextBox` |
+  1px separator | flat reveal `ToggleButton` using Fluent's own `PasswordBoxReveal/HideButtonData`
+  glyphs). New knowledge entry [[avalonia-composite-control-patterns]] captures the technique.
+  Commit `9646ccd`.
+
+## Final State (end of day)
+- All five commits landed on `claude/cranky-sammet-d148a2`: `fb0926d` (v1 providers, prior
+  session) → `3ff37d5` → `66c5869` → `f10ceb8` → `9646ccd`. Working tree clean.
+- ADR-043 carries 4 amendments (not-configured popup, provider error surfacing, auto-detect-only
+  language UI, and the ApiKeyBox polish needed no ADR trigger — Desktop-only, no Core/DI/dependency
+  change). `plans/2026-07-09-cloud-speech-providers/task.md` status `completed`.
+- Test counts at close: 428 `Parlotype.Tests` + 297 `Parlotype.Desktop.Tests`, zero build warnings.
 
 ## Next Action
-Uncommitted changes are on `claude/cranky-sammet-d148a2` awaiting a commit request.
-Candidate next work: manual click-through of the popup flow, or the ADR-043
-deferred list (key-validation ping at save time, unreachable-host fallback,
-Linux/macOS keychain).
+No pending code work on this arc. Candidates for a future session (none urgent):
+- Manual click-through of the popup/dialog flows in a real running app (only headless-tested
+  so far — record button with no key, quota/rate-limit/outage errors, ApiKeyBox reveal toggle).
+- ADR-043 deferred list: key-validation ping at save time, unreachable-host fallback behaviour,
+  Linux/macOS keychain integration for `ISecretStore` (currently base64 + warning, not encrypted).
+- Consider Azure/Google/Amazon cloud providers per the original research
+  (`docs/research/2026-07-05-online-transcription/`), if requested.

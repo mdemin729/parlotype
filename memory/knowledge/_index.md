@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-07-07
+last_updated: 2026-07-10
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -44,6 +44,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[whisper-ui-thread-loading]] | `WhisperFactory.FromPath` + processor `Build()` are synchronous/CPU-bound despite the async method; wrap in `Task.Run` or they freeze the UI thread and any `DispatcherTimer` loading animation (ADR-038) | 2026-06-27 |
 | [[avalonia12-frameless-window]] | Avalonia 12: `SystemDecorations` obsolete → `WindowDecorations` enum; frameless rounded corners need transparent window + root Border; `BeginMoveDrag` blocks until drop on Windows (persist position after it returns); headless `Screens.All` is actually populated (one real virtual screen), verified empirically | 2026-07-06 |
 | [[sherpa-onnx-quirks]] | org.k2fsa.sherpa.onnx NuGet is CPU-only (GPU needs source build); config objects use public fields; NeMo transducer results carry no confidence/language; `AcceptWaveform` auto-resamples with stderr log; load/decode are synchronous — wrap in `Task.Run` | 2026-07-07 |
+| [[avalonia-composite-control-patterns]] | Fluent `SplitButton`'s one-frame/many-parts trick (corner-radius/border-thickness filter converters); making an inner `TextBox` chrome-less via `Border#PART_BorderElement` overrides + outer `:focus-within`; reusable `PasswordBoxReveal/HideButtonData` glyphs and `TextControlButton*` brushes | 2026-07-10 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history
