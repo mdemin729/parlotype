@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:v="using:Parlotype.Desktop.Views"
              x:Class="Parlotype.Desktop.Views.Settings.CloudProviderSettingsView"
              x:DataType="vms:CloudProviderSettingsViewModel"
              x:CompileBindings="True">
@@ -60,21 +61,11 @@
 
                     <!-- Empty / editing: password entry with reveal toggle + Save / Cancel -->
                     <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding ShowOpenAiKeyEntry}">
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding OpenAiKeyEntry, Mode=TwoWay}"
-                                 PasswordChar="●"
-                                 RevealPassword="{Binding IsOpenAiKeyRevealed}"
-                                 PlaceholderText="sk-…"
-                                 Margin="0,0,8,0">
-                            <TextBox.InnerRightContent>
-                                <ToggleButton IsChecked="{Binding IsOpenAiKeyRevealed, Mode=TwoWay}"
-                                              Content="👁"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              Padding="6,0"
-                                              ToolTip.Tip="Show / hide key" />
-                            </TextBox.InnerRightContent>
-                        </TextBox>
+                        <v:ApiKeyBox Grid.Column="0"
+                                     Text="{Binding OpenAiKeyEntry, Mode=TwoWay}"
+                                     IsRevealed="{Binding IsOpenAiKeyRevealed, Mode=TwoWay}"
+                                     PlaceholderText="sk-…"
+                                     Margin="0,0,8,0" />
                         <Button Grid.Column="1" Content="Save"
                                 Command="{Binding SaveOpenAiKeyCommand}"
                                 Padding="12,6" Margin="0,0,4,0" />
@@ -134,21 +125,11 @@
 
                     <!-- Empty / editing: password entry with reveal toggle + Save / Cancel -->
                     <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding ShowXaiKeyEntry}">
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding XaiKeyEntry, Mode=TwoWay}"
-                                 PasswordChar="●"
-                                 RevealPassword="{Binding IsXaiKeyRevealed}"
-                                 PlaceholderText="xai-…"
-                                 Margin="0,0,8,0">
-                            <TextBox.InnerRightContent>
-                                <ToggleButton IsChecked="{Binding IsXaiKeyRevealed, Mode=TwoWay}"
-                                              Content="👁"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              Padding="6,0"
-                                              ToolTip.Tip="Show / hide key" />
-                            </TextBox.InnerRightContent>
-                        </TextBox>
+                        <v:ApiKeyBox Grid.Column="0"
+                                     Text="{Binding XaiKeyEntry, Mode=TwoWay}"
+                                     IsRevealed="{Binding IsXaiKeyRevealed, Mode=TwoWay}"
+                                     PlaceholderText="xai-…"
+                                     Margin="0,0,8,0" />
                         <Button Grid.Column="1" Content="Save"
                                 Command="{Binding SaveXaiKeyCommand}"
                                 Padding="12,6" Margin="0,0,4,0" />
