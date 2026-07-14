@@ -500,6 +500,104 @@ public class AudioPipelineTests
             "WaitTimeOption.Long (1000ms) should flush with 1100ms of silence");
     }
 
+    /// <summary>Recognizer fake that numbers each utterance so tests can assert order.</summary>
+    private sealed class SequencingSpeechRecognizer : ISpeechRecognizer
+    {
+        private int _count;
+
+        public bool IsReady => true;
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task<TranscriptionResult> TranscribeAsync(ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
+            => Task.FromResult(new TranscriptionResult { Text = $"utterance-{Interlocked.Increment(ref _count)}" });
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Speech that is still buffered (no trailing silence) when StopAsync is
+    /// called must be flushed through VAD and transcribed before StopAsync
+    /// returns — the drain-on-stop guarantee of the channel-based pipeline.
+    /// </summary>
+    [Fact]
+    public async Task StopAsync_FlushesBufferedSpeech_BeforeReturning()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        // Long threshold so silence-based flushing cannot fire first
+        await settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.VeryLong.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
+
+        var transcriptions = 0;
+        pipeline.TranscriptionAvailable += (_, _) => Interlocked.Increment(ref transcriptions);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        capture.SimulateAudioData(CreateSpeechSamples(1000)); // no trailing silence
+        await pipeline.StopAsync();
+
+        Assert.Equal(1, transcriptions);
+    }
+
+    /// <summary>
+    /// Utterances separated by silence must produce one TranscriptionAvailable
+    /// each, in capture order, even though segmentation and transcription run
+    /// on separate tasks.
+    /// </summary>
+    [Fact]
+    public async Task Pipeline_MultipleUtterances_TranscribedInOrder()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new SequencingSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
+
+        var received = new List<string>();
+        var gotOne = new TaskCompletionSource<bool>();
+        var gotTwo = new TaskCompletionSource<bool>();
+        pipeline.TranscriptionAvailable += (_, e) =>
+        {
+            lock (received)
+            {
+                received.Add(e.Result.Text);
+                if (received.Count == 1) gotOne.TrySetResult(true);
+                if (received.Count == 2) gotTwo.TrySetResult(true);
+            }
+        };
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+
+        // Utterance 1: speech + enough silence to cross the 500 ms threshold.
+        capture.SimulateAudioData(CreateSpeechSamples(1000));
+        capture.SimulateAudioData(CreateSilenceSamples(600));
+
+        // Wait until the first utterance flushed before feeding the second, so
+        // the two are unambiguous distinct utterances.
+        var first = await Task.WhenAny(gotOne.Task, Task.Delay(TimeSpan.FromSeconds(2)));
+        Assert.True(first == gotOne.Task, "first utterance was not transcribed within 2s");
+
+        capture.SimulateAudioData(CreateSpeechSamples(1000));
+        capture.SimulateAudioData(CreateSilenceSamples(600));
+
+        await Task.WhenAny(gotTwo.Task, Task.Delay(TimeSpan.FromSeconds(2)));
+        await pipeline.StopAsync();
+
+        Assert.Equal(["utterance-1", "utterance-2"], received);
+    }
+
     /// <summary>
     /// AudioDataEventArgs.Buffer may be pool-backed and reused once the event
     /// returns (WasapiAudioCaptureService rents its callback buffers). The
