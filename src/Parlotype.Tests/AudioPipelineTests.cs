@@ -500,6 +500,48 @@ public class AudioPipelineTests
             "WaitTimeOption.Long (1000ms) should flush with 1100ms of silence");
     }
 
+    /// <summary>
+    /// AudioDataEventArgs.Buffer may be pool-backed and reused once the event
+    /// returns (WasapiAudioCaptureService rents its callback buffers). The
+    /// pipeline must therefore copy samples synchronously inside the handler:
+    /// mutating the source array after SimulateAudioData returns must not
+    /// affect what the pipeline buffered. FakeVadService keys on non-zero
+    /// samples, so a pipeline that (incorrectly) held a reference would see
+    /// only zeros and never produce a transcription.
+    /// </summary>
+    [Fact]
+    public async Task Pipeline_CopiesEventBufferSynchronously_SurvivesSourceMutation()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
+
+        var flushed = new TaskCompletionSource<bool>();
+        pipeline.TranscriptionAvailable += (_, _) => flushed.TrySetResult(true);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+
+        var speech = CreateSpeechSamples(1000);
+        capture.SimulateAudioData(speech);
+        Array.Clear(speech); // simulate the capture service reusing its pooled buffer
+
+        capture.SimulateAudioData(CreateSilenceSamples(600));
+
+        var completed = await Task.WhenAny(flushed.Task, Task.Delay(TimeSpan.FromSeconds(2)));
+        await pipeline.StopAsync();
+
+        Assert.True(completed == flushed.Task,
+            "Pipeline must have copied the speech samples during the DataAvailable event; " +
+            "clearing the source buffer afterwards should not erase them.");
+    }
+
     [Fact]
     public async Task Pipeline_WithVadAndWhisper_ProducesTranscription()
     {

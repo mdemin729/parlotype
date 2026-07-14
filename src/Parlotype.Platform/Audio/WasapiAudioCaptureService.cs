@@ -1,3 +1,4 @@
+using System.Buffers;
 using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -101,18 +102,29 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
 
         _bufferedProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
 
-        // Read resampled float samples directly — no PCM conversion needed
-        var floatBuffer = new float[e.BytesRecorded]; // oversize is fine
-        int samplesRead = _resampler.Read(floatBuffer, 0, floatBuffer.Length);
-
-        if (samplesRead <= 0)
-            return;
-
-        DataAvailable?.Invoke(this, new AudioDataEventArgs
+        // Read resampled float samples directly — no PCM conversion needed.
+        // Rented, not allocated: BytesRecorded-sized float buffers are LOH-sized
+        // at typical shared-mode formats (48 kHz stereo float32) and this fires
+        // many times per second. Subscribers must copy during the event
+        // (see AudioDataEventArgs.Buffer), so the buffer is returned right after.
+        var floatBuffer = ArrayPool<float>.Shared.Rent(e.BytesRecorded); // oversize is fine
+        try
         {
-            Buffer = floatBuffer.AsMemory(0, samplesRead),
-            SampleRate = TargetFormat.SampleRate
-        });
+            int samplesRead = _resampler.Read(floatBuffer, 0, floatBuffer.Length);
+
+            if (samplesRead <= 0)
+                return;
+
+            DataAvailable?.Invoke(this, new AudioDataEventArgs
+            {
+                Buffer = floatBuffer.AsMemory(0, samplesRead),
+                SampleRate = TargetFormat.SampleRate
+            });
+        }
+        finally
+        {
+            ArrayPool<float>.Shared.Return(floatBuffer);
+        }
     }
 
     private void OnRecordingStopped(object? sender, StoppedEventArgs e)

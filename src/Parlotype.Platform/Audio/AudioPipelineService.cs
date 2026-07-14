@@ -102,6 +102,12 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
         _mode = mode;
 
+        // Pre-size once (Clear keeps capacity): avoids staged growth re-allocations
+        // of the up-to-1.92 MB backing array on the capture path. Slack covers the
+        // chunk that lands just before the overflow check trips.
+        lock (_sampleBuffer)
+            _sampleBuffer.EnsureCapacity(MaxBatchBufferSamples + SampleRate);
+
         await EnsureModelInitializedAsync(cancellationToken);
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -180,8 +186,10 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
         lock (_sampleBuffer)
         {
-            foreach (var s in floatSamples)
-                _sampleBuffer.Add(s);
+            // Bulk span append (single vectorised copy). Also the synchronous copy
+            // the AudioDataEventArgs.Buffer contract requires — the capture service
+            // reuses its pooled buffer after this handler returns.
+            _sampleBuffer.AddRange(floatSamples);
 
             switch (_mode)
             {
@@ -209,7 +217,9 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         rms = Math.Min(rms, 1f);
 
         CurrentLevel = rms;
-        LevelChanged?.Invoke(this, new AudioLevelEventArgs { Level = rms });
+        // Capture-thread hot path: skip the event-args allocation when nobody listens
+        if (LevelChanged is { } levelChanged)
+            levelChanged(this, new AudioLevelEventArgs { Level = rms });
     }
 
     /// <summary>Minimum new samples before running VAD (8000 samples = 500ms at 16kHz).
@@ -280,7 +290,8 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         // In streaming mode, send fixed-size windows to Whisper
         while (_sampleBuffer.Count >= StreamingWindowSamples)
         {
-            var window = _sampleBuffer.GetRange(0, StreamingWindowSamples).ToArray();
+            // Single copy straight from the backing array (GetRange + ToArray copied twice)
+            var window = CollectionsMarshal.AsSpan(_sampleBuffer)[..StreamingWindowSamples].ToArray();
             _sampleBuffer.RemoveRange(0, StreamingWindowSamples);
 
             // Run VAD to check if there's any speech in this window
