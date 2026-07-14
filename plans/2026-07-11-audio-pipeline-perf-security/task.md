@@ -1,9 +1,9 @@
 ---
 title: Audio pipeline performance/allocation improvements + application security audit
-status: in_progress
+status: completed
 created: 2026-07-11
 started: 2026-07-13
-completed:
+completed: 2026-07-13
 ---
 
 # Audio Pipeline Performance + Security Audit
@@ -90,8 +90,29 @@ Two independent asks, planned together because they touch the same subsystems:
 
 ## Workplan
 
-- [ ] Phase 0 — BenchmarkDotNet scaffolding + baseline capture ([implementation-plan.md](implementation-plan.md) §Phase 0)
-- [ ] Phase 1 — Allocation fixes on hot paths (capture pool, WavEncoder, Parakeet copy, streaming copy, buffer pre-size)
-- [ ] Phase 2 — Pipeline threading rework (Channel, VAD off capture thread) — *pending go/no-go*
-- [ ] Phase 3 — Security audit report + agreed remediations
-- [ ] Phase 4 — ADRs, memory vault, benchmark result docs, session note
+- [x] Phase 0 — BenchmarkDotNet scaffolding + baseline capture ([implementation-plan.md](implementation-plan.md) §Phase 0) — commit `1ff6d9b`
+- [x] Phase 1 — Allocation fixes on hot paths (capture pool, WavEncoder, Parakeet copy, streaming copy, buffer pre-size) — commit `99d89a7`
+- [x] Phase 2 — Pipeline threading rework (Channel, VAD off capture thread) — commit `38e9f3a`
+- [x] Phase 3 — Security audit report + agreed remediations — commit `7a2a3a0`
+- [x] Phase 4 — ADRs (044/045/046), memory vault, benchmark result docs, session note
+
+## Resolution of the open questions
+
+Review reply was a blanket "go ahead"; the questions were resolved as follows:
+
+1. **Phase 2** — implemented (Phase 1 measurements + drain/ordering tests
+   supported it; all 870 tests green, segmentation thresholds unchanged).
+2. **Transcript logging** — removed outright (no opt-in verbose setting);
+   recorded as a standing convention in ADR-046. Revisit only if user-support
+   debugging demands it.
+3. **llama-server `--api-key`** — deferred/accepted with rationale (breaks
+   crash-orphan adoption and external user-managed servers; same-user threat
+   already crosses the DPAPI boundary). See audit §S5.
+4. **Benchmark project shape** — as proposed (`src/Parlotype.MicroBenchmarks`,
+   excluded from `dotnet test`).
+
+## Verification notes (remaining manual checks)
+
+See [benchmarks-final.md](benchmarks-final.md) §"Verification still pending":
+live GC counters during real dictation, Win+V clipboard-history exclusion,
+inline base-URL hint render, and a `Parlotype.Benchmark` smoke run.
