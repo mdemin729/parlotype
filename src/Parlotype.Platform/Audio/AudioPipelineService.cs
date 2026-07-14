@@ -462,7 +462,9 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
                 if (!string.IsNullOrWhiteSpace(result.Text))
                 {
-                    _logger.LogDebug("Transcription result: {Text}", result.Text);
+                    // Never log the transcript itself — dictated text is user-private
+                    // and log files persist on disk (security audit 2026-07-11, S1).
+                    _logger.LogDebug("Transcription result: {Length} chars", result.Text.Length);
                     TranscriptionAvailable?.Invoke(this, new TranscriptionEventArgs
                     {
                         Result = result

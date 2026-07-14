@@ -153,10 +153,64 @@ public sealed class ClipboardTextInjectionService : ITextInjectionService
                 throw new InvalidOperationException("SetClipboardData failed");
             }
             // After successful SetClipboardData, the system owns the memory — do not free it.
+
+            // Injected dictation must not end up in Clipboard History (Win+V) or
+            // sync to other devices via Cloud Clipboard (security audit
+            // 2026-07-11, S4). Restore of the user's own clipboard deliberately
+            // does NOT set these — their content keeps its normal behaviour.
+            SetClipboardExclusionFormats();
         }
         finally
         {
             CloseClipboard();
+        }
+    }
+
+    /// <summary>
+    /// Marks the current clipboard contents (within the open clipboard session)
+    /// as excluded from history, cloud sync, and third-party clipboard monitors
+    /// using the documented Windows exclusion formats. Best effort — a failure
+    /// to set a flag never blocks the paste.
+    /// </summary>
+    private static void SetClipboardExclusionFormats()
+    {
+        ReadOnlySpan<string> formats =
+        [
+            "ExcludeClipboardContentFromMonitorProcessing",
+            "CanIncludeInClipboardHistory",
+            "CanUploadToCloudClipboard",
+        ];
+
+        foreach (var format in formats)
+        {
+            var formatId = RegisterClipboardFormat(format);
+            if (formatId == 0)
+                continue;
+
+            // DWORD 0 payload: 0 = "not allowed" for the Can* formats; for the
+            // monitor-processing format the mere presence is the signal.
+            var hGlobal = GlobalAlloc(GMEM_MOVEABLE, 4);
+            if (hGlobal == IntPtr.Zero)
+                continue;
+
+            var ptr = GlobalLock(hGlobal);
+            if (ptr == IntPtr.Zero)
+            {
+                GlobalFree(hGlobal);
+                continue;
+            }
+
+            try
+            {
+                Marshal.WriteInt32(ptr, 0);
+            }
+            finally
+            {
+                GlobalUnlock(hGlobal);
+            }
+
+            if (SetClipboardData(formatId, hGlobal) == IntPtr.Zero)
+                GlobalFree(hGlobal);
         }
     }
 
@@ -195,6 +249,9 @@ public sealed class ClipboardTextInjectionService : ITextInjectionService
 
     [DllImport("user32.dll", EntryPoint = "EmptyClipboard")]
     private static extern bool EmptyClipboardNative();
+
+    [DllImport("user32.dll", EntryPoint = "RegisterClipboardFormatW", CharSet = CharSet.Unicode)]
+    private static extern uint RegisterClipboardFormat(string lpszFormat);
 
     [DllImport("kernel32.dll")]
     private static extern nint GlobalAlloc(uint uFlags, nuint dwBytes);

@@ -500,6 +500,59 @@ public class AudioPipelineTests
             "WaitTimeOption.Long (1000ms) should flush with 1100ms of silence");
     }
 
+    /// <summary>Captures formatted log output for content assertions.</summary>
+    private sealed class CapturingLogger<T> : Microsoft.Extensions.Logging.ILogger<T>
+    {
+        public List<string> Messages { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            Microsoft.Extensions.Logging.LogLevel logLevel,
+            Microsoft.Extensions.Logging.EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            lock (Messages)
+                Messages.Add(formatter(state, exception));
+        }
+    }
+
+    /// <summary>
+    /// Transcribed text is user-private and log files persist on disk: no log
+    /// message may ever contain the transcript (security audit 2026-07-11, S1).
+    /// </summary>
+    [Fact]
+    public async Task Pipeline_NeverLogsTranscriptText()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer(); // returns "fake transcription"
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.Medium.ToString());
+        var logger = new CapturingLogger<AudioPipelineService>();
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(), logger);
+
+        var flushed = new TaskCompletionSource<bool>();
+        pipeline.TranscriptionAvailable += (_, _) => flushed.TrySetResult(true);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        capture.SimulateAudioData(CreateSpeechSamples(1000));
+        capture.SimulateAudioData(CreateSilenceSamples(600));
+        await Task.WhenAny(flushed.Task, Task.Delay(TimeSpan.FromSeconds(2)));
+        await pipeline.StopAsync();
+
+        Assert.True(flushed.Task.IsCompletedSuccessfully, "expected a transcription to flow through the pipeline");
+        lock (logger.Messages)
+            Assert.DoesNotContain(logger.Messages, m => m.Contains("fake transcription"));
+    }
+
     /// <summary>Recognizer fake that numbers each utterance so tests can assert order.</summary>
     private sealed class SequencingSpeechRecognizer : ISpeechRecognizer
     {

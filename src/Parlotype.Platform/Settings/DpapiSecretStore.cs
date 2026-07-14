@@ -174,6 +174,6 @@ public sealed class DpapiSecretStore : ISecretStore
         Directory.CreateDirectory(dir);
 
         var json = JsonSerializer.Serialize(dict, JsonOptions);
-        await File.WriteAllTextAsync(_path, json, cancellationToken);
+        await AtomicFileWriter.WriteAllTextAsync(_path, json, cancellationToken);
     }
 }
