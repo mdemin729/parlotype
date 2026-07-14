@@ -19,7 +19,7 @@
 
 | Plan | Started | Description |
 |------|---------|-------------|
-| _none_ | | |
+| [2026-07-11-audio-pipeline-perf-security](2026-07-11-audio-pipeline-perf-security/) | 2026-07-13 | Audio pipeline allocation/performance improvements (capture-callback LOH churn, WavEncoder, buffer copies, threading) measured via new BenchmarkDotNet project + full security audit (transcripts-in-logs, model download integrity, HTTPS enforcement, clipboard history exclusion) |
 
 ## Planned
 
