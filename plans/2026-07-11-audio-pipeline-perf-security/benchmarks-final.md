@@ -47,15 +47,16 @@ Fix (`WasapiAudioCaptureService`): request ~2× the expected resampled output
 Reproducible: `ResamplerReadBenchmarks` in MicroBenchmarks; fact recorded in
 `memory/knowledge/naudio-resampler-read-cost.md`; ADR-045 amended.
 
-**Re-verify with dotnet-counters after this fix** — expected recording
-allocation rate: roughly 4–8 MB/s (≈2 MB/s resampler + UI/waveform rendering,
-which the harnesses exclude and which was always there).
+**Verified live 2026-07-15** (`dotnet-counters`, real dictation): recording
+allocation rate ≈ **3 MB/s** — down from ~30 MB/s on master and 38–40 MB/s on
+the regressed intermediate. Idle stays at 8–16 KB/s. Acceptance criterion 3
+(live GC numbers) is closed with a **10× end-to-end reduction vs master**.
 
 ## Verification still pending (needs an interactive desktop session)
 
-1. ~~Live dictation with `dotnet-counters monitor`~~ — **done 2026-07-14**;
-   found the regression above, now fixed. One more pass after the fix to
-   confirm the drop is recommended.
+1. ~~Live dictation with `dotnet-counters monitor`~~ — **done**: 2026-07-14
+   run found the regression above; post-fix run on 2026-07-15 measured
+   ≈ 3 MB/s while recording (10× below master). Closed.
 2. Win+V after dictation — injected text must not appear in clipboard
    history (S4; headless tests cannot exercise the Win32 clipboard).
 3. Cloud providers settings page — inline red hint appears for an

@@ -49,5 +49,9 @@ pending live `dotnet-counters` verification and reported recording allocation
   wasapi-capture-buffer-sizing corrected.
 
 ## Next Action
-User re-verifies with `dotnet-counters monitor` during a real dictation;
-remaining manual checks from benchmarks-final.md.
+~~User re-verifies with `dotnet-counters monitor` during a real dictation~~ —
+**confirmed 2026-07-15: ≈3 MB/s while recording** (was ~30 MB/s on master,
+38–40 MB/s regressed) — 10× end-to-end reduction; acceptance criterion 3
+closed. Remaining manual checks from benchmarks-final.md: Win+V
+clipboard-history exclusion, inline base-URL error hint render,
+`Parlotype.Benchmark` smoke run.
