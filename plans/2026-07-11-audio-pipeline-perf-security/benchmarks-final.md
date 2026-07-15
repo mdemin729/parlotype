@@ -26,11 +26,36 @@ S1–S4, S6, S7 fixed with tests; S5 deferred with rationale; S8, S9 accepted.
 `dotnet test`: **870 passed / 0 failed** (463 core/platform + 297 desktop +
 110 benchmark), 32 of them new this plan.
 
+## Addendum 2026-07-14: live verification found and fixed a regression
+
+The live `dotnet-counters` run (item 1 below) measured recording allocation at
+**38–40 MB/s vs ~30 MB/s on master** — a regression, not the expected drop
+(idle was clean at 8–16 KB/s). Root cause chase:
+
+- A/B harness driving the real `AudioPipelineService` + Silero VAD with
+  identical synthetic audio on both branches: **268 KB per audio-second on
+  each** — the channel/segmenter rework was not the cause.
+- A resampler probe found it: NAudio's chain allocates per `Read` call
+  **proportional to the requested count**. Master requested `BytesRecorded`
+  floats (2.73 MB/callback ≈ 27 MB/s — the real source of master's 30 MB/s);
+  the pooled version passed the rented array's `.Length`, which ArrayPool had
+  rounded 38,400 → 65,536 (4.68 MB/callback ≈ 47 MB/s — the regression).
+
+Fix (`WasapiAudioCaptureService`): request ~2× the expected resampled output
+(3,200 samples for a 100 ms callback) instead — **0.19 MB/callback
+≈ 1.9 MB/s while recording, ~14× below master**, identical sample delivery.
+Reproducible: `ResamplerReadBenchmarks` in MicroBenchmarks; fact recorded in
+`memory/knowledge/naudio-resampler-read-cost.md`; ADR-045 amended.
+
+**Re-verify with dotnet-counters after this fix** — expected recording
+allocation rate: roughly 4–8 MB/s (≈2 MB/s resampler + UI/waveform rendering,
+which the harnesses exclude and which was always there).
+
 ## Verification still pending (needs an interactive desktop session)
 
-1. Live dictation with `dotnet-counters monitor` — confirm allocation-rate /
-   Gen2 drop end-to-end (benchmarks + code inspection say yes; the plan's
-   acceptance criterion 3 asks for the live numbers).
+1. ~~Live dictation with `dotnet-counters monitor`~~ — **done 2026-07-14**;
+   found the regression above, now fixed. One more pass after the fix to
+   confirm the drop is recommended.
 2. Win+V after dictation — injected text must not appear in clipboard
    history (S4; headless tests cannot exercise the Win32 clipboard).
 3. Cloud providers settings page — inline red hint appears for an

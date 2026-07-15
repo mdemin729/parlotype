@@ -63,3 +63,23 @@ buffer instead of killing the capture callback.
 - Verified: 870 tests green; WavEncoder byte-equivalence; benchmark tables in
   the plan folder. Live GC-counter run (`dotnet-counters` during real
   dictation) pending a desktop session.
+
+## Amendment (2026-07-14): resampler read-request sizing
+
+The live `dotnet-counters` verification found recording allocation **rose**
+from ~30 MB/s (pre-rework) to ~38–40 MB/s. A/B harnesses (real pipeline +
+Silero VAD on both branches — allocation-identical at 268 KB per audio-second)
+isolated the cause to the capture service: NAudio's resampler chain
+**allocates per `Read` call in proportion to the requested count**
+(2.73 MB/callback at a 38,400-sample request; the pool's power-of-two bucket
+rounding inflated the pooled version's request to 65,536 → 4.68 MB/callback).
+The pre-rework `BytesRecorded`-sized request was itself the *dominant*
+allocator during recording all along — not the capture buffer this ADR
+originally targeted.
+
+Fix: `WasapiAudioCaptureService` now requests only ~2× the expected resampled
+output (`inputFrames × 16000 / nativeRate`, min 1,024) and passes that count —
+never the rented array's `.Length` — to `Read`. Measured: **0.19 MB/callback
+(~1.9 MB/s while recording), ~14× below the pre-rework baseline**, identical
+sample delivery. Reproducible via `ResamplerReadBenchmarks`; details in
+`memory/knowledge/naudio-resampler-read-cost.md`.

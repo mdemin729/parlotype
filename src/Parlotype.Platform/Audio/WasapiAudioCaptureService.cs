@@ -16,6 +16,8 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
     private WasapiCapture? _capture;
     private BufferedWaveProvider? _bufferedProvider;
     private ISampleProvider? _resampler;
+    private int _nativeBlockAlign = 1;
+    private int _nativeSampleRate = AudioFormat.Whisper.SampleRate;
     private bool _disposed;
 
     public bool IsCapturing { get; private set; }
@@ -60,6 +62,10 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
         _capture.DataAvailable += OnCaptureDataAvailable;
         _capture.RecordingStopped += OnRecordingStopped;
 
+        // Cached for the per-callback resampled-output estimate
+        _nativeBlockAlign = Math.Max(1, _capture.WaveFormat.BlockAlign);
+        _nativeSampleRate = Math.Max(1, _capture.WaveFormat.SampleRate);
+
         // Create a buffered provider that accepts the capture's native format
         _bufferedProvider = new BufferedWaveProvider(_capture.WaveFormat)
         {
@@ -102,15 +108,28 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
 
         _bufferedProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
 
-        // Read resampled float samples directly — no PCM conversion needed.
-        // Rented, not allocated: BytesRecorded-sized float buffers are LOH-sized
-        // at typical shared-mode formats (48 kHz stereo float32) and this fires
-        // many times per second. Subscribers must copy during the event
+        // Request only ~2× the expected 16 kHz mono output for this callback.
+        // The NAudio resampler chain allocates internally in proportion to the
+        // REQUESTED count on every Read — asking for BytesRecorded floats cost
+        // ~2.7 MB per 100 ms callback (~27 MB/s while recording), and the pool's
+        // bucket rounding made it worse; a right-sized request costs ~0.3 MB
+        // (see memory/knowledge/naudio-resampler-read-cost.md). The estimate is
+        // deterministic (input frames × rate ratio), so the 2× slack means a
+        // single read consumes everything the resampler has; any filter-latency
+        // remainder simply arrives with the next callback ~10 ms later.
+        int nativeFrames = e.BytesRecorded / _nativeBlockAlign;
+        int expectedSamples = (int)((long)nativeFrames * TargetFormat.SampleRate / _nativeSampleRate);
+        int requestSamples = Math.Max(expectedSamples * 2, 1024);
+
+        // Rented, not allocated; subscribers must copy during the event
         // (see AudioDataEventArgs.Buffer), so the buffer is returned right after.
-        var floatBuffer = ArrayPool<float>.Shared.Rent(e.BytesRecorded); // oversize is fine
+        var floatBuffer = ArrayPool<float>.Shared.Rent(requestSamples);
         try
         {
-            int samplesRead = _resampler.Read(floatBuffer, 0, floatBuffer.Length);
+            // Pass requestSamples, not floatBuffer.Length — the pool rounds the
+            // buffer up to a power of two, and a bigger request directly
+            // multiplies the resampler's internal allocations.
+            int samplesRead = _resampler.Read(floatBuffer, 0, requestSamples);
 
             if (samplesRead <= 0)
                 return;

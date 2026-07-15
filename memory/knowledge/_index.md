@@ -48,6 +48,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[wasapi-capture-buffer-sizing]] | NAudio `BytesRecorded` is bytes of the *native* format — sizing float buffers from it over-allocates ~4× into the LOH (~1.5 MB/s while recording); callbacks are sequential so pooled buffers are safe; `DiscardOnBufferOverflow` silently drops audio behind slow consumers | 2026-07-13 |
 | [[windows-clipboard-exclusion-formats]] | `ExcludeClipboardContentFromMonitorProcessing` / `CanIncludeInClipboardHistory`=0 / `CanUploadToCloudClipboard`=0 must be set in the same OpenClipboard session as the content; `EmptyClipboard` clears them; only verifiable manually (Win+V) | 2026-07-13 |
 | [[huggingface-lfs-digests]] | HF tree API `lfs.oid` is the authoritative SHA-256 for LFS files; non-LFS blobs expose only a git SHA-1 — hash them directly; pin the revision the downloader actually uses | 2026-07-13 |
+| [[naudio-resampler-read-cost]] | NAudio's WDL resampler chain allocates per `Read` **in proportion to the requested count** (2.7 MB/call at 38,400 vs 0.19 MB at 3,200, same output) — never pass `BytesRecorded` or a pooled array's `.Length` as the read count; request ~2× the expected resampled output | 2026-07-14 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

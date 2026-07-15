@@ -24,3 +24,9 @@ summary: NAudio WASAPI BytesRecorded is a byte count of the device-native format
   audio** when the consumer is slower than the buffer duration — never run
   inference (VAD) on the capture callback thread (why the pipeline moved to a
   segmenter task, ADR-045).
+- **2026-07-14 correction:** the capture buffer allocation was *not* the
+  dominant recording-time allocator — the NAudio resampler's per-`Read`
+  allocation proportional to the *requested count* was (~27 MB/s at a
+  `BytesRecorded`-sized request). See [[naudio-resampler-read-cost]] /
+  ADR-045 amendment: right-size the read request (~2× expected output),
+  never pass a pooled array's `.Length`.
