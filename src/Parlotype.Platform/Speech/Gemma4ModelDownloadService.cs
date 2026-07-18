@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Speech;
 
@@ -77,6 +78,7 @@ public sealed class Gemma4ModelDownloadService
                 _logger.LogInformation("Downloading Gemma 4 {Label}: {FileName}", label, fileName);
                 var fileBytes = await DownloadFileAsync(
                     model.HuggingFaceRepo, fileName, targetPath, progress, label,
+                    expectedSha256: model.GetSha256(fileName),
                     cumulativeOffset: completedBytes,
                     grandTotal: totalKnown ? grandTotal : null,
                     cancellationToken);
@@ -143,6 +145,7 @@ public sealed class Gemma4ModelDownloadService
         string targetPath,
         IProgress<ModelDownloadProgress>? progress,
         string label,
+        string? expectedSha256,
         long cumulativeOffset,
         long? grandTotal,
         CancellationToken cancellationToken)
@@ -150,9 +153,15 @@ public sealed class Gemma4ModelDownloadService
         var url = BuildUrl(repo, fileName);
         var tempPath = targetPath + ".tmp";
 
+        if (expectedSha256 is null)
+            _logger.LogWarning("No catalog SHA-256 for {FileName} — downloading unverified", fileName);
+
         try
         {
             long downloadedBytes = 0;
+            using var hasher = expectedSha256 is null
+                ? null
+                : IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
 
             // Scope the streams so the temp file handle is fully released
             // before we move it — otherwise File.Move fails with "being used
@@ -171,6 +180,7 @@ public sealed class Gemma4ModelDownloadService
                 while ((bytesRead = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
                 {
                     await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                    hasher?.AppendData(buffer, 0, bytesRead);
                     downloadedBytes += bytesRead;
 
                     // Report against the combined download when known, otherwise
@@ -184,6 +194,15 @@ public sealed class Gemma4ModelDownloadService
                 }
 
                 await fileStream.FlushAsync(cancellationToken);
+            }
+
+            // Verify before the file can ever appear at the destination
+            // (security audit 2026-07-11, S2).
+            if (hasher is not null)
+            {
+                var actual = Convert.ToHexStringLower(hasher.GetHashAndReset());
+                if (!actual.Equals(expectedSha256, StringComparison.OrdinalIgnoreCase))
+                    throw new ModelIntegrityException(fileName, expectedSha256!.ToLowerInvariant(), actual);
             }
 
             // Atomic move (streams now disposed)

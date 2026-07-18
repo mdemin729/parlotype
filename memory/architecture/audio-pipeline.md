@@ -4,7 +4,7 @@ type: architecture
 status: active
 tags: [audio, vad, whisper, gemma4, llamacpp, pipeline]
 services: [core, platform, desktop]
-last_updated: 2026-05-21
+last_updated: 2026-07-13
 summary: End-to-end audio capture, VAD, transcription (Whisper or Gemma 4 via llama.cpp), and text injection pipeline
 ---
 
@@ -62,10 +62,25 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → ISpee
   - `SharpHookTextInjectionService`: direct key simulation
 - `Win32TargetWindowTracker` tracks last non-Parlotype foreground window
 
-## Threading Model
+## Threading Model (reworked 2026-07, [[decisions/_index|ADR-045]])
 
-- Capture and transcription run on **separate threads**
-- `ConcurrentQueue<float[]>` bridges capture → transcription
+Three single-threaded stages joined by unbounded `System.Threading.Channels`:
+
+```
+capture callback ──Channel<RawChunk>──▶ segmenter task ──Channel<float[]>──▶ transcription task
+(RMS + pooled copy only)               (owns sample buffer, VAD,             (ReadAllAsync, raises
+                                        segmentation, final flush)            pipeline events)
+```
+
+- The capture callback does **no inference** — a slow VAD on the callback
+  thread risked silent audio drops via `DiscardOnBufferOverflow`
+  (see [[../knowledge/wasapi-capture-buffer-sizing]])
+- Capture buffers are `ArrayPool`-rented; `AudioDataEventArgs.Buffer` is valid
+  **only during the event** (subscribers copy synchronously — contract in Core)
+- Shutdown = channel completion: StopAsync completes the raw writer, the
+  segmenter drains + flushes + completes the utterance writer, the
+  transcription loop drains (30 s cap). No polling loops remain.
+- Transcripts are never logged (security audit S1, [[decisions/_index|ADR-046]])
 - UI updates dispatch to `Avalonia.Threading.Dispatcher.UIThread`
 
 ## Operating Modes

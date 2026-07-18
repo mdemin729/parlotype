@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [core, contracts, domain]
 criticality: high
-last_updated: 2026-07-07
+last_updated: 2026-07-13
 summary: Domain interfaces and models — zero external dependencies, all contracts live here
 ---
 
@@ -20,6 +20,7 @@ Pure domain layer containing all interfaces, models, enums, and records. Zero ex
 - `src/Parlotype.Core/Hotkeys/` — `IGlobalHotkeyService`, `HotkeyBinding`, `HotkeyConflictDetector`
 - `src/Parlotype.Core/Settings/` — `ISettingsService`, `SettingsKeys` (long-lived, user-configured settings; cloud-provider keys `OpenAiCompatBaseUrl`/`OpenAiCompatModel`/`XaiGrokBaseUrl`/`XaiGrokModel` plus secret-store lookup names `OpenAiCompatApiKey`/`XaiGrokApiKey` — ADR-043), `ISecretStore` (small-secret storage contract — API keys; values live outside `settings.json`, encrypted at rest where the OS supports it; null/empty `SetAsync` removes — ADR-043). Deliberately separate: `IWindowStateService`, `WindowStateKeys`, `WindowPosition` (transient window-chrome state — position — that saves far more often, e.g. every drag; never shares a file/lock with `ISettingsService`, ADR-040)
 - `src/Parlotype.Core/TextInjection/` — `ITextInjectionService`, `ITargetWindowTracker`
+- Security/perf additions (ADR-045/046): `AudioDataEventArgs.Buffer` is contractually valid **only during the `DataAvailable` event** (may be pool-backed — handlers copy synchronously); `ModelIntegrityException` (SHA-256 mismatch on model download, carries FileName/Expected/Actual); `CloudBaseUrlValidator` (HTTPS-or-loopback rule for cloud base URLs); model catalogs carry SHA-256 digests — `WhisperModelInfo.Sha256` (replaced the never-consumed SHA-1 `Sha`), `ParakeetModelInfo.FileSha256` map + `GetSha256(fileName)`, `Gemma4ModelInfo.GgufSha256`/`MmprojSha256` + `GetSha256(fileName)`
 
 ## Conventions
 - Interfaces only — no implementations
@@ -43,3 +44,5 @@ None (by design).
 - [[decisions/_index|ADR-036]] Language UX rebuild (`KeyboardLayoutCode` sentinel, `TranslationForm`, `IKeyboardLayoutService`/`KeyboardLayoutInfo`, `SourceLanguageResolver`)
 - [[decisions/_index|ADR-041]] Parakeet TDT v3 (`SpeechEngine.Parakeet`, `ParakeetModelInfo`, `LanguageCatalog.ParakeetLanguages`, `SettingsKeys.SelectedParakeetModel`, transcribe-only capabilities ⇒ `TranslationForm.None`)
 - [[decisions/_index|ADR-043]] Cloud speech providers v1 (`SpeechEngine.OpenAiCompatible`/`XaiGrok`, `ISecretStore`, cloud settings keys, transcribe-only capability arms; amendment adds `CloudProviderNotConfiguredException` — typed missing-key failure carrying the `SpeechEngine`, derives from `InvalidOperationException` like the `RuntimeUnavailableException` precedent; and `CloudSpeechTranscriptionException` + `CloudSpeechErrorKind` (KeyRejected/QuotaExceeded/RateLimited/ProviderUnavailable/Other) for classified request failures, surfaced via `IAudioPipeline.TranscriptionFailed`)
+- [[decisions/_index|ADR-045]] Audio pipeline allocation & threading rework (`AudioDataEventArgs.Buffer` event-scoped lifetime contract)
+- [[decisions/_index|ADR-046]] Security hardening batch (`ModelIntegrityException`, `CloudBaseUrlValidator`, catalog SHA-256 fields)

@@ -7,5 +7,6 @@
     <Project Path="src/Parlotype.Benchmark.Tests/Parlotype.Benchmark.Tests.csproj" />
     <Project Path="src/Parlotype.Desktop/Parlotype.Desktop.csproj" />
     <Project Path="src/Parlotype.Desktop.Tests/Parlotype.Desktop.Tests.csproj" />
+    <Project Path="src/Parlotype.MicroBenchmarks/Parlotype.MicroBenchmarks.csproj" />
   </Folder>
 </Solution>

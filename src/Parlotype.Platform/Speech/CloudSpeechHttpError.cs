@@ -29,9 +29,12 @@ internal static class CloudSpeechHttpError
         CancellationToken cancellationToken)
     {
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        // Cap the provider-controlled body before it reaches persistent logs
+        // (security audit 2026-07-11, S1) — the parsed envelope below carries
+        // the useful part anyway.
         logger.LogWarning(
             "{Provider} transcription request failed (HTTP {Status}): {Body}",
-            providerDisplayName, (int)response.StatusCode, body);
+            providerDisplayName, (int)response.StatusCode, Trim(body));
 
         var (providerMessage, errorCode) = ParseErrorEnvelope(body);
         providerMessage ??= Trim(body);

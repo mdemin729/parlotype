@@ -62,3 +62,6 @@ results/*
 
 # Generated test reports
 reports/
+
+# BenchmarkDotNet output (src/Parlotype.MicroBenchmarks)
+BenchmarkDotNet.Artifacts/

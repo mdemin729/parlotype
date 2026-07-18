@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-07-10
+last_updated: 2026-07-18
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -45,6 +45,11 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[avalonia12-frameless-window]] | Avalonia 12: `SystemDecorations` obsolete → `WindowDecorations` enum; frameless rounded corners need transparent window + root Border; `BeginMoveDrag` blocks until drop on Windows (persist position after it returns); headless `Screens.All` is actually populated (one real virtual screen), verified empirically | 2026-07-06 |
 | [[sherpa-onnx-quirks]] | org.k2fsa.sherpa.onnx NuGet is CPU-only (GPU needs source build); config objects use public fields; NeMo transducer results carry no confidence/language; `AcceptWaveform` auto-resamples with stderr log; load/decode are synchronous — wrap in `Task.Run` | 2026-07-07 |
 | [[avalonia-composite-control-patterns]] | Fluent `SplitButton`'s one-frame/many-parts trick (corner-radius/border-thickness filter converters); making an inner `TextBox` chrome-less via `Border#PART_BorderElement` overrides + outer `:focus-within`; reusable `PasswordBoxReveal/HideButtonData` glyphs and `TextControlButton*` brushes | 2026-07-10 |
+| [[wasapi-capture-buffer-sizing]] | NAudio `BytesRecorded` is bytes of the *native* format — sizing float buffers from it over-allocates ~4× into the LOH (~1.5 MB/s while recording); callbacks are sequential so pooled buffers are safe; `DiscardOnBufferOverflow` silently drops audio behind slow consumers | 2026-07-13 |
+| [[windows-clipboard-exclusion-formats]] | `ExcludeClipboardContentFromMonitorProcessing` / `CanIncludeInClipboardHistory`=0 / `CanUploadToCloudClipboard`=0 must be set in the same OpenClipboard session as the content; `EmptyClipboard` clears them; only verifiable manually (Win+V) | 2026-07-13 |
+| [[huggingface-lfs-digests]] | HF tree API `lfs.oid` is the authoritative SHA-256 for LFS files; non-LFS blobs expose only a git SHA-1 — hash them directly; pin the revision the downloader actually uses | 2026-07-13 |
+| [[naudio-resampler-read-cost]] | NAudio's WDL resampler chain allocates per `Read` **in proportion to the requested count** (2.7 MB/call at 38,400 vs 0.19 MB at 3,200, same output) — never pass `BytesRecorded` or a pooled array's `.Length` as the read count; request ~2× the expected resampled output | 2026-07-14 |
+| [[whisper-net-linux-native-crash]] | Whisper.net's native ggml library hard-crashes the .NET test host on Linux (`GGML_ASSERT`) regardless of CPU/CUDA/Vulkan selection — root cause unresolved; `benchmark.yml` pinned to `windows-latest` as a workaround | 2026-07-18 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

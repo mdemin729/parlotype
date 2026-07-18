@@ -1,4 +1,6 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
+using Parlotype.Core.Speech;
 
 namespace Parlotype.Platform.Speech;
 
@@ -26,12 +28,17 @@ public sealed class StreamingFileDownloader
     /// Downloads <paramref name="url"/> to <paramref name="destinationPath"/>.
     /// Throws on non-2xx status. Throws <see cref="OperationCanceledException"/>
     /// when the token cancels. The destination directory is created if needed.
+    /// When <paramref name="expectedSha256"/> is provided, the stream is hashed
+    /// while writing and a mismatch throws <see cref="ModelIntegrityException"/>
+    /// with the temp file removed — the destination is never touched
+    /// (security audit 2026-07-11, S2).
     /// </summary>
     public async Task DownloadAsync(
         string url,
         string destinationPath,
         IProgress<StreamingDownloadProgress>? progress,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? expectedSha256 = null)
     {
         var dir = Path.GetDirectoryName(destinationPath);
         if (!string.IsNullOrEmpty(dir))
@@ -47,6 +54,10 @@ public sealed class StreamingFileDownloader
 
         try
         {
+            using var hasher = expectedSha256 is null
+                ? null
+                : IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+
             await using (var content = await response.Content.ReadAsStreamAsync(cancellationToken))
             await using (var file = File.Create(tempPath))
             {
@@ -57,6 +68,7 @@ public sealed class StreamingFileDownloader
                     var read = await content.ReadAsync(buffer, cancellationToken);
                     if (read == 0) break;
                     await file.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+                    hasher?.AppendData(buffer, 0, read);
                     received += read;
                     progress?.Report(new StreamingDownloadProgress(received, totalBytes));
                 }
@@ -64,6 +76,15 @@ public sealed class StreamingFileDownloader
                 _logger.LogDebug(
                     "Downloaded {Bytes} byte(s) from {Url} to {Path}",
                     received, url, destinationPath);
+            }
+
+            if (hasher is not null)
+            {
+                var actual = Convert.ToHexStringLower(hasher.GetHashAndReset());
+                if (!actual.Equals(expectedSha256, StringComparison.OrdinalIgnoreCase))
+                    throw new ModelIntegrityException(
+                        Path.GetFileName(destinationPath), expectedSha256!.ToLowerInvariant(), actual);
+                _logger.LogDebug("SHA-256 verified for {Path}", destinationPath);
             }
 
             if (File.Exists(destinationPath))

@@ -56,6 +56,10 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
     [ObservableProperty]
     private string _openAiBaseUrl = "";
 
+    /// <summary>Inline validation hint (null = valid). HTTPS-or-loopback rule, security audit 2026-07-11 S3.</summary>
+    [ObservableProperty]
+    private string? _openAiBaseUrlError;
+
     [ObservableProperty]
     private string _openAiModel = "";
 
@@ -96,6 +100,10 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
 
     [ObservableProperty]
     private string _xaiBaseUrl = "";
+
+    /// <summary>Inline validation hint (null = valid). HTTPS-or-loopback rule, security audit 2026-07-11 S3.</summary>
+    [ObservableProperty]
+    private string? _xaiBaseUrlError;
 
     [ObservableProperty]
     private string _xaiModel = "";
@@ -163,6 +171,11 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
 
     partial void OnOpenAiBaseUrlChanged(string value)
     {
+        // The value is persisted regardless (no silent data loss while typing);
+        // the recognizer re-validates at initialisation and refuses to send the
+        // key over a rejected URL, so the hint here is a courtesy, not the gate.
+        OpenAiBaseUrlError = CloudBaseUrlValidator.TryValidate(value, out var error) ? null : error;
+
         if (_isLoading) return;
         _ = _settings.SetAsync(SettingsKeys.OpenAiCompatBaseUrl, value);
     }
@@ -175,6 +188,9 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
 
     partial void OnXaiBaseUrlChanged(string value)
     {
+        // See OnOpenAiBaseUrlChanged — hint only; the recognizer is the gate.
+        XaiBaseUrlError = CloudBaseUrlValidator.TryValidate(value, out var error) ? null : error;
+
         if (_isLoading) return;
         _ = _settings.SetAsync(SettingsKeys.XaiGrokBaseUrl, value);
     }

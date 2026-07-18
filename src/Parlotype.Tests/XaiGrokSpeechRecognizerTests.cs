@@ -309,4 +309,21 @@ public sealed class XaiGrokSpeechRecognizerTests
         Assert.Equal("first", first.Text);
         Assert.Equal("second", second.Text);
     }
+
+    /// <summary>HTTPS-or-loopback rule, security audit 2026-07-11 S3.</summary>
+    [Fact]
+    public async Task InitializeAsync_RemoteHttpBaseUrl_ThrowsNotConfigured()
+    {
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.XaiGrokBaseUrl, "http://api.example.com/v1");
+        var secrets = new FakeSecretStore();
+        await secrets.SetAsync(SettingsKeys.XaiGrokApiKey, "xai-test");
+
+        var recognizer = Create(new ScriptedHandler(), settings, secrets);
+
+        var ex = await Assert.ThrowsAsync<CloudProviderNotConfiguredException>(
+            () => recognizer.InitializeAsync());
+        Assert.Contains("base URL", ex.Message);
+        Assert.False(recognizer.IsReady);
+    }
 }
