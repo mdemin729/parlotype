@@ -28,6 +28,10 @@
                     <TextBlock Text="Base URL" FontSize="12" Opacity="0.7" />
                     <TextBox Text="{Binding OpenAiBaseUrl, Mode=TwoWay}"
                              PlaceholderText="{x:Static vms:CloudProviderSettingsViewModel.DefaultOpenAiBaseUrl}" />
+                    <TextBlock Text="{Binding OpenAiBaseUrlError}"
+                               IsVisible="{Binding OpenAiBaseUrlError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                               Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                               FontSize="12" TextWrapping="Wrap" />
                 </StackPanel>
 
                 <StackPanel Spacing="4">
@@ -92,6 +96,10 @@
                     <TextBlock Text="Base URL" FontSize="12" Opacity="0.7" />
                     <TextBox Text="{Binding XaiBaseUrl, Mode=TwoWay}"
                              PlaceholderText="{x:Static vms:CloudProviderSettingsViewModel.DefaultXaiBaseUrl}" />
+                    <TextBlock Text="{Binding XaiBaseUrlError}"
+                               IsVisible="{Binding XaiBaseUrlError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                               Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                               FontSize="12" TextWrapping="Wrap" />
                 </StackPanel>
 
                 <StackPanel Spacing="4">

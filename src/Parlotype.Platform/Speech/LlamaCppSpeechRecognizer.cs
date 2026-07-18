@@ -126,18 +126,27 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
 
             _logger.LogInformation("Starting llama-server (model={Gguf}, port={Port})", model.GgufFileName, _activePort);
 
+            // ArgumentList (not a hand-quoted Arguments string) so paths with
+            // quotes or other shell metacharacters can't break the command line
+            // (security audit 2026-07-11, S6).
             var psi = new ProcessStartInfo
             {
                 FileName = serverPath,
-                Arguments = $"-m \"{ggufPath}\" " +
-                            $"--mmproj \"{mmprojPath}\" " +
-                            $"--host {DefaultHost} --port {_activePort} " +
-                            $"-ngl 99 --flash-attn on --jinja " +
-                            $"-c 24576",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
+                ArgumentList =
+                {
+                    "-m", ggufPath,
+                    "--mmproj", mmprojPath,
+                    "--host", DefaultHost,
+                    "--port", _activePort.ToString(),
+                    "-ngl", "99",
+                    "--flash-attn", "on",
+                    "--jinja",
+                    "-c", "24576",
+                },
             };
 
             _serverProcess = Process.Start(psi)

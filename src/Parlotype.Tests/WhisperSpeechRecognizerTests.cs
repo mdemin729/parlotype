@@ -46,6 +46,12 @@ public class WhisperSpeechRecognizerTests
     {
         var settings = new FakeSettingsService();
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
+        // Cpu, not the Auto default: on a machine with no real Vulkan loader (e.g.
+        // Linux CI runners), Whisper.net's own Vulkan probe under Auto can hard-crash
+        // the native process instead of throwing — this test only cares about
+        // transcription correctness, not runtime selection (that's covered by
+        // WhisperRuntimeBootstrapTests / WhisperSpeechRecognizerStrictRuntimeTests).
+        await settings.SetAsync(SettingsKeys.RuntimePreference, RuntimePreference.Cpu.ToString());
 
         await using var recognizer = new WhisperSpeechRecognizer(
             new HeadlessModelDownloadService(),
@@ -76,6 +82,8 @@ public class WhisperSpeechRecognizerTests
     {
         var settings = new FakeSettingsService();
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
+        // See TranscribeAsync_WithSpeechAudio_ReturnsTranscription for why Cpu.
+        await settings.SetAsync(SettingsKeys.RuntimePreference, RuntimePreference.Cpu.ToString());
 
         await using var recognizer = new WhisperSpeechRecognizer(
             new HeadlessModelDownloadService(),

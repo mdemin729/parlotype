@@ -15,7 +15,12 @@ on:
 
 jobs:
   benchmark:
-    runs-on: ubuntu-latest
+    # Windows-only: Whisper.net's native ggml library hard-crashes the test
+    # host on Linux (GGML_ASSERT(prev != ggml_uncaught_exception) while
+    # loading libggml-base-whisper.so, independent of CPU/CUDA/Vulkan
+    # selection) — reproduced locally, root cause not resolved. Revisit
+    # ubuntu-latest once that's fixed upstream or worked around.
+    runs-on: windows-latest
     timeout-minutes: 30
 
     steps:
@@ -36,7 +41,15 @@ jobs:
       - name: Run tests
         run: dotnet test --no-build
 
+      - name: Install FFmpeg
+        # AudioFileLoader shells out to ffmpeg for FLAC samples (e.g. the
+        # smoke-test dataset) — not preinstalled on windows-latest. Chocolatey
+        # is preinstalled on GitHub-hosted Windows runners and non-interactive,
+        # unlike winget which can hit MS Store consent prompts in CI.
+        run: choco install ffmpeg -y --no-progress
+
       - name: Run benchmark
+        shell: bash
         run: |
           dotnet run --project src/Parlotype.Benchmark --no-build -- run \
             --config datasets/smoke-test-config.json \
@@ -45,6 +58,7 @@ jobs:
 
       - name: Check for regressions
         if: inputs.baseline_run_id != ''
+        shell: bash
         run: |
           dotnet run --project src/Parlotype.Benchmark --no-build -- check \
             --baseline ${{ inputs.baseline_run_id || 'latest' }} \

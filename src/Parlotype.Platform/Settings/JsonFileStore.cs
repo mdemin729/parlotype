@@ -89,6 +89,6 @@ public abstract class JsonFileStore
         Directory.CreateDirectory(dir);
 
         var json = JsonSerializer.Serialize(dict, JsonOptions);
-        await File.WriteAllTextAsync(_path, json, cancellationToken);
+        await AtomicFileWriter.WriteAllTextAsync(_path, json, cancellationToken);
     }
 }

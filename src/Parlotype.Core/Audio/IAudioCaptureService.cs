@@ -22,6 +22,11 @@ public interface IAudioCaptureService : IAsyncDisposable
 public sealed class AudioDataEventArgs : EventArgs
 {
     /// <summary>Mono float samples in the range [-1, 1].</summary>
+    /// <remarks>
+    /// May be backed by a pooled buffer that the capture service reuses once the
+    /// event returns. Handlers must consume or copy the samples synchronously
+    /// inside the event handler and must not hold on to this memory.
+    /// </remarks>
     public required ReadOnlyMemory<float> Buffer { get; init; }
 
     /// <summary>Sample rate of the audio data (e.g. 16 000 Hz).</summary>

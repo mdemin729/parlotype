@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
@@ -127,7 +128,7 @@ public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
         var text = await Task.Run(() =>
         {
             using var stream = recognizer.CreateStream();
-            stream.AcceptWaveform(SampleRate, samples.ToArray());
+            stream.AcceptWaveform(SampleRate, AsArray(samples));
             recognizer.Decode(stream);
             return stream.Result.Text;
         }, cancellationToken).ConfigureAwait(false);
@@ -141,6 +142,19 @@ public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
             Text = text.Trim(),
         };
     }
+
+    /// <summary>
+    /// Returns the underlying array without copying when the memory spans a
+    /// whole array — always true for pipeline-produced utterance buffers, which
+    /// avoids duplicating the entire utterance per transcription. sherpa-onnx
+    /// only reads the samples.
+    /// </summary>
+    private static float[] AsArray(ReadOnlyMemory<float> samples) =>
+        MemoryMarshal.TryGetArray(samples, out var segment)
+            && segment is { Array: not null, Offset: 0 }
+            && segment.Count == segment.Array.Length
+            ? segment.Array
+            : samples.ToArray();
 
     public async Task UnloadAsync()
     {

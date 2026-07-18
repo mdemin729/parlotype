@@ -60,8 +60,10 @@ public sealed class HttpModelDownloadService
                 : new Progress<StreamingDownloadProgress>(p =>
                     progress.Report(new ModelDownloadProgress(p.BytesReceived, p.TotalBytes)));
 
-            await _downloader.DownloadAsync(url, modelPath, bridged, cancellationToken);
-            _logger.LogInformation("Whisper model {ModelType} download complete", modelType);
+            await _downloader.DownloadAsync(
+                url, modelPath, bridged, cancellationToken,
+                expectedSha256: WhisperModelInfo.Get(modelType).Sha256);
+            _logger.LogInformation("Whisper model {ModelType} download complete (SHA-256 verified)", modelType);
         }
         finally
         {

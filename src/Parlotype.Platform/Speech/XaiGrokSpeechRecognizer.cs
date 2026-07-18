@@ -76,6 +76,13 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
                 return;
 
             var savedBaseUrl = await _settings.GetAsync<string>(SettingsKeys.XaiGrokBaseUrl, cancellationToken);
+            // HTTPS-or-loopback only — the request carries the bearer key and
+            // recorded audio (security audit 2026-07-11, S3).
+            if (!CloudBaseUrlValidator.TryValidate(savedBaseUrl, out var urlError))
+                throw new CloudProviderNotConfiguredException(
+                    SpeechEngine.XaiGrok,
+                    $"The xAI Grok base URL is rejected: {urlError}. " +
+                    "Fix it in Settings → Speech engine.");
             _baseUrl = string.IsNullOrWhiteSpace(savedBaseUrl) ? DefaultBaseUrl : savedBaseUrl.TrimEnd('/');
 
             var savedModel = await _settings.GetAsync<string>(SettingsKeys.XaiGrokModel, cancellationToken);

@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [platform, implementations, whisper, nAudio, vad]
 criticality: high
-last_updated: 2026-07-07
+last_updated: 2026-07-13
 summary: Implements Core interfaces using Whisper.net, sherpa-onnx, NAudio, SileroVad, SharpHook
 ---
 
@@ -20,6 +20,7 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 - `src/Parlotype.Platform/Hotkeys/` — `SharpHookHotkeyService`, `KeyCodeMapper`
 - `src/Parlotype.Platform/Settings/` — `JsonFileStore` (abstract, shared JSON key-value persistence: file path + own `SemaphoreSlim` lock + load/save), `JsonSettingsService` (`ISettingsService` → `settings.json`), `JsonWindowStateService` (`IWindowStateService` → `window-state.json`, kept in a separate file from `settings.json` on purpose so window-drag saves never touch or contend with user settings — ADR-040), `DpapiSecretStore` (`ISecretStore` → `secrets.json`, deliberately outside `settings.json`; standalone impl — not on `JsonFileStore`, which lacks per-key delete and a protect hook; Windows: DPAPI `ProtectedData` CurrentUser scope; non-Windows: base64 plaintext + one-time warning; undecryptable values treated as absent, never fatal — ADR-043)
 - `src/Parlotype.Platform/PlatformServiceExtensions.cs` — DI registration (all singletons)
+- 2026-07 perf/security rework (ADR-045/046): `AudioPipelineService` is now three channel-joined single-threaded stages — capture callback (RMS + pooled copy only) → segmenter task (owns the sample buffer, VAD/segmentation, unchanged thresholds) → transcription task (`ReadAllAsync`, no polling); stop = channel completion with drain + 30 s cap; `WasapiAudioCaptureService` rents callback buffers from `ArrayPool<float>` (see [[wasapi-capture-buffer-sizing]]); `WavEncoder` writes one exact-size array via `BinaryPrimitives` (byte-identical to the old MemoryStream encoder); `StreamingFileDownloader` + Parakeet/Gemma download loops verify SHA-256 while streaming (mismatch ⇒ Core `ModelIntegrityException`, fail-closed; missing digest ⇒ warn, fail-open); cloud recognizers enforce `CloudBaseUrlValidator` (HTTPS-or-loopback) at init; `ClipboardTextInjectionService` sets the Windows clipboard exclusion formats on injected text (see [[windows-clipboard-exclusion-formats]]); llama-server spawned via `ArgumentList`; `AtomicFileWriter` (temp + move) backs `JsonFileStore` + `DpapiSecretStore` saves; transcripts are never logged (S1 convention — log lengths only)
 
 ## Key External Dependencies
 - **Whisper.net** + **Whisper.net.Runtime.Cuda** (conditional, ~350 MB) + **Whisper.net.Runtime.Vulkan** (always, ~30 MB) — transcription
@@ -55,3 +56,6 @@ Platform-specific implementations of all Core interfaces. Where the real audio c
 - [[decisions/_index|ADR-036]] Language UX rebuild (`Win32KeyboardLayoutService` P/Invoke; pipeline + Gemma prompt resolve the keyboard sentinel)
 - [[decisions/_index|ADR-041]] Parakeet TDT v3 via sherpa-onnx (`ParakeetSpeechRecognizer`, `ParakeetModelDownloadService`)
 - [[decisions/_index|ADR-043]] Cloud speech providers v1 (`OpenAiCompatibleSpeechRecognizer`, `XaiGrokSpeechRecognizer`, `WavEncoder`, `DpapiSecretStore`, cloud helpers)
+- [[decisions/_index|ADR-044]] Micro-benchmark project (frozen legacy copies live in `Parlotype.MicroBenchmarks`, `InternalsVisibleTo` for `WavEncoder`)
+- [[decisions/_index|ADR-045]] Audio pipeline allocation & threading rework (pooled capture buffers, channel stages, WavEncoder rewrite, Parakeet zero-copy)
+- [[decisions/_index|ADR-046]] Security hardening batch (SHA-256 download verification, URL validation, clipboard exclusion, atomic writes, log hygiene)

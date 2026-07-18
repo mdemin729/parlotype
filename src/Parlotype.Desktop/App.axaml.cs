@@ -174,6 +174,12 @@ public class App : Application
         services.AddLogging(logging =>
         {
             logging.SetMinimumLevel(LogLevel.Debug);
+            // The rolling file persists on disk: cap it at Information so Debug
+            // detail (settings values, server output, per-chunk pipeline state)
+            // never lands in long-lived files. Console keeps full Debug for dev.
+            // (Security audit 2026-07-11, S1.)
+            logging.AddFilter<ZLogger.Providers.ZLoggerRollingFileLoggerProvider>(
+                category: null, level: LogLevel.Information);
             logging.AddZLoggerConsole(options =>
             {
                 options.UsePlainTextFormatter(formatter =>
