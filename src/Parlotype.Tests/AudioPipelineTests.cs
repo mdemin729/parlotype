@@ -702,6 +702,10 @@ public class AudioPipelineTests
 
         var settings = new FakeSettingsService();
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.BaseEn.ToString());
+        // Cpu, not the Auto default: see WhisperSpeechRecognizerTests for why —
+        // Whisper.net's Vulkan probe under Auto can hard-crash the native test
+        // host on a machine with no real Vulkan loader (e.g. Linux CI runners).
+        await settings.SetAsync(SettingsKeys.RuntimePreference, RuntimePreference.Cpu.ToString());
         await using var recognizer = new WhisperSpeechRecognizer(
             new HeadlessModelDownloadService(),
             settings,

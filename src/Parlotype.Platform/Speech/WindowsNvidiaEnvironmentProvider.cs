@@ -189,9 +189,14 @@ internal sealed partial class WindowsNvidiaEnvironmentProvider : INvidiaEnvironm
 
     internal static string? ExtractVersionFromCudaPath(string path)
     {
-        // Expected shape: "...\NVIDIA GPU Computing Toolkit\CUDA\v13.2"
-        var trimmed = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var leaf = Path.GetFileName(trimmed);
+        // Expected shape: "...\NVIDIA GPU Computing Toolkit\CUDA\v13.2" — always a
+        // Windows-style path (this only runs on Windows in production), so parse
+        // explicitly on '\'/'/' rather than via Path.* — those adapt to the host
+        // OS's separator and silently fail to split a backslash path on Linux,
+        // which only this static method needs to tolerate for cross-platform tests.
+        var trimmed = path.TrimEnd('\\', '/');
+        var lastSeparator = trimmed.LastIndexOfAny(['\\', '/']);
+        var leaf = lastSeparator >= 0 ? trimmed[(lastSeparator + 1)..] : trimmed;
         if (!string.IsNullOrEmpty(leaf) && leaf.StartsWith('v') && leaf.Length > 1
             && char.IsDigit(leaf[1]))
         {
