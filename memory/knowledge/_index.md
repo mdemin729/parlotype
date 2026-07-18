@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-07-18
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -49,6 +49,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[windows-clipboard-exclusion-formats]] | `ExcludeClipboardContentFromMonitorProcessing` / `CanIncludeInClipboardHistory`=0 / `CanUploadToCloudClipboard`=0 must be set in the same OpenClipboard session as the content; `EmptyClipboard` clears them; only verifiable manually (Win+V) | 2026-07-13 |
 | [[huggingface-lfs-digests]] | HF tree API `lfs.oid` is the authoritative SHA-256 for LFS files; non-LFS blobs expose only a git SHA-1 — hash them directly; pin the revision the downloader actually uses | 2026-07-13 |
 | [[naudio-resampler-read-cost]] | NAudio's WDL resampler chain allocates per `Read` **in proportion to the requested count** (2.7 MB/call at 38,400 vs 0.19 MB at 3,200, same output) — never pass `BytesRecorded` or a pooled array's `.Length` as the read count; request ~2× the expected resampled output | 2026-07-14 |
+| [[whisper-net-linux-native-crash]] | Whisper.net's native ggml library hard-crashes the .NET test host on Linux (`GGML_ASSERT`) regardless of CPU/CUDA/Vulkan selection — root cause unresolved; `benchmark.yml` pinned to `windows-latest` as a workaround | 2026-07-18 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history
