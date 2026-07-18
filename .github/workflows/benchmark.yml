@@ -41,6 +41,13 @@ jobs:
       - name: Run tests
         run: dotnet test --no-build
 
+      - name: Install FFmpeg
+        # AudioFileLoader shells out to ffmpeg for FLAC samples (e.g. the
+        # smoke-test dataset) — not preinstalled on windows-latest. Chocolatey
+        # is preinstalled on GitHub-hosted Windows runners and non-interactive,
+        # unlike winget which can hit MS Store consent prompts in CI.
+        run: choco install ffmpeg -y --no-progress
+
       - name: Run benchmark
         shell: bash
         run: |
