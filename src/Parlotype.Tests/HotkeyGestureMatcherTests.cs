@@ -265,6 +265,53 @@ public class HotkeyGestureMatcherTests
     }
 
     [Fact]
+    public void A_Configured_Escape_Chord_Stops_Rather_Than_Discards()
+    {
+        // Binding Ctrl+Escape to toggle means "finish and type it", not "throw
+        // it away" — the hardwired bare-Escape cancel must not override it.
+        var chord = DictationHotkey.Chord(
+            new HotkeyBinding(HotkeyModifiers.Ctrl, "Escape"),
+            ActivationMode.Toggle);
+        var matcher = new HotkeyGestureMatcher([chord]);
+        matcher.SetDictationActive(true);
+
+        var result = matcher.Process(
+            HotkeyKeyEvent.KeyDown("Escape", 500, HotkeyModifiers.Ctrl));
+
+        Assert.Equal(DictationAction.Stop, result.Action);
+        Assert.True(result.Suppress);
+    }
+
+    [Fact]
+    public void Bare_Escape_Still_Cancels_When_An_Escape_Chord_Is_Bound()
+    {
+        var chord = DictationHotkey.Chord(
+            new HotkeyBinding(HotkeyModifiers.Ctrl, "Escape"),
+            ActivationMode.Toggle);
+        var matcher = new HotkeyGestureMatcher([chord]);
+        matcher.SetDictationActive(true);
+
+        var result = matcher.Process(HotkeyKeyEvent.KeyDown("Escape", 500));
+
+        Assert.Equal(DictationAction.Cancel, result.Action);
+    }
+
+    [Fact]
+    public void Escape_With_Modifiers_Held_Is_Left_To_The_OS()
+    {
+        // Ctrl+Esc opens the Start menu and Alt+Esc cycles windows; swallowing
+        // them for the duration of every recording would be hostile.
+        var matcher = Default();
+        matcher.SetDictationActive(true);
+
+        var result = matcher.Process(
+            HotkeyKeyEvent.KeyDown("Escape", 500, HotkeyModifiers.Ctrl));
+
+        Assert.Equal(DictationAction.None, result.Action);
+        Assert.False(result.Suppress);
+    }
+
+    [Fact]
     public void Escape_Passes_Through_When_Not_Dictating()
     {
         var matcher = Default();

@@ -100,9 +100,13 @@ non-overlapping binding such as Hold Right Alt starts with no delay.
   Swallowing a Ctrl key-down would break every Ctrl shortcut on the machine.
   The consequence is that a Right Ctrl hold still reads as Ctrl to other
   applications while dictating.
-- **Escape** is suppressed only while dictation is actually running. This does
-  steal Escape from the foreground app for the duration of a recording —
-  acceptable, since recording is a deliberate and visible mode.
+- **Escape** cancels — and is suppressed — only while dictation is actually
+  running *and* no modifier is held. This does steal bare Escape from the
+  foreground app for the duration of a recording, which is acceptable since
+  recording is a deliberate and visible mode. Requiring no modifiers keeps
+  Ctrl+Esc and Alt+Esc with the OS, and means a user who binds a chord
+  containing Escape gets the action they asked for: every valid chord carries
+  at least one modifier, so the two paths cannot collide.
 
 ### 6. The service reports intent, and is told the state
 
@@ -124,10 +128,19 @@ as active so Escape can abandon a start that is still waiting on the model.
 
 `TranscribeViewModel.CancelRecordingAsync()` detaches the pipeline's
 `TranscriptionAvailable` handler *before* stopping it, so anything the pipeline
-still produces has nowhere to go — no transcription, no injection. It waits on
-an in-flight start first, for the same reason `StopRecordingAsync` does
-(ADR-039). No Core audio contract changed; the discard decision lives in the
-view model.
+still produces has nowhere to go — no transcription, no injection. No Core
+audio contract changed; the discard decision lives in the view model.
+
+Unlike `StopRecordingAsync`, cancel deliberately **does not wait** on an
+in-flight start. A stop waits because the user wants that recording (ADR-039);
+someone pressing Escape wants out immediately, and a cold model load can run
+for seconds. Model loading is synchronous native work on a thread-pool thread,
+so a `CancellationToken` could not interrupt it anyway — passing one down would
+leave the caller blocked just the same. Instead the cancel releases the UI at
+once and sets `_cancelRequested`; the start path checks that flag on completion
+and tears the recording down without ever entering the recording state. The
+deferred loading spinner honours the same flag, or it would strand the widget
+on "Loading model…" after the user had already cancelled.
 
 `TranscribeWindow`'s Escape handler now cancels while recording and hides to
 tray otherwise (ADR-040's behaviour is preserved for the idle case).
@@ -160,6 +173,11 @@ of `SettingsKeys.HotkeyBindings`:
 
 The legacy keys are read once and never written again, following the
 `TranslateToEnglish` precedent.
+
+An **empty** stored list is a decision rather than an absent setting — the
+settings page lets users remove every binding and drive dictation from the
+widget — so it is honoured on load. Only a genuinely missing key, or a list
+whose entries all fail to decode (a damaged file), falls back to the defaults.
 
 Bindings persist as a readable string list —
 `["hold|Ctrl|Right|PushToTalk", "doubletap|Ctrl|Either|Toggle", …]` — via

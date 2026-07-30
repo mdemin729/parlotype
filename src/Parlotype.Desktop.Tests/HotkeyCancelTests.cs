@@ -56,20 +56,67 @@ public class HotkeyCancelTests
     }
 
     [AvaloniaFact]
-    public async Task Cancel_Waits_For_An_In_Flight_Start()
+    public async Task Cancel_Does_Not_Wait_For_An_In_Flight_Start()
     {
-        // A hold aborted inside the grace window can land while the model is
-        // still loading (ADR-039).
-        var pipeline = new MockAudioPipeline { StartDelay = TimeSpan.FromMilliseconds(150) };
+        // Escape during a cold model load must release the UI at once — waiting
+        // out a load that can run for seconds is what a *stop* does (ADR-039),
+        // not a cancel.
+        var pipeline = new MockAudioPipeline { StartDelay = TimeSpan.FromSeconds(3) };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, new MockTextInjectionService());
+
+        var start = vm.StartRecordingAsync();
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        await vm.CancelRecordingAsync();
+        sw.Stop();
+
+        Assert.True(sw.ElapsedMilliseconds < 500,
+            $"cancel blocked for {sw.ElapsedMilliseconds} ms waiting on the model load");
+        Assert.False(vm.IsRecording);
+        Assert.Equal("Cancelled", vm.StatusText);
+
+        await start;
+    }
+
+    [AvaloniaFact]
+    public async Task Start_Finishing_After_A_Cancel_Discards_Instead_Of_Recording()
+    {
+        // The load cannot be interrupted, so the pipeline does start — it just
+        // has to be torn straight back down without ever entering the recording
+        // state or injecting anything.
+        var pipeline = new MockAudioPipeline { StartDelay = TimeSpan.FromMilliseconds(300) };
         var injector = new MockTextInjectionService();
         var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, injector);
 
         var start = vm.StartRecordingAsync();
-        var cancel = vm.CancelRecordingAsync();
-        await Task.WhenAll(start, cancel);
+        await vm.CancelRecordingAsync();
+        await start;
+        await SettleAsync();
 
         Assert.False(vm.IsRecording);
         Assert.Equal(1, pipeline.StopCount);
+        Assert.Equal("Cancelled", vm.StatusText);
+
+        pipeline.RaiseTranscriptionAvailable("discard me");
+        await SettleAsync();
+        Assert.Empty(injector.InjectedTexts);
+    }
+
+    [AvaloniaFact]
+    public async Task A_Later_Start_Is_Unaffected_By_An_Earlier_Cancel()
+    {
+        var pipeline = new MockAudioPipeline { StartDelay = TimeSpan.FromMilliseconds(200) };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, new MockTextInjectionService());
+
+        var start = vm.StartRecordingAsync();
+        await vm.CancelRecordingAsync();
+        await start;
+
+        pipeline.StartDelay = null;
+        await vm.StartRecordingAsync();
+
+        Assert.True(vm.IsRecording);
+        Assert.Equal("Recording...", vm.StatusText);
     }
 
     [AvaloniaFact]

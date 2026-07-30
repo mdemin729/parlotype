@@ -116,8 +116,13 @@ public sealed class HotkeyGestureMatcher
 
     public HotkeyMatchResult Process(in HotkeyKeyEvent e)
     {
+        // Only *bare* Escape cancels. Every configured chord carries at least one
+        // modifier, so requiring none here keeps a binding like Ctrl+Escape doing
+        // what the user asked of it instead of silently discarding their
+        // dictation — and leaves the OS's own Ctrl+Esc / Alt+Esc alone.
         var isEscapeCancel = e.IsDown
                              && _dictationActive
+                             && e.HeldModifiers == HotkeyModifiers.None
                              && string.Equals(e.KeyName, EscapeKeyName, StringComparison.OrdinalIgnoreCase);
 
         var chord = MatchChord(e);

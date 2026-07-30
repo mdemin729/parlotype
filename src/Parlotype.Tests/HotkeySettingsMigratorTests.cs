@@ -129,6 +129,36 @@ public class HotkeySettingsMigratorTests
     }
 
     [Fact]
+    public async Task Deliberately_Empty_Set_Survives_A_Restart()
+    {
+        // Removing every binding is a supported choice — the settings page says
+        // so — and must not be undone by handing the defaults back on launch.
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.HotkeyBindings, new List<string>());
+        settings.WrittenKeys.Clear();
+
+        var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(settings);
+
+        Assert.Empty(bindings);
+        Assert.Empty(settings.WrittenKeys);
+    }
+
+    [Fact]
+    public async Task Empty_Set_Is_Honoured_Even_With_Legacy_Keys_Present()
+    {
+        // Otherwise an upgraded user who clears their bindings would get their
+        // old chord resurrected on every launch.
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.HotkeyModifiers, "Ctrl, Alt");
+        await settings.SetAsync(SettingsKeys.HotkeyKey, "F9");
+        await settings.SetAsync(SettingsKeys.HotkeyBindings, new List<string>());
+
+        var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(settings);
+
+        Assert.Empty(bindings);
+    }
+
+    [Fact]
     public async Task Unparseable_Stored_Set_Falls_Back_To_Migration()
     {
         var settings = new FakeSettingsService();

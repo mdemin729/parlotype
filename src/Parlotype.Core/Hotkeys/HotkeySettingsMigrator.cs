@@ -24,10 +24,17 @@ public static class HotkeySettingsMigrator
         ISettingsService settings, CancellationToken ct = default)
     {
         var stored = await settings.GetAsync<List<string>>(SettingsKeys.HotkeyBindings, ct).ConfigureAwait(false);
-        if (stored is { Count: > 0 })
+        if (stored is not null)
         {
             var decoded = HotkeyBindingCodec.DecodeAll(stored);
-            if (decoded.Count > 0)
+
+            // An empty list is a decision, not an absent setting: the settings
+            // page lets users remove every binding and drive dictation from the
+            // widget instead, and handing them three global hotkeys back on the
+            // next launch would undo that silently. A list whose entries all
+            // fail to decode is a damaged file rather than a choice, so that
+            // case falls through to the defaults below.
+            if (decoded.Count > 0 || stored.Count == 0)
                 return decoded;
         }
 
