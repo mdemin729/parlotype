@@ -5,6 +5,7 @@
     <RootNamespace>Parlotype.Desktop</RootNamespace>
     <AssemblyName>Parlotype.Desktop</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\parlotype.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
