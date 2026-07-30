@@ -136,11 +136,14 @@
             </Button>
 
             <Grid Grid.Row="1" ColumnDefinitions="*,6,44" Margin="8,0">
+                <!-- Tooltip names the current push-to-talk gesture; the more
+                     specific tip wins over RootChrome's status tooltip. -->
                 <Button Name="RecordButton"
                         Grid.Column="0"
                         Classes.recording="{Binding IsRecording}"
                         Classes.loading="{Binding IsLoading}"
                         Command="{Binding TogglePlayCommand}"
+                        ToolTip.Tip="{Binding HotkeyHintText}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         CornerRadius="22"

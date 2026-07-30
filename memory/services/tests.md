@@ -22,7 +22,7 @@ Unit and integration tests for Core contracts and Platform implementations.
 - Whisper.net integration (model loading, transcription, hot-swap via `UnloadAsync`)
 - `LlamaServer` subsystem: `LlamaServerAssetParser`, `GitHubLlamaServerCatalog` (HTTP+ETag+cache), `JsonLlamaServerRegistry`, `LlamaServerInstaller` (staging + SHA256 + atomic move + cudart companion)
 - Settings persistence (`JsonSettingsService` with `SemaphoreSlim`)
-- Hotkey binding parsing and key-code mapping
+- Hotkey binding parsing and key-code mapping; gesture recognition (`ModifierTapTrackerTests`, `ModifierHoldTrackerTests`, `HotkeyGestureMatcherTests` — pure timestamp-driven, no hook needed), `HotkeyBindingCodecTests`, `HotkeySettingsMigratorTests`, `HotkeyConflictCheckTests`, `DictationHotkeyTests`, `HotkeyHintTests` (ADR-047)
 
 ## Run
 ```bash

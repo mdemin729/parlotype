@@ -35,7 +35,7 @@ public partial class HotkeySettingsView : UserControl
         if (e.KeyModifiers.HasFlag(KeyModifiers.Shift))   modifiers |= HotkeyModifiers.Shift;
         if (e.KeyModifiers.HasFlag(KeyModifiers.Meta))    modifiers |= HotkeyModifiers.Meta;
 
-        vm.ApplyRecordedBinding(new HotkeyBinding(modifiers, keyName));
+        vm.ApplyRecordedChord(new HotkeyBinding(modifiers, keyName));
         e.Handled = true;
     }
 

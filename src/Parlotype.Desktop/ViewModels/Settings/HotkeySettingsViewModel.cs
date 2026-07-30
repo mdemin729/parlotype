@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -13,37 +14,34 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private readonly ISettingsService _settings;
     private readonly ILogger<HotkeySettingsViewModel> _logger;
 
-    public override string Title => "Hotkey";
+    public override string Title => "Hotkeys";
     public override SettingsCategory Category => SettingsCategory.Input;
 
-    [ObservableProperty]
-    private HotkeyBinding _currentBinding = HotkeyBinding.Default;
+    /// <summary>The configured gestures, in list order.</summary>
+    public ObservableCollection<HotkeyBindingItemViewModel> Bindings { get; } = [];
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPushToTalk))]
-    [NotifyPropertyChangedFor(nameof(IsToggle))]
-    private ActivationMode _currentMode;
-
-    [ObservableProperty]
-    private string _displayText = HotkeyBinding.Default.DisplayString;
+    /// <summary>
+    /// Ready-made gestures offered by the Add button. A key-capture field can
+    /// record a chord, but it has no way to express "hold this modifier" or
+    /// "tap it twice", so those arrive as presets.
+    /// </summary>
+    public IReadOnlyList<HotkeyPresetViewModel> Presets { get; }
 
     [ObservableProperty]
     private bool _isRecording;
 
     [ObservableProperty]
-    private string? _conflictWarning;
+    private string _recorderText = "Record a chord…";
 
-    public bool IsPushToTalk
-    {
-        get => CurrentMode == ActivationMode.PushToTalk;
-        set { if (value) SetActivationMode(ActivationMode.PushToTalk); }
-    }
+    /// <summary>Reserved-shortcut or duplicate message; the offending binding was rejected.</summary>
+    [ObservableProperty]
+    private string? _blockingWarning;
 
-    public bool IsToggle
-    {
-        get => CurrentMode == ActivationMode.Toggle;
-        set { if (value) SetActivationMode(ActivationMode.Toggle); }
-    }
+    /// <summary>Advisory note about a binding that was accepted anyway.</summary>
+    [ObservableProperty]
+    private string? _advisoryWarning;
+
+    public bool HasBindings => Bindings.Count > 0;
 
     public HotkeySettingsViewModel(
         IGlobalHotkeyService? hotkeyService,
@@ -53,6 +51,17 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
         _hotkeyService = hotkeyService;
         _settings = settings;
         _logger = logger ?? NullLogger<HotkeySettingsViewModel>.Instance;
+
+        Presets =
+        [
+            new HotkeyPresetViewModel(DictationHotkey.Hold(ModifierKey.Ctrl, ModifierSide.Right), AddPresetCommand),
+            new HotkeyPresetViewModel(DictationHotkey.Hold(ModifierKey.Alt, ModifierSide.Right), AddPresetCommand),
+            new HotkeyPresetViewModel(DictationHotkey.DoubleTap(ModifierKey.Ctrl, ModifierSide.Either), AddPresetCommand),
+            new HotkeyPresetViewModel(DictationHotkey.DoubleTap(ModifierKey.Shift, ModifierSide.Either), AddPresetCommand),
+        ];
+
+        Bindings.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasBindings));
+
         _ = InitializeAsync();
     }
 
@@ -60,73 +69,150 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     {
         try
         {
-            var savedModifiers = await _settings.GetAsync<string>(SettingsKeys.HotkeyModifiers);
-            var savedKey = await _settings.GetAsync<string>(SettingsKeys.HotkeyKey);
+            var bindings = _hotkeyService?.Bindings is { Count: > 0 } live
+                ? live
+                : await HotkeySettingsMigrator.LoadOrMigrateAsync(_settings);
 
-            if (Enum.TryParse<HotkeyModifiers>(savedModifiers, out var modifiers) &&
-                !string.IsNullOrWhiteSpace(savedKey))
-            {
-                CurrentBinding = new HotkeyBinding(modifiers, savedKey);
-            }
-
-            var savedMode = await _settings.GetAsync<string>(SettingsKeys.ActivationMode);
-            if (Enum.TryParse<ActivationMode>(savedMode, out var mode))
-                CurrentMode = mode;
+            Reload(bindings);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to load hotkey settings");
+            Reload(DictationHotkeyDefaults.All);
         }
     }
 
-    partial void OnCurrentBindingChanged(HotkeyBinding value)
+    /// <summary>Refreshes the list from the hotkey service — used when the settings flyout opens.</summary>
+    public void Refresh()
     {
-        if (!IsRecording)
-            DisplayText = value.DisplayString;
-        ConflictWarning = HotkeyConflictDetector.GetConflictDescription(value);
+        if (_hotkeyService?.Bindings is { Count: > 0 } bindings)
+            Reload(bindings);
     }
 
-    partial void OnIsRecordingChanged(bool value)
+    private void Reload(IReadOnlyList<DictationHotkey> bindings)
     {
-        DisplayText = value ? "Press keys..." : CurrentBinding.DisplayString;
+        Bindings.Clear();
+        foreach (var binding in bindings)
+            Bindings.Add(CreateItem(binding));
+    }
+
+    private HotkeyBindingItemViewModel CreateItem(DictationHotkey hotkey) =>
+        new(hotkey, RemoveBindingCommand, ToggleBindingModeCommand);
+
+    [RelayCommand]
+    private void StartRecording()
+    {
+        IsRecording = true;
+        RecorderText = "Press a key combination…";
+        ClearWarnings();
     }
 
     [RelayCommand]
-    private void StartRecording() => IsRecording = true;
-
-    [RelayCommand]
-    private void StopRecording() => IsRecording = false;
-
-    public void ApplyRecordedBinding(HotkeyBinding binding)
+    private void StopRecording()
     {
         IsRecording = false;
-        if (!binding.IsValid)
+        RecorderText = "Record a chord…";
+    }
+
+    [RelayCommand]
+    private void AddPreset(DictationHotkey? hotkey)
+    {
+        if (hotkey is not null)
+            TryAdd(hotkey);
+    }
+
+    [RelayCommand]
+    private void RemoveBinding(HotkeyBindingItemViewModel? item)
+    {
+        if (item is null || !Bindings.Remove(item))
             return;
 
-        CurrentBinding = binding;
-        _hotkeyService?.UpdateBinding(binding);
-        _ = PersistBindingAsync(binding);
-        _logger.LogInformation("Hotkey binding updated to {Binding}", binding.DisplayString);
+        ClearWarnings();
+        Commit();
     }
 
-    public void SetActivationMode(ActivationMode mode)
+    /// <summary>Flips a chord between push-to-talk and toggle.</summary>
+    [RelayCommand]
+    private void ToggleBindingMode(HotkeyBindingItemViewModel? item)
     {
-        CurrentMode = mode;
-        if (_hotkeyService is not null)
-            _hotkeyService.Mode = mode;
-        _ = _settings.SetAsync(SettingsKeys.ActivationMode, mode.ToString());
+        if (item is null || !item.CanChangeMode)
+            return;
+
+        var index = Bindings.IndexOf(item);
+        if (index < 0)
+            return;
+
+        var flipped = item.Hotkey.Mode == ActivationMode.PushToTalk
+            ? ActivationMode.Toggle
+            : ActivationMode.PushToTalk;
+
+        Bindings[index] = CreateItem(item.Hotkey with { Mode = flipped });
+        Commit();
     }
 
-    private async Task PersistBindingAsync(HotkeyBinding binding)
+    /// <summary>Called by the view once it has captured a chord from the keyboard.</summary>
+    public void ApplyRecordedChord(HotkeyBinding chord)
+    {
+        StopRecording();
+
+        if (!chord.IsValid)
+            return;
+
+        TryAdd(DictationHotkey.Chord(chord, ActivationMode.Toggle));
+    }
+
+    private void TryAdd(DictationHotkey candidate)
+    {
+        ClearWarnings();
+
+        var existing = Bindings.Select(b => b.Hotkey).ToList();
+        var conflict = HotkeyConflictDetector.Check(candidate, existing);
+
+        if (conflict.IsBlocking)
+        {
+            BlockingWarning = conflict.Description;
+            _logger.LogInformation("Rejected hotkey {Binding}: {Reason}",
+                candidate.DisplayString, conflict.Description);
+            return;
+        }
+
+        if (conflict.HasMessage)
+            AdvisoryWarning = conflict.Description;
+
+        Bindings.Add(CreateItem(candidate));
+        Commit();
+    }
+
+    private void ClearWarnings()
+    {
+        BlockingWarning = null;
+        AdvisoryWarning = null;
+    }
+
+    private void Commit()
+    {
+        var bindings = Bindings.Select(b => b.Hotkey).ToList();
+
+        if (_hotkeyService is not null)
+        {
+            _hotkeyService.UpdateBindings(bindings);
+            return;
+        }
+
+        // No hook running (design mode, headless tests) — persist directly so
+        // the choice still survives a restart.
+        _ = PersistAsync(bindings);
+    }
+
+    private async Task PersistAsync(IReadOnlyList<DictationHotkey> bindings)
     {
         try
         {
-            await _settings.SetAsync(SettingsKeys.HotkeyModifiers, binding.Modifiers.ToString());
-            await _settings.SetAsync(SettingsKeys.HotkeyKey, binding.Key);
+            await _settings.SetAsync(SettingsKeys.HotkeyBindings, HotkeyBindingCodec.EncodeAll(bindings));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to persist hotkey binding");
+            _logger.LogError(ex, "Failed to persist hotkey bindings");
         }
     }
 }

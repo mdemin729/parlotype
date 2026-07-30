@@ -1,7 +1,8 @@
 namespace Parlotype.Core.Hotkeys;
 
 /// <summary>
-/// Listens for global keyboard shortcuts even when the app is not focused.
+/// Listens for global dictation gestures even when the app is not focused, and
+/// reports them as intent rather than as raw key events.
 /// </summary>
 public interface IGlobalHotkeyService : IDisposable
 {
@@ -11,18 +12,32 @@ public interface IGlobalHotkeyService : IDisposable
     /// <summary>Stops listening for global hotkeys.</summary>
     Task StopAsync(CancellationToken cancellationToken = default);
 
-    /// <summary>Raised when the push-to-talk hotkey is pressed.</summary>
-    event EventHandler HotkeyPressed;
+    /// <summary>A gesture asked for dictation to begin.</summary>
+    event EventHandler DictationStartRequested;
 
-    /// <summary>Raised when the push-to-talk hotkey is released.</summary>
-    event EventHandler HotkeyReleased;
+    /// <summary>A gesture asked for dictation to finish and transcribe.</summary>
+    event EventHandler DictationStopRequested;
 
-    /// <summary>The currently configured hotkey binding.</summary>
-    HotkeyBinding CurrentBinding { get; }
+    /// <summary>
+    /// Dictation should stop and the captured audio be thrown away — the user
+    /// pressed Escape, or a hold turned out to be a keyboard shortcut.
+    /// </summary>
+    event EventHandler DictationCancelRequested;
 
-    /// <summary>Updates the hotkey binding at runtime.</summary>
-    void UpdateBinding(HotkeyBinding binding);
+    /// <summary>Raised after <see cref="UpdateBindings"/> so the UI can restate the current gesture.</summary>
+    event EventHandler BindingsChanged;
 
-    /// <summary>Current activation mode (PTT or Toggle).</summary>
-    ActivationMode Mode { get; set; }
+    /// <summary>The currently configured bindings.</summary>
+    IReadOnlyList<DictationHotkey> Bindings { get; }
+
+    /// <summary>Replaces the binding set at runtime and persists it.</summary>
+    void UpdateBindings(IReadOnlyList<DictationHotkey> bindings);
+
+    /// <summary>
+    /// Tells the service whether dictation is currently running. Toggle gestures
+    /// and Escape both depend on it, and recording can start or stop by means the
+    /// service never sees — the widget's button, a model that failed to load — so
+    /// the owner reports the truth instead of the service inferring it.
+    /// </summary>
+    void SetDictationActive(bool active);
 }
