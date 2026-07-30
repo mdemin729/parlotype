@@ -45,6 +45,14 @@ public partial class TranscribeViewModel : ViewModelBase
     /// </summary>
     private Task? _startTask;
 
+    /// <summary>
+    /// Set when a cancel arrives while <see cref="_startTask"/> is still in
+    /// flight — a model load cannot be interrupted, so the start path checks
+    /// this on completion and tears the recording down instead of entering it.
+    /// All access happens on the UI thread.
+    /// </summary>
+    private bool _cancelRequested;
+
     /// <summary>Smoothed RMS level for stable state transitions (EMA).</summary>
     private float _smoothedRms;
 
@@ -77,6 +85,18 @@ public partial class TranscribeViewModel : ViewModelBase
     /// <summary>True while the speech model is loading (for button styling/spinner).</summary>
     [ObservableProperty]
     private bool _isLoading;
+
+    /// <summary>
+    /// Reminder of the current dictation gesture, shown as the record button's
+    /// tooltip. Pushed in by <see cref="Services.HotkeyCoordinator"/> rather than
+    /// read from the hotkey service here — this VM exists in design mode and in
+    /// tests where no global hook is running.
+    /// </summary>
+    [ObservableProperty]
+    private string _hotkeyHintText = string.Empty;
+
+    /// <summary>Updates the record button's hotkey reminder. Called on the UI thread.</summary>
+    public void SetHotkeyHint(string hint) => HotkeyHintText = hint;
 
     /// <summary>
     /// The currently active speech engine. Loaded from settings during this
@@ -375,6 +395,7 @@ public partial class TranscribeViewModel : ViewModelBase
         if (_pipeline is null || IsRecording || _startTask is not null)
             return;
 
+        _cancelRequested = false;
         var startTask = StartRecordingCoreAsync(_pipeline);
         _startTask = startTask;
         try
@@ -384,6 +405,7 @@ public partial class TranscribeViewModel : ViewModelBase
         finally
         {
             _startTask = null;
+            _cancelRequested = false;
         }
     }
 
@@ -400,14 +422,29 @@ public partial class TranscribeViewModel : ViewModelBase
 
             // Defer the spinner: a hot model starts almost instantly, so only show
             // the loading state when the load actually outlasts the threshold —
-            // otherwise the icon would flash for a single frame.
-            if (await Task.WhenAny(startTask, Task.Delay(LoadingSpinnerDelay)) != startTask)
+            // otherwise the icon would flash for a single frame. A cancel that
+            // already landed skips it entirely; the load runs on regardless, but
+            // showing a spinner for work the user has abandoned would strand the
+            // widget on "Loading model..." after they pressed Escape.
+            if (await Task.WhenAny(startTask, Task.Delay(LoadingSpinnerDelay)) != startTask
+                && !_cancelRequested)
             {
                 RecordingState = RecordingState.Loading;
                 StatusText = "Loading model...";
             }
 
             await startTask;
+
+            // Escape arrived while the model was still loading. The pipeline is
+            // running now, so it still has to be shut down — but the UI was
+            // already returned to a cancelled state and must not flash into
+            // "Recording..." on its way back out.
+            if (_cancelRequested)
+            {
+                await DiscardStartedRecordingAsync(pipeline);
+                return;
+            }
+
             IsRecording = true;
             RecordingState = RecordingState.Idle;
             StatusText = "Recording...";
@@ -508,16 +545,95 @@ public partial class TranscribeViewModel : ViewModelBase
         }
         finally
         {
+            DetachPipelineHandlers();
+            ResetRecordingState();
+        }
+    }
+
+    /// <summary>
+    /// Stops recording and throws the audio away — nothing is transcribed and
+    /// nothing is typed. Detaching the handlers before stopping the pipeline is
+    /// what makes it a discard: whatever the pipeline still produces has nowhere
+    /// left to go.
+    /// </summary>
+    public async Task CancelRecordingAsync()
+    {
+        if (_pipeline is null)
+            return;
+
+        // Unlike StopRecordingAsync, a cancel must *not* wait on an in-flight
+        // start. A stop waits because the user wants that recording (ADR-039);
+        // someone pressing Escape wants out now, and a cold model load can run
+        // for seconds. So the UI is released immediately and the intent is
+        // handed to the start path, which discards the recording the moment the
+        // load it cannot interrupt finally completes.
+        if (_startTask is not null)
+        {
+            _cancelRequested = true;
+            DetachPipelineHandlers();
+            ResetRecordingState();
+            StatusText = "Cancelled";
+            return;
+        }
+
+        if (!IsRecording)
+            return;
+
+        DetachPipelineHandlers();
+
+        try
+        {
+            await _pipeline.StopAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cancel recording");
+        }
+        finally
+        {
+            ResetRecordingState();
+            StatusText = "Cancelled";
+        }
+    }
+
+    /// <summary>
+    /// Shuts down a recording that only came into being because the model
+    /// finished loading after the user had already cancelled. The UI state is
+    /// left alone — <see cref="CancelRecordingAsync"/> already set it.
+    /// </summary>
+    private async Task DiscardStartedRecordingAsync(IAudioPipeline pipeline)
+    {
+        DetachPipelineHandlers();
+
+        try
+        {
+            await pipeline.StopAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to discard a recording cancelled during model load");
+        }
+    }
+
+    private void DetachPipelineHandlers()
+    {
+        if (_pipeline is not null)
+        {
             _pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
             _pipeline.TranscriptionFailed -= OnTranscriptionFailed;
-            if (_audioLevelProvider is not null)
-                _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
-            IsRecording = false;
-            RecordingState = RecordingState.Disabled;
-            AudioLevel = 0f;
-            _smoothedRms = 0f;
-            StatusText = "Ready";
         }
+
+        if (_audioLevelProvider is not null)
+            _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
+    }
+
+    private void ResetRecordingState()
+    {
+        IsRecording = false;
+        RecordingState = RecordingState.Disabled;
+        AudioLevel = 0f;
+        _smoothedRms = 0f;
+        StatusText = "Ready";
     }
 
     private async void OnTranscriptionAvailable(object? sender, TranscriptionEventArgs e)

@@ -8,29 +8,41 @@ namespace Parlotype.Platform.Hotkeys;
 
 /// <summary>
 /// Global hotkey listener using SharpHook's <see cref="SimpleGlobalHook"/>.
-/// Supports Push-to-Talk and Toggle activation modes.
+/// Translates raw key events into <see cref="HotkeyKeyEvent"/> and lets
+/// <see cref="HotkeyGestureMatcher"/> decide what they mean, so this class stays
+/// a thin adapter over the hooking library.
 /// </summary>
 public sealed class SharpHookHotkeyService : IGlobalHotkeyService
 {
     private readonly ISettingsService _settings;
     private readonly ILogger<SharpHookHotkeyService> _logger;
 
+    /// <summary>Guards the matcher, which the hook thread and the timer both reach.</summary>
+    private readonly Lock _matcherLock = new();
+
+    private readonly HotkeyGestureMatcher _matcher = new(DictationHotkeyDefaults.All);
+
+    /// <summary>Fires when a deferred hold has been held long enough to count as one.</summary>
+    private readonly Timer _timeoutTimer;
+
     private SimpleGlobalHook? _hook;
-    private KeyCode _targetKeyCode;
-    private volatile bool _isActive;
-    private volatile bool _isToggleRecording;
+    private bool _disposed;
 
-    public event EventHandler? HotkeyPressed;
-    public event EventHandler? HotkeyReleased;
+    public event EventHandler? DictationStartRequested;
+    public event EventHandler? DictationStopRequested;
+    public event EventHandler? DictationCancelRequested;
+    public event EventHandler? BindingsChanged;
 
-    public HotkeyBinding CurrentBinding { get; private set; } = HotkeyBinding.Default;
-    public ActivationMode Mode { get; set; } = ActivationMode.PushToTalk;
+    public IReadOnlyList<DictationHotkey> Bindings
+    {
+        get { lock (_matcherLock) return _matcher.Bindings; }
+    }
 
     public SharpHookHotkeyService(ISettingsService settings, ILogger<SharpHookHotkeyService> logger)
     {
         _settings = settings;
         _logger = logger;
-        ApplyBinding(CurrentBinding);
+        _timeoutTimer = new Timer(_ => OnTimeout(), null, Timeout.Infinite, Timeout.Infinite);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
@@ -38,7 +50,9 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         if (_hook is not null)
             return;
 
-        await LoadSettingsAsync(cancellationToken);
+        var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(_settings, cancellationToken);
+        lock (_matcherLock)
+            _matcher.UpdateBindings(bindings);
 
         _hook = new SimpleGlobalHook(GlobalHookType.Keyboard, runAsyncOnBackgroundThread: true);
         _hook.KeyPressed += OnKeyPressed;
@@ -47,8 +61,11 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         _ = _hook.RunAsync();
 
         _logger.LogInformation(
-            "Global hotkey listener started — binding: {Binding}, mode: {Mode}",
-            CurrentBinding.DisplayString, Mode);
+            "Global hotkey listener started — bindings: {Bindings}",
+            string.Join(", ", bindings.Select(b => b.DisplayString)));
+
+        // The set may have just been migrated from the legacy single-chord keys.
+        BindingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public Task StopAsync(CancellationToken cancellationToken = default)
@@ -58,113 +75,141 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         return Task.CompletedTask;
     }
 
-    public void UpdateBinding(HotkeyBinding binding)
+    public void UpdateBindings(IReadOnlyList<DictationHotkey> bindings)
     {
-        ApplyBinding(binding);
-        _isActive = false;
-        _isToggleRecording = false;
-        _logger.LogInformation("Hotkey binding updated to {Binding}", binding.DisplayString);
-        _ = PersistSettingsAsync();
+        lock (_matcherLock)
+        {
+            _matcher.UpdateBindings(bindings);
+            ScheduleTimeout();
+        }
+
+        _logger.LogInformation("Hotkey bindings updated: {Bindings}",
+            string.Join(", ", bindings.Select(b => b.DisplayString)));
+
+        BindingsChanged?.Invoke(this, EventArgs.Empty);
+        _ = PersistBindingsAsync(bindings);
+    }
+
+    public void SetDictationActive(bool active)
+    {
+        lock (_matcherLock)
+            _matcher.SetDictationActive(active);
     }
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
+        _disposed = true;
         DisposeHook();
+        _timeoutTimer.Dispose();
     }
 
-    private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
+    private void OnKeyPressed(object? sender, KeyboardHookEventArgs e) => HandleKey(e, isDown: true);
+
+    private void OnKeyReleased(object? sender, KeyboardHookEventArgs e) => HandleKey(e, isDown: false);
+
+    private void HandleKey(KeyboardHookEventArgs e, bool isDown)
     {
-        if (e.Data.KeyCode != _targetKeyCode)
-            return;
+        var keyEvent = BuildKeyEvent(e, isDown);
 
-        var modifiers = KeyCodeMapper.ToHotkeyModifiers(e.RawEvent.Mask);
-        if (modifiers != CurrentBinding.Modifiers)
-            return;
-
-        e.SuppressEvent = true;
-
-        if (Mode == ActivationMode.PushToTalk)
+        HotkeyMatchResult result;
+        lock (_matcherLock)
         {
-            if (!_isActive)
-            {
-                _isActive = true;
-                _logger.LogDebug("PTT hotkey pressed");
-                HotkeyPressed?.Invoke(this, EventArgs.Empty);
-            }
+            result = _matcher.Process(keyEvent);
+            ScheduleTimeout();
         }
-        else // Toggle
+
+        // Must be set synchronously on the hook thread for SimpleGlobalHook to
+        // honour it (ADR-020). Only chords and a cancelling Escape ever suppress —
+        // swallowing a bare Ctrl would break every shortcut on the machine.
+        if (result.Suppress)
+            e.SuppressEvent = true;
+
+        Raise(result.Action);
+    }
+
+    private void OnTimeout()
+    {
+        HotkeyMatchResult result;
+        lock (_matcherLock)
         {
-            if (!_isToggleRecording)
-            {
-                _isToggleRecording = true;
-                _logger.LogDebug("Toggle hotkey: start");
-                HotkeyPressed?.Invoke(this, EventArgs.Empty);
-            }
-            else
-            {
-                _isToggleRecording = false;
-                _logger.LogDebug("Toggle hotkey: stop");
-                HotkeyReleased?.Invoke(this, EventArgs.Empty);
-            }
+            result = _matcher.ProcessTimeout(Environment.TickCount64);
+            ScheduleTimeout();
         }
+
+        Raise(result.Action);
     }
 
-    private void OnKeyReleased(object? sender, KeyboardHookEventArgs e)
+    /// <summary>Must be called with <see cref="_matcherLock"/> held.</summary>
+    private void ScheduleTimeout()
     {
-        if (e.Data.KeyCode != _targetKeyCode)
+        if (_disposed)
             return;
 
-        var modifiers = KeyCodeMapper.ToHotkeyModifiers(e.RawEvent.Mask);
-        if (modifiers != CurrentBinding.Modifiers)
-            return;
-
-        e.SuppressEvent = true;
-
-        if (Mode != ActivationMode.PushToTalk)
-            return;
-
-        if (_isActive)
+        if (_matcher.NextTimeoutMs is not { } due)
         {
-            _isActive = false;
-            _logger.LogDebug("PTT hotkey released");
-            HotkeyReleased?.Invoke(this, EventArgs.Empty);
+            _timeoutTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            return;
+        }
+
+        var delay = Math.Max(0, due - Environment.TickCount64);
+        _timeoutTimer.Change(delay, Timeout.Infinite);
+    }
+
+    private static HotkeyKeyEvent BuildKeyEvent(KeyboardHookEventArgs e, bool isDown)
+    {
+        var mask = e.RawEvent.Mask;
+        var modifier = KeyCodeMapper.ToModifier(e.Data.KeyCode);
+
+        return new HotkeyKeyEvent
+        {
+            IsDown = isDown,
+            TimestampMs = Environment.TickCount64,
+            KeyName = modifier is null ? KeyCodeMapper.ToKeyName(e.Data.KeyCode) : null,
+            Modifier = modifier?.Key,
+            Side = modifier?.Side ?? ModifierSide.Either,
+            HeldModifiers = KeyCodeMapper.ToHotkeyModifiers(mask),
+            RightAltHeld = KeyCodeMapper.IsRightAltHeld(mask)
+        };
+    }
+
+    private void Raise(DictationAction action)
+    {
+        switch (action)
+        {
+            case DictationAction.Start:
+                _logger.LogDebug("Dictation start requested");
+                DictationStartRequested?.Invoke(this, EventArgs.Empty);
+                break;
+            case DictationAction.Stop:
+                _logger.LogDebug("Dictation stop requested");
+                DictationStopRequested?.Invoke(this, EventArgs.Empty);
+                break;
+            case DictationAction.Cancel:
+                _logger.LogDebug("Dictation cancel requested");
+                DictationCancelRequested?.Invoke(this, EventArgs.Empty);
+                break;
         }
     }
 
-    private void ApplyBinding(HotkeyBinding binding)
+    private async Task PersistBindingsAsync(IReadOnlyList<DictationHotkey> bindings)
     {
-        CurrentBinding = binding;
-        _targetKeyCode = KeyCodeMapper.ToKeyCode(binding.Key) ?? KeyCode.VcUndefined;
-
-        if (_targetKeyCode == KeyCode.VcUndefined)
-            _logger.LogWarning("Unrecognized hotkey key: {Key}", binding.Key);
-    }
-
-    private async Task LoadSettingsAsync(CancellationToken cancellationToken)
-    {
-        var modStr = await _settings.GetAsync<string>(SettingsKeys.HotkeyModifiers, cancellationToken);
-        var key = await _settings.GetAsync<string>(SettingsKeys.HotkeyKey, cancellationToken);
-        var modeStr = await _settings.GetAsync<string>(SettingsKeys.ActivationMode, cancellationToken);
-
-        if (Enum.TryParse<HotkeyModifiers>(modStr, out var mods) && !string.IsNullOrWhiteSpace(key))
-            ApplyBinding(new HotkeyBinding(mods, key));
-
-        if (Enum.TryParse<ActivationMode>(modeStr, out var mode))
-            Mode = mode;
-
-        _logger.LogDebug("Loaded hotkey settings — binding: {Binding}, mode: {Mode}",
-            CurrentBinding.DisplayString, Mode);
-    }
-
-    private async Task PersistSettingsAsync()
-    {
-        await _settings.SetAsync(SettingsKeys.HotkeyModifiers, CurrentBinding.Modifiers.ToString());
-        await _settings.SetAsync(SettingsKeys.HotkeyKey, CurrentBinding.Key);
-        await _settings.SetAsync(SettingsKeys.ActivationMode, Mode.ToString());
+        try
+        {
+            await _settings.SetAsync(SettingsKeys.HotkeyBindings, HotkeyBindingCodec.EncodeAll(bindings));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to persist hotkey bindings");
+        }
     }
 
     private void DisposeHook()
     {
+        _timeoutTimer.Change(Timeout.Infinite, Timeout.Infinite);
+
         if (_hook is null)
             return;
 
@@ -181,7 +226,5 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         }
 
         _hook = null;
-        _isActive = false;
-        _isToggleRecording = false;
     }
 }

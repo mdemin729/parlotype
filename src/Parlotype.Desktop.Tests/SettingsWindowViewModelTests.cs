@@ -56,7 +56,7 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Whisper runtime"),
             n => AssertSection(n, "Whisper output"),
             n => AssertHeader(n, "Input"),
-            n => AssertSection(n, "Hotkey"),
+            n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"));
     }
@@ -83,7 +83,7 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Prompts"),
             n => AssertSection(n, "llama.cpp server"),
             n => AssertHeader(n, "Input"),
-            n => AssertSection(n, "Hotkey"),
+            n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"));
     }
@@ -104,7 +104,7 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Engine"),
             n => AssertSection(n, "Parakeet model"),
             n => AssertHeader(n, "Input"),
-            n => AssertSection(n, "Hotkey"),
+            n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"));
     }
@@ -126,7 +126,7 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Engine"),
             n => AssertSection(n, "Cloud providers"),
             n => AssertHeader(n, "Input"),
-            n => AssertSection(n, "Hotkey"),
+            n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"));
     }

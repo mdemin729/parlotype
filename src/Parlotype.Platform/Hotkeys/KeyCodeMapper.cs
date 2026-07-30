@@ -67,6 +67,22 @@ internal static class KeyCodeMapper
     private static readonly Dictionary<KeyCode, string> CodeToName =
         NameToCode.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
+    /// <summary>
+    /// Left and right modifiers arrive as distinct key codes, which is what
+    /// makes "Hold Right Ctrl" possible without disturbing left-Ctrl shortcuts.
+    /// </summary>
+    private static readonly Dictionary<KeyCode, (ModifierKey Key, ModifierSide Side)> ModifierKeys = new()
+    {
+        [KeyCode.VcLeftControl] = (ModifierKey.Ctrl, ModifierSide.Left),
+        [KeyCode.VcRightControl] = (ModifierKey.Ctrl, ModifierSide.Right),
+        [KeyCode.VcLeftAlt] = (ModifierKey.Alt, ModifierSide.Left),
+        [KeyCode.VcRightAlt] = (ModifierKey.Alt, ModifierSide.Right),
+        [KeyCode.VcLeftShift] = (ModifierKey.Shift, ModifierSide.Left),
+        [KeyCode.VcRightShift] = (ModifierKey.Shift, ModifierSide.Right),
+        [KeyCode.VcLeftMeta] = (ModifierKey.Meta, ModifierSide.Left),
+        [KeyCode.VcRightMeta] = (ModifierKey.Meta, ModifierSide.Right),
+    };
+
     /// <summary>Maps a key name to a SharpHook KeyCode. Returns null if not recognized.</summary>
     public static KeyCode? ToKeyCode(string keyName)
         => NameToCode.TryGetValue(keyName, out var code) ? code : null;
@@ -76,17 +92,22 @@ internal static class KeyCodeMapper
         => CodeToName.TryGetValue(code, out var name) ? name : null;
 
     /// <summary>Returns true if the given KeyCode represents a modifier key.</summary>
-    public static bool IsModifierKey(KeyCode code) => code is
-        KeyCode.VcLeftControl or KeyCode.VcRightControl or
-        KeyCode.VcLeftAlt or KeyCode.VcRightAlt or
-        KeyCode.VcLeftShift or KeyCode.VcRightShift or
-        KeyCode.VcLeftMeta or KeyCode.VcRightMeta;
+    public static bool IsModifierKey(KeyCode code) => ModifierKeys.ContainsKey(code);
+
+    /// <summary>
+    /// Maps a modifier key code to the modifier it represents and which physical
+    /// key it is. Returns null for non-modifier keys.
+    /// </summary>
+    public static (ModifierKey Key, ModifierSide Side)? ToModifier(KeyCode code) =>
+        ModifierKeys.TryGetValue(code, out var entry) ? entry : null;
 
     /// <summary>Extracts <see cref="HotkeyModifiers"/> from a SharpHook <see cref="EventMask"/>.</summary>
     public static HotkeyModifiers ToHotkeyModifiers(EventMask mask)
     {
         var mods = HotkeyModifiers.None;
 
+        // EventMask.Ctrl and friends are composites of their left and right bits,
+        // so test with & rather than HasFlag — which would demand both sides.
         if ((mask & EventMask.Ctrl) != 0)
             mods |= HotkeyModifiers.Ctrl;
         if ((mask & EventMask.Alt) != 0)
@@ -98,4 +119,10 @@ internal static class KeyCodeMapper
 
         return mods;
     }
+
+    /// <summary>
+    /// True when the right Alt key is held. European layouts send AltGr as
+    /// Ctrl+Alt, so chords have to be able to tell it apart from a real Ctrl+Alt.
+    /// </summary>
+    public static bool IsRightAltHeld(EventMask mask) => (mask & EventMask.RightAlt) != 0;
 }

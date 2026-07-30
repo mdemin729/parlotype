@@ -38,14 +38,47 @@ Two implementations of `ITextInjectionService`:
 
 ## Global Hotkeys
 
-- **Core**: `IGlobalHotkeyService`, `HotkeyBinding` record (modifiers + key name string)
-- **Platform**: `SharpHookHotkeyService` using `SimpleGlobalHook` (required for event suppression; ADR-020)
-- **Mapping**: `KeyCodeMapper` converts Core key names → SharpHook `KeyCode`
-- **Modes**: Push-to-Talk (key-down → start, key-up → stop) and Toggle
-- **Suppression**: `SuppressEvent` prevents hotkey passthrough (Windows/macOS only; requires `SimpleGlobalHook` — `TaskPoolGlobalHook` silently ignores it)
-- **Conflict detection**: `HotkeyConflictDetector` warns on reserved OS shortcuts
-- **UI**: `HotkeyRecorderView` captures key combos in settings flyout
-- **Persistence**: `JsonSettingsService` stores `HotkeyModifiers`, `HotkeyKey`, `ActivationMode`
+Users configure a *list* of gestures, not a single chord (ADR-047).
+
+- **Core model**: `DictationHotkey` = `HotkeyGesture` + `ActivationMode`.
+  `HotkeyGesture` is one of `Chord` (wraps `HotkeyBinding`), `HoldModifier`, or
+  `DoubleTapModifier`, the latter two carrying `ModifierKey` + `ModifierSide`
+  (Left/Right/Either). Mode is constrained by kind: holds are push-to-talk only,
+  double-taps are toggle only, chords are either.
+- **Defaults** (`DictationHotkeyDefaults`): Hold Right Ctrl (PTT), Double-tap
+  Ctrl (toggle), Ctrl+Alt+Space (toggle). `Escape` cancels and is hardwired.
+- **Recognition**: `HotkeyGestureMatcher` (Core) turns `HotkeyKeyEvent`s into a
+  `DictationAction` (Start/Stop/Cancel) + suppression flag, driving
+  `ModifierTapTracker` and `ModifierHoldTracker` — pure, timestamp-driven, so
+  timing is testable without a keyboard. Thresholds in `HotkeyGestureTiming`.
+- **Deferred hold-start**: when a double-tap binding shares a hold binding's key
+  (as the defaults do), the hold's start waits out the 250 ms tap window so a
+  deliberate double-tap doesn't flicker a recording into existence.
+- **Platform**: `SharpHookHotkeyService` is a thin adapter over `SimpleGlobalHook`
+  (required for suppression; ADR-020) — builds the event, asks the matcher,
+  raises the semantic event. Owns a `Timer` for deferred holds; the matcher is
+  lock-guarded (hook thread + timer thread).
+- **Mapping**: `KeyCodeMapper` converts key names ↔ SharpHook `KeyCode`, maps
+  modifier codes to `ModifierKey` + side, and reads `EventMask` (side-resolvable
+  — see [[sharphook-modifier-sides]]).
+- **Suppression**: chords on both down and up; **never** bare modifiers (would
+  break every Ctrl shortcut); `Escape` only while dictation is active.
+- **State feedback**: `IGlobalHotkeyService.SetDictationActive(bool)`, fed by
+  `HotkeyCoordinator` from `TranscribeViewModel.RecordingState` — toggle and
+  Escape need state the hook cannot observe (widget button, failed model load).
+- **Cancel**: `TranscribeViewModel.CancelRecordingAsync()` detaches
+  `TranscriptionAvailable` *before* stopping the pipeline, so nothing is
+  transcribed or injected.
+- **Validation**: `HotkeyConflictDetector.Check` returns `HotkeyConflict` with
+  Blocking (OS-reserved, or duplicate/overlapping with existing bindings) or
+  Warning (`Ctrl+Shift+Space` = IDE parameter hints; `Ctrl+Alt+<letter>` = AltGr)
+  severity.
+- **UI**: `HotkeySettingsView` is a binding list (add via presets or chord
+  recorder, remove, per-chord mode); `TranscribeWindow`'s record button tooltip
+  shows the current gesture via `HotkeyHint`.
+- **Persistence**: `SettingsKeys.HotkeyBindings` — a readable string list encoded
+  by `HotkeyBindingCodec` (`hold|Ctrl|Right|PushToTalk`). `HotkeySettingsMigrator`
+  converts the legacy `HotkeyModifiers`/`HotkeyKey`/`ActivationMode` triple once.
 
 ## Settings
 

@@ -14,7 +14,7 @@ Parlotype is a **local-by-default** voice-to-text desktop application: on-device
 - **Silero VAD** — Voice activity detection
 - **NAudio** — Windows audio capture (WASAPI)
 - **CommunityToolkit.Mvvm** — MVVM framework
-- **SharpHook** — Global hotkeys
+- **SharpHook** — Global hotkeys (hold / double-tap / chord gestures)
 - **ZLogger** — Structured logging
 - **DPAPI** (`System.Security.Cryptography.ProtectedData`) — encrypted storage for cloud API keys
 - **BenchmarkDotNet** — Micro-benchmarks (allocations / hot-path latency)
@@ -113,14 +113,37 @@ The language surface is **capability-driven** — each engine declares what it s
 - **The whole Language page disappears** for engines with no language choice — Parakeet and both cloud engines. The Transcribe widget's quick-picker strip hides with it and the window compacts from 118 px to 88 px. Your Whisper/Gemma source and translation setup is left untouched, so it survives a round trip through another engine.
 - **Switching engines never loses selections silently** — an invalidated choice falls back (unsupported source → keyboard layout, no-translation form → translation off, etc.) with a short toast explaining what changed.
 
+## Dictation Hotkeys
+
+Dictation has two genuinely different modes — holding a key for one sentence, and going hands-free — so Parlotype binds **both out of the box** rather than making you choose ([ADR-047](docs/decisions/047-multi-binding-dictation-hotkeys.md)):
+
+| Gesture | Mode | Why this one |
+|---------|------|--------------|
+| **Hold Right Ctrl** | Push-to-talk | The same physical key on every platform, and comfortable to hold. Left and right Ctrl are distinct keys to the hook, so all your normal Ctrl shortcuts keep working. |
+| **Double-tap Ctrl** | Toggle | macOS Dictation's own default on external keyboards, and it collides with nothing on Windows or Linux. |
+| **Ctrl+Alt+Space** | Toggle | An explicit chord for anywhere bare-modifier detection isn't available. |
+
+**Esc cancels.** While recording, Escape stops and **discards** the take — nothing is transcribed and nothing is typed. It passes straight through to whatever app you're in the rest of the time.
+
+Manage all of this under **Settings → Input → Hotkeys**: add gestures from a preset menu or record a chord, remove them, and flip a chord between push-to-talk and toggle. Hold and double-tap gestures don't offer that choice — releasing a held key has to mean "stop", and a double-tap has no release to hang "stop" on.
+
+New bindings are validated before they're accepted. Shortcuts the OS has already claimed (Win+L, Win+H, Win+Ctrl+S, …) and duplicates of your own bindings are **refused**; combinations that merely tend to collide are **accepted with a note** — `Ctrl+Shift+Space` shows parameter hints in Visual Studio and VS Code, and any `Ctrl+Alt+<letter>` can fire while typing accented characters, because AltGr *is* Ctrl+Alt on European layouts. (Parlotype ignores chord matches while right Alt is held for exactly that reason.)
+
+Two behaviours worth knowing:
+
+- **Right Ctrl+C still copies.** A key pressed right after a hold begins means you reached for a shortcut, not for dictation, so the gesture is abandoned — at normal typing speed no recording is created at all. Keys pressed later are ignored, since people do type while dictating.
+- **Push-to-talk starts ~250 ms after the key goes down** in the default setup. Because hold and double-tap share the Ctrl key, the hold waits out the double-tap window; without it every deliberate double-tap would flash a recording into existence and immediately throw it away. A gesture on a key nothing else uses — Hold Right Alt, say — starts instantly.
+
+**Upgrading?** If you'd picked your own hotkey, it carries over as your only binding and the new defaults are *not* added on top — no surprise global shortcuts. Anyone still on the old `Ctrl+Shift+Space` default gets the new set, since that combination fights the IDEs most of this audience lives in.
+
 ## The Transcribe Widget
 
 The Transcribe window is a frameless always-on-top mini card (172 px wide, 88 px tall — 118 px when the language strip is shown), modelled on the Windows Voice Typing widget ([ADR-040](docs/decisions/040-frameless-compact-transcribe-window.md)).
 
 - Drag it by the **grip strip** at the top; the rest of the surface is not draggable.
-- The ✕ button and **Esc** *hide* the widget — recording continues, and the tray icon reopens it.
+- The ✕ button *hides* the widget — recording continues, and the tray icon reopens it. **Esc** hides it too when idle, but **cancels and discards** the take while recording (see [Dictation Hotkeys](#dictation-hotkeys)).
 - Its position is remembered across restarts in `window-state.json`, and self-heals to centre-screen if the saved spot is off-screen (monitor unplugged, resolution change).
-- The record button carries all state: blue chrome while recording, a waveform while you speak, and a spinner while the model loads. Hover the card for the status text.
+- The record button carries all state: blue chrome while recording, a waveform while you speak, and a spinner while the model loads. Hover it to be reminded of your gesture — *"Hold Right Ctrl to talk · Esc to cancel"* — or hover the card for the status text.
 - **Model loading** — the spinner appears only if the load outlasts ~200 ms, so warm starts don't flash. Optionally enable **Preload model on startup** under **Settings → Speech engine → Engine** to warm the model in the background at launch (off by default; takes effect on the next launch). See [ADR-038](docs/decisions/038-speech-model-prewarm-and-loading-state.md).
 
 ## Privacy & Security
@@ -140,7 +163,7 @@ Everything lives under `%LOCALAPPDATA%\parlotype\`:
 
 | Path | Contents |
 |------|----------|
-| `settings.json` | User-configured settings (microphone, engine, model, hotkey, languages, theme) |
+| `settings.json` | User-configured settings (microphone, engine, model, hotkeys, languages, theme) |
 | `window-state.json` | Transient window chrome state (Transcribe widget position) |
 | `secrets.json` | Cloud API keys, DPAPI-encrypted on Windows |
 | `models\` | Downloaded Whisper / Parakeet / Gemma 4 model files |
@@ -178,7 +201,7 @@ dotnet build Parlotype.slnx
 dotnet run --project src\Parlotype.Desktop
 ```
 
-The app starts minimized to the system tray. Click the tray icon for an Open / Settings / Exit menu, or press the global hotkey to open the Transcribe window and start recording.
+The app starts minimized to the system tray. Click the tray icon for an Open / Settings / Exit menu, or use a [dictation hotkey](#dictation-hotkeys) — hold Right Ctrl, or double-tap Ctrl — to open the Transcribe window and start recording.
 
 To skip the heavyweight CUDA package (faster builds, smaller output — Vulkan stays):
 

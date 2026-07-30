@@ -25,7 +25,7 @@ public class HotkeyCoordinatorTests
         await coordinator.StartAsync(TestContext.Current.CancellationToken);
         Assert.True(hotkey.IsStarted);
 
-        hotkey.SimulatePress();
+        hotkey.SimulateStart();
         await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => { });
         // Allow the posted async lambda to complete.
         await Task.Delay(50, TestContext.Current.CancellationToken);
@@ -52,7 +52,7 @@ public class HotkeyCoordinatorTests
         await coordinator.StartAsync(TestContext.Current.CancellationToken);
 
         // Simulate hotkey press → starts recording
-        hotkey.SimulatePress();
+        hotkey.SimulateStart();
         await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => { });
         await Task.Delay(100, TestContext.Current.CancellationToken);
 
@@ -67,7 +67,7 @@ public class HotkeyCoordinatorTests
         Assert.Equal("hello from voice", injector.InjectedTexts[0]);
 
         // Simulate hotkey release → stops recording
-        hotkey.SimulateRelease();
+        hotkey.SimulateStop();
         await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => { });
         await Task.Delay(100, TestContext.Current.CancellationToken);
 
