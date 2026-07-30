@@ -123,7 +123,15 @@ public partial class TranscribeWindow : Window
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
-            HideToTray();
+
+            // While recording, Escape discards the take rather than hiding the
+            // widget — the same meaning it has in macOS Dictation. The global
+            // hook handles this when the widget isn't focused.
+            if (DataContext is TranscribeViewModel { IsRecording: true } vm)
+                _ = vm.CancelRecordingAsync();
+            else
+                HideToTray();
+
             return;
         }
 

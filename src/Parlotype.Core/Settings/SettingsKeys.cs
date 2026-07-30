@@ -6,9 +6,29 @@ public static class SettingsKeys
     public const string SelectedMicrophoneId = "SelectedMicrophoneId";
     public const string SelectedTheme = "SelectedTheme";
     public const string SelectedWhisperModel = "SelectedWhisperModel";
+    /// <summary>
+    /// Legacy single-chord hotkey settings (modifiers + key + one global
+    /// activation mode). Superseded by <see cref="HotkeyBindings"/>, which holds
+    /// several gestures at once. Read one final time by
+    /// <see cref="Hotkeys.HotkeySettingsMigrator"/> so an upgrade keeps the
+    /// user's own shortcut; nothing writes them afterwards.
+    /// </summary>
     public const string HotkeyModifiers = "HotkeyModifiers";
+
+    /// <inheritdoc cref="HotkeyModifiers"/>
     public const string HotkeyKey = "HotkeyKey";
+
+    /// <inheritdoc cref="HotkeyModifiers"/>
     public const string ActivationMode = "ActivationMode";
+
+    /// <summary>
+    /// The configured dictation hotkeys, encoded by
+    /// <see cref="Hotkeys.HotkeyBindingCodec"/> — e.g.
+    /// <c>["hold|Ctrl|Right|PushToTalk", "doubletap|Ctrl|Either|Toggle"]</c>.
+    /// Several gestures can be bound at once; see
+    /// <see cref="Hotkeys.DictationHotkeyDefaults"/> for what ships by default.
+    /// </summary>
+    public const string HotkeyBindings = "HotkeyBindings";
     public const string RuntimePreference = "RuntimePreference";
     public const string WaitTime = "WaitTime";
     public const string AutomaticPunctuation = "AutomaticPunctuation";

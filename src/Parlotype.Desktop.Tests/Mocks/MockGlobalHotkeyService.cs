@@ -4,12 +4,16 @@ namespace Parlotype.Desktop.Tests.Mocks;
 
 public sealed class MockGlobalHotkeyService : IGlobalHotkeyService
 {
-    public event EventHandler? HotkeyPressed;
-    public event EventHandler? HotkeyReleased;
+    public event EventHandler? DictationStartRequested;
+    public event EventHandler? DictationStopRequested;
+    public event EventHandler? DictationCancelRequested;
+    public event EventHandler? BindingsChanged;
 
-    public HotkeyBinding CurrentBinding { get; private set; } = HotkeyBinding.Default;
-    public ActivationMode Mode { get; set; } = ActivationMode.PushToTalk;
+    public IReadOnlyList<DictationHotkey> Bindings { get; private set; } = DictationHotkeyDefaults.All;
     public bool IsStarted { get; private set; }
+
+    /// <summary>Last value pushed in via <see cref="SetDictationActive"/>.</summary>
+    public bool DictationActive { get; private set; }
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
@@ -23,10 +27,17 @@ public sealed class MockGlobalHotkeyService : IGlobalHotkeyService
         return Task.CompletedTask;
     }
 
-    public void UpdateBinding(HotkeyBinding binding) => CurrentBinding = binding;
+    public void UpdateBindings(IReadOnlyList<DictationHotkey> bindings)
+    {
+        Bindings = bindings;
+        BindingsChanged?.Invoke(this, EventArgs.Empty);
+    }
 
-    public void SimulatePress() => HotkeyPressed?.Invoke(this, EventArgs.Empty);
-    public void SimulateRelease() => HotkeyReleased?.Invoke(this, EventArgs.Empty);
+    public void SetDictationActive(bool active) => DictationActive = active;
+
+    public void SimulateStart() => DictationStartRequested?.Invoke(this, EventArgs.Empty);
+    public void SimulateStop() => DictationStopRequested?.Invoke(this, EventArgs.Empty);
+    public void SimulateCancel() => DictationCancelRequested?.Invoke(this, EventArgs.Empty);
 
     public void Dispose() { }
 }

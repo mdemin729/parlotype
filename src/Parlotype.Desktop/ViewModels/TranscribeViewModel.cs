@@ -79,6 +79,18 @@ public partial class TranscribeViewModel : ViewModelBase
     private bool _isLoading;
 
     /// <summary>
+    /// Reminder of the current dictation gesture, shown as the record button's
+    /// tooltip. Pushed in by <see cref="Services.HotkeyCoordinator"/> rather than
+    /// read from the hotkey service here — this VM exists in design mode and in
+    /// tests where no global hook is running.
+    /// </summary>
+    [ObservableProperty]
+    private string _hotkeyHintText = string.Empty;
+
+    /// <summary>Updates the record button's hotkey reminder. Called on the UI thread.</summary>
+    public void SetHotkeyHint(string hint) => HotkeyHintText = hint;
+
+    /// <summary>
     /// The currently active speech engine. Loaded from settings during this
     /// VM's own initialization (the Transcribe window exists before the
     /// Settings window is ever opened, so it cannot rely on anyone else for
@@ -508,16 +520,66 @@ public partial class TranscribeViewModel : ViewModelBase
         }
         finally
         {
+            DetachPipelineHandlers();
+            ResetRecordingState();
+        }
+    }
+
+    /// <summary>
+    /// Stops recording and throws the audio away — nothing is transcribed and
+    /// nothing is typed. Detaching the handlers before stopping the pipeline is
+    /// what makes it a discard: whatever the pipeline still produces has nowhere
+    /// left to go.
+    /// </summary>
+    public async Task CancelRecordingAsync()
+    {
+        if (_pipeline is null)
+            return;
+
+        // Same reasoning as StopRecordingAsync (ADR-039): a hold that turns out
+        // to be a shortcut can be cancelled while the model is still loading.
+        if (_startTask is { } startTask)
+            await startTask;
+
+        if (!IsRecording)
+            return;
+
+        DetachPipelineHandlers();
+
+        try
+        {
+            await _pipeline.StopAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cancel recording");
+        }
+        finally
+        {
+            ResetRecordingState();
+            StatusText = "Cancelled";
+        }
+    }
+
+    private void DetachPipelineHandlers()
+    {
+        if (_pipeline is not null)
+        {
             _pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
             _pipeline.TranscriptionFailed -= OnTranscriptionFailed;
-            if (_audioLevelProvider is not null)
-                _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
-            IsRecording = false;
-            RecordingState = RecordingState.Disabled;
-            AudioLevel = 0f;
-            _smoothedRms = 0f;
-            StatusText = "Ready";
         }
+
+        if (_audioLevelProvider is not null)
+            _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
+    }
+
+    private void ResetRecordingState()
+    {
+        IsRecording = false;
+        RecordingState = RecordingState.Disabled;
+        AudioLevel = 0f;
+        _smoothedRms = 0f;
+        StatusText = "Ready";
     }
 
     private async void OnTranscriptionAvailable(object? sender, TranscriptionEventArgs e)

@@ -54,117 +54,146 @@ public class HotkeySettingsScreenshotTests : IClassFixture<HotkeyScreenshotRepor
         Avalonia.Threading.Dispatcher.UIThread.RunJobs();
     }
 
-    [AvaloniaFact]
-    public async Task Scenario_DefaultHotkey()
+    private static async Task<HotkeySettingsViewModel> CreateViewModelAsync()
     {
-        var settings = new MockSettingsService();
-        var hotkeyService = new MockGlobalHotkeyService();
-        var vm = new HotkeySettingsViewModel(hotkeyService, settings);
+        var vm = new HotkeySettingsViewModel(new MockGlobalHotkeyService(), new MockSettingsService());
         await SettleAsync();
+        return vm;
+    }
 
-        var steps = new List<ScenarioStep>();
+    [AvaloniaFact]
+    public async Task Scenario_DefaultBindings()
+    {
+        var vm = await CreateViewModelAsync();
 
         var view = new HotkeySettingsView();
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
-        steps.Add(new ScenarioStep(
-            "Default hotkey binding: Ctrl+Shift+Space. Activation mode is Push to Talk.",
-            screenshot));
 
         _report.AddScenario(new Scenario(
-            "Default Hotkey",
-            "Fresh install defaults — Ctrl+Shift+Space with Push to Talk mode.",
+            "Default Bindings",
+            "What a fresh install ships with: hold Right Ctrl to talk, double-tap Ctrl for hands-free, and Ctrl+Alt+Space as an explicit chord.",
+            [
+                new ScenarioStep(
+                    "Three bindings are listed, each with its activation mode. Only the chord's mode can be changed — a hold must be push-to-talk and a double-tap must toggle.",
+                    screenshot)
+            ]));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_AddPreset()
+    {
+        var vm = await CreateViewModelAsync();
+
+        var steps = new List<ScenarioStep>();
+
+        var before = new HotkeySettingsView();
+        steps.Add(new ScenarioStep(
+            "Starting from the default three bindings.",
+            await ScreenshotHelper.CaptureBase64Async(before, vm)));
+
+        vm.AddPresetCommand.Execute(DictationHotkey.Hold(ModifierKey.Alt, ModifierSide.Right));
+        await SettleAsync();
+
+        var after = new HotkeySettingsView();
+        steps.Add(new ScenarioStep(
+            "After picking \"Hold Right Alt\" from the Add menu — a fourth binding joins the list.",
+            await ScreenshotHelper.CaptureBase64Async(after, vm)));
+
+        _report.AddScenario(new Scenario(
+            "Add a Preset Binding",
+            "Bare-modifier gestures come from a preset menu, since a key-capture field cannot express \"hold this key\".",
             steps));
     }
 
     [AvaloniaFact]
-    public async Task Scenario_ToggleMode()
+    public async Task Scenario_ReservedShortcutRejected()
     {
-        var settings = new MockSettingsService();
-        var hotkeyService = new MockGlobalHotkeyService();
-        var vm = new HotkeySettingsViewModel(hotkeyService, settings);
+        var vm = await CreateViewModelAsync();
+
+        // Win+L locks the workstation — the binding must not be accepted.
+        vm.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Meta, "L"));
         await SettleAsync();
-
-        var steps = new List<ScenarioStep>();
-
-        // Step 1: Default Push to Talk
-        var view1 = new HotkeySettingsView();
-        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view1, vm);
-        steps.Add(new ScenarioStep(
-            "Initial state: Push to Talk is selected.",
-            screenshot1));
-
-        // Step 2: Switch to Toggle
-        vm.SetActivationMode(ActivationMode.Toggle);
-        await SettleAsync();
-
-        var view2 = new HotkeySettingsView();
-        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
-        steps.Add(new ScenarioStep(
-            "User switches to Toggle mode. The Toggle radio button is now selected.",
-            screenshot2));
-
-        _report.AddScenario(new Scenario(
-            "Switch to Toggle Mode",
-            "User changes activation from Push to Talk to Toggle.",
-            steps));
-    }
-
-    [AvaloniaFact]
-    public async Task Scenario_ConflictWarning()
-    {
-        var settings = new MockSettingsService();
-        var hotkeyService = new MockGlobalHotkeyService();
-        var vm = new HotkeySettingsViewModel(hotkeyService, settings);
-        await SettleAsync();
-
-        // Apply a binding that conflicts with a reserved shortcut (Win+L = Lock workstation)
-        vm.ApplyRecordedBinding(new HotkeyBinding(HotkeyModifiers.Meta, "L"));
-        await SettleAsync();
-
-        var steps = new List<ScenarioStep>();
 
         var view = new HotkeySettingsView();
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
-        steps.Add(new ScenarioStep(
-            "User sets Win+L as the hotkey. A conflict warning appears in orange, indicating this shortcut is reserved for \"Lock workstation\".",
-            screenshot));
 
         _report.AddScenario(new Scenario(
-            "Hotkey Conflict Warning",
-            "User selects a key combination that conflicts with a reserved OS shortcut.",
-            steps));
+            "Reserved Shortcut Rejected",
+            "Validation against shortcuts the OS has already claimed.",
+            [
+                new ScenarioStep(
+                    "The user records Win+L. It is rejected in red and never joins the list, because Windows uses it to lock the workstation.",
+                    screenshot)
+            ]));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_AdvisoryWarning()
+    {
+        var vm = await CreateViewModelAsync();
+
+        // Accepted, but it is parameter-hints in Visual Studio and VS Code.
+        vm.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Shift, "Space"));
+        await SettleAsync();
+
+        var view = new HotkeySettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
+
+        _report.AddScenario(new Scenario(
+            "Advisory Warning",
+            "Combinations that work but commonly collide with other applications are flagged rather than blocked.",
+            [
+                new ScenarioStep(
+                    "Ctrl+Shift+Space is added to the list, with an amber note that it shows parameter hints in Visual Studio and VS Code.",
+                    screenshot)
+            ]));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_DuplicateRejected()
+    {
+        var vm = await CreateViewModelAsync();
+
+        // Ctrl+Alt+Space is already in the default set.
+        vm.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Alt, "Space"));
+        await SettleAsync();
+
+        var view = new HotkeySettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
+
+        _report.AddScenario(new Scenario(
+            "Duplicate Binding Rejected",
+            "Validation against the user's own existing bindings, not just the OS.",
+            [
+                new ScenarioStep(
+                    "Recording Ctrl+Alt+Space when it is already bound is refused, naming what already owns it.",
+                    screenshot)
+            ]));
     }
 
     [AvaloniaFact]
     public async Task Scenario_RecordingState()
     {
-        var settings = new MockSettingsService();
-        var hotkeyService = new MockGlobalHotkeyService();
-        var vm = new HotkeySettingsViewModel(hotkeyService, settings);
-        await SettleAsync();
+        var vm = await CreateViewModelAsync();
 
         var steps = new List<ScenarioStep>();
 
-        // Step 1: Normal state
-        var view1 = new HotkeySettingsView();
-        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view1, vm);
+        var idle = new HotkeySettingsView();
         steps.Add(new ScenarioStep(
-            "Normal state showing current binding (Ctrl+Shift+Space).",
-            screenshot1));
+            "Idle: the chord recorder invites a key combination.",
+            await ScreenshotHelper.CaptureBase64Async(idle, vm)));
 
-        // Step 2: Recording state
         vm.StartRecordingCommand.Execute(null);
         await SettleAsync();
 
-        var view2 = new HotkeySettingsView();
-        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
+        var recording = new HotkeySettingsView();
         steps.Add(new ScenarioStep(
-            "Recording state: the recorder button shows \"Press keys...\" prompting the user to press their desired key combination.",
-            screenshot2));
+            "Armed: the button prompts for a key combination and the next keypress is captured as a chord.",
+            await ScreenshotHelper.CaptureBase64Async(recording, vm)));
 
         _report.AddScenario(new Scenario(
-            "Hotkey Recording State",
-            "User clicks the recorder button and enters the key capture state.",
+            "Chord Recording State",
+            "Capturing an explicit chord, which is still the only gesture a keyboard field can record directly.",
             steps));
     }
 }
