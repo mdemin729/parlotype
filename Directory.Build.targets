@@ -76,4 +76,32 @@
     </ItemGroup>
   </Target>
 
+  <!--
+    Drop native .pdb symbol files from Release publish output.
+
+    Avalonia's Skia rendering backend pulls in SkiaSharp.NativeAssets.Win32 and
+    HarfBuzzSharp.NativeAssets.Win32, whose runtimes/win-x64/native/ payloads include
+    libSkiaSharp.pdb (~80 MB) and libHarfBuzzSharp.pdb (~20 MB) alongside the native DLLs —
+    together nearly 100 MB, the two largest files in the publish output after ADR-050/051.
+    Nobody debugs into Skia's or HarfBuzz's native code from a Parlotype crash; these symbols
+    are dead weight in a shipped build.
+
+    NuGet tags these as %(AssetType) == 'native', which is what the filter keys on rather
+    than filename — it also cleanly excludes Parlotype's own managed PDBs (Parlotype.Desktop/
+    Platform/Core.pdb), which carry no AssetType at all and are worth keeping for crash
+    symbolication.
+
+    Release/publish only: a `dotnet publish -c Debug` keeps every symbol, and `bin/` dev
+    output is untouched either way. See ADR-052.
+  -->
+  <Target Name="RemoveNativePdbsFromPublish"
+          AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <_NativePdbToPublish Include="@(ResolvedFileToPublish)"
+          Condition="'%(Extension)' == '.pdb' and '%(ResolvedFileToPublish.AssetType)' == 'native'" />
+      <ResolvedFileToPublish Remove="@(_NativePdbToPublish)" />
+    </ItemGroup>
+  </Target>
+
 </Project>
