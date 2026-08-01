@@ -8,6 +8,9 @@ using Xunit;
 
 namespace Parlotype.Tests;
 
+// One test here drives a real Whisper load — see the note on
+// WhisperSpeechRecognizerTests for why that has to share the runtime collection.
+[Collection("WhisperRuntime")]
 public class AudioPipelineTests
 {
     private sealed class FakeSettingsService : ISettingsService

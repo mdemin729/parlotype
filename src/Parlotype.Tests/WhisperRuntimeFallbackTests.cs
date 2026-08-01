@@ -27,13 +27,17 @@ public sealed class WhisperRuntimeFallbackTests : IDisposable
     }
 
     [Fact]
-    public void LoadedRuntime_IsNull_BeforeAnyFactoryCreation()
+    public void Initialize_DoesNotLoadANativeLibrary()
     {
-        // Bootstrap sets the order but does NOT create a WhisperFactory,
-        // so no native library is loaded yet.
+        // Bootstrap sets the order but does NOT create a WhisperFactory, so it
+        // cannot change what is loaded. Compared against the value before the call
+        // rather than null: another class in this collection may already have
+        // loaded a model, and that latch is process-wide for the whole test run.
+        var before = WhisperRuntimeBootstrap.LoadedRuntime;
+
         WhisperRuntimeBootstrap.Initialize(RuntimePreference.Auto, Logger);
 
-        Assert.Null(WhisperRuntimeBootstrap.LoadedRuntime);
+        Assert.Equal(before, WhisperRuntimeBootstrap.LoadedRuntime);
     }
 
     [Fact]

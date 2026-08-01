@@ -25,6 +25,27 @@ internal static class WhisperRuntimeBootstrap
     public static RuntimeLibrary? LoadedRuntime => RuntimeOptions.LoadedLibrary;
 
     /// <summary>
+    /// Whether the runtime library Whisper.net loaded satisfies <paramref name="preference"/>.
+    /// A <c>null</c> <paramref name="loaded"/> (nothing loaded yet) is always satisfied, and
+    /// <see cref="RuntimePreference.Auto"/> accepts whatever won the fallback chain.
+    /// </summary>
+    public static bool IsSatisfiedBy(RuntimePreference preference, RuntimeLibrary? loaded)
+    {
+        if (loaded is not { } library)
+            return true;
+
+        return preference switch
+        {
+            RuntimePreference.Cuda => library == RuntimeLibrary.Cuda,
+            RuntimePreference.Vulkan => library == RuntimeLibrary.Vulkan,
+            // Whisper.net picks between the AVX and no-AVX CPU builds itself —
+            // both honour a Cpu preference.
+            RuntimePreference.Cpu => library is RuntimeLibrary.Cpu or RuntimeLibrary.CpuNoAvx,
+            _ => true,
+        };
+    }
+
+    /// <summary>
     /// Sets <see cref="RuntimeOptions.RuntimeLibraryOrder"/> according to the given
     /// <paramref name="preference"/>. This is idempotent — only the first call takes effect.
     /// </summary>
