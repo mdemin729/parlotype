@@ -9,7 +9,7 @@ Parlotype is a **local-by-default** voice-to-text desktop application: on-device
 - **.NET 10** — Runtime
 - **Avalonia UI 12** — Cross-platform desktop UI (tray-based)
 - **sherpa-onnx** (`org.k2fsa.sherpa.onnx`) — Parakeet TDT v3 speech recognition, in-process on CPU
-- **Whisper.net** — On-device speech recognition (OpenAI Whisper), CUDA / Vulkan / CPU
+- **Whisper.net** — On-device speech recognition (OpenAI Whisper), Vulkan / CPU
 - **llama.cpp (`llama-server`)** — Gemma 4 speech recognition sidecar
 - **Silero VAD** — Voice activity detection
 - **NAudio** — Windows audio capture (WASAPI)
@@ -23,23 +23,20 @@ Parlotype is a **local-by-default** voice-to-text desktop application: on-device
 
 Parlotype currently runs on **Windows** only. macOS and Linux support are planned for the future. Two features are explicitly Windows-only today: DPAPI encryption of cloud API keys (other platforms fall back to base64 with a logged warning) and keyboard-layout source detection (other platforms fall back to auto-detect).
 
-**GPU acceleration** applies to the **Whisper** engine: **NVIDIA** GPUs via CUDA and **AMD / Intel / other** GPUs via Vulkan, with automatic CPU fallback if no compatible GPU is detected. The active runtime can be changed under **Settings → Speech engine → Whisper runtime**. Parakeet is **CPU-only by design** (see [ADR-041](docs/decisions/041-parakeet-v3-sherpa-onnx.md)) and needs no GPU to be fast; Gemma 4 acceleration depends on the `llama-server` build you install.
+**GPU acceleration** applies to the **Whisper** engine and runs on **any** Vulkan-capable GPU (AMD, Intel, NVIDIA), with automatic CPU fallback if no compatible GPU is detected. CUDA was dropped in [ADR-049](docs/decisions/049-drop-whisper-cuda-runtime.md) — NVIDIA cards are still accelerated, via Vulkan. The active runtime can be changed under **Settings → Speech engine → Whisper runtime**. Parakeet is **CPU-only by design** (see [ADR-041](docs/decisions/041-parakeet-v3-sherpa-onnx.md)) and needs no GPU to be fast; Gemma 4 acceleration depends on the `llama-server` build you install.
 
 ## Download / Releases
 
 Pre-built Windows binaries are published on the [Releases page](../../releases). Each
-release ships two self-contained `win-x64` builds — no .NET runtime install required, just
-unzip and run `Parlotype.Desktop.exe`:
+release ships one self-contained `win-x64` build — no .NET runtime install required, just
+unzip and run `Parlotype.Desktop.exe`. Releases up to and including the Full/Lite split
+still carry `-full` / `-lite` suffixes; from [ADR-049](docs/decisions/049-drop-whisper-cuda-runtime.md)
+onward there is a single `Parlotype-<version>-win-x64.zip`.
 
-| Build | Contents | Use when |
-|-------|----------|----------|
-| **Full** | CUDA + Vulkan GPU runtimes | You have an **NVIDIA** GPU and want CUDA acceleration for Whisper (also requires the [CUDA toolkit](#cuda-optional-nvidia-gpus) installed) |
-| **Lite** | Vulkan GPU runtime only | Everything else — AMD / Intel GPUs, or you prefer a smaller download (NVIDIA still works via Vulkan) |
-
-Both are self-contained, so they're large (roughly 0.8–1 GB unzipped; the downloaded zips
-are smaller — exact sizes are listed on each release). Both fall back to CPU automatically
-if no compatible GPU is found, and the default Parakeet engine needs no GPU at all. The
-builds are currently unsigned, so Windows SmartScreen may warn on first launch.
+Being self-contained it is large (~730 MB unzipped; the downloaded zip is smaller — exact
+sizes are listed on each release). It falls back to CPU automatically if no Vulkan-capable
+GPU is found, and the default Parakeet engine needs no GPU at all. The build is currently
+unsigned, so Windows SmartScreen may warn on first launch.
 
 Speech models are **not** bundled — they download on demand into
 `%LOCALAPPDATA%\parlotype\models\` the first time you need them.
@@ -51,7 +48,7 @@ Parlotype ships five interchangeable speech-to-text engines — three local, two
 | Engine | Where it runs | Download | Languages | Translation |
 |--------|---------------|----------|-----------|-------------|
 | **Parakeet TDT v3** (default) | Local, CPU only | ~670 MB (INT8) | 25 European, always auto-detected | — |
-| **Whisper** | Local, CUDA / Vulkan / CPU | 75 MiB – 2.9 GiB by model | ~99, selectable | To English |
+| **Whisper** | Local, Vulkan / CPU | 75 MiB – 2.9 GiB by model | ~99, selectable | To English |
 | **Gemma 4** | Local, `llama-server` sidecar | ~5.5–15 GiB by variant | Full catalog | To any language |
 | **OpenAI-compatible** (cloud) | Your provider (OpenAI, Groq, …) | — | Auto-detected | — |
 | **xAI Grok** (cloud) | xAI | — | Auto-detected | — |
@@ -173,26 +170,15 @@ Everything lives under `%LOCALAPPDATA%\parlotype\`:
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
-Neither CUDA nor Vulkan is required unless you want GPU-accelerated **Whisper** — the default Parakeet engine runs on CPU.
-
-### CUDA (optional, NVIDIA GPUs)
-
-For GPU-accelerated Whisper recognition with an NVIDIA graphics card:
-
-1. Install the latest NVIDIA drivers for your GPU.
-2. Download and install CUDA from [developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads).
-   - Choose **Express Installation** when prompted.
-3. Restart your computer after installation.
-
-Parlotype will automatically detect and use CUDA when available. No additional configuration is needed.
+Vulkan is not required unless you want GPU-accelerated **Whisper** — the default Parakeet engine runs on CPU.
 
 ### Vulkan (optional, AMD / Intel / NVIDIA GPUs)
 
-Vulkan is the recommended Whisper runtime when you don't have an NVIDIA GPU. Most modern GPU drivers (Radeon, Intel Arc, GeForce) already ship the Vulkan loader (`vulkan-1.dll`) — no extra install is needed for end users.
+Vulkan is the only GPU runtime for Whisper, on every vendor. Most modern GPU drivers (Radeon, Intel Arc, GeForce) already ship the Vulkan loader (`vulkan-1.dll`) — no extra install is needed for end users.
 
 If Parlotype reports that the Vulkan loader is missing, install the **Vulkan SDK** from [vulkan.lunarg.com/sdk/home](https://vulkan.lunarg.com/sdk/home) (the SDK bundles a system-wide Vulkan loader and is also useful for development).
 
-Parlotype will automatically detect and use Vulkan when available, in priority order **CUDA → Vulkan → CPU** (Auto mode). You can pin a specific runtime under **Settings → Speech engine → Whisper runtime**; changes take effect after an app restart.
+Parlotype will automatically detect and use Vulkan when available, in priority order **Vulkan → CPU** (Auto mode). You can pin a specific runtime under **Settings → Speech engine → Whisper runtime**; changes take effect after an app restart.
 
 ## Build & Run
 
@@ -202,12 +188,6 @@ dotnet run --project src\Parlotype.Desktop
 ```
 
 The app starts minimized to the system tray. Click the tray icon for an Open / Settings / Exit menu, or use a [dictation hotkey](#dictation-hotkeys) — hold Right Ctrl, or double-tap Ctrl — to open the Transcribe window and start recording.
-
-To skip the heavyweight CUDA package (faster builds, smaller output — Vulkan stays):
-
-```powershell
-dotnet build Parlotype.slnx -p:EnableCuda=false
-```
 
 ### Visual inspector (Debug builds)
 

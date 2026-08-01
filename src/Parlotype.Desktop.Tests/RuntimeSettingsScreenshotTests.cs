@@ -64,15 +64,12 @@ public class RuntimeSettingsScreenshotTests : IClassFixture<ScreenshotReportFixt
         _report = report;
     }
 
-    private static RuntimeSettingsViewModel BuildVm(
-        NvidiaEnvironmentInfo? nvidia = null,
-        VulkanEnvironmentInfo? vulkan = null)
+    private static RuntimeSettingsViewModel BuildVm(VulkanEnvironmentInfo? vulkan = null)
     {
         var settings = new MockSettingsService();
-        var nvidiaProvider = new MockNvidiaEnvironmentProvider(nvidia ?? NvidiaEnvironmentInfo.Empty);
         var vulkanProvider = new MockVulkanEnvironmentProvider(
             vulkan ?? new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" });
-        return new RuntimeSettingsViewModel(settings, nvidiaProvider, vulkanProvider);
+        return new RuntimeSettingsViewModel(settings, vulkanProvider);
     }
 
     private static async Task SettleAsync()
@@ -82,86 +79,9 @@ public class RuntimeSettingsScreenshotTests : IClassFixture<ScreenshotReportFixt
     }
 
     [AvaloniaFact]
-    public async Task Scenario_CudaNoDriver()
-    {
-        var vm = BuildVm(
-            nvidia: NvidiaEnvironmentInfo.Empty,
-            vulkan: new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" });
-        await SettleAsync();
-
-        var steps = new List<ScenarioStep>();
-
-        // Step 1: Initial state — CUDA shows as unavailable
-        var view = new RuntimeSettingsView();
-        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view, vm);
-        steps.Add(new ScenarioStep(
-            "Initial state: Runtime settings opened. CUDA is marked unavailable because no NVIDIA GPU was detected.",
-            screenshot1));
-
-        // Step 2: User selects CUDA — the guidance panel is visible
-        vm.SelectRuntimeCommand.Execute(RuntimePreference.Cuda);
-        await SettleAsync();
-
-        var view2 = new RuntimeSettingsView();
-        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
-        steps.Add(new ScenarioStep(
-            "User selects CUDA runtime. The \"NVIDIA GPU not detected\" guidance panel is displayed, explaining that CUDA requires an NVIDIA GPU with drivers installed.",
-            screenshot2));
-
-        _report.AddScenario(new Scenario(
-            "CUDA — No NVIDIA Driver",
-            "User's machine has no NVIDIA GPU or driver installed. Selecting CUDA shows a clear explanation.",
-            steps));
-    }
-
-    [AvaloniaFact]
-    public async Task Scenario_CudaDriverButNoSdk()
-    {
-        var vm = BuildVm(
-            nvidia: new NvidiaEnvironmentInfo
-            {
-                DriverVersion = "596.36",
-                DriverMaxCudaVersion = "13.2",
-                LoadableRuntimes = [],
-            },
-            vulkan: new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" });
-        await SettleAsync();
-
-        var steps = new List<ScenarioStep>();
-
-        // Step 1: Initial state — CUDA shows unavailable with SDK message
-        var view = new RuntimeSettingsView();
-        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view, vm);
-        steps.Add(new ScenarioStep(
-            "Initial state: NVIDIA driver (version 596.36) is detected, but the CUDA toolkit is not installed. CUDA is marked unavailable.",
-            screenshot1));
-
-        // Step 2: User selects CUDA
-        vm.SelectRuntimeCommand.Execute(RuntimePreference.Cuda);
-        await SettleAsync();
-
-        var view2 = new RuntimeSettingsView();
-        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
-        steps.Add(new ScenarioStep(
-            "User selects CUDA. The guidance panel shows the detected driver version (596.36) and provides step-by-step instructions to install the CUDA toolkit, including a clickable \"Download CUDA Toolkit\" button.",
-            screenshot2));
-
-        _report.AddScenario(new Scenario(
-            "CUDA — Driver Present, Toolkit Missing",
-            "User has an NVIDIA GPU with driver 596.36 but hasn't installed the CUDA toolkit. The UI shows the driver version and provides download instructions.",
-            steps));
-    }
-
-    [AvaloniaFact]
     public async Task Scenario_VulkanLoaderMissing()
     {
-        var vm = BuildVm(
-            nvidia: new NvidiaEnvironmentInfo
-            {
-                DriverVersion = "596.36",
-                LoadableRuntimes = [new CudaRuntimeProbe("cudart64_13", "13.2", "13.2")],
-            },
-            vulkan: VulkanEnvironmentInfo.Empty);
+        var vm = BuildVm(vulkan: VulkanEnvironmentInfo.Empty);
         await SettleAsync();
 
         var steps = new List<ScenarioStep>();
@@ -193,11 +113,6 @@ public class RuntimeSettingsScreenshotTests : IClassFixture<ScreenshotReportFixt
     public async Task Scenario_AllAvailable()
     {
         var vm = BuildVm(
-            nvidia: new NvidiaEnvironmentInfo
-            {
-                DriverVersion = "596.36",
-                LoadableRuntimes = [new CudaRuntimeProbe("cudart64_13", "13.2", "13.2")],
-            },
             vulkan: new VulkanEnvironmentInfo
             {
                 HasVulkanLoader = true,
@@ -213,32 +128,32 @@ public class RuntimeSettingsScreenshotTests : IClassFixture<ScreenshotReportFixt
         var view = new RuntimeSettingsView();
         var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
-            "Happy path: All runtimes are available. CUDA (NVIDIA driver 596.36 with toolkit), Vulkan (loader 1.3.268 with SDK), and CPU are all selectable with no warnings.",
+            "Happy path: Auto, Vulkan (loader 1.3.268 with SDK) and CPU are all selectable with no warnings.",
             screenshot1));
 
-        // Step 2: User selects CUDA
-        vm.SelectRuntimeCommand.Execute(RuntimePreference.Cuda);
+        // Step 2: User selects Vulkan
+        vm.SelectRuntimeCommand.Execute(RuntimePreference.Vulkan);
         await SettleAsync();
 
         var view2 = new RuntimeSettingsView();
         var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
         steps.Add(new ScenarioStep(
-            "User selects CUDA. The selection indicator moves to CUDA. No warnings or guidance panels are shown.",
+            "User selects Vulkan. The selection indicator moves to Vulkan. No warnings or guidance panels are shown.",
             screenshot2));
 
-        // Step 3: User selects Vulkan
-        vm.SelectRuntimeCommand.Execute(RuntimePreference.Vulkan);
+        // Step 3: User falls back to CPU
+        vm.SelectRuntimeCommand.Execute(RuntimePreference.Cpu);
         await SettleAsync();
 
         var view3 = new RuntimeSettingsView();
         var screenshot3 = await ScreenshotHelper.CaptureBase64Async(view3, vm);
         steps.Add(new ScenarioStep(
-            "User selects Vulkan. The selection indicator moves to Vulkan. No warnings or guidance panels are shown.",
+            "User selects CPU. The selection indicator moves to CPU. No warnings or guidance panels are shown.",
             screenshot3));
 
         _report.AddScenario(new Scenario(
             "All Runtimes Available (Happy Path)",
-            "User's machine has full CUDA and Vulkan support. All options are selectable without any warnings.",
+            "User's machine has working Vulkan support. Every option is selectable without any warnings.",
             steps));
     }
 }

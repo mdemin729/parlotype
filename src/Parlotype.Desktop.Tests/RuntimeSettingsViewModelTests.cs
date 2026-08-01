@@ -10,16 +10,12 @@ public class RuntimeSettingsViewModelTests
 {
     private static RuntimeSettingsViewModel Build(
         MockSettingsService settings,
-        bool hasNvidia = false,
         bool hasVulkan = true)
     {
-        var nvidia = new MockNvidiaEnvironmentProvider(hasNvidia
-            ? new NvidiaEnvironmentInfo { DriverVersion = "999.99" }
-            : NvidiaEnvironmentInfo.Empty);
         var vulkan = new MockVulkanEnvironmentProvider(hasVulkan
             ? new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" }
             : VulkanEnvironmentInfo.Empty);
-        return new RuntimeSettingsViewModel(settings, nvidia, vulkan);
+        return new RuntimeSettingsViewModel(settings, vulkan);
     }
 
     private static Task SettleAsync() => Task.Delay(50, TestContext.Current.CancellationToken);
@@ -62,21 +58,51 @@ public class RuntimeSettingsViewModelTests
         Assert.Equal("Cpu", saved);
     }
 
+    /// <summary>
+    /// Settings written before ADR-049 can still name the removed CUDA runtime. The
+    /// selection must fall back to Auto <i>and</i> the stale value must be rewritten,
+    /// so it never resurfaces in a later session or a bug report.
+    /// </summary>
+    [Fact]
+    public async Task Initialize_MigratesRemovedCudaPreference_ToAuto()
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.RuntimePreference, "Cuda", TestContext.Current.CancellationToken);
+
+        var vm = Build(settings);
+        await SettleAsync();
+
+        Assert.Equal(RuntimePreference.Auto, vm.SelectedRuntime);
+        var saved = await settings.GetAsync<string>(SettingsKeys.RuntimePreference, TestContext.Current.CancellationToken);
+        Assert.Equal("Auto", saved);
+    }
+
+    [Fact]
+    public async Task RuntimeOptions_DoNotOfferCuda()
+    {
+        var settings = new MockSettingsService();
+        var vm = Build(settings);
+        await SettleAsync();
+
+        Assert.Equal(
+            [RuntimePreference.Auto, RuntimePreference.Vulkan, RuntimePreference.Cpu],
+            vm.RuntimeOptions.Select(o => o.Type));
+    }
+
     [Fact]
     public async Task Availability_ReflectsEnvironmentDetection()
     {
         var settings = new MockSettingsService();
-        var vm = Build(settings, hasNvidia: false, hasVulkan: true);
+        var vm = Build(settings, hasVulkan: true);
         await SettleAsync();
 
-        var cuda = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Cuda);
+        var auto = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Auto);
         var vulkan = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Vulkan);
         var cpu = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Cpu);
 
-        Assert.False(cuda.IsAvailable);
+        Assert.True(auto.IsAvailable);
         Assert.True(vulkan.IsAvailable);
         Assert.True(cpu.IsAvailable);
-        Assert.NotNull(cuda.UnavailableReason);
         Assert.False(vm.VulkanLoaderMissing);
     }
 
@@ -84,7 +110,7 @@ public class RuntimeSettingsViewModelTests
     public async Task Availability_VulkanMissing_FlagsLoaderMissing()
     {
         var settings = new MockSettingsService();
-        var vm = Build(settings, hasNvidia: true, hasVulkan: false);
+        var vm = Build(settings, hasVulkan: false);
         await SettleAsync();
 
         var vulkan = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Vulkan);
@@ -92,82 +118,24 @@ public class RuntimeSettingsViewModelTests
         Assert.False(vulkan.IsAvailable);
         Assert.True(vm.VulkanLoaderMissing);
         Assert.NotNull(vulkan.UnavailableReason);
-    }
 
-    [Fact]
-    public async Task CudaDriverMissing_WhenNoNvidiaDetected()
-    {
-        var settings = new MockSettingsService();
-        var vm = Build(settings, hasNvidia: false);
-        await SettleAsync();
-
-        Assert.True(vm.CudaDriverMissing);
-        Assert.False(vm.CudaSdkMissing);
-        Assert.Null(vm.CudaDriverVersion);
-
-        var cuda = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Cuda);
-        Assert.False(cuda.IsAvailable);
-        Assert.Contains("No NVIDIA GPU detected", cuda.UnavailableReason);
-    }
-
-    [Fact]
-    public async Task CudaSdkMissing_WhenDriverPresentButNoRuntime()
-    {
-        var settings = new MockSettingsService();
-        var nvidia = new MockNvidiaEnvironmentProvider(new NvidiaEnvironmentInfo
-        {
-            DriverVersion = "596.36",
-            DriverMaxCudaVersion = "13.2",
-            LoadableRuntimes = [],
-        });
-        var vulkan = new MockVulkanEnvironmentProvider(
-            new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" });
-        var vm = new RuntimeSettingsViewModel(settings, nvidia, vulkan);
-        await SettleAsync();
-
-        Assert.False(vm.CudaDriverMissing);
-        Assert.True(vm.CudaSdkMissing);
-        Assert.Equal("596.36", vm.CudaDriverVersion);
-
-        var cuda = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Cuda);
-        Assert.False(cuda.IsAvailable);
-        Assert.Contains("CUDA toolkit not installed", cuda.UnavailableReason);
-    }
-
-    [Fact]
-    public async Task CudaReady_WhenRuntimesLoadable()
-    {
-        var settings = new MockSettingsService();
-        var nvidia = new MockNvidiaEnvironmentProvider(new NvidiaEnvironmentInfo
-        {
-            DriverVersion = "596.36",
-            LoadableRuntimes = [new CudaRuntimeProbe("cudart64_13", "13.2", "13.2")],
-        });
-        var vulkan = new MockVulkanEnvironmentProvider(
-            new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" });
-        var vm = new RuntimeSettingsViewModel(settings, nvidia, vulkan);
-        await SettleAsync();
-
-        Assert.False(vm.CudaDriverMissing);
-        Assert.False(vm.CudaSdkMissing);
-
-        var cuda = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Cuda);
-        Assert.True(cuda.IsAvailable);
-        Assert.Null(cuda.UnavailableReason);
+        // Auto and Cpu stay selectable — both can still run on the CPU backend.
+        Assert.True(vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Auto).IsAvailable);
+        Assert.True(vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Cpu).IsAvailable);
     }
 
     [Fact]
     public async Task RestartRequired_WhenSelectionDiffersFromLoadedRuntime()
     {
         var settings = new MockSettingsService();
-        await settings.SetAsync(SettingsKeys.RuntimePreference, RuntimePreference.Cuda.ToString(), TestContext.Current.CancellationToken);
-        var vm = BuildWithStatus(settings, new FakeRuntimeStatus("Cuda"));
+        await settings.SetAsync(SettingsKeys.RuntimePreference, RuntimePreference.Vulkan.ToString(), TestContext.Current.CancellationToken);
+        var vm = BuildWithStatus(settings, new FakeRuntimeStatus("Vulkan"));
         await SettleAsync();
 
         Assert.False(vm.RestartRequired);
-        Assert.Equal("Cuda", vm.LoadedRuntimeName);
+        Assert.Equal("Vulkan", vm.LoadedRuntimeName);
 
-        vm.SelectRuntimeCommand.Execute(RuntimePreference.Vulkan);
+        vm.SelectRuntimeCommand.Execute(RuntimePreference.Cpu);
 
         Assert.True(vm.RestartRequired);
     }
@@ -189,10 +157,9 @@ public class RuntimeSettingsViewModelTests
         MockSettingsService settings,
         IWhisperRuntimeStatus status)
     {
-        var nvidia = new MockNvidiaEnvironmentProvider(NvidiaEnvironmentInfo.Empty);
         var vulkan = new MockVulkanEnvironmentProvider(
             new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" });
-        return new RuntimeSettingsViewModel(settings, nvidia, vulkan, status);
+        return new RuntimeSettingsViewModel(settings, vulkan, status);
     }
 
     /// <summary>Mimics the process-wide runtime latch without loading anything native.</summary>

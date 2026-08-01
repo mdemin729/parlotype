@@ -1,7 +1,12 @@
 ---
 status: accepted
+amended-by: 049
 date: 2026-05-05
 ---
+
+> **Amended by [ADR-049](049-drop-whisper-cuda-runtime.md) (2026-07-31).** Vulkan is now the
+> *only* GPU runtime: `RuntimePreference` is `Auto / Vulkan / Cpu` and `Auto` chains
+> Vulkan -> CPU.
 
 # 022. Vulkan GPU Acceleration
 

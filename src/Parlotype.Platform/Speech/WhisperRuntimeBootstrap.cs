@@ -36,7 +36,6 @@ internal static class WhisperRuntimeBootstrap
 
         return preference switch
         {
-            RuntimePreference.Cuda => library == RuntimeLibrary.Cuda,
             RuntimePreference.Vulkan => library == RuntimeLibrary.Vulkan,
             // Whisper.net picks between the AVX and no-AVX CPU builds itself —
             // both honour a Cpu preference.
@@ -57,7 +56,7 @@ internal static class WhisperRuntimeBootstrap
             return;
         }
 
-        // Bridge Whisper.net internal diagnostics (CUDA probing, DLL loading) to our logger.
+        // Bridge Whisper.net internal diagnostics (backend probing, DLL loading) to our logger.
         // Note: Whisper.net 1.9.0 has an inverted GgmlLogLevel enum (Error=2 matches native INFO=2),
         // so native informational messages arrive as WhisperLogLevel.Error. We remap accordingly.
         LogProvider.AddLogger((level, message) =>
@@ -76,13 +75,12 @@ internal static class WhisperRuntimeBootstrap
         RuntimeOptions.RuntimeLibraryOrder = preference switch
         {
             RuntimePreference.Cpu => [RuntimeLibrary.Cpu],
-            // Strict modes: no fallback. WhisperSpeechRecognizer pre-checks the
-            // environment and surfaces a RuntimeUnavailableException if the chosen
-            // backend isn't usable.
-            RuntimePreference.Cuda => [RuntimeLibrary.Cuda],
+            // Strict mode: no fallback. WhisperSpeechRecognizer pre-checks the
+            // environment and surfaces a RuntimeUnavailableException if Vulkan
+            // isn't usable.
             RuntimePreference.Vulkan => [RuntimeLibrary.Vulkan],
-            // Auto: try CUDA, then Vulkan, then fall back to CPU.
-            _ => [RuntimeLibrary.Cuda, RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
+            // Auto: try Vulkan, then fall back to CPU.
+            _ => [RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
         };
 
         logger.LogInformation(

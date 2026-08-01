@@ -1,7 +1,13 @@
 ---
-status: accepted
+status: superseded
+superseded-by: 049
 date: 2026-03-16
 ---
+
+> **Superseded by [ADR-049](049-drop-whisper-cuda-runtime.md) (2026-07-31).** The CUDA
+> runtime, the `EnableCuda` flag and the `RuntimePreference.Cuda` member no longer exist;
+> Vulkan is the only GPU backend. The `WhisperRuntimeBootstrap` mechanism described here
+> is still in force.
 
 # 012. CUDA GPU Acceleration
 

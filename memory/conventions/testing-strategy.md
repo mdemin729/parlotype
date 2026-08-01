@@ -37,7 +37,6 @@ dotnet test                                      # All tests
 dotnet test src/Parlotype.Tests                  # Core + Platform only
 dotnet test src/Parlotype.Desktop.Tests          # UI only
 dotnet test src/Parlotype.Benchmark.Tests        # Benchmark only
-dotnet test -p:EnableCuda=false                  # CPU-only (skip CUDA runtime)
 dotnet test --filter "FullyQualifiedName~Name"   # Single test
 ```
 

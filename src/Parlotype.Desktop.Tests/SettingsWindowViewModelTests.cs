@@ -14,14 +14,13 @@ public class SettingsWindowViewModelTests
     {
         settings ??= new MockSettingsService();
         var enumerator = new MockMicrophoneEnumerator(new MicrophoneInfo("m1", "Mic 1", true));
-        var nvidia = new MockNvidiaEnvironmentProvider();
         var vulkan = new MockVulkanEnvironmentProvider();
 
         var engine = new SpeechEngineSettingsViewModel(settings);
         var mic = new MicrophoneSettingsViewModel(enumerator, settings);
         var silence = new SilenceTimeoutSettingsViewModel(settings);
         var model = new WhisperModelSettingsViewModel(settings);
-        var runtime = new RuntimeSettingsViewModel(settings, nvidia, vulkan);
+        var runtime = new RuntimeSettingsViewModel(settings, vulkan);
         var whisperOutput = new WhisperOutputSettingsViewModel(settings);
         var language = new LanguageSelectionSettingsViewModel(
             new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService()));

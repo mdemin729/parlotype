@@ -41,8 +41,7 @@ The 8 projects are wired in `Parlotype.slnx`. `Parlotype.Desktop` is the sole de
 
 ### Parlotype.Platform
 - **Whisper.net** + **Whisper.net.Runtime** — speech recognition
-- **Whisper.net.Runtime.Cuda** — NVIDIA GPU acceleration (conditional via `EnableCuda` MSBuild flag, ~350 MB; default on)
-- **Whisper.net.Runtime.Vulkan** — cross-vendor GPU acceleration (always included, ~30 MB) — [[decisions/_index|ADR-022]]
+- **Whisper.net.Runtime.Vulkan** — the only GPU runtime, cross-vendor (always included, ~30 MB) — [[decisions/_index|ADR-022]], [[decisions/_index|ADR-049]]
 - **NAudio** — WASAPI audio capture
 - **Microsoft.ML.OnnxRuntime** — Silero VAD inference
 - **SharpHook 7.x** — global keyboard hooks (uses `SimpleGlobalHook` for working event suppression — [[decisions/_index|ADR-020]])

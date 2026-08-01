@@ -712,7 +712,6 @@ public class AudioPipelineTests
         await using var recognizer = new WhisperSpeechRecognizer(
             new HeadlessModelDownloadService(),
             settings,
-            new NoOpNvidiaEnvironmentProvider(),
             new NoOpVulkanEnvironmentProvider(),
             NullLogger<WhisperSpeechRecognizer>.Instance);
 

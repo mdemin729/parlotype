@@ -11,7 +11,7 @@ namespace Parlotype.Core.Speech;
 public interface IWhisperRuntimeStatus
 {
     /// <summary>
-    /// Name of the runtime library the process loaded ("Cuda", "Vulkan", "Cpu", …),
+    /// Name of the runtime library the process loaded ("Vulkan", "Cpu", …),
     /// or <c>null</c> when no Whisper model has been loaded yet.
     /// </summary>
     string? LoadedRuntimeName { get; }

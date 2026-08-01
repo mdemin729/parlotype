@@ -60,7 +60,6 @@ public class WhisperSpeechRecognizerTests
         await using var recognizer = new WhisperSpeechRecognizer(
             new HeadlessModelDownloadService(),
             settings,
-            new NoOpNvidiaEnvironmentProvider(),
             new NoOpVulkanEnvironmentProvider(),
             NullLogger<WhisperSpeechRecognizer>.Instance);
         await recognizer.InitializeAsync();
@@ -92,7 +91,6 @@ public class WhisperSpeechRecognizerTests
         await using var recognizer = new WhisperSpeechRecognizer(
             new HeadlessModelDownloadService(),
             settings,
-            new NoOpNvidiaEnvironmentProvider(),
             new NoOpVulkanEnvironmentProvider(),
             NullLogger<WhisperSpeechRecognizer>.Instance);
         await recognizer.InitializeAsync();

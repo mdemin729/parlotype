@@ -21,6 +21,13 @@ from source with `-DSHERPA_ONNX_ENABLE_GPU=ON` and CUDA 11.8/12.x
 (github.com/k2-fsa/sherpa-onnx issues #1044, #1313). Setting
 `config.ModelConfig.Provider = "cuda"` on the stock package does not work.
 
+Despite that, the package **still ships** `onnxruntime_providers_cuda.dll` —
+**391 MB**, measured 2026-07-31 in a self-contained `win-x64` publish, i.e. ~54%
+of the whole 731 MB output — plus a small `onnxruntime_providers_tensorrt.dll`.
+Neither is ever loaded, since `ParakeetSpeechRecognizer` pins `Provider = "cpu"`.
+This is now the single largest item in the artifact, well ahead of anything the
+Whisper CUDA removal saved ([[../decisions/_index|ADR-049]]).
+
 ## 2. Config objects use public fields, not properties
 
 `OfflineRecognizerConfig`, `OfflineModelConfig`, `OfflineTransducerModelConfig`

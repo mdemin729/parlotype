@@ -10,11 +10,9 @@ namespace Parlotype.Desktop.ViewModels.Settings;
 
 public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
 {
-    private const string CudaDownloadUrl = "https://developer.nvidia.com/cuda-downloads";
     private const string VulkanSdkUrl = "https://vulkan.lunarg.com/sdk/home";
 
     private readonly ISettingsService _settings;
-    private readonly INvidiaEnvironmentProvider _nvidia;
     private readonly IVulkanEnvironmentProvider _vulkan;
     private readonly IWhisperRuntimeStatus? _runtimeStatus;
     private readonly ILogger<RuntimeSettingsViewModel> _logger;
@@ -31,18 +29,6 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
     [ObservableProperty]
     private bool _vulkanLoaderMissing;
 
-    /// <summary>True when no NVIDIA driver is detected at all.</summary>
-    [ObservableProperty]
-    private bool _cudaDriverMissing;
-
-    /// <summary>True when an NVIDIA driver exists but no CUDA runtime library can be loaded.</summary>
-    [ObservableProperty]
-    private bool _cudaSdkMissing;
-
-    /// <summary>The detected NVIDIA driver version, or null if no driver was found.</summary>
-    [ObservableProperty]
-    private string? _cudaDriverVersion;
-
     /// <summary>
     /// True when the selected runtime differs from the one this process already
     /// loaded. Whisper's runtime is process-wide and one-shot, so the selection
@@ -57,13 +43,11 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
 
     public RuntimeSettingsViewModel(
         ISettingsService settings,
-        INvidiaEnvironmentProvider nvidia,
         IVulkanEnvironmentProvider vulkan,
         IWhisperRuntimeStatus? runtimeStatus = null,
         ILogger<RuntimeSettingsViewModel>? logger = null)
     {
         _settings = settings;
-        _nvidia = nvidia;
         _vulkan = vulkan;
         // Null in design-time/unit contexts, where no native runtime is ever loaded.
         _runtimeStatus = runtimeStatus;
@@ -72,10 +56,7 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
         RuntimeOptions =
         [
             new(RuntimePreference.Auto, "Auto",
-                "Try CUDA, then Vulkan, then CPU. Recommended.",
-                SelectRuntimeCommand),
-            new(RuntimePreference.Cuda, "CUDA",
-                "NVIDIA GPU only. Fastest on supported NVIDIA hardware. Will not start without an NVIDIA driver.",
+                "Try Vulkan, then fall back to CPU. Recommended.",
                 SelectRuntimeCommand),
             new(RuntimePreference.Vulkan, "Vulkan",
                 "Any GPU via Vulkan (AMD, Intel, NVIDIA). Requires GPU drivers with Vulkan support.",
@@ -91,10 +72,20 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
     private async Task InitializeAsync()
     {
         var saved = await _settings.GetAsync<string>(SettingsKeys.RuntimePreference);
-        var runtime = Enum.TryParse<RuntimePreference>(saved, ignoreCase: true, out var parsed)
-            ? parsed
-            : RuntimePreference.Auto;
+        var recognized = Enum.TryParse<RuntimePreference>(saved, ignoreCase: true, out var parsed);
+        var runtime = recognized ? parsed : RuntimePreference.Auto;
         Apply(runtime);
+
+        // Settings written before ADR-049 can still hold "Cuda". Every reader already
+        // degrades to Auto, but rewriting the file keeps the stale value from lingering
+        // and showing up in bug reports as a runtime we no longer ship.
+        if (!recognized && !string.IsNullOrWhiteSpace(saved))
+        {
+            _logger.LogInformation(
+                "Discarding unsupported runtime preference '{Saved}' — falling back to {Runtime}", saved, runtime);
+            await _settings.SetAsync(SettingsKeys.RuntimePreference, runtime.ToString());
+        }
+
         await RefreshAvailabilityAsync();
     }
 
@@ -111,27 +102,13 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
 
     private async Task RefreshAvailabilityAsync()
     {
-        var nvidia = await _nvidia.GetAsync();
         var vulkan = await _vulkan.GetAsync();
         VulkanLoaderMissing = !vulkan.HasVulkanLoader;
-
-        // Distinguish CUDA readiness states
-        CudaDriverMissing = !nvidia.HasNvidia;
-        CudaSdkMissing = nvidia.HasNvidia && nvidia.LoadableRuntimes.Count == 0;
-        CudaDriverVersion = nvidia.DriverVersion;
 
         foreach (var item in RuntimeOptions)
         {
             switch (item.Type)
             {
-                case RuntimePreference.Cuda:
-                    item.IsAvailable = nvidia.HasNvidia && nvidia.LoadableRuntimes.Count > 0;
-                    item.UnavailableReason = item.IsAvailable
-                        ? null
-                        : CudaDriverMissing
-                            ? "No NVIDIA GPU detected — see guidance below."
-                            : "CUDA toolkit not installed — see guidance below.";
-                    break;
                 case RuntimePreference.Vulkan:
                     item.IsAvailable = vulkan.HasVulkanLoader;
                     item.UnavailableReason = vulkan.HasVulkanLoader
@@ -166,13 +143,6 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
             item.IsSelected = item.Type == type;
 
         RefreshRestartState();
-    }
-
-    [RelayCommand]
-    private void OpenCudaDownloadLink()
-    {
-        _logger.LogInformation("Opening CUDA download page: {Url}", CudaDownloadUrl);
-        Process.Start(new ProcessStartInfo(CudaDownloadUrl) { UseShellExecute = true });
     }
 
     [RelayCommand]
