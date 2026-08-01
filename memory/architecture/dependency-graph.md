@@ -47,7 +47,7 @@ The 8 projects are wired in `Parlotype.slnx`. `Parlotype.Desktop` is the sole de
 - **SharpHook 7.x** — global keyboard hooks (uses `SimpleGlobalHook` for working event suppression — [[decisions/_index|ADR-020]])
 
 ### Parlotype.Desktop
-- **Avalonia 12.0.2** — UI framework (`Avalonia`, `Avalonia.Desktop`, `Avalonia.Themes.Fluent`, `Avalonia.Fonts.Inter`)
+- **Avalonia 12.0.2** — UI framework (`Avalonia`, `Avalonia.Desktop`, `Avalonia.Themes.Fluent`, `Avalonia.Fonts.Inter`; its Skia rendering backend pulls in `SkiaSharp.NativeAssets.Win32`/`HarfBuzzSharp.NativeAssets.Win32`, whose native PDBs (`libSkiaSharp.pdb`, `libHarfBuzzSharp.pdb`, ~100 MB combined) are filtered out of Release publish output by `Directory.Build.targets` — [[decisions/_index|ADR-052]])
 - **CommunityToolkit.Mvvm** — MVVM source generators
 - **Microsoft.Extensions.DependencyInjection** — DI container
 - **ZLogger** — structured logging

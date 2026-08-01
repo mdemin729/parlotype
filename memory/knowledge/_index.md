@@ -53,6 +53,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[sharphook-modifier-sides]] | Left/right modifiers are distinct `KeyCode`s *and* distinct `EventMask` bits; the unqualified `EventMask.Ctrl`/`Alt`/… are composites of both sides, so use `&` not `HasFlag`. Enables Hold Right Ctrl and the AltGr filter. Simulated events are visible to the hook, so it can be driven from an automated harness | 2026-07-30 |
 | [[onnxruntime-gpu-providers-dead-weight]] | SileroVad 1.3.0 pulls Microsoft.ML.OnnxRuntime.Gpu, whose 391 MB `onnxruntime_providers_cuda.dll` was 54% of the published output and can never load (CPU providers pinned; ORT version mismatch with sherpa-onnx’s own onnxruntime.dll). Filtered out in `Directory.Build.targets` — 731 MB → 338 MB | 2026-07-31 |
 | [[avalonia-axaml-text-gotchas]] | A `Text=`/`Run Text=` value starting with `{` is parsed as a markup extension — escape literal braces with `{}`; adjacent `<Run>`s on separate source lines get an implicit space, so punctuation-leading Runs render detached | 2026-08-01 |
+| [[nuget-assettype-native-metadata]] | `ResolvedFileToPublish` items carry `%(AssetType) == 'native'` when resolved from a package's `runtimes/<rid>/native/` folder; Parlotype's own managed PDBs/DLLs have no `AssetType` at all — lets a `Directory.Build.targets` filter distinguish third-party native assets without a filename list | 2026-08-01 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history
