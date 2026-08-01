@@ -10,7 +10,7 @@
         CanResize="False"
         Topmost="True"
         WindowStartupLocation="CenterOwner"
-        SystemDecorations="Full">
+        WindowDecorations="Full">
 
     <Design.DataContext>
         <vm:ModelDownloadViewModel />

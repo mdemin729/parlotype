@@ -238,7 +238,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox Grid.Column="0"
                              Text="{Binding ServerFolder, Mode=TwoWay}"
-                             Watermark="%LOCALAPPDATA%\parlotype\llama-server"
+                             PlaceholderText="%LOCALAPPDATA%\parlotype\llama-server"
                              Margin="0,0,8,0" />
                     <Button Grid.Column="1" Content="Browse…"
                             Command="{Binding BrowseServerFolderCommand}"
@@ -322,7 +322,7 @@
             <TextBlock Text="Port for llama-server (default: 8321). Changes take effect on next recording."
                        Opacity="0.6" FontSize="12" />
             <TextBox Text="{Binding PortText, Mode=TwoWay}"
-                     Watermark="8321"
+                     PlaceholderText="8321"
                      MaxLength="5"
                      Margin="0,4,0,0" />
         </StackPanel>
