@@ -15,7 +15,6 @@ Parlotype is a local-by-default voice-to-text desktop app. On-device speech reco
 ```bash
 dotnet build Parlotype.slnx                    # Build (zero warnings required)
 dotnet test                                     # All tests
-dotnet test -p:EnableCuda=false                 # CPU-only tests
 dotnet run --project src/Parlotype.Desktop      # Launch app
 ```
 

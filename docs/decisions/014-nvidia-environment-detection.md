@@ -1,7 +1,12 @@
 ---
 status: accepted
+amended-by: 049
 date: 2026-04-28
 ---
+
+> **Amended by [ADR-049](049-drop-whisper-cuda-runtime.md) (2026-07-31).** Detection itself
+> is unchanged and still runs at startup, but its only consumer is now the diagnostic log —
+> Whisper no longer has a CUDA path, so the CUDA-readiness UI in Settings is gone.
 
 # 014. NVIDIA/CUDA Environment Detection
 

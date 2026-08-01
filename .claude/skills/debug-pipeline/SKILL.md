@@ -29,7 +29,7 @@ description: Use when debugging audio capture, VAD, Whisper transcription, text 
 - Check `ISpeechRecognizer` / `WhisperSpeechRecognizer`
 - Verify model is downloaded and loadable
 - Check `WhisperOptions` (beam size, language, temperature)
-- CUDA issues: try `-p:EnableCuda=false` to isolate
+- GPU issues: set the runtime to `Cpu` (Settings, or `SettingsKeys.RuntimePreference`) and restart to isolate — Vulkan is the only GPU backend (ADR-049)
 - **Never** load model multiple times in a single run
 
 ### 4. Text Injection Issues

@@ -51,7 +51,7 @@ var samplesOption = new Option<string?>("--samples")
 
 var gpuOption = new Option<bool>("--gpu")
 {
-    Description = "Enable GPU acceleration (CUDA). Use --gpu false to force CPU-only.",
+    Description = "Enable GPU acceleration (Vulkan). Use --gpu false to force CPU-only.",
     DefaultValueFactory = _ => true,
 };
 
@@ -686,7 +686,7 @@ var sweepVerboseOption = new Option<bool>("--verbose", "-v")
 
 var sweepGpuOption = new Option<bool>("--gpu")
 {
-    Description = "Enable GPU acceleration (CUDA). Use --gpu false to force CPU-only.",
+    Description = "Enable GPU acceleration (Vulkan). Use --gpu false to force CPU-only.",
     DefaultValueFactory = _ => true,
 };
 

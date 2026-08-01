@@ -21,6 +21,12 @@ from source with `-DSHERPA_ONNX_ENABLE_GPU=ON` and CUDA 11.8/12.x
 (github.com/k2-fsa/sherpa-onnx issues #1044, #1313). Setting
 `config.ModelConfig.Provider = "cuda"` on the stock package does not work.
 
+The sherpa native package also **wins the `onnxruntime.dll` race**: it drops its
+own newer build (16 MB, ORT 1.2x) into the output folder, overwriting the 1.18.1
+one that `Microsoft.ML.OnnxRuntime.Gpu` puts there via SileroVad. Worth knowing
+before reasoning about which ONNX Runtime is actually loaded at runtime — see
+[[onnxruntime-gpu-providers-dead-weight]].
+
 ## 2. Config objects use public fields, not properties
 
 `OfflineRecognizerConfig`, `OfflineModelConfig`, `OfflineTransducerModelConfig`

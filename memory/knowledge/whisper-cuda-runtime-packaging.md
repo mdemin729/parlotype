@@ -1,33 +1,38 @@
 ---
-title: Whisper.net CUDA runtime packaging
+title: Whisper.net CUDA runtime packaging (historical)
 type: knowledge
-tags: [cuda, whisper, packaging, release]
+tags: [cuda, whisper, packaging, release, historical]
 created: 2026-05-24
-summary: Whisper.net.Runtime.Cuda ships only ggml-cuda-whisper.dll (~150 MB in published output) and relies on the user's installed CUDA toolkit for cudart/cublas — it does not bundle them
+updated: 2026-07-31
+summary: Why the CUDA runtime was worth less than its name suggested — it added only ~150 MB of published output and bundled no cudart/cublas, so the Full build still needed the user's CUDA toolkit. Removed in ADR-049; kept as the rationale trail.
 ---
 
-# Whisper.net CUDA runtime packaging
+# Whisper.net CUDA runtime packaging (historical)
 
-The `EnableCuda` MSBuild flag is named for the ~350 MB **NuGet package**
+> **Historical since [[../decisions/_index|ADR-049]] (2026-07-31).** `Whisper.net.Runtime.Cuda`,
+> the `EnableCuda` flag and the Full/Lite release split no longer exist. Kept because the
+> measurements below are the evidence that motivated the removal.
+
+The `EnableCuda` MSBuild flag was named for the ~350 MB **NuGet package**
 `Whisper.net.Runtime.Cuda`, but the marginal cost in a **published self-contained
-`win-x64` output** is only ~150 MB.
+`win-x64` output** was only ~150 MB.
 
 Measured on 2026-05-24 (Whisper.net 1.9.0) for `dotnet publish -r win-x64
 --self-contained true`:
 
-- **Lite** (`EnableCuda=false`): ~720 MB unzipped. Contains Vulkan natives
-  (`ggml-vulkan-whisper.dll`, `Avalonia.Vulkan.dll`) and **no** CUDA DLLs.
-- **Full** (`EnableCuda=true`): ~870 MB unzipped. Adds **only** `ggml-cuda-whisper.dll`.
+- **Lite** (`EnableCuda=false`): ~720 MB unzipped. Vulkan natives, no CUDA DLLs.
+- **Full** (`EnableCuda=true`): ~870 MB unzipped. Added **only** `ggml-cuda-whisper.dll`.
 
-Key non-derivable quirk: the CUDA package does **not** bundle the CUDA runtime libraries
+Key non-derivable quirk: the CUDA package did **not** bundle the CUDA runtime libraries
 (`cudart64_*.dll`, `cublas64_*.dll`, `cublasLt64_*.dll`). The Full build therefore still
-**requires the user to install the NVIDIA CUDA toolkit** (as the README prerequisites
-state) — without it, the CUDA path fails to load and Parlotype falls back to Vulkan/CPU.
+**required the user to install the NVIDIA CUDA toolkit** — without it the CUDA path failed
+to load and Parlotype fell back to Vulkan/CPU. A "Full" download was never a self-sufficient
+CUDA install, which is why so much of the Runtime settings page was toolkit guidance.
 
-Implications:
-- Both release variants are large because of the self-contained .NET runtime + the
-  cross-platform Whisper natives, not because of CUDA. The Full-vs-Lite split saves
-  ~150 MB, not ~350 MB.
-- The "Full" zip alone is **not** a self-sufficient CUDA install — a CUDA-toolkit
-  prerequisite note belongs anywhere we advertise the Full build (done in README
-  Download/Releases section + ADR-031).
+Post-removal measurement (2026-07-31, same publish command): **731 MB**, one artifact.
+
+That measurement immediately exposed a bigger one: `onnxruntime_providers_cuda.dll`,
+**391 MB** and never loaded, which [[../decisions/_index|ADR-050]] removed the same day
+(731 MB → 338 MB). It comes from `SileroVad` → `Microsoft.ML.OnnxRuntime.Gpu` — *not* from
+`org.k2fsa.sherpa.onnx`, which is where it was first assumed to come from. See
+[[onnxruntime-gpu-providers-dead-weight]].

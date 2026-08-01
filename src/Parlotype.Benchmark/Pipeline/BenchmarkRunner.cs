@@ -124,7 +124,7 @@ public sealed class BenchmarkRunner
         _logger.LogInformation("Found {SampleCount} samples across {DatasetCount} dataset(s)",
             allSamples.Count, config.Datasets.Length);
 
-        // Warm-up pass: one throwaway transcription of the first sample to prime CUDA / OS
+        // Warm-up pass: one throwaway transcription of the first sample to prime the GPU / OS
         // file cache / first-inference paths so the timed loop reports steady-state numbers.
         // The same sample is re-run inside the timed loop, so all reported per-sample
         // numbers are warm. Exceptions propagate — a failed warm-up means the timed loop

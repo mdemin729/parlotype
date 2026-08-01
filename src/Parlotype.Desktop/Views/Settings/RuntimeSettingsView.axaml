@@ -67,37 +67,6 @@
             </StackPanel>
         </Border>
 
-        <!-- CUDA: no NVIDIA driver detected -->
-        <StackPanel Spacing="4" IsVisible="{Binding CudaDriverMissing}" Margin="0,8,0,0">
-            <TextBlock Text="NVIDIA GPU not detected"
-                       FontWeight="SemiBold" FontSize="14" />
-            <TextBlock TextWrapping="Wrap" Opacity="0.7">
-                CUDA requires an NVIDIA graphics card with drivers installed.
-                If your computer has an NVIDIA GPU, make sure the latest drivers
-                are installed, then restart Parlotype.
-            </TextBlock>
-        </StackPanel>
-
-        <!-- CUDA: driver found, but CUDA toolkit/SDK missing -->
-        <StackPanel Spacing="4" IsVisible="{Binding CudaSdkMissing}" Margin="0,8,0,0">
-            <TextBlock Text="CUDA toolkit not installed"
-                       FontWeight="SemiBold" FontSize="14" />
-            <TextBlock TextWrapping="Wrap" Opacity="0.7">
-                <Run Text="Your NVIDIA driver (version" />
-                <Run Text="{Binding CudaDriverVersion}" FontWeight="SemiBold" />
-                <Run Text=") is ready, but the CUDA toolkit is missing. The toolkit lets Parlotype use your GPU for faster speech recognition." />
-            </TextBlock>
-            <TextBlock Text="To get started:" FontWeight="SemiBold" Margin="0,4,0,0" />
-            <TextBlock TextWrapping="Wrap" Opacity="0.7" Margin="8,0,0,0"
-                       Text="1. Download the CUDA toolkit from NVIDIA's website&#x0a;2. Run the installer and follow the prompts&#x0a;3. Restart Parlotype" />
-            <Button Content="Download CUDA Toolkit →"
-                    Command="{Binding OpenCudaDownloadLinkCommand}"
-                    Padding="12,6"
-                    Margin="0,4,0,0"
-                    HorizontalAlignment="Left"
-                    FontWeight="SemiBold" />
-        </StackPanel>
-
         <!-- Vulkan loader missing -->
         <StackPanel Spacing="4" IsVisible="{Binding VulkanLoaderMissing}" Margin="0,8,0,0">
             <TextBlock Text="Vulkan loader (vulkan-1.dll) was not detected on this system."

@@ -8,7 +8,7 @@ using Xunit;
 namespace Parlotype.Tests;
 
 /// <summary>
-/// Validates the bootstrap + factory fallback path for machines without NVIDIA GPU.
+/// Validates the bootstrap + factory fallback path for machines without a usable GPU.
 /// Serialized with <see cref="WhisperRuntimeBootstrapTests"/> via the shared collection.
 /// </summary>
 [Collection("WhisperRuntime")]
@@ -41,27 +41,28 @@ public sealed class WhisperRuntimeFallbackTests : IDisposable
     }
 
     [Fact]
-    public void CpuOnlyMode_ExcludesCudaFromOrder()
+    public void CpuOnlyMode_ExcludesGpuRuntimesFromOrder()
     {
         WhisperRuntimeBootstrap.Initialize(RuntimePreference.Cpu, Logger);
 
         var order = RuntimeOptions.RuntimeLibraryOrder;
 
         Assert.Equal([RuntimeLibrary.Cpu], order);
-        Assert.DoesNotContain(RuntimeLibrary.Cuda, order);
+        Assert.DoesNotContain(RuntimeLibrary.Vulkan, order);
     }
 
     [Fact]
-    public void AutoMode_IncludesCudaVulkanAndCpuInOrder()
+    public void AutoMode_PrefersVulkanThenFallsBackToCpu()
     {
         WhisperRuntimeBootstrap.Initialize(RuntimePreference.Auto, Logger);
 
         var order = RuntimeOptions.RuntimeLibraryOrder;
 
-        Assert.Contains(RuntimeLibrary.Cuda, order);
         Assert.Contains(RuntimeLibrary.Vulkan, order);
         Assert.Contains(RuntimeLibrary.Cpu, order);
-        Assert.Equal(0, order.IndexOf(RuntimeLibrary.Cuda));
-        Assert.Equal(1, order.IndexOf(RuntimeLibrary.Vulkan));
+        // CUDA is no longer packaged (ADR-049) — it must never appear in the chain.
+        Assert.DoesNotContain(RuntimeLibrary.Cuda, order);
+        Assert.Equal(0, order.IndexOf(RuntimeLibrary.Vulkan));
+        Assert.Equal(1, order.IndexOf(RuntimeLibrary.Cpu));
     }
 }

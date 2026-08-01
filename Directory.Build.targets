@@ -1,0 +1,79 @@
+<Project>
+
+  <!--
+    Drop the ONNX Runtime GPU execution providers from build and publish output.
+
+    SileroVad 1.3.0 depends on Microsoft.ML.OnnxRuntime.Gpu, which drags in the CUDA and
+    TensorRT execution providers — onnxruntime_providers_cuda.dll alone is 391 MB, over
+    half of a self-contained win-x64 publish. Nothing in Parlotype ever registers them:
+    Silero VAD constructs `new Vad()` with default (CPU) session options, and Parakeet
+    pins `Provider = "cpu"` (ADR-041). They are also built against ONNX Runtime 1.18.1,
+    while the onnxruntime.dll that actually lands in the output folder comes from
+    sherpa-onnx's own newer native package — so they could not load even if asked.
+
+    Only the provider libraries go. onnxruntime.dll, onnxruntime_providers_shared.dll and
+    the managed Microsoft.ML.OnnxRuntime.dll stay — the first two are required for any
+    inference at all, GPU or not. The Contains() match also covers the lib*.so/.dylib
+    spellings and the accompanying .lib import libraries.
+
+    See ADR-050.
+  -->
+  <Target Name="RemoveUnusedOnnxRuntimeProvidersFromBuild"
+          AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <_UnusedOnnxRuntimeProviderCopyLocal Include="@(ReferenceCopyLocalPaths)"
+          Condition="$([System.String]::Copy('%(Filename)').Contains('onnxruntime_providers_cuda'))
+                     or $([System.String]::Copy('%(Filename)').Contains('onnxruntime_providers_tensorrt'))" />
+      <ReferenceCopyLocalPaths Remove="@(_UnusedOnnxRuntimeProviderCopyLocal)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveUnusedOnnxRuntimeProvidersFromPublish"
+          AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <_UnusedOnnxRuntimeProviderToPublish Include="@(ResolvedFileToPublish)"
+          Condition="$([System.String]::Copy('%(Filename)').Contains('onnxruntime_providers_cuda'))
+                     or $([System.String]::Copy('%(Filename)').Contains('onnxruntime_providers_tensorrt'))" />
+      <ResolvedFileToPublish Remove="@(_UnusedOnnxRuntimeProviderToPublish)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Drop the Whisper.net native libraries built for platforms we are not publishing for.
+
+    Whisper.net.Runtime and Whisper.net.Runtime.Vulkan do not use the runtimes/<rid>/native
+    convention, so the SDK's RID filtering never sees them: their .targets declare plain
+    <None> content items with a hard-coded TargetPath (runtimes/win-x64/whisper.dll,
+    runtimes/vulkan/linux-x64/libggml-vulkan-whisper.so, …). What gating they do have is on
+    TargetFramework, not RuntimeIdentifier — and `net10.0` has no platform suffix, so the
+    Windows *and* macOS blocks both fire while the Linux ones are unconditional. A win-x64
+    publish therefore carries every desktop platform: ~60 MB, 45 of it the Linux twin of
+    ggml-vulkan-whisper.dll.
+
+    In both layouts the RID is the immediate parent directory of the file, which is what the
+    match below keys on — so runtimes/vulkan/win-x64/ survives alongside runtimes/win-x64/.
+    Restricting it to a known RID list (rather than "anything that isn't our RID") keeps the
+    filter from touching runtimes/ paths owned by any other package.
+
+    Publish only: `bin/` output is left exactly as it was, so dev builds and tests are
+    unaffected. See ADR-051.
+  -->
+  <PropertyGroup>
+    <!-- Every RID directory the two Whisper.net runtime packages can emit, semicolon-delimited. -->
+    <WhisperRuntimeRidDirectories>;linux-arm;linux-arm64;linux-x64;macos-arm64;macos-x64;win-arm64;win-x64;win-x86;</WhisperRuntimeRidDirectories>
+  </PropertyGroup>
+
+  <Target Name="RemoveForeignRuntimeAssetsFromPublish"
+          AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(RuntimeIdentifier)' != ''">
+    <PropertyGroup>
+      <_ForeignWhisperRuntimeRids>$(WhisperRuntimeRidDirectories.Replace(';$(RuntimeIdentifier);', ';'))</_ForeignWhisperRuntimeRids>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ForeignRuntimeAssetToPublish Include="@(ResolvedFileToPublish)"
+          Condition="$(_ForeignWhisperRuntimeRids.Contains(';$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('%(RelativePath)'))));'))" />
+      <ResolvedFileToPublish Remove="@(_ForeignRuntimeAssetToPublish)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

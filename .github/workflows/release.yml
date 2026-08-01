@@ -12,14 +12,6 @@ jobs:
   build:
     runs-on: windows-latest
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - variant: full
-            cuda: 'true'
-          - variant: lite
-            cuda: 'false'
 
     steps:
       - name: Checkout
@@ -40,24 +32,25 @@ jobs:
         run: dotnet restore Parlotype.slnx
 
       - name: Test (gate)
-        run: dotnet test --no-restore -p:EnableCuda=${{ matrix.cuda }}
+        run: dotnet test --no-restore
 
+      # Single artifact since ADR-049: Vulkan is the only GPU runtime, and it
+      # ships unconditionally, so there is nothing left for a Full/Lite split.
       - name: Publish
         run: >
           dotnet publish src/Parlotype.Desktop
           -c Release -r win-x64 --self-contained true
-          -p:EnableCuda=${{ matrix.cuda }}
           -p:Version=${{ env.VERSION }}
-          -o publish/${{ matrix.variant }}
+          -o publish
 
       - name: Zip
         shell: pwsh
-        run: Compress-Archive -Path publish/${{ matrix.variant }}/* -DestinationPath "Parlotype-${{ env.VERSION }}-win-x64-${{ matrix.variant }}.zip"
+        run: Compress-Archive -Path publish/* -DestinationPath "Parlotype-${{ env.VERSION }}-win-x64.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.variant }}
+          name: win-x64
           path: Parlotype-*.zip
           retention-days: 7
 

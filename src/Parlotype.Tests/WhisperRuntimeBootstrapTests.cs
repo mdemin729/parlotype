@@ -24,12 +24,12 @@ public sealed class WhisperRuntimeBootstrapTests : IDisposable
     }
 
     [Fact]
-    public void Initialize_Auto_SetsOrderToCudaVulkanCpu()
+    public void Initialize_Auto_SetsOrderToVulkanCpu()
     {
         WhisperRuntimeBootstrap.Initialize(RuntimePreference.Auto, Logger);
 
         Assert.Equal(
-            [RuntimeLibrary.Cuda, RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
+            [RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
             RuntimeOptions.RuntimeLibraryOrder);
     }
 
@@ -40,16 +40,6 @@ public sealed class WhisperRuntimeBootstrapTests : IDisposable
 
         Assert.Equal(
             [RuntimeLibrary.Cpu],
-            RuntimeOptions.RuntimeLibraryOrder);
-    }
-
-    [Fact]
-    public void Initialize_Cuda_SetsOrderToCudaOnly_NoFallback()
-    {
-        WhisperRuntimeBootstrap.Initialize(RuntimePreference.Cuda, Logger);
-
-        Assert.Equal(
-            [RuntimeLibrary.Cuda],
             RuntimeOptions.RuntimeLibraryOrder);
     }
 
@@ -84,7 +74,7 @@ public sealed class WhisperRuntimeBootstrapTests : IDisposable
         await WhisperRuntimeBootstrap.EnsureInitializedAsync(settings, Logger);
 
         Assert.Equal(
-            [RuntimeLibrary.Cuda, RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
+            [RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
             RuntimeOptions.RuntimeLibraryOrder);
     }
 
@@ -109,7 +99,7 @@ public sealed class WhisperRuntimeBootstrapTests : IDisposable
         await WhisperRuntimeBootstrap.EnsureInitializedAsync(settings, Logger);
 
         Assert.Equal(
-            [RuntimeLibrary.Cuda, RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
+            [RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
             RuntimeOptions.RuntimeLibraryOrder);
     }
 
@@ -122,7 +112,7 @@ public sealed class WhisperRuntimeBootstrapTests : IDisposable
         await WhisperRuntimeBootstrap.EnsureInitializedAsync(settings, Logger);
 
         Assert.Equal(
-            [RuntimeLibrary.Cuda, RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
+            [RuntimeLibrary.Vulkan, RuntimeLibrary.Cpu],
             RuntimeOptions.RuntimeLibraryOrder);
     }
 

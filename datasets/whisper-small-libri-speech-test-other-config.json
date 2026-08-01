@@ -8,7 +8,7 @@
     "language": "auto",
     "beamSize": 1,
     "temperature": 0.0,
-    "runtimePreference": "Cuda"
+    "runtimePreference": "Vulkan"
   },
   "vad": {
     "enabled": false

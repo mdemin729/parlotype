@@ -43,13 +43,13 @@ summary: .NET 10 target, nullable refs, warnings-as-errors, DI registration patt
 - Settings UI hides engine-restricted rows for the inactive engine ([[decisions/_index|ADR-028]])
 
 ## GPU Runtime Preference
-- `RuntimePreference` enum: `Auto` (default) → `Cuda` → `Vulkan` → `Cpu`
-- `Auto` chains CUDA → Vulkan → CPU silently
-- `Cuda` and `Vulkan` are **strict** — throw `RuntimeUnavailableException` rather than silently falling back to CPU ([[decisions/_index|ADR-022]])
-- Persisted under `SettingsKeys.RuntimePreference`; selection is process-global one-shot ([[decisions/_index|ADR-012]], [[decisions/_index|ADR-022]]) — changes require restart
+- `RuntimePreference` enum: `Auto` (default) → `Vulkan` → `Cpu` — CUDA removed in [[decisions/_index|ADR-049]]
+- `Auto` chains Vulkan → CPU silently
+- `Vulkan` is **strict** — throws `RuntimeUnavailableException` rather than silently falling back to CPU ([[decisions/_index|ADR-022]])
+- Persisted under `SettingsKeys.RuntimePreference`; selection is process-global one-shot ([[decisions/_index|ADR-012]], [[decisions/_index|ADR-022]], [[decisions/_index|ADR-048]]) — changes require restart
+- A pre-ADR-049 `"Cuda"` value is unparseable: every reader degrades to `Auto`, and `RuntimeSettingsViewModel` rewrites the stale value
 
 ## GPU Runtimes (packaging)
-- `Whisper.net.Runtime.Cuda` (~350 MB) — included when `EnableCuda` MSBuild property is `true` (default). NVIDIA only.
-- `Whisper.net.Runtime.Vulkan` (~30 MB) — **always included**. Works on AMD/Intel/NVIDIA.
-- Build without CUDA: `dotnet build Parlotype.slnx -p:EnableCuda=false` (Vulkan stays).
+- `Whisper.net.Runtime.Vulkan` (~30 MB) — **always included**, the only GPU runtime. Works on AMD/Intel/NVIDIA.
+- No `EnableCuda` flag and no Full/Lite split — every build is identical ([[decisions/_index|ADR-049]]).
 

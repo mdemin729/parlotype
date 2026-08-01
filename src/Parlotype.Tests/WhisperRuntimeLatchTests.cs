@@ -33,20 +33,20 @@ public sealed class WhisperRuntimeLatchTests : IDisposable
 
     [Theory]
     // Nothing loaded yet — every preference is still satisfiable.
-    [InlineData(RuntimePreference.Cuda, null, true)]
+    [InlineData(RuntimePreference.Vulkan, null, true)]
     [InlineData(RuntimePreference.Cpu, null, true)]
     // Auto takes whatever won the fallback chain.
-    [InlineData(RuntimePreference.Auto, RuntimeLibrary.Cuda, true)]
+    [InlineData(RuntimePreference.Auto, RuntimeLibrary.Vulkan, true)]
     [InlineData(RuntimePreference.Auto, RuntimeLibrary.Cpu, true)]
-    // Strict GPU preferences must match exactly.
-    [InlineData(RuntimePreference.Cuda, RuntimeLibrary.Cuda, true)]
-    [InlineData(RuntimePreference.Cuda, RuntimeLibrary.Vulkan, false)]
+    // The strict GPU preference must match exactly.
     [InlineData(RuntimePreference.Vulkan, RuntimeLibrary.Vulkan, true)]
+    [InlineData(RuntimePreference.Vulkan, RuntimeLibrary.Cpu, false)]
+    // A runtime we no longer package can still be latched by a stale process.
     [InlineData(RuntimePreference.Vulkan, RuntimeLibrary.Cuda, false)]
     // Whisper.net picks between the AVX and no-AVX CPU builds itself.
     [InlineData(RuntimePreference.Cpu, RuntimeLibrary.Cpu, true)]
     [InlineData(RuntimePreference.Cpu, RuntimeLibrary.CpuNoAvx, true)]
-    [InlineData(RuntimePreference.Cpu, RuntimeLibrary.Cuda, false)]
+    [InlineData(RuntimePreference.Cpu, RuntimeLibrary.Vulkan, false)]
     public void IsSatisfiedBy_MatchesPreferenceAgainstLoadedLibrary(
         RuntimePreference preference, RuntimeLibrary? loaded, bool expected)
     {
@@ -56,7 +56,7 @@ public sealed class WhisperRuntimeLatchTests : IDisposable
     [Fact]
     public async Task InitializeAsync_WithOptions_MismatchedLatch_ThrowsBeforeLoadingModel()
     {
-        var recognizer = CreateRecognizer(latched: RuntimeLibrary.Cuda);
+        var recognizer = CreateRecognizer(latched: RuntimeLibrary.Cpu);
         var options = new WhisperOptions { Model = WhisperModelType.Tiny, RuntimePreference = RuntimePreference.Vulkan };
 
         // ThrowingDownloadService fails the test if the guard runs too late: the
@@ -76,7 +76,7 @@ public sealed class WhisperRuntimeLatchTests : IDisposable
         await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.Tiny.ToString());
         await settings.SetAsync(SettingsKeys.RuntimePreference, RuntimePreference.Vulkan.ToString());
 
-        var recognizer = CreateRecognizer(settings, latched: RuntimeLibrary.Cuda);
+        var recognizer = CreateRecognizer(settings, latched: RuntimeLibrary.Cpu);
 
         var ex = await Assert.ThrowsAsync<RuntimeUnavailableException>(
             () => recognizer.InitializeAsync());
@@ -86,13 +86,13 @@ public sealed class WhisperRuntimeLatchTests : IDisposable
     }
 
     /// <summary>
-    /// The pre-ADR-048 guard only covered Cuda and Vulkan, so picking CPU while a
-    /// GPU runtime was latched silently kept running on the GPU.
+    /// The pre-ADR-048 guard only covered the strict GPU preferences, so picking CPU
+    /// while a GPU runtime was latched silently kept running on the GPU.
     /// </summary>
     [Fact]
     public async Task InitializeAsync_WithOptions_CpuRequested_GpuLatched_Throws()
     {
-        var recognizer = CreateRecognizer(latched: RuntimeLibrary.Cuda);
+        var recognizer = CreateRecognizer(latched: RuntimeLibrary.Vulkan);
         var options = new WhisperOptions { Model = WhisperModelType.Tiny, RuntimePreference = RuntimePreference.Cpu };
 
         var ex = await Assert.ThrowsAsync<RuntimeUnavailableException>(
@@ -140,7 +140,6 @@ public sealed class WhisperRuntimeLatchTests : IDisposable
         => new(
             new ThrowingDownloadService(),
             settings ?? new FakeSettingsService(),
-            new AlwaysAvailableNvidiaProvider(),
             new AlwaysAvailableVulkanProvider(),
             NullLogger<WhisperSpeechRecognizer>.Instance,
             new FakeRuntimeStatus(latched));
@@ -164,13 +163,6 @@ public sealed class WhisperRuntimeLatchTests : IDisposable
             _store[key] = value;
             return Task.CompletedTask;
         }
-    }
-
-    private sealed class AlwaysAvailableNvidiaProvider : INvidiaEnvironmentProvider
-    {
-        private static readonly NvidiaEnvironmentInfo Info = new() { DriverVersion = "999.99" };
-        public Task<NvidiaEnvironmentInfo> GetAsync(CancellationToken ct = default) => Task.FromResult(Info);
-        public Task<NvidiaEnvironmentInfo> RefreshAsync(CancellationToken ct = default) => Task.FromResult(Info);
     }
 
     private sealed class AlwaysAvailableVulkanProvider : IVulkanEnvironmentProvider

@@ -27,7 +27,6 @@ Unit and integration tests for Core contracts and Platform implementations.
 ## Run
 ```bash
 dotnet test src/Parlotype.Tests
-dotnet test src/Parlotype.Tests -p:EnableCuda=false   # CPU-only (skip CUDA runtime)
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"
 ```
 

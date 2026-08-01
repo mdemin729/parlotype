@@ -10,7 +10,6 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 {
     private readonly IModelDownloadService _downloadService;
     private readonly ISettingsService _settings;
-    private readonly INvidiaEnvironmentProvider _nvidia;
     private readonly IVulkanEnvironmentProvider _vulkan;
     private readonly IWhisperRuntimeStatus _runtimeStatus;
     private readonly ILogger<WhisperSpeechRecognizer> _logger;
@@ -24,14 +23,12 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
     public WhisperSpeechRecognizer(
         IModelDownloadService downloadService,
         ISettingsService settings,
-        INvidiaEnvironmentProvider nvidia,
         IVulkanEnvironmentProvider vulkan,
         ILogger<WhisperSpeechRecognizer> logger,
         IWhisperRuntimeStatus? runtimeStatus = null)
     {
         _downloadService = downloadService;
         _settings = settings;
-        _nvidia = nvidia;
         _vulkan = vulkan;
         // Defaults to the real process-wide latch; tests inject a fake so they never
         // have to mutate Whisper.net's global state out from under parallel tests.
@@ -41,23 +38,14 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 
     private async Task EnsureRuntimeAvailableAsync(RuntimePreference preference, CancellationToken cancellationToken)
     {
-        switch (preference)
-        {
-            case RuntimePreference.Cuda:
-                var nvidia = await _nvidia.GetAsync(cancellationToken).ConfigureAwait(false);
-                if (!nvidia.HasNvidia)
-                    throw new RuntimeUnavailableException(
-                        RuntimePreference.Cuda,
-                        "no NVIDIA driver was detected on this machine. Install CUDA-capable drivers, switch to a different runtime in Settings, or use Auto.");
-                break;
-            case RuntimePreference.Vulkan:
-                var vulkan = await _vulkan.GetAsync(cancellationToken).ConfigureAwait(false);
-                if (!vulkan.HasVulkanLoader)
-                    throw new RuntimeUnavailableException(
-                        RuntimePreference.Vulkan,
-                        "the Vulkan loader (vulkan-1.dll) was not found. Install your GPU vendor's latest drivers or the Vulkan SDK from https://vulkan.lunarg.com/sdk/home, then restart Parlotype.");
-                break;
-        }
+        if (preference is not RuntimePreference.Vulkan)
+            return;
+
+        var vulkan = await _vulkan.GetAsync(cancellationToken).ConfigureAwait(false);
+        if (!vulkan.HasVulkanLoader)
+            throw new RuntimeUnavailableException(
+                RuntimePreference.Vulkan,
+                "the Vulkan loader (vulkan-1.dll) was not found. Install your GPU vendor's latest drivers or the Vulkan SDK from https://vulkan.lunarg.com/sdk/home, then restart Parlotype.");
     }
 
     /// <summary>
@@ -108,7 +96,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         {
             factory = WhisperFactory.FromPath(modelPath);
         }
-        catch (Exception ex) when (preference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
+        catch (Exception ex) when (preference is RuntimePreference.Vulkan)
         {
             throw new RuntimeUnavailableException(
                 preference,

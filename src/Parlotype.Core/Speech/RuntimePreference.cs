@@ -7,16 +7,10 @@ namespace Parlotype.Core.Speech;
 public enum RuntimePreference
 {
     /// <summary>
-    /// Try GPU runtimes in order — CUDA, then Vulkan — and fall back to CPU
-    /// if neither is loadable. This is the default.
+    /// Try the Vulkan GPU runtime first and fall back to CPU if it isn't
+    /// loadable. This is the default.
     /// </summary>
     Auto,
-
-    /// <summary>
-    /// Force NVIDIA CUDA only. No fallback — Whisper initialization will fail
-    /// with <see cref="RuntimeUnavailableException"/> if CUDA isn't usable.
-    /// </summary>
-    Cuda,
 
     /// <summary>
     /// Force Vulkan only. No fallback — Whisper initialization will fail

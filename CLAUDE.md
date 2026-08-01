@@ -18,21 +18,13 @@ dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Run a single t
 dotnet run --project src/Parlotype.Desktop  # Launch the app
 ```
 
-### GPU Runtime Builds
+### GPU Runtime
 
-Two GPU runtimes ship with Parlotype:
+One GPU runtime ships with Parlotype: `Whisper.net.Runtime.Vulkan` (~30 MB), **always included**, works on AMD, Intel and NVIDIA. CUDA was removed in [ADR-049](docs/decisions/049-drop-whisper-cuda-runtime.md) — there is no `EnableCuda` flag and no Full/Lite build split; every build and every release artifact is the same. NVIDIA cards are accelerated through Vulkan like everything else. (Gemma 4 is unaffected: `llama-server` CUDA builds are still downloadable at runtime.)
 
-- `Whisper.net.Runtime.Cuda` (~350 MB) — included when `EnableCuda` is `true` (default). NVIDIA GPUs only.
-- `Whisper.net.Runtime.Vulkan` (~30 MB) — **always included**. AMD, Intel, NVIDIA, etc.
+`Directory.Build.targets` (repo root) strips the ONNX Runtime CUDA/TensorRT provider natives from build and publish output — `SileroVad` pulls them in transitively via `Microsoft.ML.OnnxRuntime.Gpu` and nothing ever loads them ([ADR-050](docs/decisions/050-drop-onnx-runtime-gpu-providers.md)). The same file also drops the Whisper natives built for other platforms — the Whisper.net runtime packages ship them as plain content, so `-r win-x64` does not filter them ([ADR-051](docs/decisions/051-publish-only-target-rid-runtimes.md)). Without both filters the published app is 731 MB instead of 278 MB.
 
-To skip the heavyweight CUDA package (faster CI, smaller output) — Vulkan stays:
-
-```bash
-dotnet build Parlotype.slnx -p:EnableCuda=false   # CUDA opt-out (Vulkan still active)
-dotnet test -p:EnableCuda=false
-```
-
-`RuntimePreference.Auto` (default) tries CUDA → Vulkan → CPU. `Cuda` and `Vulkan` are strict — they throw `RuntimeUnavailableException` rather than silently falling back to CPU. Selection lives at **Settings → Runtime** and persists under `SettingsKeys.RuntimePreference`. Selection is process-global one-shot (see ADR-012, ADR-022) — changes require an app restart.
+`RuntimePreference` is `Auto / Vulkan / Cpu`. `Auto` (default) tries Vulkan → CPU; `Vulkan` is strict — it throws `RuntimeUnavailableException` rather than silently falling back to CPU. Selection lives at **Settings → Speech engine → Whisper runtime** and persists under `SettingsKeys.RuntimePreference`. Selection is process-global one-shot (see ADR-012, ADR-022, ADR-048) — changes require an app restart, and the Settings page surfaces a "Restart required" panel when a change is pending.
 
 **Note:** File lock errors from `.NET Host` processes are common on Windows. Kill the locking process by PID before rebuilding.
 
