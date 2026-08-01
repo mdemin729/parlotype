@@ -183,6 +183,14 @@ public class PromptSettingsViewModelTests
     }
 
     [Fact]
+    public void HelpPanel_IsCollapsedByDefault()
+    {
+        var vm = BuildViewModel();
+
+        Assert.False(vm.IsHelpExpanded);
+    }
+
+    [Fact]
     public async Task SelectPrompt_SameId_IsNoOp()
     {
         var registry = new MockPromptTemplateRegistry();

@@ -31,6 +31,14 @@ public partial class PromptSettingsViewModel : SettingsSectionViewModelBase
     [ObservableProperty]
     private bool _isEditing;
 
+    /// <summary>
+    /// Expansion state of the "How prompts work" help panel. Session-only (not
+    /// persisted) and collapsed by default so the page stays compact; lives on the
+    /// ViewModel rather than in code-behind so headless tests can drive it.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isHelpExpanded;
+
     [ObservableProperty]
     private string _editingName = string.Empty;
 
@@ -87,7 +95,7 @@ public partial class PromptSettingsViewModel : SettingsSectionViewModelBase
         _editingId = null;
         EditingName = string.Empty;
         EditingText = $"Transcribe the following speech in {PromptTemplate.SpeechLanguageToken} verbatim. " +
-                      "Only output the transcription.";
+                      "Use punctuation. Only output the transcription.";
         IsEditing = true;
     }
 

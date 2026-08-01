@@ -125,6 +125,44 @@ public class LlamaCppPromptBuildingTests
         Assert.DoesNotContain("translate", text, StringComparison.OrdinalIgnoreCase);
     }
 
+    // A custom prompt using {text_lang} must never leak the raw token, on any path.
+    [Fact]
+    public async Task CustomPrompt_WithTextLangToken_Translating_RendersTargetLanguage()
+    {
+        var prompt = new PromptTemplate("p2", "Test", "Transcribe {speech_lang} into {text_lang} text.");
+        var vm = CreateRecognizer(Settings("ru", "fr", translation: true));
+
+        var text = await vm.BuildPromptTextAsync(prompt, CancellationToken.None);
+
+        Assert.StartsWith("Transcribe Russian into French text.", text);
+        Assert.Contains("translate the transcript into French", text);
+        Assert.DoesNotContain(PromptTemplate.TextLanguageToken, text, StringComparison.Ordinal);
+    }
+
+    // Without translation the output language *is* the spoken language, so a custom
+    // prompt using {text_lang} must render it rather than leak the raw token.
+    [Fact]
+    public async Task CustomPrompt_WithTextLangToken_NoTranslation_RendersSpeechLanguage()
+    {
+        var prompt = new PromptTemplate("p2", "Test", "Transcribe {speech_lang} into {text_lang} text.");
+        var vm = CreateRecognizer(Settings("ru", "fr", translation: false));
+
+        var text = await vm.BuildPromptTextAsync(prompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe Russian into Russian text.", text);
+    }
+
+    [Fact]
+    public async Task CustomPrompt_WithTextLangToken_AutoSource_NoTranslation_RendersDetectedLanguage()
+    {
+        var prompt = new PromptTemplate("p2", "Test", "Transcribe {speech_lang} into {text_lang} text.");
+        var vm = CreateRecognizer(Settings(source: LanguageCatalog.AutoDetectCode));
+
+        var text = await vm.BuildPromptTextAsync(prompt, CancellationToken.None);
+
+        Assert.Equal("Transcribe the detected language into the detected language text.", text);
+    }
+
     [Fact]
     public async Task BuiltIn_KnownSource_NoTarget_UsesTranscriptionBody()
     {

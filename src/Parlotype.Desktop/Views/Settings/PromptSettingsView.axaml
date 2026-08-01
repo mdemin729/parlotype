@@ -7,8 +7,51 @@
              x:CompileBindings="True">
     <StackPanel Spacing="12">
         <TextBlock Text="Prompts" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Manage the instruction sent to the Gemma 4 engine for each transcription. The {speech_lang} placeholder is replaced with the spoken language automatically. When translation is enabled and the output language differs, a translation instruction is added automatically."
+        <TextBlock Text="The instruction sent to the Gemma 4 engine with every transcription. The active prompt is marked with the accent bar."
                    Opacity="0.7" TextWrapping="Wrap" />
+
+        <!-- Collapsed help: placeholders, the translation trigger, and why the
+             built-in default reads the way it does. Collapsed by default so the
+             page stays compact; IsExpanded is session-only VM state. -->
+        <Expander Header="How prompts work"
+                  IsExpanded="{Binding IsHelpExpanded}"
+                  HorizontalAlignment="Stretch"
+                  IsVisible="{Binding !IsEditing}">
+            <StackPanel Spacing="14">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Placeholders" FontWeight="SemiBold" />
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75">
+                        <Run Text="{}{speech_lang}" FontWeight="SemiBold" />
+                        <Run Text="&#x2014; the spoken language, taken from the Languages settings page. With &quot;Auto-detect&quot; it renders as &quot;the detected language&quot;." />
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75">
+                        <Run Text="{}{text_lang}" FontWeight="SemiBold" />
+                        <Run Text="&#x2014; the output language. It differs from the spoken language only while translation is active; otherwise it renders as the spoken language too." />
+                    </TextBlock>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="When translation is applied" FontWeight="SemiBold" />
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75"
+                               Text="Only when all three hold: the Translate toggle is on, an output language is selected, and it differs from the spoken language (Auto-detect always counts as different). Otherwise the engine just transcribes, and the output language is the spoken one." />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Built-in vs. custom prompts" FontWeight="SemiBold" />
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75">
+                        <Run Text="The built-in default carries three bodies and the engine picks one per transcription: a transcription body, where the output language equals the spoken one, so" />
+                        <Run Text="{}{speech_lang}" FontWeight="SemiBold" />
+                        <Run Text="appears twice &#x2014; &quot;speech in X into X text&quot;; a translation body that pairs" />
+                        <Run Text="{}{speech_lang}" FontWeight="SemiBold" />
+                        <Run Text="with" />
+                        <Run Text="{}{text_lang}" FontWeight="SemiBold" />
+                        <Run Text="for the output; and an auto-detect body with no placeholders." />
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Opacity="0.75"
+                               Text="A custom prompt has a single body. When translation applies, a &quot;then translate into ...&quot; instruction is appended to it automatically. Duplicating the built-in copies only its transcription body." />
+                </StackPanel>
+            </StackPanel>
+        </Expander>
 
         <!-- Prompt list (hidden while editing) -->
         <StackPanel Spacing="4" IsVisible="{Binding !IsEditing}">
@@ -91,8 +134,17 @@
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      MinHeight="120" />
-            <TextBlock Text="Tip: use {speech_lang} where the spoken language should appear."
-                       FontSize="12" Opacity="0.6" />
+            <StackPanel Spacing="2">
+                <TextBlock FontSize="12" Opacity="0.6" TextWrapping="Wrap">
+                    <Run Text="Placeholders:" />
+                    <Run Text="{}{speech_lang}" FontWeight="SemiBold" />
+                    <Run Text="&#x2014; the spoken language (&quot;the detected language&quot; when auto-detecting);" />
+                    <Run Text="{}{text_lang}" FontWeight="SemiBold" />
+                    <Run Text="&#x2014; the output language, which equals the spoken one unless translation is active." />
+                </TextBlock>
+                <TextBlock FontSize="12" Opacity="0.6" TextWrapping="Wrap"
+                           Text="When translation is active, a &quot;then translate into ...&quot; instruction is appended to your prompt automatically." />
+            </StackPanel>
 
             <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
                 <Button Content="Save"

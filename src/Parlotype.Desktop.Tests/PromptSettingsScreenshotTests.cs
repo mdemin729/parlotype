@@ -142,8 +142,9 @@ public class PromptSettingsScreenshotTests : IClassFixture<PromptSettingsScreens
         steps.Add(new ScenarioStep(
             "User clicks 'New prompt'. The list is hidden and the inline editor appears. " +
             "The Name field is empty. The Prompt text field is pre-populated with the default template " +
-            "(containing '{speech_lang}'). A tip below reads 'Tip: use {speech_lang} where the spoken language " +
-            "should appear.' Save and Cancel buttons are visible.",
+            "(containing '{speech_lang}'). Below it a two-line hint explains both placeholders " +
+            "('{speech_lang}' and '{text_lang}') and that a translation instruction is appended " +
+            "automatically while translation is active. Save and Cancel buttons are visible.",
             screenshot2));
 
         _report.AddScenario(new Scenario(
@@ -154,6 +155,45 @@ public class PromptSettingsScreenshotTests : IClassFixture<PromptSettingsScreens
         Assert.True(vm.IsEditing);
         Assert.Empty(vm.EditingName);
         Assert.Contains("{speech_lang}", vm.EditingText, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_HowPromptsWorkHelpPanel()
+    {
+        var registry = new MockPromptTemplateRegistry();
+        var vm = new PromptSettingsViewModel(registry);
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+
+        // Step 1: collapsed by default
+        var view1 = new PromptSettingsView();
+        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view1, vm);
+        steps.Add(new ScenarioStep(
+            "Default state: the 'How prompts work' expander sits under the intro line, collapsed, " +
+            "so the page stays compact.",
+            screenshot1));
+
+        // Step 2: expanded
+        vm.IsHelpExpanded = true;
+        await SettleAsync();
+
+        var view2 = new PromptSettingsView();
+        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
+        steps.Add(new ScenarioStep(
+            "User expands the panel. Three sections appear: 'Placeholders' (what '{speech_lang}' and " +
+            "'{text_lang}' render to), 'When translation is applied' (toggle on + output language set + " +
+            "differs from the spoken language), and 'Built-in vs. custom prompts' (the built-in's three " +
+            "bodies — including why '{speech_lang}' appears twice in the transcription body — versus a " +
+            "custom prompt's single body with the auto-appended translation instruction).",
+            screenshot2));
+
+        _report.AddScenario(new Scenario(
+            "How Prompts Work — Help Panel",
+            "Inline explanation of placeholders, the translation trigger, and built-in vs. custom bodies.",
+            steps));
+
+        Assert.True(vm.IsHelpExpanded);
     }
 
     [AvaloniaFact]
