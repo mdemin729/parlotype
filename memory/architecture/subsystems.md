@@ -157,9 +157,11 @@ User-facing `RuntimePreference` (`Parlotype.Core/Speech/`) maps to Whisper.net's
 | `Vulkan` | `[Vulkan]` | **no** — strict |
 | `Cpu` | `[Cpu]` | n/a |
 
-- **Bootstrap**: `WhisperRuntimeBootstrap.Initialize(RuntimePreference, ILogger)` sets `RuntimeOptions.RuntimeLibraryOrder` once per process (first-call-wins).
+- **Bootstrap**: `WhisperRuntimeBootstrap.Initialize(RuntimePreference, ILogger)` sets `RuntimeOptions.RuntimeLibraryOrder` once per process (first-call-wins). `IsSatisfiedBy(preference, loaded)` is the single matcher for "does the loaded library honour this preference" (`Auto` accepts anything; `Cpu` accepts `Cpu`+`CpuNoAvx`).
 - **Strict-mode guard**: `WhisperSpeechRecognizer` calls `INvidiaEnvironmentProvider`/`IVulkanEnvironmentProvider` before factory creation. On a strict mismatch it throws `RuntimeUnavailableException` (Core) instead of silently falling back to CPU. `TranscribeViewModel` catches it and shows a status-bar message directing the user to Settings.
-- **UI**: `RuntimeSettingsViewModel` + `RuntimeSettingsView` (Settings → Runtime). Persists via `SettingsKeys.RuntimePreference`. Shows "Changes take effect after restart" because runtime selection is process-global one-shot.
+- **Latch guard** ([[decisions/_index|ADR-048]]): `IWhisperRuntimeStatus` (Core) → `WhisperRuntimeStatus` (Platform) exposes the loaded runtime + `RequiresRestartFor(preference)`. `WhisperSpeechRecognizer.AssertRuntimeStillSelectable` runs **before the model download** in both `InitializeAsync` overloads and throws `RuntimeUnavailableException { RequiresRestart = true }`; the post-load assertion covers a stale *order* latch. Applies to `Cpu` too — a CPU selection under a latched GPU runtime is an error, not a silent GPU run.
+- **Factory lifetime** ([[decisions/_index|ADR-048]]): `CreateVerifiedFactory` disposes the `WhisperFactory` on any verification/build failure and `_factory` is assigned only after the processor exists; `UnloadAsync` releases whatever exists regardless of `IsReady`. `WhisperFactory` has no finalizer — see [[whisper-net-quirks]].
+- **UI**: `RuntimeSettingsViewModel` + `RuntimeSettingsView` (Settings → Runtime). Persists via `SettingsKeys.RuntimePreference`. Shows "Changes take effect after restart", plus a live "Restart required" panel (`RestartRequired`/`LoadedRuntimeName`) once the selection diverges from the loaded runtime — selection is process-global one-shot.
 - **Packages**: `Whisper.net.Runtime.Cuda` (conditional on `EnableCuda` MSBuild prop, default true) and `Whisper.net.Runtime.Vulkan` (always included).
 
 ## Audio Level & Waveform Visualisation

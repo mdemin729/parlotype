@@ -155,4 +155,55 @@ public class RuntimeSettingsViewModelTests
         Assert.True(cuda.IsAvailable);
         Assert.Null(cuda.UnavailableReason);
     }
+
+    [Fact]
+    public async Task RestartRequired_WhenSelectionDiffersFromLoadedRuntime()
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.RuntimePreference, RuntimePreference.Cuda.ToString(), TestContext.Current.CancellationToken);
+        var vm = BuildWithStatus(settings, new FakeRuntimeStatus("Cuda"));
+        await SettleAsync();
+
+        Assert.False(vm.RestartRequired);
+        Assert.Equal("Cuda", vm.LoadedRuntimeName);
+
+        vm.SelectRuntimeCommand.Execute(RuntimePreference.Vulkan);
+
+        Assert.True(vm.RestartRequired);
+    }
+
+    [Fact]
+    public async Task RestartRequired_IsFalse_WhenNoRuntimeLoadedYet()
+    {
+        var settings = new MockSettingsService();
+        var vm = BuildWithStatus(settings, new FakeRuntimeStatus(loaded: null));
+        await SettleAsync();
+
+        vm.SelectRuntimeCommand.Execute(RuntimePreference.Vulkan);
+
+        Assert.False(vm.RestartRequired);
+        Assert.Null(vm.LoadedRuntimeName);
+    }
+
+    private static RuntimeSettingsViewModel BuildWithStatus(
+        MockSettingsService settings,
+        IWhisperRuntimeStatus status)
+    {
+        var nvidia = new MockNvidiaEnvironmentProvider(NvidiaEnvironmentInfo.Empty);
+        var vulkan = new MockVulkanEnvironmentProvider(
+            new VulkanEnvironmentInfo { HasVulkanLoader = true, LoaderVersion = "1.3.0" });
+        return new RuntimeSettingsViewModel(settings, nvidia, vulkan, status);
+    }
+
+    /// <summary>Mimics the process-wide runtime latch without loading anything native.</summary>
+    private sealed class FakeRuntimeStatus(string? loaded) : IWhisperRuntimeStatus
+    {
+        public string? LoadedRuntimeName => loaded;
+
+        public bool RequiresRestartFor(RuntimePreference preference) => loaded switch
+        {
+            null => false,
+            _ => preference is not RuntimePreference.Auto && preference.ToString() != loaded,
+        };
+    }
 }

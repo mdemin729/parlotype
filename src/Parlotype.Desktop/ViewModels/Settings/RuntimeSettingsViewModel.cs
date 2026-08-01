@@ -16,6 +16,7 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
     private readonly ISettingsService _settings;
     private readonly INvidiaEnvironmentProvider _nvidia;
     private readonly IVulkanEnvironmentProvider _vulkan;
+    private readonly IWhisperRuntimeStatus? _runtimeStatus;
     private readonly ILogger<RuntimeSettingsViewModel> _logger;
 
     public override string Title => "Whisper runtime";
@@ -42,15 +43,30 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
     [ObservableProperty]
     private string? _cudaDriverVersion;
 
+    /// <summary>
+    /// True when the selected runtime differs from the one this process already
+    /// loaded. Whisper's runtime is process-wide and one-shot, so the selection
+    /// only takes effect after a restart (ADR-048).
+    /// </summary>
+    [ObservableProperty]
+    private bool _restartRequired;
+
+    /// <summary>Name of the runtime currently loaded in this process, if any.</summary>
+    [ObservableProperty]
+    private string? _loadedRuntimeName;
+
     public RuntimeSettingsViewModel(
         ISettingsService settings,
         INvidiaEnvironmentProvider nvidia,
         IVulkanEnvironmentProvider vulkan,
+        IWhisperRuntimeStatus? runtimeStatus = null,
         ILogger<RuntimeSettingsViewModel>? logger = null)
     {
         _settings = settings;
         _nvidia = nvidia;
         _vulkan = vulkan;
+        // Null in design-time/unit contexts, where no native runtime is ever loaded.
+        _runtimeStatus = runtimeStatus;
         _logger = logger ?? NullLogger<RuntimeSettingsViewModel>.Instance;
 
         RuntimeOptions =
@@ -80,6 +96,17 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
             : RuntimePreference.Auto;
         Apply(runtime);
         await RefreshAvailabilityAsync();
+    }
+
+    /// <summary>
+    /// Recomputes the "restart to apply" state for the current selection. Called on
+    /// load and after every selection change — the loaded runtime itself can also
+    /// appear mid-session, once the first model load happens.
+    /// </summary>
+    private void RefreshRestartState()
+    {
+        LoadedRuntimeName = _runtimeStatus?.LoadedRuntimeName;
+        RestartRequired = _runtimeStatus?.RequiresRestartFor(SelectedRuntime) ?? false;
     }
 
     private async Task RefreshAvailabilityAsync()
@@ -117,6 +144,8 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
                     break;
             }
         }
+
+        RefreshRestartState();
     }
 
     [RelayCommand]
@@ -135,6 +164,8 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
         SelectedRuntime = type;
         foreach (var item in RuntimeOptions)
             item.IsSelected = item.Type == type;
+
+        RefreshRestartState();
     }
 
     [RelayCommand]

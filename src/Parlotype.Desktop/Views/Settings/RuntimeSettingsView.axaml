@@ -51,6 +51,22 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
+        <!-- Runtime already latched: Whisper resolves its native library once per
+             process, so a change made after the first model load needs a restart. -->
+        <Border Background="#33808080" CornerRadius="6" Padding="12"
+                IsVisible="{Binding RestartRequired}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Restart required" FontWeight="SemiBold" FontSize="14" />
+                <TextBlock TextWrapping="Wrap" Opacity="0.7">
+                    <Run Text="This session is already running the" />
+                    <Run Text="{Binding LoadedRuntimeName}" FontWeight="SemiBold" />
+                    <Run Text="runtime. Whisper picks its runtime once per launch, so restart Parlotype to switch to" />
+                    <Run Text="{Binding SelectedRuntime}" FontWeight="SemiBold" />
+                    <Run Text="— until then, recording will not start." />
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
         <!-- CUDA: no NVIDIA driver detected -->
         <StackPanel Spacing="4" IsVisible="{Binding CudaDriverMissing}" Margin="0,8,0,0">
             <TextBlock Text="NVIDIA GPU not detected"
