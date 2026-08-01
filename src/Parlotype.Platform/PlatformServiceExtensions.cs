@@ -23,6 +23,9 @@ public static class PlatformServiceExtensions
         // DelegatingSpeechRecognizer reads the SpeechEngine setting at
         // InitializeAsync time and forwards to the correct one.
         services.AddSingleton<WhisperSpeechRecognizer>();
+        // Read-only view of the process-wide Whisper runtime latch, so Settings can
+        // tell the user a restart is pending instead of failing at record time.
+        services.AddSingleton<IWhisperRuntimeStatus, WhisperRuntimeStatus>();
         services.AddSingleton<LlamaCppSpeechRecognizer>();
         services.AddSingleton<ParakeetSpeechRecognizer>();
         // Opt-in cloud providers (ADR-032, bring-your-own-key). Registered as

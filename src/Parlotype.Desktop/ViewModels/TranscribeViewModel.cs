@@ -458,7 +458,11 @@ public partial class TranscribeViewModel : ViewModelBase
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
             RecordingState = RecordingState.Disabled;
-            StatusText = $"{ex.Requested} runtime not available — change in Settings";
+            // A latched runtime is not a broken machine — the fix is a restart, not
+            // a different setting, so say so instead of sending the user to Settings.
+            StatusText = ex.RequiresRestart
+                ? $"Restart Parlotype to use the {ex.Requested} runtime"
+                : $"{ex.Requested} runtime not available — change in Settings";
         }
         catch (CloudProviderNotConfiguredException ex)
         {

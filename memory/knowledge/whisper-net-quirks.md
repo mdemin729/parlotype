@@ -3,8 +3,8 @@ title: Whisper.net Quirks
 type: knowledge
 tags: [whisper, cuda, logging, gotchas]
 created: 2026-04-28
-last_updated: 2026-04-28
-summary: Non-obvious behaviours of Whisper.net 1.9.0 that affected CUDA diagnostics
+last_updated: 2026-07-31
+summary: Non-obvious behaviours of Whisper.net 1.9.0 — CUDA diagnostics, inverted log levels, and unfinalized native model contexts
 ---
 
 # Whisper.net 1.9.0 Quirks
@@ -49,3 +49,15 @@ The native value is passed straight through, so a native `INFO=2` arrives as man
 This is intentionally pessimistic; revisit if Whisper.net fixes the enum in a future version.
 
 **Verification**: `Whisper.net.Internals.Native.Data.GgmlLogLevel` in the decompiled NuGet assembly.
+
+## 3. `WhisperFactory` has **no finalizer** — dropping one leaks the whole model
+
+`WhisperFactory` keeps its native context in a plain `Lazy<IntPtr>` field (`contextLazy`) and declares no `Finalize` override; `WhisperProcessor` is the same with a raw `IntPtr currentWhisperContext`. Nothing releases `whisper_free` except an explicit `Dispose`/`DisposeAsync`.
+
+Consequences we hit in [[decisions/_index|ADR-048]]:
+
+- `WhisperFactory.FromPath` loads the **full model weights immediately** (the native log prints `whisper_model_load: … total size = N MB` before the call returns), so a factory that is created and then dropped on an exception path leaks that many MB for the process lifetime.
+- The managed object is a few bytes, so the GC has no pressure signal and never collects on its account — the managed heap stays flat (~22 MB) while private bytes climb. Measured: 149 MB leaked per failed initialization with `base.en`, ~3 GB with `large-v3`.
+- Any code path that creates a factory must dispose it on **every** failure branch. Guarding disposal on an `IsReady`-style flag that is only set at the end of a successful init is exactly the bug.
+
+**Verification**: reflect over `Whisper.net.WhisperFactory` — `GetMethod("Finalize", NonPublic|Instance).DeclaringType` is `System.Object`, i.e. no custom finalizer.

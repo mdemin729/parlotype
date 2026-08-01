@@ -6,6 +6,10 @@ using Xunit;
 
 namespace Parlotype.Tests;
 
+// Loads a real model, so it shares the process-wide runtime latch with the
+// bootstrap tests: without this collection they interleave and the model can end
+// up on whichever runtime another class latched first (ADR-048).
+[Collection("WhisperRuntime")]
 public class WhisperSpeechRecognizerTests
 {
     private sealed class FakeSettingsService : ISettingsService

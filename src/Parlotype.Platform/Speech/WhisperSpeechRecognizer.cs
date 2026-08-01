@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Whisper.net;
-using Whisper.net.LibraryLoader;
 
 namespace Parlotype.Platform.Speech;
 
@@ -13,6 +12,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
     private readonly ISettingsService _settings;
     private readonly INvidiaEnvironmentProvider _nvidia;
     private readonly IVulkanEnvironmentProvider _vulkan;
+    private readonly IWhisperRuntimeStatus _runtimeStatus;
     private readonly ILogger<WhisperSpeechRecognizer> _logger;
     private WhisperFactory? _factory;
     private WhisperProcessor? _processor;
@@ -26,12 +26,16 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         ISettingsService settings,
         INvidiaEnvironmentProvider nvidia,
         IVulkanEnvironmentProvider vulkan,
-        ILogger<WhisperSpeechRecognizer> logger)
+        ILogger<WhisperSpeechRecognizer> logger,
+        IWhisperRuntimeStatus? runtimeStatus = null)
     {
         _downloadService = downloadService;
         _settings = settings;
         _nvidia = nvidia;
         _vulkan = vulkan;
+        // Defaults to the real process-wide latch; tests inject a fake so they never
+        // have to mutate Whisper.net's global state out from under parallel tests.
+        _runtimeStatus = runtimeStatus ?? new WhisperRuntimeStatus();
         _logger = logger;
     }
 
@@ -56,19 +60,75 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         }
     }
 
-    private void AssertLoadedRuntimeMatches(RuntimePreference preference)
+    /// <summary>
+    /// Fails fast when this process already loaded a different runtime. Whisper.net
+    /// resolves its native library once per process, so a preference change made
+    /// after the first model load can only be applied by restarting the app — and
+    /// finding that out <i>after</i> loading several GB of weights is both slow and,
+    /// historically, leaky. Cheap enough to run before the model download.
+    /// </summary>
+    private void AssertRuntimeStillSelectable(RuntimePreference preference)
     {
-        if (preference is not (RuntimePreference.Cuda or RuntimePreference.Vulkan))
+        if (!_runtimeStatus.RequiresRestartFor(preference))
             return;
 
+        throw new RuntimeUnavailableException(
+            preference,
+            $"this session already loaded the '{_runtimeStatus.LoadedRuntimeName}' runtime. Whisper's runtime is chosen once per process, so restart Parlotype to switch to '{preference}'.",
+            requiresRestart: true);
+    }
+
+    /// <summary>
+    /// Post-load counterpart of <see cref="AssertRuntimeStillSelectable"/>: catches the
+    /// case where the library order was latched by an earlier (failed) initialization,
+    /// so nothing was loaded yet but the order in effect is not the one we asked for.
+    /// </summary>
+    private static void AssertLoadedRuntimeMatches(RuntimePreference preference)
+    {
         var loaded = WhisperRuntimeBootstrap.LoadedRuntime;
-        var expected = preference == RuntimePreference.Cuda ? RuntimeLibrary.Cuda : RuntimeLibrary.Vulkan;
-        if (loaded != expected)
+        if (WhisperRuntimeBootstrap.IsSatisfiedBy(preference, loaded))
+            return;
+
+        throw new RuntimeUnavailableException(
+            preference,
+            $"Whisper.net loaded '{loaded?.ToString() ?? "(none)"}' instead of '{preference}'. The runtime order was fixed earlier in this session — restart Parlotype to switch.",
+            requiresRestart: true);
+    }
+
+    /// <summary>
+    /// Creates the factory and verifies the loaded runtime, disposing the factory if
+    /// verification fails. <see cref="WhisperFactory"/> owns the native model context
+    /// (multiple GB for large models) and has no finalizer, so a factory that escapes
+    /// without a <c>Dispose</c> leaks that memory for the lifetime of the process.
+    /// </summary>
+    private WhisperFactory CreateVerifiedFactory(string modelPath, RuntimePreference preference)
+    {
+        WhisperFactory factory;
+        try
+        {
+            factory = WhisperFactory.FromPath(modelPath);
+        }
+        catch (Exception ex) when (preference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
         {
             throw new RuntimeUnavailableException(
                 preference,
-                $"Whisper.net loaded '{loaded?.ToString() ?? "(none)"}' instead of '{expected}'. The native runtime may be missing or incompatible.");
+                $"Whisper.net failed to load the '{preference}' runtime. The native libraries may be missing or incompatible.",
+                ex);
         }
+
+        _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
+
+        try
+        {
+            AssertLoadedRuntimeMatches(preference);
+        }
+        catch
+        {
+            factory.Dispose();
+            throw;
+        }
+
+        return factory;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -89,6 +149,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             : RuntimePreference.Auto;
 
         await EnsureRuntimeAvailableAsync(runtimePreference, cancellationToken);
+        AssertRuntimeStillSelectable(runtimePreference);
 
         _logger.LogInformation("Initializing Whisper with model type: {ModelType}", modelType);
         var modelPath = await _downloadService.EnsureModelAsync(modelType, cancellationToken);
@@ -99,24 +160,24 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         // the calling thread so the UI thread stays free and the spinner animates.
         await Task.Run(() =>
         {
+            var factory = CreateVerifiedFactory(modelPath, runtimePreference);
+
+            // Publish the factory only once the processor is built: a half-initialized
+            // recognizer stays IsReady == false, and UnloadAsync would then skip
+            // disposing whatever _factory held.
             try
             {
-                _factory = WhisperFactory.FromPath(modelPath);
+                _processor = factory.CreateBuilder()
+                    .WithLanguage("auto")
+                    .Build();
             }
-            catch (Exception ex) when (runtimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
+            catch
             {
-                throw new RuntimeUnavailableException(
-                    runtimePreference,
-                    $"Whisper.net failed to load the '{runtimePreference}' runtime. The native libraries may be missing or incompatible.",
-                    ex);
+                factory.Dispose();
+                throw;
             }
 
-            _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
-            AssertLoadedRuntimeMatches(runtimePreference);
-
-            _processor = _factory.CreateBuilder()
-                .WithLanguage("auto")
-                .Build();
+            _factory = factory;
         }, cancellationToken).ConfigureAwait(false);
 
         IsReady = true;
@@ -142,6 +203,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
             options.Model, options.Language, options.BeamSize, options.Temperature);
 
         await EnsureRuntimeAvailableAsync(options.RuntimePreference, cancellationToken);
+        AssertRuntimeStillSelectable(options.RuntimePreference);
 
         var modelPath = await _downloadService.EnsureModelAsync(options.Model, cancellationToken);
 
@@ -153,44 +215,44 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
         {
             WhisperRuntimeBootstrap.Initialize(options.RuntimePreference, _logger);
 
+            var factory = CreateVerifiedFactory(modelPath, options.RuntimePreference);
+
+            // Publish the factory only once the processor is built — see the note in
+            // the parameterless overload.
             try
             {
-                _factory = WhisperFactory.FromPath(modelPath);
+                var builder = factory.CreateBuilder()
+                    .WithLanguage(options.Language)
+                    .WithTemperature(options.Temperature);
+
+                if (options.Threads is not null)
+                    builder.WithThreads(options.Threads.Value);
+
+                if (options.BeamSize > 1)
+                {
+                    var beamStrategy = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();
+                    beamStrategy.WithBeamSize(options.BeamSize);
+                }
+                else
+                {
+                    builder.WithGreedySamplingStrategy();
+                }
+
+                if (options.TranslateToEnglish)
+                    builder.WithTranslate();
+
+                if (!string.IsNullOrEmpty(options.InitialPrompt))
+                    builder.WithPrompt(options.InitialPrompt);
+
+                _processor = builder.Build();
             }
-            catch (Exception ex) when (options.RuntimePreference is RuntimePreference.Cuda or RuntimePreference.Vulkan)
+            catch
             {
-                throw new RuntimeUnavailableException(
-                    options.RuntimePreference,
-                    $"Whisper.net failed to load the '{options.RuntimePreference}' runtime. The native libraries may be missing or incompatible.",
-                    ex);
-            }
-            _logger.LogInformation("Whisper runtime loaded: {Runtime}", WhisperRuntimeBootstrap.LoadedRuntime?.ToString() ?? "unknown");
-            AssertLoadedRuntimeMatches(options.RuntimePreference);
-
-            var builder = _factory.CreateBuilder()
-                .WithLanguage(options.Language)
-                .WithTemperature(options.Temperature);
-
-            if (options.Threads is not null)
-                builder.WithThreads(options.Threads.Value);
-
-            if (options.BeamSize > 1)
-            {
-                var beamStrategy = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();
-                beamStrategy.WithBeamSize(options.BeamSize);
-            }
-            else
-            {
-                builder.WithGreedySamplingStrategy();
+                factory.Dispose();
+                throw;
             }
 
-            if (options.TranslateToEnglish)
-                builder.WithTranslate();
-
-            if (!string.IsNullOrEmpty(options.InitialPrompt))
-                builder.WithPrompt(options.InitialPrompt);
-
-            _processor = builder.Build();
+            _factory = factory;
         }, cancellationToken).ConfigureAwait(false);
 
         _currentOptions = options;
@@ -231,8 +293,13 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (!IsReady)
+        // Deliberately not gated on IsReady: native resources are released whenever
+        // they exist, so a partially initialized recognizer can never strand them.
+        if (_processor is null && _factory is null)
+        {
+            IsReady = false;
             return;
+        }
 
         if (_processor is not null)
         {
