@@ -274,7 +274,7 @@ llama-server).
       "role": "user",
       "content": [
         { "type": "text",
-          "text": "Transcribe the following speech segment in English into English text. Only output the transcription, with no newlines. When transcribing numbers, write the digits." },
+          "text": "Transcribe the following speech segment in English into English text. Use punctuation. Only output the transcription, with no newlines. When transcribing numbers, write the digits." },
         { "type": "input_audio",
           "input_audio": { "data": "<base64 WAV>", "format": "wav" } }
       ]

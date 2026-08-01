@@ -18,20 +18,27 @@ public sealed class JsonPromptTemplateRegistry : IPromptTemplateRegistry
     internal const string FileName = "prompts.json";
     internal const string BuiltInDefaultId = "builtin-default";
 
-    /// <summary>The built-in default prompt — Google's prescribed verbatim transcription prompt.</summary>
+    /// <summary>
+    /// The built-in default prompt — Google's prescribed verbatim transcription prompt,
+    /// plus an explicit "Use punctuation." instruction in every body: without it the
+    /// model punctuates inconsistently.
+    /// </summary>
     internal static readonly PromptTemplate BuiltInDefault = new(
         Id: BuiltInDefaultId,
         Name: "Default (verbatim transcription)",
         Text: "Transcribe the following speech segment in {speech_lang} into {speech_lang} text. " +
+              "Use punctuation. " +
               "Only output the transcription, with no newlines. " +
               "When transcribing numbers, write the digits.",
         IsBuiltIn: true,
         TranslationText:
             "Transcribe the following speech segment spoken in {speech_lang} and translate it into {text_lang}. " +
+            "Use punctuation. " +
             "Only output the {text_lang} text, with no newlines. " +
             "When writing numbers, write the digits.",
         AutoDetectText:
             "Detect the language being spoken and transcribe the speech in that same language. " +
+            "Use punctuation. " +
             "Only output the transcription, with no newlines. " +
             "When transcribing numbers, write the digits.");
 

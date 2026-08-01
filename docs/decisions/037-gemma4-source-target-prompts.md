@@ -93,3 +93,39 @@ Amends ADR-030 (single-token seam) and ADR-034 (appended translation instruction
 - Tests: `LlamaCppPromptBuildingTests` covers every matrix row (toggle on/off, auto
   vs known source, custom vs built-in); `JsonPromptTemplateRegistryTests` covers the
   three built-in bodies and legacy single-body JSON loading with null optional bodies.
+
+## Amendment (2026-08-01) — `{text_lang}` is substituted on every path
+
+As originally implemented, only the built-in `TranslationText` branch of
+`BuildPromptTextAsync` passed a target language to `PromptTemplate.Substitute`; the
+other three branches passed the speech language alone, and `Substitute` leaves a token
+untouched when its argument is `null`. A **custom** prompt containing `{text_lang}`
+therefore shipped the literal string `{text_lang}` to the model on all of them — with
+translation off *and*, more damagingly, with translation on, which is exactly when a
+prompt author would reach for the token. The built-in default never hit this: its
+transcription and auto-detect bodies carry no `{text_lang}`.
+
+Decision: `{text_lang}` is substituted on every path. While translating it renders to
+the target language (custom bodies now, as the built-in translation body already did);
+otherwise the output language *is* the spoken language, so it renders to the same name
+as `{speech_lang}`, "the detected language" included. `Substitute` itself is unchanged
+— the null-argument contract still means "leave the token alone"; only the recognizer
+now supplies both arguments. Built-in behaviour is byte-identical; only custom prompts
+using `{text_lang}` change, and strictly for the better. `LlamaCppPromptBuildingTests`
+covers both the translating and non-translating custom-prompt cases.
+
+All three bodies of the built-in default also gained an explicit `Use punctuation.`
+sentence (placed after the transcribe/translate instruction, before "Only output…"),
+plus the pre-filled text for a **new** custom prompt. Empirically the model punctuates
+inconsistently without it. This is a deliberate divergence from Google's prescribed
+template, which omits the instruction; `JsonPromptTemplateRegistryTests` pins it so a
+future edit cannot drop it silently. The built-in is merged at read time and never
+written to `prompts.json`, so every install picks the new wording up on next launch
+with no migration — existing *custom* prompts (including copies made from the built-in
+earlier) keep their own text and must be edited by hand.
+
+The Prompts settings page gained a collapsible **How prompts work** panel documenting
+the two placeholders, the three conditions that trigger translation, and the built-in's
+three bodies versus a custom prompt's single body — the transcription body's doubled
+`{speech_lang}` had been read as a typo. Panel state is session-only
+(`PromptSettingsViewModel.IsHelpExpanded`), collapsed by default.

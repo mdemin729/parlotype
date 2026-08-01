@@ -237,8 +237,10 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     /// <para>The built-in default carries dedicated translation and auto-detect
     /// bodies; a custom prompt has a single body, so the translation instruction is
     /// appended in code. <c>{speech_lang}</c> renders to "the detected language"
-    /// when the source is auto-detect. Transcription and translation happen in one
-    /// LLM call (no separate ASR step).</para>
+    /// when the source is auto-detect. <c>{text_lang}</c> is always substituted, on
+    /// every path: with the target language while translating, otherwise with the
+    /// spoken language, since the output language is then the spoken one. Transcription
+    /// and translation happen in one LLM call (no separate ASR step).</para>
     /// </remarks>
     internal async Task<string> BuildPromptTextAsync(PromptTemplate activePrompt, CancellationToken cancellationToken)
     {
@@ -274,22 +276,27 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
             var targetName = LanguageCatalog.GetEnglishName(targetCode);
 
             // Built-in default has a dedicated translation body; custom prompts
-            // render their single body and get the instruction appended.
+            // render their single body and get the instruction appended. Both bodies
+            // get the target name for {text_lang} — a custom prompt that already names
+            // the output language must not leak the raw token (ADR-037 amendment).
             if (activePrompt.TranslationText is { } translationBody)
                 return PromptTemplate.Substitute(translationBody, speechName, targetName);
 
-            var transcribed = PromptTemplate.Substitute(activePrompt.Text, speechName);
+            var transcribed = PromptTemplate.Substitute(activePrompt.Text, speechName, targetName);
             return transcribed +
                 $"\n\nThen translate the transcript into {targetName}. " +
                 $"Respond with only the {targetName} translation and no other text.";
         }
 
-        // No translation: the built-in default has a dedicated auto-detect body for
-        // an unknown spoken language; otherwise render the transcription body.
+        // No translation: the output language *is* the spoken language, so {text_lang}
+        // resolves to the same name as {speech_lang} — a custom prompt that uses it
+        // must never leak the raw token into the model (ADR-037 amendment).
+        // The built-in default has a dedicated auto-detect body for an unknown spoken
+        // language; otherwise render the transcription body.
         if (sourceIsAuto && activePrompt.AutoDetectText is { } autoBody)
-            return PromptTemplate.Substitute(autoBody, speechName);
+            return PromptTemplate.Substitute(autoBody, speechName, speechName);
 
-        return PromptTemplate.Substitute(activePrompt.Text, speechName);
+        return PromptTemplate.Substitute(activePrompt.Text, speechName, speechName);
     }
 
     public async Task UnloadAsync()

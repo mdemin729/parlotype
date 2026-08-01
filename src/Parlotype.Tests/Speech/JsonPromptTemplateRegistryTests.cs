@@ -145,6 +145,17 @@ public sealed class JsonPromptTemplateRegistryTests : IDisposable
         Assert.NotNull(builtIn.AutoDetectText);
     }
 
+    // The model punctuates inconsistently without an explicit instruction, so every
+    // body of the built-in default must carry it.
+    [Fact]
+    public void BuiltInDefault_EveryBody_InstructsPunctuation()
+    {
+        var builtIn = JsonPromptTemplateRegistry.BuiltInDefault;
+        Assert.Contains("Use punctuation.", builtIn.Text, StringComparison.Ordinal);
+        Assert.Contains("Use punctuation.", builtIn.TranslationText!, StringComparison.Ordinal);
+        Assert.Contains("Use punctuation.", builtIn.AutoDetectText!, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task LegacyUserJson_LoadsWithNullOptionalBodies()
     {
