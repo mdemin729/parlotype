@@ -33,7 +33,7 @@ unzip and run `Parlotype.Desktop.exe`. Releases up to and including the Full/Lit
 still carry `-full` / `-lite` suffixes; from [ADR-049](docs/decisions/049-drop-whisper-cuda-runtime.md)
 onward there is a single `Parlotype-<version>-win-x64.zip`.
 
-Being self-contained it is large (~730 MB unzipped; the downloaded zip is smaller — exact
+Being self-contained it is sizeable (~340 MB unzipped; the downloaded zip is smaller — exact
 sizes are listed on each release). It falls back to CPU automatically if no Vulkan-capable
 GPU is found, and the default Parakeet engine needs no GPU at all. The build is currently
 unsigned, so Windows SmartScreen may warn on first launch.

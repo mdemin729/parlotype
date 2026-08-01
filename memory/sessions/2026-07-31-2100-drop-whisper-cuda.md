@@ -1,10 +1,10 @@
 ---
-title: "Session: 2026-07-31 — Drop the Whisper CUDA runtime"
+title: "Session: 2026-07-31 — Drop the Whisper CUDA runtime and the ONNX GPU providers"
 type: session
 status: active
-tags: [cuda, vulkan, whisper, packaging, release, adr-049]
+tags: [cuda, vulkan, whisper, packaging, release, onnxruntime, adr-049, adr-050]
 created: 2026-07-31
-summary: Removed CUDA entirely — package, EnableCuda flag, RuntimePreference.Cuda, the Settings guidance panels and the Full/Lite release split. Vulkan is the only GPU runtime. ADR-049.
+summary: Removed CUDA entirely — package, EnableCuda flag, RuntimePreference.Cuda, the Settings guidance panels and the Full/Lite release split (ADR-049). Then cut the published artifact 731 MB → 338 MB by filtering the never-loaded ONNX Runtime GPU providers (ADR-050).
 ---
 
 # Session: 2026-07-31
@@ -28,6 +28,9 @@ onto ADR-048, which had just reworked the same `WhisperSpeechRecognizer` code).
 - **CI**: `release.yml` loses the Full/Lite matrix — one `Parlotype-<version>-win-x64.zip`.
 - **Tests**: bootstrap/fallback/latch/strict-runtime suites rewritten; deleted the now
   consumerless `MockNvidiaEnvironmentProvider` (Desktop.Tests). 1023 tests green.
+- **Packaging (ADR-050)**: new root `Directory.Build.targets` filters the ONNX Runtime
+  CUDA/TensorRT provider natives out of `ReferenceCopyLocalPaths` and
+  `ResolvedFileToPublish`. Published `win-x64` output **731 MB → 338 MB**.
 
 ## Decisions Made
 
@@ -46,11 +49,15 @@ onto ADR-048, which had just reworked the same `WhisperSpeechRecognizer` code).
 
 ## Facts Learned
 
-- **`onnxruntime_providers_cuda.dll` is 391 MB — ~54% of the entire 731 MB published
-  output** — and is never loaded, because `ParakeetSpeechRecognizer` pins
-  `Provider = "cpu"` (ADR-041). It arrives via `org.k2fsa.sherpa.onnx`. Removing it is a
-  far bigger win than this whole ADR; deferred because it needs an end-to-end Parakeet
-  run to verify. Recorded in [[sherpa-onnx-quirks]].
+- **`onnxruntime_providers_cuda.dll` is 391 MB — ~54% of the 731 MB published output**
+  and is never loaded. First assumed to come from `org.k2fsa.sherpa.onnx`; it actually
+  arrives via **`SileroVad 1.3.0` → `Microsoft.ML.OnnxRuntime.Gpu 1.18.1`**, a dependency
+  no `.csproj` in the repo names. Removed in ADR-050 the same session (731 MB → 338 MB).
+  Full write-up in [[onnxruntime-gpu-providers-dead-weight]].
+- The providers could not have loaded even if requested: they target ORT 1.18.1, while the
+  `onnxruntime.dll` that wins the output folder is sherpa-onnx’s own newer native build.
+  Proven inert by running the Parakeet smoke benchmark with and without the DLL present —
+  identical WER 6.4% / CER 2.6% / RAM Δ 46.1 MB.
 - `RuntimeLibrary.Cuda` still exists in Whisper.net's enum after the package is gone, so
   test code referencing it keeps compiling — useful for the stale-latch case above.
 - The benchmark's `whisperRuntime` field in `results/*.json` is a plain string, so
@@ -64,23 +71,24 @@ GPU host (the change cannot alter the Vulkan path, but the app was not launched)
 
 ## Documentation Status
 
-- ADR: **done** — `docs/decisions/049-drop-whisper-cuda-runtime.md`; supersede/amend
-  banners added to ADR-012 (superseded), 014, 022, 031.
+- ADR: **done** — `docs/decisions/049-drop-whisper-cuda-runtime.md` and
+  `docs/decisions/050-drop-onnx-runtime-gpu-providers.md`; supersede/amend banners added
+  to ADR-012 (superseded), 014, 022, 031.
 - Vault (services/architecture): **done** — `decisions/_index`, `architecture/subsystems`,
   `architecture/dependency-graph`, `conventions/dotnet-standards`,
   `conventions/testing-strategy`, `services/{core,platform,desktop,tests}`, `memory/CLAUDE.md`.
 - Knowledge: **done** — [[whisper-cuda-runtime-packaging]] marked historical with the
-  post-removal measurement; [[sherpa-onnx-quirks]] gained the 391 MB finding.
+  post-removal measurement; new [[onnxruntime-gpu-providers-dead-weight]];
+  [[sherpa-onnx-quirks]] gained the "sherpa wins the onnxruntime.dll race" note.
 
 ## Next Action
 
-**Strip the unused ONNX Runtime GPU providers from the published output** — exclude
-`onnxruntime_providers_cuda.dll` (391 MB) and `onnxruntime_providers_tensorrt.dll` from
-`org.k2fsa.sherpa.onnx`'s native assets, keeping `onnxruntime.dll`,
-`onnxruntime_providers_shared.dll` and `Microsoft.ML.OnnxRuntime.dll`. Then launch the
-app with the default Parakeet engine, record a clip, and confirm transcription still
-works with no native-load error in `%LOCALAPPDATA%/parlotype/logs/`. That single change
-roughly halves the download — needs its own ADR.
+**Trim the ~100 MB of native PDBs from release publishes.** `libSkiaSharp.pdb` (80 MB) and
+`libHarfBuzzSharp.pdb` (20 MB) are now the two largest files in the 338 MB output — they
+come from SkiaSharp/HarfBuzzSharp native packages and are debug symbols no end user needs.
+The same `Directory.Build.targets` filter pattern ADR-050 introduced applies, but it should
+be scoped to Release/publish only so local debugging keeps its symbols. Verify by
+publishing and confirming the app still starts and renders.
 
 Also outstanding, in the separate `parlotype-website` repo: the download page still
-documents the Full/Lite split (EN + RU).
+documents the Full/Lite split and the old size (EN + RU).

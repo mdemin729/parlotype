@@ -43,7 +43,7 @@ The 8 projects are wired in `Parlotype.slnx`. `Parlotype.Desktop` is the sole de
 - **Whisper.net** + **Whisper.net.Runtime** — speech recognition
 - **Whisper.net.Runtime.Vulkan** — the only GPU runtime, cross-vendor (always included, ~30 MB) — [[decisions/_index|ADR-022]], [[decisions/_index|ADR-049]]
 - **NAudio** — WASAPI audio capture
-- **Microsoft.ML.OnnxRuntime** — Silero VAD inference
+- **Microsoft.ML.OnnxRuntime** — Silero VAD inference (arrives as `Microsoft.ML.OnnxRuntime.Gpu` via `SileroVad`; its CUDA/TensorRT provider natives are filtered out of build and publish output by `Directory.Build.targets` — [[decisions/_index|ADR-050]])
 - **SharpHook 7.x** — global keyboard hooks (uses `SimpleGlobalHook` for working event suppression — [[decisions/_index|ADR-020]])
 
 ### Parlotype.Desktop

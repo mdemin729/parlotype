@@ -76,7 +76,7 @@ from source, and no Full/Lite split.
 - **Note:** Measured self-contained `win-x64` output after this change: **731 MB**. The
   CUDA package previously added ~150 MB on top of that (`ggml-cuda-whisper.dll`).
 - **Note:** The largest single file in the published output is now
-  `onnxruntime_providers_cuda.dll` at **391 MB**, shipped by `org.k2fsa.sherpa.onnx`.
-  It is never loaded — `ParakeetSpeechRecognizer` sets `Provider = "cpu"` — so removing
-  it is a much bigger win than this ADR. Deferred to its own change because it needs an
-  end-to-end Parakeet run to verify.
+  `onnxruntime_providers_cuda.dll` at **391 MB**, and it is never loaded. Removed in
+  [ADR-050](050-drop-onnx-runtime-gpu-providers.md), which also corrects the provenance
+  guessed here on first sighting: it comes from `Microsoft.ML.OnnxRuntime.Gpu` via
+  `SileroVad`, not from `org.k2fsa.sherpa.onnx`.

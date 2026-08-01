@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-07-18
+last_updated: 2026-07-31
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -51,6 +51,7 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[naudio-resampler-read-cost]] | NAudio's WDL resampler chain allocates per `Read` **in proportion to the requested count** (2.7 MB/call at 38,400 vs 0.19 MB at 3,200, same output) — never pass `BytesRecorded` or a pooled array's `.Length` as the read count; request ~2× the expected resampled output | 2026-07-14 |
 | [[whisper-net-linux-native-crash]] | Whisper.net's native ggml library hard-crashes the .NET test host on Linux (`GGML_ASSERT`) regardless of CPU/CUDA/Vulkan selection — root cause unresolved; `benchmark.yml` pinned to `windows-latest` as a workaround | 2026-07-18 |
 | [[sharphook-modifier-sides]] | Left/right modifiers are distinct `KeyCode`s *and* distinct `EventMask` bits; the unqualified `EventMask.Ctrl`/`Alt`/… are composites of both sides, so use `&` not `HasFlag`. Enables Hold Right Ctrl and the AltGr filter. Simulated events are visible to the hook, so it can be driven from an automated harness | 2026-07-30 |
+| [[onnxruntime-gpu-providers-dead-weight]] | SileroVad 1.3.0 pulls Microsoft.ML.OnnxRuntime.Gpu, whose 391 MB `onnxruntime_providers_cuda.dll` was 54% of the published output and can never load (CPU providers pinned; ORT version mismatch with sherpa-onnx’s own onnxruntime.dll). Filtered out in `Directory.Build.targets` — 731 MB → 338 MB | 2026-07-31 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

@@ -31,7 +31,8 @@ CUDA install, which is why so much of the Runtime settings page was toolkit guid
 
 Post-removal measurement (2026-07-31, same publish command): **731 MB**, one artifact.
 
-The dominant remaining cost is *not* Whisper: `onnxruntime_providers_cuda.dll` from
-`org.k2fsa.sherpa.onnx` is **391 MB** of that output and is never loaded, because
-`ParakeetSpeechRecognizer` sets `Provider = "cpu"` ([[../decisions/_index|ADR-041]]).
-See [[sherpa-onnx-quirks]].
+That measurement immediately exposed a bigger one: `onnxruntime_providers_cuda.dll`,
+**391 MB** and never loaded, which [[../decisions/_index|ADR-050]] removed the same day
+(731 MB → 338 MB). It comes from `SileroVad` → `Microsoft.ML.OnnxRuntime.Gpu` — *not* from
+`org.k2fsa.sherpa.onnx`, which is where it was first assumed to come from. See
+[[onnxruntime-gpu-providers-dead-weight]].
