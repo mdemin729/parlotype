@@ -59,7 +59,8 @@ new solution-wide `Directory.Build.targets`.
 ## Consequences
 
 - **Easier:** Published self-contained `win-x64` output drops from **731 MB to 338 MB** —
-  a 54% cut, and more than double what ADR-049 saved. Every `bin/` in the solution loses
+  a 54% cut, and more than double what ADR-049 saved. [ADR-051](051-publish-only-target-rid-runtimes.md)
+  then took it to 278 MB by filtering foreign-RID Whisper natives out of the same file. Every `bin/` in the solution loses
   391 MB too, which speeds up local rebuilds and clean checkouts.
 - **Easier:** The download is now dominated by things that are actually used — the largest
   remaining files are Skia/HarfBuzz PDBs, the Vulkan Whisper natives, and the .NET runtime.

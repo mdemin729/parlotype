@@ -1,15 +1,15 @@
 ---
 title: Whisper.net Quirks
 type: knowledge
-tags: [whisper, cuda, logging, gotchas]
+tags: [whisper, cuda, logging, packaging, gotchas]
 created: 2026-04-28
 last_updated: 2026-07-31
-summary: Non-obvious behaviours of Whisper.net 1.9.0 — CUDA diagnostics, inverted log levels, and unfinalized native model contexts
+summary: Non-obvious behaviours of Whisper.net 1.9.0 — CUDA diagnostics, inverted log levels, unfinalized native model contexts, and native libraries shipped as plain content that RID filtering cannot touch
 ---
 
 # Whisper.net 1.9.0 Quirks
 
-Two non-derivable facts learned while diagnosing why our CUDA runtime fell back to CPU. Both are stable across patch releases of 1.9.x and likely to remain relevant until Whisper.net 2.x.
+Non-derivable facts learned while diagnosing why our CUDA runtime fell back to CPU, and later while shrinking the release artifact. Both are stable across patch releases of 1.9.x and likely to remain relevant until Whisper.net 2.x.
 
 ## 1. NuGet build of `CudaHelper` differs from upstream `master`
 
@@ -61,3 +61,34 @@ Consequences we hit in [[decisions/_index|ADR-048]]:
 - Any code path that creates a factory must dispose it on **every** failure branch. Guarding disposal on an `IsReady`-style flag that is only set at the end of a successful init is exactly the bug.
 
 **Verification**: reflect over `Whisper.net.WhisperFactory` — `GetMethod("Finalize", NonPublic|Instance).DeclaringType` is `System.Object`, i.e. no custom finalizer.
+
+## 4. Native libraries are plain content, not RID-scoped assets
+
+`Whisper.net.Runtime` and `Whisper.net.Runtime.Vulkan` do **not** use the
+`runtimes/<rid>/native/` convention. Their `build/*.targets` declare `<None>` items with
+`CopyToOutputDirectory` and a hard-coded `TargetPath`:
+
+```xml
+<None Include="$(MSBuildThisFileDirectory)linux-x64\libggml-vulkan-whisper.so">
+  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  <TargetPath>runtimes/vulkan/linux-x64/libggml-vulkan-whisper.so</TargetPath>
+</None>
+```
+
+Two consequences that are impossible to guess from the `.csproj`:
+
+- **`dotnet publish -r <rid>` does not filter them.** RID filtering only applies to assets
+  the SDK recognises as RID-scoped; these are ordinary content. A `win-x64` publish carried
+  Linux, macOS, win-x86 and win-arm64 natives — ~60 MB, 45 of it `libggml-vulkan-whisper.so`
+  ([[decisions/_index|ADR-051]] filters them in `Directory.Build.targets`).
+- **What gating exists keys on TargetFramework, not RuntimeIdentifier.** The Windows and
+  macOS blocks share `Condition="$(TargetFramework.Contains('-windows')) or
+  $(TargetFramework.Contains('-')) == false"`, so a plain `net10.0` TFM (no platform suffix)
+  fires **both**. The Linux blocks have no condition at all. Only iOS/Android/tvOS/Catalyst
+  are gated properly.
+
+The Vulkan package uses a second layout level — `runtimes/vulkan/<rid>/` alongside the base
+package's `runtimes/<rid>/` — because Whisper.net resolves its own runtime folder at load
+time (that is what `RuntimeOptions.RuntimeLibraryOrder` drives). Both folders are
+independently functional: hiding either one still leaves a working Whisper, because the
+loader falls through to the other.

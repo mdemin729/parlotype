@@ -38,4 +38,42 @@
     </ItemGroup>
   </Target>
 
+  <!--
+    Drop the Whisper.net native libraries built for platforms we are not publishing for.
+
+    Whisper.net.Runtime and Whisper.net.Runtime.Vulkan do not use the runtimes/<rid>/native
+    convention, so the SDK's RID filtering never sees them: their .targets declare plain
+    <None> content items with a hard-coded TargetPath (runtimes/win-x64/whisper.dll,
+    runtimes/vulkan/linux-x64/libggml-vulkan-whisper.so, …). What gating they do have is on
+    TargetFramework, not RuntimeIdentifier — and `net10.0` has no platform suffix, so the
+    Windows *and* macOS blocks both fire while the Linux ones are unconditional. A win-x64
+    publish therefore carries every desktop platform: ~60 MB, 45 of it the Linux twin of
+    ggml-vulkan-whisper.dll.
+
+    In both layouts the RID is the immediate parent directory of the file, which is what the
+    match below keys on — so runtimes/vulkan/win-x64/ survives alongside runtimes/win-x64/.
+    Restricting it to a known RID list (rather than "anything that isn't our RID") keeps the
+    filter from touching runtimes/ paths owned by any other package.
+
+    Publish only: `bin/` output is left exactly as it was, so dev builds and tests are
+    unaffected. See ADR-051.
+  -->
+  <PropertyGroup>
+    <!-- Every RID directory the two Whisper.net runtime packages can emit, semicolon-delimited. -->
+    <WhisperRuntimeRidDirectories>;linux-arm;linux-arm64;linux-x64;macos-arm64;macos-x64;win-arm64;win-x64;win-x86;</WhisperRuntimeRidDirectories>
+  </PropertyGroup>
+
+  <Target Name="RemoveForeignRuntimeAssetsFromPublish"
+          AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(RuntimeIdentifier)' != ''">
+    <PropertyGroup>
+      <_ForeignWhisperRuntimeRids>$(WhisperRuntimeRidDirectories.Replace(';$(RuntimeIdentifier);', ';'))</_ForeignWhisperRuntimeRids>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ForeignRuntimeAssetToPublish Include="@(ResolvedFileToPublish)"
+          Condition="$(_ForeignWhisperRuntimeRids.Contains(';$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('%(RelativePath)'))));'))" />
+      <ResolvedFileToPublish Remove="@(_ForeignRuntimeAssetToPublish)" />
+    </ItemGroup>
+  </Target>
+
 </Project>

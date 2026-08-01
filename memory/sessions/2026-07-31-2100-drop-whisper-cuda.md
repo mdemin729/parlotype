@@ -2,9 +2,9 @@
 title: "Session: 2026-07-31 — Drop the Whisper CUDA runtime and the ONNX GPU providers"
 type: session
 status: active
-tags: [cuda, vulkan, whisper, packaging, release, onnxruntime, adr-049, adr-050]
+tags: [cuda, vulkan, whisper, packaging, release, onnxruntime, adr-049, adr-050, adr-051]
 created: 2026-07-31
-summary: Removed CUDA entirely — package, EnableCuda flag, RuntimePreference.Cuda, the Settings guidance panels and the Full/Lite release split (ADR-049). Then cut the published artifact 731 MB → 338 MB by filtering the never-loaded ONNX Runtime GPU providers (ADR-050).
+summary: Removed CUDA entirely — package, EnableCuda flag, RuntimePreference.Cuda, the Settings guidance panels and the Full/Lite release split (ADR-049). Then cut the published artifact 731 MB → 338 MB by filtering the never-loaded ONNX Runtime GPU providers (ADR-050) and the foreign-RID Whisper natives (ADR-051) — 731 MB → 278 MB overall.
 ---
 
 # Session: 2026-07-31
@@ -31,6 +31,9 @@ onto ADR-048, which had just reworked the same `WhisperSpeechRecognizer` code).
 - **Packaging (ADR-050)**: new root `Directory.Build.targets` filters the ONNX Runtime
   CUDA/TensorRT provider natives out of `ReferenceCopyLocalPaths` and
   `ResolvedFileToPublish`. Published `win-x64` output **731 MB → 338 MB**.
+- **Packaging (ADR-051)**: same file gained `RemoveForeignRuntimeAssetsFromPublish` —
+  a `-r win-x64` publish was still shipping Whisper natives for Linux/macOS/win-x86/
+  win-arm64. **338 MB → 278 MB**.
 
 ## Decisions Made
 
@@ -63,6 +66,13 @@ onto ADR-048, which had just reworked the same `WhisperSpeechRecognizer` code).
 - The benchmark's `whisperRuntime` field in `results/*.json` is a plain string, so
   historical runs and the `import` command survive an enum member removal untouched;
   `BenchmarkConfig.RuntimePreference` and `SweepExpander`'s `Enum.Parse` do not.
+- **Whisper.net natives are plain `<None>` content, not RID-scoped assets**, so
+  `publish -r win-x64` never filtered them; their own gating keys on TargetFramework and a
+  bare `net10.0` fires the Windows *and* macOS blocks. Recorded in [[whisper-net-quirks]].
+- **`RuntimeOptions.LoadedLibrary` is null after a successful model load** in the benchmark
+  ("Runtime: unknown"), identical before and after these changes — so pre-existing, but it
+  means `IsSatisfiedBy` passes vacuously and ADR-048's latch guard may never fire outside
+  the desktop app. Flagged as a separate task, not chased here.
 
 ## Open Blockers
 
@@ -71,20 +81,21 @@ GPU host (the change cannot alter the Vulkan path, but the app was not launched)
 
 ## Documentation Status
 
-- ADR: **done** — `docs/decisions/049-drop-whisper-cuda-runtime.md` and
-  `docs/decisions/050-drop-onnx-runtime-gpu-providers.md`; supersede/amend banners added
-  to ADR-012 (superseded), 014, 022, 031.
+- ADR: **done** — `docs/decisions/049-drop-whisper-cuda-runtime.md`,
+  `050-drop-onnx-runtime-gpu-providers.md` and `051-publish-only-target-rid-runtimes.md`;
+  supersede/amend banners added to ADR-012 (superseded), 014, 022, 031.
 - Vault (services/architecture): **done** — `decisions/_index`, `architecture/subsystems`,
   `architecture/dependency-graph`, `conventions/dotnet-standards`,
   `conventions/testing-strategy`, `services/{core,platform,desktop,tests}`, `memory/CLAUDE.md`.
 - Knowledge: **done** — [[whisper-cuda-runtime-packaging]] marked historical with the
   post-removal measurement; new [[onnxruntime-gpu-providers-dead-weight]];
-  [[sherpa-onnx-quirks]] gained the "sherpa wins the onnxruntime.dll race" note.
+  [[sherpa-onnx-quirks]] gained the "sherpa wins the onnxruntime.dll race" note;
+  [[whisper-net-quirks]] gained the native-packaging section (section 4).
 
 ## Next Action
 
 **Trim the ~100 MB of native PDBs from release publishes.** `libSkiaSharp.pdb` (80 MB) and
-`libHarfBuzzSharp.pdb` (20 MB) are now the two largest files in the 338 MB output — they
+`libHarfBuzzSharp.pdb` (20 MB) are now the two largest files in the 278 MB output — they
 come from SkiaSharp/HarfBuzzSharp native packages and are debug symbols no end user needs.
 The same `Directory.Build.targets` filter pattern ADR-050 introduced applies, but it should
 be scoped to Release/publish only so local debugging keeps its symbols. Verify by
