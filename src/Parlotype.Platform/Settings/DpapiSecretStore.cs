@@ -24,10 +24,6 @@ namespace Parlotype.Platform.Settings;
 /// </remarks>
 public sealed class DpapiSecretStore : ISecretStore
 {
-    private static readonly string DefaultPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "parlotype", "secrets.json");
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true
@@ -38,7 +34,8 @@ public sealed class DpapiSecretStore : ISecretStore
     private readonly ILogger<DpapiSecretStore> _logger;
     private bool _warnedNonWindows;
 
-    public DpapiSecretStore(ILogger<DpapiSecretStore> logger) : this(DefaultPath, logger)
+    public DpapiSecretStore(IAppPaths paths, ILogger<DpapiSecretStore> logger)
+        : this(paths.SecretsFilePath, logger)
     {
     }
 

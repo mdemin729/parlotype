@@ -11,11 +11,8 @@ namespace Parlotype.Platform.Settings;
 /// </summary>
 public sealed class JsonWindowStateService : JsonFileStore, IWindowStateService
 {
-    private static readonly string WindowStatePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "parlotype", "window-state.json");
-
-    public JsonWindowStateService(ILogger<JsonWindowStateService> logger) : base(WindowStatePath, logger)
+    public JsonWindowStateService(IAppPaths paths, ILogger<JsonWindowStateService> logger)
+        : base(paths.WindowStateFilePath, logger)
     {
     }
 

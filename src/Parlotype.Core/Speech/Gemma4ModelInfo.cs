@@ -134,8 +134,5 @@ public sealed record Gemma4ModelInfo(
         All.FirstOrDefault(m => m.ModelId == modelId);
 
     /// <summary>Returns the expected local directory for model files.</summary>
-    public static string GetModelCacheDirectory() =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "models");
+    public static string GetModelCacheDirectory() => Settings.AppPaths.Default.ModelsDirectory;
 }

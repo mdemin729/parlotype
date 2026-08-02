@@ -38,5 +38,5 @@ Parlotype downloads Gemma 4 GGUFs with its own `Gemma4ModelDownloadService`
 `HF_TOKEN`) or long-tail models we don't want to curate. If we ever add it,
 the cache layout requires resolving the `main` ref to a commit OID via the HF
 API before files land in the standard hub layout — our current downloader
-sidesteps this by writing to `%LOCALAPPDATA%/parlotype/models` and passing
+sidesteps this by writing to `%LOCALAPPDATA%/parlotype-data/models` and passing
 `-m`/`--mmproj` explicitly.

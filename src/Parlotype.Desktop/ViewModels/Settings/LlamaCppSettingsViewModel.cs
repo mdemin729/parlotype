@@ -17,10 +17,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private const int DefaultPort = 8321;
     private const string DefaultHost = "127.0.0.1";
 
-    private static string DefaultServerFolder =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "llama-server");
+    private static string DefaultServerFolder => AppPaths.Default.LlamaServerDirectory;
 
     private readonly ISettingsService _settings;
     private readonly ISpeechRecognizer? _recognizer;

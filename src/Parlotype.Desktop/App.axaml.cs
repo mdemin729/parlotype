@@ -9,6 +9,7 @@ using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Core.LlamaServer;
 using Parlotype.Core.TextInjection;
+using Parlotype.Core.Updates;
 using Parlotype.Desktop.Services;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.ViewModels.Settings;
@@ -21,9 +22,7 @@ namespace Parlotype.Desktop;
 
 public class App : Application
 {
-    private static readonly string LogDirectory = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "parlotype", "logs");
+    private static readonly string LogDirectory = AppPaths.Default.LogsDirectory;
 
     private IServiceProvider? _services;
     private HotkeyCoordinator? _hotkeyCoordinator;
@@ -52,6 +51,20 @@ public class App : Application
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             desktop.Exit += async (_, _) =>
             {
+                // First, and synchronously: a downloaded update is only staged, and
+                // Velopack installs nothing without an explicit apply (ADR-053).
+                // This hands it to Update.exe, which waits for us to exit. Runs
+                // before the awaits below because a shutdown handler is not a
+                // reliable place for a continuation to resume.
+                _services.GetService<IUpdateService>()?.ApplyOnExit();
+
+                // Flush the uninstall-consent write before the process goes away —
+                // it gates a destructive action taken later by a process that
+                // cannot ask.
+                var dataSettings = _services.GetService<DataSettingsViewModel>();
+                if (dataSettings is not null)
+                    await dataSettings.PendingWrite;
+
                 _hotkeyCoordinator?.Dispose();
 
                 // Stop the llama-server sidecar (if running) before exiting
@@ -67,12 +80,30 @@ public class App : Application
         _ = Task.Run(() => LogNvidiaEnvironmentAsync(_services));
         _ = Task.Run(() => LogVulkanEnvironmentAsync(_services));
 
+        // Fire-and-forget: the updater schedules its own delayed first check and
+        // must never hold up the first window paint (ADR-053).
+        _ = Task.Run(() => StartUpdateCheckerAsync(_services));
+
         // Warm the speech model in the background so the user's first record press
         // is instant instead of blocking on a cold model load. Best-effort — the
         // on-button loading spinner still covers any cold start.
         _ = Task.Run(() => PrewarmSpeechModelAsync(_services));
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task StartUpdateCheckerAsync(IServiceProvider provider)
+    {
+        var logger = provider.GetRequiredService<ILogger<App>>();
+        try
+        {
+            await provider.GetRequiredService<IUpdateService>().StartAsync();
+        }
+        catch (Exception ex)
+        {
+            // A broken updater must never stop the app from transcribing.
+            logger.LogWarning(ex, "Could not start the update checker");
+        }
     }
 
     private static async Task PrewarmSpeechModelAsync(IServiceProvider provider)
@@ -250,12 +281,15 @@ public class App : Application
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();
+        services.AddSingleton<UpdateSettingsViewModel>();
+        services.AddSingleton<DataSettingsViewModel>();
         services.AddSingleton<SettingsWindowViewModel>();
         services.AddSingleton<TranscribeViewModel>();
         services.AddSingleton<AppViewModel>();
 
         services.AddSingleton<IWindowManager, WindowManager>();
         services.AddSingleton<IUserDialogService, UserDialogService>();
+        services.AddSingleton<IShellService, ShellService>();
         services.AddSingleton<HotkeyCoordinator>();
 
         return services.BuildServiceProvider();

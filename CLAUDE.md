@@ -97,8 +97,10 @@ WASAPI Capture → 16kHz Mono Float → Silero VAD → Speech Segments → Whisp
 
 - **Text Injection:** `ClipboardTextInjectionService` (default, saves/restores clipboard around Ctrl+V) or `SharpHookTextInjectionService` (direct key simulation). `Win32TargetWindowTracker` tracks the last non-Parlotype foreground window.
 - **Global Hotkeys:** `IGlobalHotkeyService` (Core) → `SharpHookHotkeyService` (Platform, `TaskPoolGlobalHook` for non-blocking keyboard event dispatch). `HotkeyBinding` record (modifiers + key name string) in Core, mapped to SharpHook `KeyCode` via `KeyCodeMapper` in Platform. Supports Push-to-Talk (key-down → start, key-up → stop) and Toggle modes. Event suppression via `SuppressEvent` (Windows/macOS only). Config persisted via `JsonSettingsService` (`HotkeyModifiers`, `HotkeyKey`, `ActivationMode` keys). `HotkeyConflictDetector` warns on reserved OS shortcuts. `HotkeyRecorderView` captures key combos in the settings flyout.
-- **Settings:** `JsonSettingsService` persists to `%LOCALAPPDATA%/parlotype/settings.json`. Thread-safe via `SemaphoreSlim`.
-- **Logging:** ZLogger to console + rolling file in `%LOCALAPPDATA%/parlotype/logs/`.
+- **App paths:** `IAppPaths` (Core) is the single source of truth for every path the app writes to; `AppPaths.Default` is the process-wide instance. On Windows the data root is `%LOCALAPPDATA%/parlotype-data` — deliberately **not** `parlotype`, which is the Velopack pack folder and is deleted on uninstall ([ADR-053](docs/decisions/053-velopack-packaging-and-auto-update.md)). Never compose a write path by hand.
+- **Settings:** `JsonSettingsService` persists to `IAppPaths.SettingsFilePath` (`%LOCALAPPDATA%/parlotype-data/settings.json`). Thread-safe via `SemaphoreSlim`.
+- **Logging:** ZLogger to console + rolling file in `IAppPaths.LogsDirectory` (`%LOCALAPPDATA%/parlotype-data/logs/`).
+- **Updates:** `IUpdateService` (Core) → `VelopackUpdateService` (Platform). The only outbound request in local mode; opt-out at `SettingsKeys.UpdatesCheckAutomatically` (default on). No-ops for non-installed builds (ADR-053).
 - **Model Management:** `IModelDownloadService` (Core) → `HttpModelDownloadService` (Platform, HTTP with progress) → `ModelDownloadDialogService` (Desktop, modal confirmation dialog + progress bar). Tests use a `HeadlessModelDownloadService` that downloads without UI.
 
 ## Coding Conventions

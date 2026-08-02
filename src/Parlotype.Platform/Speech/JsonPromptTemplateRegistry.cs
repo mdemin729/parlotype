@@ -68,11 +68,8 @@ public sealed class JsonPromptTemplateRegistry : IPromptTemplateRegistry
         _logger = logger;
     }
 
-    /// <summary><c>%LOCALAPPDATA%\parlotype</c>.</summary>
-    public static string DefaultDirectory() =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype");
+    /// <summary><c>%LOCALAPPDATA%\parlotype-data</c> on Windows; see <see cref="IAppPaths"/>.</summary>
+    public static string DefaultDirectory() => AppPaths.Default.SettingsDirectory;
 
     public async Task<IReadOnlyList<PromptTemplate>> ListAsync(CancellationToken cancellationToken = default)
     {

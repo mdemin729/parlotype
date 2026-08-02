@@ -1,3 +1,4 @@
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Xunit;
 
@@ -76,9 +77,11 @@ public class ParakeetModelInfoTests
         var dir = ParakeetModelInfo.TdtV3Int8.GetModelDirectory();
 
         // Generic upstream file names (encoder.int8.onnx …) collide across
-        // models, so each model must get its own subdirectory.
-        Assert.EndsWith(
-            Path.Combine("parlotype", "models", ParakeetModelInfo.TdtV3Int8.ModelId),
+        // models, so each model must get its own subdirectory under the shared
+        // cache. The cache root itself comes from IAppPaths (ADR-053) rather
+        // than being spelled out again here.
+        Assert.Equal(
+            Path.Combine(AppPaths.Default.ModelsDirectory, ParakeetModelInfo.TdtV3Int8.ModelId),
             dir);
     }
 

@@ -31,10 +31,12 @@ public class SettingsWindowViewModelTests
         var llamaCpp = new LlamaCppSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
         var theme = new ThemeSettingsViewModel(settings);
+        var updates = new UpdateSettingsViewModel(settings, new MockUpdateService());
+        var data = new DataSettingsViewModel(settings);
 
         return new SettingsWindowViewModel(
             engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, parakeetModel,
-            cloudProviders, prompts, llamaCpp, hotkey, theme);
+            cloudProviders, prompts, llamaCpp, hotkey, theme, updates, data);
     }
 
     [Fact]
@@ -57,7 +59,10 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
-            n => AssertSection(n, "Theme"));
+            n => AssertSection(n, "Theme"),
+            n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Updates"),
+            n => AssertSection(n, "Data"));
     }
 
     [Fact]
@@ -84,7 +89,10 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
-            n => AssertSection(n, "Theme"));
+            n => AssertSection(n, "Theme"),
+            n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Updates"),
+            n => AssertSection(n, "Data"));
     }
 
     [Fact]
@@ -105,7 +113,10 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
-            n => AssertSection(n, "Theme"));
+            n => AssertSection(n, "Theme"),
+            n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Updates"),
+            n => AssertSection(n, "Data"));
     }
 
     [Fact]
@@ -127,7 +138,10 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
-            n => AssertSection(n, "Theme"));
+            n => AssertSection(n, "Theme"),
+            n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Updates"),
+            n => AssertSection(n, "Data"));
     }
 
     [Fact]

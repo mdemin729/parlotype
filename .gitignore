@@ -65,3 +65,25 @@ reports/
 
 # BenchmarkDotNet output (src/Parlotype.MicroBenchmarks)
 BenchmarkDotNet.Artifacts/
+
+# Velopack packaging (ADR-053)
+publish/
+publish-*/
+Releases/
+Releases-*/
+.vpk/
+
+# Signing material — never commit these. Belt and braces: signing is not wired
+# up yet, so these rules exist to make an accidental `git add` fail loudly
+# rather than leak a certificate.
+*.pfx
+*.p12
+*.snk
+*.cer
+*.crt
+*.key
+*.mobileprovision
+*.provisionprofile
+# Azure Trusted Signing config passed to `vpk pack --azureTrustedSignFile`.
+# Named specifically rather than ignoring every metadata.json in the tree.
+azure-trusted-signing.json
