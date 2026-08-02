@@ -10,7 +10,7 @@ on:
       version:
         description: 'Version to pack (SemVer 2, no leading v)'
         required: false
-        default: '0.0.0-dryrun'
+        default: '0.0.1-dryrun'
   # Packaging breaks quietly — a lost --self-contained flag or a Program.Main
   # that no longer calls VelopackApp.Run() only shows up at pack time. Exercise
   # the dry-run path on PRs that touch anything packaging-related.
@@ -72,7 +72,7 @@ jobs:
             version="${GITHUB_REF_NAME#v}"
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           else
-            version="${{ github.event.inputs.version || '0.0.0-dryrun' }}"
+            version="${{ github.event.inputs.version || '0.0.1-dryrun' }}"
             echo "DRY_RUN=true" >> "$GITHUB_ENV"
           fi
 
@@ -111,25 +111,28 @@ jobs:
         continue-on-error: true
         run: >
           vpk download github
-          --repoUrl ${{ env.REPO_URL }}
-          --channel ${{ matrix.channel }}
+          --repoUrl "${{ env.REPO_URL }}"
+          --channel "${{ matrix.channel }}"
           --outputDir Releases
-          --token ${{ secrets.GITHUB_TOKEN }}
+          --token "${{ secrets.GITHUB_TOKEN }}"
 
       # Unsigned by design for now: code signing is planned but out of scope, and
       # a build without credentials must still succeed so developers (and PRs)
       # can test packaging. When certificates arrive, add --signParams /
       # --azureTrustedSignFile here; nothing else in this workflow changes.
+      # Every value is quoted: PACK_AUTHORS ("Maksim Demin") has a space, and an
+      # unquoted interpolation here splits on it — vpk then sees a stray
+      # positional argument and rejects the whole command.
       - name: Pack
         run: >
           vpk pack
-          --packId ${{ env.PACK_ID }}
-          --packTitle ${{ env.PACK_TITLE }}
-          --packAuthors ${{ env.PACK_AUTHORS }}
-          --packVersion ${{ env.VERSION }}
+          --packId "${{ env.PACK_ID }}"
+          --packTitle "${{ env.PACK_TITLE }}"
+          --packAuthors "${{ env.PACK_AUTHORS }}"
+          --packVersion "${{ env.VERSION }}"
           --packDir publish
-          --mainExe ${{ matrix.main_exe }}
-          --channel ${{ matrix.channel }}
+          --mainExe "${{ matrix.main_exe }}"
+          --channel "${{ matrix.channel }}"
           --outputDir Releases
           --icon src/Parlotype.Desktop/Assets/parlotype.ico
 
@@ -160,11 +163,11 @@ jobs:
         if: env.DRY_RUN == 'false'
         run: >
           vpk upload github
-          --repoUrl ${{ env.REPO_URL }}
-          --channel ${{ matrix.channel }}
+          --repoUrl "${{ env.REPO_URL }}"
+          --channel "${{ matrix.channel }}"
           --outputDir Releases
-          --token ${{ secrets.GITHUB_TOKEN }}
-          --tag ${{ github.ref_name }}
+          --token "${{ secrets.GITHUB_TOKEN }}"
+          --tag "${{ github.ref_name }}"
           --releaseName "Parlotype ${{ env.VERSION }}"
           --merge true
           --publish true
