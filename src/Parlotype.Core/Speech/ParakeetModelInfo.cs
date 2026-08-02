@@ -97,10 +97,8 @@ public sealed record ParakeetModelInfo(
 
     /// <summary>
     /// Returns this model's local cache directory
-    /// (<c>%LOCALAPPDATA%\parlotype\models\&lt;ModelId&gt;</c>).
+    /// (<c>%LOCALAPPDATA%\parlotype-data\models\&lt;ModelId&gt;</c> on Windows).
     /// </summary>
     public string GetModelDirectory() =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "models", ModelId);
+        Path.Combine(Settings.AppPaths.Default.ModelsDirectory, ModelId);
 }

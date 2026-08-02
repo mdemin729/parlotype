@@ -36,6 +36,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public LlamaCppSettingsViewModel LlamaCpp { get; }
     public HotkeySettingsViewModel Hotkey { get; }
     public ThemeSettingsViewModel Theme { get; }
+    public UpdateSettingsViewModel Updates { get; }
+    public DataSettingsViewModel Data { get; }
 
     public SettingsWindowViewModel(
         SpeechEngineSettingsViewModel speechEngine,
@@ -51,7 +53,9 @@ public partial class SettingsWindowViewModel : ViewModelBase
         PromptSettingsViewModel prompts,
         LlamaCppSettingsViewModel llamaCpp,
         HotkeySettingsViewModel hotkey,
-        ThemeSettingsViewModel theme)
+        ThemeSettingsViewModel theme,
+        UpdateSettingsViewModel updates,
+        DataSettingsViewModel data)
     {
         SpeechEngine = speechEngine;
         Microphone = microphone;
@@ -67,6 +71,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
         LlamaCpp = llamaCpp;
         Hotkey = hotkey;
         Theme = theme;
+        Updates = updates;
+        Data = data;
 
         // Fixed authoring order — engine-filtered rows are dropped per active
         // engine, but the order of those that survive is preserved.
@@ -86,6 +92,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
             llamaCpp,
             hotkey,
             theme,
+            updates,
+            data,
         ];
 
         speechEngine.PropertyChanged += OnSpeechEnginePropertyChanged;

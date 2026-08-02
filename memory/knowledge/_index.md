@@ -55,6 +55,8 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[avalonia-axaml-text-gotchas]] | A `Text=`/`Run Text=` value starting with `{` is parsed as a markup extension — escape literal braces with `{}`; adjacent `<Run>`s on separate source lines get an implicit space, so punctuation-leading Runs render detached | 2026-08-01 |
 | [[nuget-assettype-native-metadata]] | `ResolvedFileToPublish` items carry `%(AssetType) == 'native'` when resolved from a package's `runtimes/<rid>/native/` folder; Parlotype's own managed PDBs/DLLs have no `AssetType` at all — lets a `Directory.Build.targets` filter distinguish third-party native assets without a filename list | 2026-08-01 |
 
+| [[velopack-pack-folder-is-destructive]] | Velopack owns `%LOCALAPPDATA%\{packId}` and deletes it **entirely** on uninstall *and* on a Setup.exe re-run; Windows case-insensitivity means a data folder differing only in case is the same directory. Store nothing user-owned under the pack folder | 2026-08-01 |
+
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history
 - Include the "why" — reasoning, context, constraints

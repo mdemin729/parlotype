@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.UpdateSettingsView"
+             x:DataType="vms:UpdateSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="Updates" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Parlotype can check GitHub for new releases and install them in the background."
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <!-- Automatic checks -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding CheckAutomatically, Mode=TwoWay}"
+                          IsEnabled="{Binding IsUpdateSupported}"
+                          OnContent="Check for updates automatically"
+                          OffContent="Automatic update checks off" />
+            <TextBlock Opacity="0.6" FontSize="12" TextWrapping="Wrap"
+                       Text="When on, Parlotype checks shortly after launch and every 6 hours after that." />
+        </StackPanel>
+
+        <!-- Privacy note: this is the only outbound request the app makes in local mode. -->
+        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                CornerRadius="4" Padding="12">
+            <StackPanel Spacing="6">
+                <TextBlock Text="What this sends" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Opacity="0.75" FontSize="12" TextWrapping="Wrap"
+                           Text="An anonymous request to api.github.com for the public list of Parlotype releases, and a download of the release file itself. No account, no machine identifier, no usage data. This is the only network request Parlotype makes while all your speech engines are local." />
+            </StackPanel>
+        </Border>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Status -->
+        <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Installed version:" Opacity="0.6" FontSize="12" />
+                <TextBlock Text="{Binding CurrentVersionText}" FontSize="12" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Last checked:" Opacity="0.6" FontSize="12" />
+                <TextBlock Text="{Binding LastCheckedText}" FontSize="12" />
+            </StackPanel>
+            <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" FontSize="13" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Check now"
+                    Command="{Binding CheckNowCommand}"
+                    IsEnabled="{Binding IsUpdateSupported}" />
+            <Button Content="Restart to update"
+                    Command="{Binding RestartNowCommand}"
+                    IsVisible="{Binding IsRestartRequired}"
+                    Classes="accent" />
+            <ProgressBar IsIndeterminate="True"
+                         Width="80" Height="4"
+                         VerticalAlignment="Center"
+                         IsVisible="{Binding IsBusy}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

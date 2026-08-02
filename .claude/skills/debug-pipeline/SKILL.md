@@ -17,7 +17,7 @@ description: Use when debugging audio capture, VAD, Whisper transcription, text 
 - Check `IAudioCaptureService` / `WasapiAudioCaptureService`
 - Verify microphone is selected and accessible
 - Check sample rate conversion to 16kHz mono float
-- Look for NAudio exceptions in `%LOCALAPPDATA%/parlotype/logs/`
+- Look for NAudio exceptions in `%LOCALAPPDATA%/parlotype-data/logs/`
 
 ### 2. VAD Issues
 - Check `IVoiceActivityDetector` / `SileroVadService`

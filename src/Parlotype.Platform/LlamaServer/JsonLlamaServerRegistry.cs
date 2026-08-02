@@ -46,11 +46,8 @@ public sealed class JsonLlamaServerRegistry : ILlamaServerRegistry
         _logger = logger;
     }
 
-    /// <summary><c>%LOCALAPPDATA%\parlotype\llama-servers</c>.</summary>
-    public static string DefaultRootDirectory() =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "llama-servers");
+    /// <summary><c>%LOCALAPPDATA%\parlotype-data\llama-servers</c> on Windows; see <see cref="IAppPaths"/>.</summary>
+    public static string DefaultRootDirectory() => AppPaths.Default.LlamaServerInstallsDirectory;
 
     public async Task<IReadOnlyList<LlamaServerInstall>> ListManagedAsync(
         CancellationToken cancellationToken = default)

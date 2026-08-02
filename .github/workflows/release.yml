@@ -4,14 +4,56 @@ on:
   push:
     tags:
       - 'v*'
+  # Dry run: packs and validates the installer without uploading or signing.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to pack (SemVer 2, no leading v)'
+        required: false
+        default: '0.0.0-dryrun'
+  # Packaging breaks quietly — a lost --self-contained flag or a Program.Main
+  # that no longer calls VelopackApp.Run() only shows up at pack time. Exercise
+  # the dry-run path on PRs that touch anything packaging-related.
+  pull_request:
+    paths:
+      - 'src/Parlotype.Desktop/**'
+      - 'src/Parlotype.Core/**'
+      - 'src/Parlotype.Platform/**'
+      - 'Directory.Build.*'
+      - '.github/workflows/release.yml'
 
 permissions:
   contents: write
 
+env:
+  # Permanent (ADR-053). Velopack derives the install directory
+  # %LOCALAPPDATA%\{PACK_ID} from this, so it can never change without
+  # orphaning every existing install.
+  PACK_ID: Parlotype
+  PACK_TITLE: Parlotype
+  PACK_AUTHORS: Maksim Demin
+  REPO_URL: https://github.com/mdemin729/parlotype
+  VELOPACK_VERSION: '1.2.0'
+
 jobs:
-  build:
-    runs-on: windows-latest
-    timeout-minutes: 60
+  release:
+    name: Pack ${{ matrix.rid }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            runner: windows-latest
+            channel: win
+            main_exe: Parlotype.exe
+          # Adding a platform is adding a row here — nothing below reads a RID,
+          # a runner or a channel except through `matrix`:
+          # - { rid: osx-arm64, runner: macos-14,      channel: osx,   main_exe: Parlotype }
+          # - { rid: osx-x64,   runner: macos-13,      channel: osx,   main_exe: Parlotype }
+          # - { rid: linux-x64, runner: ubuntu-latest, channel: linux, main_exe: Parlotype }
 
     steps:
       - name: Checkout
@@ -22,11 +64,26 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Derive version from tag
-        shell: pwsh
+      # Tag pushes release; everything else is a dry run that must not upload.
+      - name: Resolve version and mode
+        shell: bash
         run: |
-          $version = '${{ github.ref_name }}'.TrimStart('v')
-          echo "VERSION=$version" >> $env:GITHUB_ENV
+          if [ "${{ github.event_name }}" = "push" ]; then
+            version="${GITHUB_REF_NAME#v}"
+            echo "DRY_RUN=false" >> "$GITHUB_ENV"
+          else
+            version="${{ github.event.inputs.version || '0.0.0-dryrun' }}"
+            echo "DRY_RUN=true" >> "$GITHUB_ENV"
+          fi
+
+          # Velopack wants SemVer 2; a four-part 1.2.3.4 is not handled well.
+          if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+            echo "::error::'$version' is not a SemVer 2 version (expected MAJOR.MINOR.PATCH[-prerelease])."
+            exit 1
+          fi
+
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "Packing version $version (dry run: ${DRY_RUN:-see above})"
 
       - name: Restore
         run: dotnet restore Parlotype.slnx
@@ -34,39 +91,81 @@ jobs:
       - name: Test (gate)
         run: dotnet test --no-restore
 
-      # Single artifact since ADR-049: Vulkan is the only GPU runtime, and it
-      # ships unconditionally, so there is nothing left for a Full/Lite split.
+      - name: Install Velopack CLI
+        run: dotnet tool install -g vpk --version ${{ env.VELOPACK_VERSION }}
+
+      # --self-contained is also pinned in Parlotype.Desktop.csproj so it cannot
+      # be lost by editing this file. Do not add --framework: that is for
+      # non-self-contained apps and would add an elevation prompt to setup.
       - name: Publish
         run: >
           dotnet publish src/Parlotype.Desktop
-          -c Release -r win-x64 --self-contained true
+          -c Release -r ${{ matrix.rid }} --self-contained true
           -p:Version=${{ env.VERSION }}
           -o publish
 
-      - name: Zip
-        shell: pwsh
-        run: Compress-Archive -Path publish/* -DestinationPath "Parlotype-${{ env.VERSION }}-win-x64.zip"
+      # Delta packages can only be built against releases that are present
+      # locally. Without this every release ships as a full ~80 MB download.
+      # Expected to fail on the very first release, when no feed exists yet.
+      - name: Download existing releases (for delta generation)
+        continue-on-error: true
+        run: >
+          vpk download github
+          --repoUrl ${{ env.REPO_URL }}
+          --channel ${{ matrix.channel }}
+          --outputDir Releases
+          --token ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifact
+      # Unsigned by design for now: code signing is planned but out of scope, and
+      # a build without credentials must still succeed so developers (and PRs)
+      # can test packaging. When certificates arrive, add --signParams /
+      # --azureTrustedSignFile here; nothing else in this workflow changes.
+      - name: Pack
+        run: >
+          vpk pack
+          --packId ${{ env.PACK_ID }}
+          --packTitle ${{ env.PACK_TITLE }}
+          --packAuthors ${{ env.PACK_AUTHORS }}
+          --packVersion ${{ env.VERSION }}
+          --packDir publish
+          --mainExe ${{ matrix.main_exe }}
+          --channel ${{ matrix.channel }}
+          --outputDir Releases
+          --icon src/Parlotype.Desktop/Assets/parlotype.ico
+
+      - name: Verify pack output
+        shell: bash
+        run: |
+          ls -la Releases
+          # The feed is what installed clients poll; without it nothing can update.
+          test -f "Releases/releases.${{ matrix.channel }}.json" \
+            || { echo "::error::No release feed was produced."; exit 1; }
+          if ls Releases/*-delta.nupkg >/dev/null 2>&1; then
+            echo "Delta package built."
+          else
+            echo "::notice::No delta package — expected only for the first release on this channel."
+          fi
+
+      - name: Upload artifacts (dry run)
+        if: env.DRY_RUN == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: win-x64
-          path: Parlotype-*.zip
+          name: velopack-${{ matrix.rid }}
+          path: Releases
           retention-days: 7
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: artifacts/*.zip
-          generate_release_notes: true
-          prerelease: ${{ contains(github.ref_name, '-') }}
+      # --merge lets each matrix row attach to the same GitHub release, so
+      # adding macOS/Linux rows does not need any change here.
+      - name: Upload to GitHub Releases
+        if: env.DRY_RUN == 'false'
+        run: >
+          vpk upload github
+          --repoUrl ${{ env.REPO_URL }}
+          --channel ${{ matrix.channel }}
+          --outputDir Releases
+          --token ${{ secrets.GITHUB_TOKEN }}
+          --tag ${{ github.ref_name }}
+          --releaseName "Parlotype ${{ env.VERSION }}"
+          --merge true
+          --publish true
+          --pre ${{ contains(github.ref_name, '-') }}

@@ -28,18 +28,47 @@ Parlotype currently runs on **Windows** only. macOS and Linux support are planne
 ## Download / Releases
 
 Pre-built Windows binaries are published on the [Releases page](../../releases). Each
-release ships one self-contained `win-x64` build — no .NET runtime install required, just
-unzip and run `Parlotype.Desktop.exe`. Releases up to and including the Full/Lite split
-still carry `-full` / `-lite` suffixes; from [ADR-049](docs/decisions/049-drop-whisper-cuda-runtime.md)
-onward there is a single `Parlotype-<version>-win-x64.zip`.
+release ships one self-contained `win-x64` build — no .NET runtime install required.
 
-Being self-contained it is sizeable (~280 MB unzipped; the downloaded zip is smaller — exact
-sizes are listed on each release). It falls back to CPU automatically if no Vulkan-capable
-GPU is found, and the default Parakeet engine needs no GPU at all. The build is currently
-unsigned, so Windows SmartScreen may warn on first launch.
+**Recommended: `Parlotype-win-Setup.exe`.** It installs per-user into
+`%LOCALAPPDATA%\Parlotype` with **no administrator prompt**, adds Start Menu and desktop
+shortcuts, and can update itself in place ([ADR-053](docs/decisions/053-velopack-packaging-and-auto-update.md)).
+
+`Parlotype-win-Portable.zip` is also published for anyone who wants to unzip and run
+without installing. The portable build **cannot update itself** — you re-download it by
+hand each time.
+
+Being self-contained it is sizeable (~280 MB installed). Updates after the first install
+are incremental, so a typical update downloads a fraction of that. Parlotype falls back to
+CPU automatically if no Vulkan-capable GPU is found, and the default Parakeet engine needs
+no GPU at all. Builds are currently **unsigned**, so Windows SmartScreen may warn on first
+launch — choose *More info → Run anyway*.
 
 Speech models are **not** bundled — they download on demand into
-`%LOCALAPPDATA%\parlotype\models\` the first time you need them.
+`%LOCALAPPDATA%\parlotype-data\models\` the first time you need them, and survive both
+updates and uninstalls.
+
+> **Upgrading from a version before the installer?** Older builds stored data in
+> `%LOCALAPPDATA%\parlotype`, which is now where the installer itself lives. Rename that
+> folder to `%LOCALAPPDATA%\parlotype-data` before installing to keep your settings and
+> downloaded models; otherwise Parlotype starts fresh and re-downloads models on demand.
+> See [docs/RELEASING.md](docs/RELEASING.md#migrating-from-a-pre-adr-053-install).
+
+### Updates
+
+Parlotype checks for new releases automatically, shortly after launch and every six hours
+after that. New versions download in the background and install on next restart.
+
+The check is an **anonymous HTTPS GET** of
+`https://api.github.com/repos/mdemin729/parlotype/releases` — the public list of releases
+for this repository — followed by a download of the release file itself if a newer version
+exists. No account, no machine identifier, no install id, no usage data, and no custom
+headers are sent. Nothing about you or your machine is transmitted.
+
+**This is the only network request Parlotype makes while your speech engines are local.**
+Turn it off at **Settings → Application → Updates**, which also shows when the feed was
+last reached and offers a manual *Check now*. With the toggle off, the updater makes no
+outbound requests at all.
 
 ## Speech Engines
 
@@ -153,10 +182,14 @@ Findings from the [2026-07 security audit](docs/security/2026-07-11-security-aud
 - **Cloud API keys live outside `settings.json`** — in `secrets.json`, encrypted with DPAPI (`CurrentUser` scope) on Windows, so settings backups, sync, or diagnostics never carry credentials. Undecryptable values are treated as absent and re-prompted. On non-Windows platforms they are base64-encoded with a logged warning (OS keychain support is a known gap).
 - **Cloud base URLs must be HTTPS** unless the host is loopback, enforced at recognizer initialization.
 - **`settings.json` and `secrets.json` are written atomically** (temp file + move), and the `llama-server` sidecar is spawned with an argument list rather than a quoted command line.
+- **The update check is the only outbound request** in local mode, it is anonymous, and it can be switched off. See [Updates](#updates) for the exact endpoint and what is sent.
 
 ## Where Parlotype Stores Data
 
-Everything lives under `%LOCALAPPDATA%\parlotype\`:
+User data lives under `%LOCALAPPDATA%\parlotype-data\`, deliberately **outside** the
+install directory. The installer owns `%LOCALAPPDATA%\Parlotype` and erases it on
+uninstall, so nothing of yours is kept there — your models and settings survive updates
+and uninstalls alike ([ADR-053](docs/decisions/053-velopack-packaging-and-auto-update.md)).
 
 | Path | Contents |
 |------|----------|
@@ -164,7 +197,17 @@ Everything lives under `%LOCALAPPDATA%\parlotype\`:
 | `window-state.json` | Transient window chrome state (Transcribe widget position) |
 | `secrets.json` | Cloud API keys, DPAPI-encrypted on Windows |
 | `models\` | Downloaded Whisper / Parakeet / Gemma 4 model files |
-| `logs\` | Rolling log files (`Information` and above; no transcript text) |
+| `logs\` | Rolling log files (`Information` and above; no transcript text), plus `velopack.log` for install/update events |
+
+**Uninstalling keeps this folder by default** — it can hold several GB of models that are
+expensive to re-download, and plenty of uninstalls are really reinstalls. If you'd rather
+have a clean removal, turn on *Delete everything when I uninstall Parlotype* at
+**Settings → Application → Data** before uninstalling; uninstall then removes the whole
+folder. You can also delete it by hand at any time.
+
+That page also shows the folder's exact location — with *Copy path* and *Open folder*
+buttons — how much space your downloaded models occupy, and a *Delete downloaded models…*
+button if you want the disk space back without giving up your settings and API keys.
 
 ## Prerequisites
 

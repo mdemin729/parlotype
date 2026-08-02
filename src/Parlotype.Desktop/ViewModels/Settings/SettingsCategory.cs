@@ -10,6 +10,7 @@ public enum SettingsCategory
     SpeechEngine,
     Input,
     Appearance,
+    Application,
 }
 
 public static class SettingsCategoryExtensions
@@ -20,6 +21,7 @@ public static class SettingsCategoryExtensions
         SettingsCategory.SpeechEngine => "Speech engine",
         SettingsCategory.Input => "Input",
         SettingsCategory.Appearance => "Appearance",
+        SettingsCategory.Application => "Application",
         _ => category.ToString(),
     };
 }

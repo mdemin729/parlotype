@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.DataSettingsView"
+             x:DataType="vms:DataSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="Data" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Where Parlotype keeps your models, settings and API keys."
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Location" Opacity="0.6" FontSize="12" />
+            <!-- Selectable so the path can also be picked up by hand, not only via the button. -->
+            <SelectableTextBlock Text="{Binding DataDirectory}"
+                                 FontSize="12"
+                                 TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+                <Button Content="Copy path" Command="{Binding CopyPathCommand}" />
+                <Button Content="Open folder" Command="{Binding OpenFolderCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding PathActionMessage}"
+                       IsVisible="{Binding PathActionMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                       FontSize="12" Opacity="0.8" TextWrapping="Wrap" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                <TextBlock Text="Downloaded models:" Opacity="0.6" FontSize="12" />
+                <TextBlock Text="{Binding ModelsSizeText}" FontSize="12" />
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Delete downloaded models…"
+                    Command="{Binding DeleteModelsCommand}"
+                    IsEnabled="{Binding !IsBusy}" />
+            <ProgressBar IsIndeterminate="True"
+                         Width="80" Height="4"
+                         VerticalAlignment="Center"
+                         IsVisible="{Binding IsBusy}" />
+        </StackPanel>
+
+        <TextBlock Text="{Binding StatusMessage}"
+                   IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                   TextWrapping="Wrap" FontSize="12" Opacity="0.8" />
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!--
+            Velopack's uninstall hook cannot show UI, so this toggle is where the
+            user consents in advance; the hook only executes the recorded choice.
+        -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding UninstallRemovesData, Mode=TwoWay}"
+                          OnContent="Delete everything when I uninstall Parlotype"
+                          OffContent="Keep my data when I uninstall Parlotype" />
+            <TextBlock Opacity="0.6" FontSize="12" TextWrapping="Wrap"
+                       Text="Off by default, so reinstalling Parlotype does not cost you a multi-gigabyte re-download. When on, uninstalling also removes your downloaded models, settings and saved API keys." />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

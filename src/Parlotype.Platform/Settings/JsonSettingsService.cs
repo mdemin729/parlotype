@@ -5,15 +5,12 @@ namespace Parlotype.Platform.Settings;
 
 /// <summary>
 /// Persists long-lived application settings (transcription, model, hotkey, etc.)
-/// as a JSON file in the local application data folder.
+/// as a JSON file under <see cref="IAppPaths.SettingsDirectory"/>.
 /// </summary>
 public sealed class JsonSettingsService : JsonFileStore, ISettingsService
 {
-    private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "parlotype", "settings.json");
-
-    public JsonSettingsService(ILogger<JsonSettingsService> logger) : base(SettingsPath, logger)
+    public JsonSettingsService(IAppPaths paths, ILogger<JsonSettingsService> logger)
+        : base(paths.SettingsFilePath, logger)
     {
     }
 

@@ -96,9 +96,9 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
         var recognizer = NewRecognizer();
         var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
-        var defaultFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "llama-server");
+        // Resolved through IAppPaths, not spelled out here: the data root moved
+        // once already (ADR-053) and a hardcoded copy would silently rot.
+        var defaultFolder = AppPaths.Default.LlamaServerDirectory;
         Assert.Equal(Path.Combine(defaultFolder, "llama-server.exe"), path);
     }
 
@@ -126,9 +126,9 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
         var recognizer = NewRecognizer();
         var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
-        var defaultFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "llama-server");
+        // Resolved through IAppPaths, not spelled out here: the data root moved
+        // once already (ADR-053) and a hardcoded copy would silently rot.
+        var defaultFolder = AppPaths.Default.LlamaServerDirectory;
         Assert.Equal(Path.Combine(defaultFolder, "llama-server.exe"), path);
     }
 

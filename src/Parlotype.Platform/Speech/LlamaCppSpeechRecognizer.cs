@@ -356,10 +356,7 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         return Path.Combine(GetDefaultServerFolder(), ServerExeName);
     }
 
-    private static string GetDefaultServerFolder() =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "llama-server");
+    private static string GetDefaultServerFolder() => AppPaths.Default.LlamaServerDirectory;
 
     private async Task<int> GetConfiguredPortAsync(CancellationToken cancellationToken)
     {

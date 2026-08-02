@@ -83,9 +83,9 @@ Users configure a *list* of gestures, not a single chord (ADR-047).
 ## Settings
 
 - `ISettingsService` (Core) → `JsonSettingsService` (Platform)
-- Persists to `%LOCALAPPDATA%/parlotype/settings.json`
+- Persists to `%LOCALAPPDATA%/parlotype-data/settings.json` (resolved via `IAppPaths.SettingsFilePath`, ADR-053)
 - Thread-safe via `SemaphoreSlim`
-- Secrets are separate: `ISecretStore` (Core) → `DpapiSecretStore` (Platform) → `%LOCALAPPDATA%/parlotype/secrets.json`, DPAPI-encrypted per value on Windows, base64 + one-time warning elsewhere; cloud API keys only, never in `settings.json` (ADR-043)
+- Secrets are separate: `ISecretStore` (Core) → `DpapiSecretStore` (Platform) → `%LOCALAPPDATA%/parlotype-data/secrets.json`, DPAPI-encrypted per value on Windows, base64 + one-time warning elsewhere; cloud API keys only, never in `settings.json` (ADR-043)
 
 ## Language & Translation
 
@@ -104,7 +104,7 @@ Single source of truth for "what language(s) the user wants" — see [[decisions
 ## Logging
 
 - ZLogger to console + rolling file
-- Log directory: `%LOCALAPPDATA%/parlotype/logs/`
+- Log directory: `%LOCALAPPDATA%/parlotype-data/logs/` (via `IAppPaths.LogsDirectory`)
 
 ## Model Management
 
@@ -181,3 +181,63 @@ Real-time visual feedback showing whether the user is speaking. See [[decisions/
   - EMA-smoothed RMS (attack 0.4, decay 0.05) compared against threshold 0.005
   - 1200ms hold-off keeps Active state through natural speech pauses
   - Button turns blue `#378ADD` when recording (Idle or Active) or loading
+
+## Packaging, App Paths & Updates
+
+See [[decisions/_index|ADR-053]]. Cross-cutting: touches Core contracts, Platform
+services, the Desktop entry point, and CI.
+
+### App paths — the constraint that shapes everything
+
+Velopack installs to `%LOCALAPPDATA%\{packId}` (packId is `Parlotype`, permanent)
+and deletes **that entire folder** on uninstall *and* on a `Setup.exe` re-run.
+Because Windows paths are case-insensitive, the old data root
+`%LOCALAPPDATA%\parlotype` *was* that folder — see
+[[knowledge/velopack-pack-folder-is-destructive]].
+
+- **Core**: `IAppPaths` + `AppPaths` (`.Default`) — one source of truth for every
+  write path. Windows root `%LOCALAPPDATA%/parlotype-data`; macOS
+  `~/Library/Application Support/Parlotype` (+ `~/Library/Logs/Parlotype`); Linux
+  XDG (`$XDG_DATA_HOME` / `$XDG_CONFIG_HOME` / `$XDG_STATE_HOME`).
+- Consumers: `JsonSettingsService`, `DpapiSecretStore`, `JsonWindowStateService`
+  (injected), plus `HttpModelDownloadService`, `JsonPromptTemplateRegistry`,
+  `JsonLlamaServerRegistry`, `LlamaCppSpeechRecognizer`, `ParakeetModelInfo`,
+  `Gemma4ModelInfo`, `App.LogDirectory` (via `AppPaths.Default`, where no
+  constructor exists).
+- `AppPathsTests` fails the suite if any path lands inside the pack folder.
+- **No automatic migration** — existing installs are moved by hand
+  (`docs/RELEASING.md`).
+
+### Entry point
+
+`VelopackApp.Build().Run()` is the first statement in `Program.Main`. Velopack
+re-invokes the same exe with hook arguments and expects handle-and-exit within
+15–30 s, so nothing may initialise first. `vpk pack` verifies this statically.
+`VelopackFileLogger` gives the hooks somewhere to log, since DI and ZLogger do not
+exist yet at that point.
+
+### Uninstall cleanup
+
+User data is kept on uninstall by default. The hook may not show UI, so it cannot
+ask — instead `SettingsKeys.UninstallRemovesUserData` (default false) records the
+user's choice in advance from Settings → Application → Data, and
+`OnBeforeUninstallFastCallback` executes it. The hook parses settings.json
+directly (no DI at that point); anything ambiguous reads as false, so data is only
+deleted on an unambiguous opt-in. `DataSettingsViewModel` also exposes a
+"Delete downloaded models…" action that unloads the recognizer and stops the
+`llama-server` sidecar before deleting, since Windows locks loaded model files.
+Windows-only — macOS and Linux have no uninstall hooks.
+
+### Updates
+
+- **Core**: `IUpdateService`, `UpdateStatus`, `UpdateState`.
+- **Platform**: `VelopackUpdateService` over `UpdateManager` + `GithubSource`.
+  Startup check (30 s delay) then every 6 h; background download; apply on
+  restart. `IsInstalled`/`NotInstalledException` make dev and portable builds a
+  silent no-op.
+- **Desktop**: `App` kicks off `StartAsync` fire-and-forget;
+  `UpdateSettingsViewModel` drives Settings → Application → Updates.
+- **Privacy**: the only outbound request in local mode. Anonymous GET of the
+  public GitHub releases API — no machine id, install id, or usage data. Default
+  on (`SettingsKeys.UpdatesCheckAutomatically`), disclosed in README and in the
+  page itself, one-click opt-out.

@@ -121,4 +121,35 @@ public static class SettingsKeys
     /// only the lookup key.
     /// </summary>
     public const string XaiGrokApiKey = "XaiGrokApiKey";
+
+    /// <summary>
+    /// Whether Parlotype checks the release feed for updates on its own.
+    /// Defaults to <c>true</c> when unset (ADR-053): the check is an
+    /// unauthenticated read of a public endpoint that sends no identifying
+    /// information, and users who never check will silently run builds with
+    /// known bugs. Setting it false stops all outbound traffic from the updater;
+    /// "Check now" still works and remains explicitly user-driven.
+    /// </summary>
+    public const string UpdatesCheckAutomatically = "UpdatesCheckAutomatically";
+
+    /// <summary>
+    /// Round-trip ("O") timestamp of the last time the release feed was reached
+    /// successfully. Shown in Settings so the user can see how much the updater
+    /// has actually talked to the network. Not sent anywhere.
+    /// </summary>
+    public const string UpdatesLastCheckedUtc = "UpdatesLastCheckedUtc";
+
+    /// <summary>
+    /// Whether uninstalling Parlotype also deletes <see cref="IAppPaths.DataDirectory"/>
+    /// — downloaded models, settings, and stored API keys. Defaults to <c>false</c>.
+    /// </summary>
+    /// <remarks>
+    /// Velopack's uninstall hook may not show UI, so consent for a destructive
+    /// action cannot be obtained at uninstall time. This key <em>is</em> that
+    /// consent, recorded in advance from Settings → Application → Data; the hook
+    /// only executes a decision the user already made (ADR-053). Default off
+    /// because many uninstalls are really troubleshooting reinstalls, where
+    /// discarding several GB of models is the wrong outcome.
+    /// </remarks>
+    public const string UninstallRemovesUserData = "UninstallRemovesUserData";
 }

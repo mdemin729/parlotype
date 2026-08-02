@@ -3,9 +3,22 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Parlotype.Desktop</RootNamespace>
-    <AssemblyName>Parlotype.Desktop</AssemblyName>
+    <AssemblyName>Parlotype</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\parlotype.ico</ApplicationIcon>
+
+    <!--
+      Velopack packages a self-contained app (ADR-053). On .NET 8+ a RID no longer
+      implies self-contained, so a CI script that loses the `self-contained true`
+      flag would silently produce a framework-dependent build: green in CI, broken
+      on any machine without the exact runtime. Pinning it here means the flag
+      cannot be lost by editing the workflow.
+
+      Conditioned on a RID being present because the SDK rejects self-contained
+      without one (NETSDK1031) — that keeps plain `dotnet build`/`dotnet test`,
+      which pass no RID, working as framework-dependent.
+    -->
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +33,7 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.2" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview.1.25080.5" />
+    <PackageReference Include="Velopack" Version="1.2.0" />
     <PackageReference Include="ZLogger" Version="2.5.10" />
   </ItemGroup>
 

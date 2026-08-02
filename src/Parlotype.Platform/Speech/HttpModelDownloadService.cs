@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 
 namespace Parlotype.Platform.Speech;
@@ -20,10 +21,7 @@ public sealed class HttpModelDownloadService
     }
 
     /// <summary>Returns the local cache directory for model files.</summary>
-    public static string GetModelCacheDirectory() =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "parlotype", "models");
+    public static string GetModelCacheDirectory() => AppPaths.Default.ModelsDirectory;
 
     /// <summary>Returns the expected local file path for a model.</summary>
     public string GetModelPath(WhisperModelType modelType) =>
