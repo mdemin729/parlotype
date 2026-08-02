@@ -47,7 +47,12 @@ but not for *temporal* activation (e.g. "the session is starting / ending").
 | Where it lives | What goes there |
 |----------------|-----------------|
 | `CLAUDE.md` | Invariants and protocols that must apply every session/turn (Definition of Done, Session Lifecycle summary, hard architectural rules). |
-| `.claude/skills/<x>/SKILL.md` | Topic-triggered workflows the agent should auto-load when the user's request matches (debug-pipeline, implement-feature, obsidian-markdown). |
+| `.claude/skills/<x>/SKILL.md` | Topic-triggered workflows the agent should auto-load when the user's request matches (debug-pipeline, implement-feature, obsidian-markdown, release-notes). |
+
+`release-notes` is the clearest case of the topic-triggered pattern working: "we
+are cutting a release" is something the agent *does* reason about explicitly, and
+the skill carries editorial rules (what counts as user-facing, which words are
+banned in a bullet) that would be dead weight in `CLAUDE.md` on every other turn.
 
 ## See also
 - `.claude/skills/session-management/SKILL.md`

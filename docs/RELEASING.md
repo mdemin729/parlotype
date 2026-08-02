@@ -19,7 +19,10 @@ Parlotype is packaged and updated with [Velopack](https://velopack.io) 1.2.0
 2. Pick a **SemVer 2** version. `MAJOR.MINOR.PATCH` with an optional
    `-prerelease` suffix. Velopack does not handle four-part versions
    (`1.2.3.4`) well, and the workflow rejects them.
-3. Tag and push:
+3. **Write the release notes and merge them before tagging** — see
+   [Writing release notes](#writing-release-notes) below. The tag build fails in
+   its first minute if `CHANGELOG.md` has no section for the version.
+4. Tag and push:
 
 ```bash
 git tag v1.2.0 && git push origin v1.2.0
@@ -50,6 +53,48 @@ Either:
 - Open a PR touching `src/Parlotype.Desktop/**`, `src/Parlotype.Core/**`,
   `src/Parlotype.Platform/**`, or `Directory.Build.*`. The same dry-run path runs
   automatically.
+
+A dry run cannot check the version section — there is no tag yet — so it only
+verifies that `CHANGELOG.md` still has its `## [Unreleased]` heading, which is
+what the extractor keys off.
+
+---
+
+## Writing release notes
+
+[`CHANGELOG.md`](../CHANGELOG.md) is the source of truth for what a release says
+([ADR-054](decisions/054-curated-release-notes.md)). The workflow copies the
+section matching the tag into the GitHub Release body — nothing else does. Left
+empty, `vpk` publishes a release with no body, and GitHub falls back to rendering
+the tagged commit's message, which for a squash-merged PR is the entire
+engineering commit body. That is what `v0.4.0` shipped with.
+
+Draft the entry with the `/release-notes` skill
+([`.claude/skills/release-notes/SKILL.md`](../.claude/skills/release-notes/SKILL.md)).
+It reads the commits since the last tag plus every ADR they reference, sorts
+user-facing changes from internal churn, writes the `## [X.Y.Z]` section, and
+opens a PR. It stops there by design: **it never tags and never edits a
+published release.**
+
+Review the wording yourself before merging — the notes are the most-read part of
+a release, and the agent cannot know which changes you consider headline
+material. Then merge, then tag.
+
+### When the tag build fails on the notes
+
+```
+Error: CHANGELOG.md has no non-empty '## [1.2.0]' section.
+Run /release-notes and merge that PR before tagging.
+```
+
+The gate runs before restore, so this costs seconds rather than a full publish,
+and nothing was uploaded — no release exists yet. Add the section on `master`,
+delete the tag locally and on the remote, then re-tag: the tag has to point at a
+commit that already contains the notes.
+
+To check extraction before pushing a tag, run the same awk the gate runs — it is
+the `Extract release notes` step in `.github/workflows/release.yml`. It must
+print your section and stop at the next `## ` heading.
 
 ---
 
