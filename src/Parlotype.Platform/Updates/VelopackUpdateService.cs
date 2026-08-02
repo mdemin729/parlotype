@@ -49,6 +49,9 @@ public sealed class VelopackUpdateService : IUpdateService, IDisposable
     private UpdateInfo? _pendingDownload;
     private bool _disposed;
 
+    /// <summary>Set once an apply has been handed to Velopack, so it happens once.</summary>
+    private volatile bool _applying;
+
     public VelopackUpdateService(ISettingsService settings, ILogger<VelopackUpdateService> logger)
     {
         _settings = settings;
@@ -179,7 +182,9 @@ public sealed class VelopackUpdateService : IUpdateService, IDisposable
             await _manager.Value.DownloadUpdatesAsync(update, progress: null, cancellationToken);
             _pendingDownload = update;
 
-            _logger.LogInformation("Update v{Version} downloaded — applies on next restart", version);
+            // Staged, not installed: Velopack applies nothing until ApplyOnExit or
+            // ApplyAndRestartAsync runs. A plain quit-and-relaunch leaves it staged.
+            _logger.LogInformation("Update v{Version} downloaded — installs when Parlotype exits", version);
             SetStatus(new UpdateStatus(UpdateState.ReadyToApply, version, lastChecked));
         }
         catch (OperationCanceledException)
@@ -196,6 +201,39 @@ public sealed class VelopackUpdateService : IUpdateService, IDisposable
         }
     }
 
+    public bool ApplyOnExit()
+    {
+        // The explicit "Restart to update" path already exits through Velopack;
+        // scheduling a second updater on the way out would race it.
+        if (_applying || !IsInstalled())
+            return false;
+
+        var asset = _pendingDownload?.TargetFullRelease ?? TryGetStagedUpdate();
+        if (asset is null)
+            return false;
+
+        try
+        {
+            _applying = true;
+
+            // Launches Update.exe, which waits for this process to exit (up to 60s)
+            // and then swaps `current`. silent: the user asked to quit, not to watch
+            // a progress window. restart: false for the same reason.
+            _manager.Value.WaitExitThenApplyUpdates(asset, silent: true, restart: false);
+
+            _logger.LogInformation("Update v{Version} will install as Parlotype exits", asset.Version);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Shutdown must not be blocked by a failed hand-off. The package stays
+            // staged and the next exit — or the Settings button — retries it.
+            _applying = false;
+            _logger.LogWarning(ex, "Could not schedule update v{Version} to apply on exit", asset.Version);
+            return false;
+        }
+    }
+
     public async Task<bool> ApplyAndRestartAsync(CancellationToken cancellationToken = default)
     {
         if (!IsInstalled())
@@ -208,6 +246,9 @@ public sealed class VelopackUpdateService : IUpdateService, IDisposable
         _logger.LogInformation("Applying update v{Version} and restarting", asset.Version);
 
         await Task.CompletedTask;
+
+        // Claim the apply so the shutdown hook does not also launch an updater.
+        _applying = true;
 
         // Does not return: the process exits, Update.exe swaps `current`, and the
         // app relaunches.

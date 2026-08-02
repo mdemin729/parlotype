@@ -51,6 +51,20 @@ public class App : Application
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             desktop.Exit += async (_, _) =>
             {
+                // First, and synchronously: a downloaded update is only staged, and
+                // Velopack installs nothing without an explicit apply (ADR-053).
+                // This hands it to Update.exe, which waits for us to exit. Runs
+                // before the awaits below because a shutdown handler is not a
+                // reliable place for a continuation to resume.
+                _services.GetService<IUpdateService>()?.ApplyOnExit();
+
+                // Flush the uninstall-consent write before the process goes away —
+                // it gates a destructive action taken later by a process that
+                // cannot ask.
+                var dataSettings = _services.GetService<DataSettingsViewModel>();
+                if (dataSettings is not null)
+                    await dataSettings.PendingWrite;
+
                 _hotkeyCoordinator?.Dispose();
 
                 // Stop the llama-server sidecar (if running) before exiting

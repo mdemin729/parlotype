@@ -137,8 +137,11 @@ public partial class UpdateSettingsViewModel : SettingsSectionViewModelBase
             UpdateState.UpdateAvailable => status.Message
                 ?? $"Version {status.AvailableVersion} is available.",
             UpdateState.Downloading => $"Downloading version {status.AvailableVersion}…",
+            // Staged, not installed. It applies as Parlotype closes; the button
+            // just brings that forward. Saying "restart" alone would be a promise
+            // an ordinary quit-and-relaunch does not keep (ADR-053).
             UpdateState.ReadyToApply =>
-                $"Version {status.AvailableVersion} is ready. Restart to finish updating.",
+                $"Version {status.AvailableVersion} is downloaded. It installs when you quit Parlotype.",
             UpdateState.Failed => status.Message ?? "The update check failed.",
             _ => string.Empty,
         };

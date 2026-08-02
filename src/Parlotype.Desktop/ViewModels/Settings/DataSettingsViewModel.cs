@@ -85,13 +85,70 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
         await RefreshSizeAsync();
     }
 
+    /// <summary>
+    /// Completes when the consent write has reached disk. Awaited on shutdown so the
+    /// process cannot exit while the flag still disagrees with what the user chose.
+    /// </summary>
+    public Task PendingWrite { get; private set; } = Task.CompletedTask;
+
     partial void OnUninstallRemovesDataChanged(bool value)
     {
         if (_loading)
             return;
 
-        _logger.LogInformation("Delete user data on uninstall: {Enabled}", value);
-        _ = _settings.SetAsync(SettingsKeys.UninstallRemovesUserData, value.ToString());
+        PendingWrite = PersistConsentAsync(value);
+    }
+
+    /// <summary>
+    /// Writes the consent flag, confirms it landed, and reverts the toggle if it
+    /// did not.
+    /// </summary>
+    /// <remarks>
+    /// Unlike the other settings pages, this one cannot fire-and-forget. The flag is
+    /// read later by the uninstall hook — a process with no UI, no chance to ask, and
+    /// the ability to delete several GB of models. A toggle showing "keep my data"
+    /// while settings.json still says "delete everything" is silent data loss, so the
+    /// displayed state is only ever what the write actually achieved.
+    /// </remarks>
+    private async Task PersistConsentAsync(bool value)
+    {
+        IsBusy = true;
+        StatusMessage = null;
+        try
+        {
+            await _settings.SetAsync(SettingsKeys.UninstallRemovesUserData, value.ToString());
+
+            // Read back rather than trusting the write: this is the gate on a
+            // destructive action, and the cost of confirming it is one dictionary hit.
+            var stored = await _settings.GetAsync<string>(SettingsKeys.UninstallRemovesUserData);
+            if (!bool.TryParse(stored, out var persisted) || persisted != value)
+                throw new InvalidOperationException(
+                    $"settings.json still reads '{stored ?? "(absent)"}'");
+
+            _logger.LogInformation("Delete user data on uninstall: {Enabled}", value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to save the uninstall data-removal preference");
+
+            RevertTo(!value);
+            StatusMessage = value
+                ? "Could not save that preference. Uninstalling will still keep your data."
+                : "Could not save that preference — uninstalling will still delete your "
+                  + "downloaded models, settings and API keys. Please try again.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>Puts the toggle back without treating the correction as a new edit.</summary>
+    private void RevertTo(bool value)
+    {
+        _loading = true;
+        UninstallRemovesData = value;
+        _loading = false;
     }
 
     [RelayCommand]

@@ -50,6 +50,26 @@ public class VelopackUpdateServiceTests
     }
 
     [Fact]
+    public void ApplyOnExit_WhenNothingIsStaged_ReturnsFalseAndDoesNotThrow()
+    {
+        using var service = NewService();
+
+        // Runs on every shutdown, including the overwhelmingly common one where no
+        // update is waiting — it must be a silent no-op, never an exception on the
+        // way out of the app.
+        Assert.False(service.ApplyOnExit());
+    }
+
+    [Fact]
+    public void ApplyOnExit_IsIdempotent()
+    {
+        using var service = NewService();
+
+        Assert.False(service.ApplyOnExit());
+        Assert.False(service.ApplyOnExit());
+    }
+
+    [Fact]
     public async Task CheckAsync_WhenAutomaticChecksDisabled_RecordsNoCheck()
     {
         var settings = new InMemorySettings();

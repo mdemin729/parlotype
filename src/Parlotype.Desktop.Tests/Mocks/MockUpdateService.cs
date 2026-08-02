@@ -33,6 +33,15 @@ public sealed class MockUpdateService : IUpdateService
         return Task.FromResult(Status);
     }
 
+    /// <summary>Number of times the shutdown path handed a staged update to the updater.</summary>
+    public int ApplyOnExitCount { get; private set; }
+
+    public bool ApplyOnExit()
+    {
+        ApplyOnExitCount++;
+        return Status.State == UpdateState.ReadyToApply;
+    }
+
     public Task<bool> ApplyAndRestartAsync(CancellationToken cancellationToken = default)
     {
         ApplyCalled = true;

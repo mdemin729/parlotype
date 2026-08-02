@@ -57,7 +57,7 @@ updates and uninstalls.
 ### Updates
 
 Parlotype checks for new releases automatically, shortly after launch and every six hours
-after that. New versions download in the background and install on next restart.
+after that. New versions download in the background and install when you quit Parlotype — or immediately, via *Install and restart now* on that page.
 
 The check is an **anonymous HTTPS GET** of
 `https://api.github.com/repos/mdemin729/parlotype/releases` — the public list of releases

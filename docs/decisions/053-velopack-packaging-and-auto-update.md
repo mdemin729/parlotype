@@ -124,6 +124,35 @@ this statically and fails the build if the call is missing.
 Hooks: `OnFirstRun` pre-creates the data directories.
 `OnBeforeUninstallFastCallback` (Windows-only) handles uninstall cleanup.
 
+### Downloading stages; it does not install
+
+`DownloadUpdatesAsync` only places the package in the local packages folder.
+Velopack installs nothing until an apply call runs — its own docs say
+`UpdatePendingRestart` returns an asset that *"requires a call … to be applied"*.
+An ordinary quit-and-relaunch therefore does **not** pick up a downloaded update;
+it stays staged indefinitely.
+
+The first cut of this ADR got that wrong: it downloaded, reported "ready", and
+told the user a restart would finish the job, when in fact only the Settings
+button ever applied anything. Users who never opened Settings would have
+re-downloaded every release forever and never installed one.
+
+`IUpdateService` therefore has two apply paths:
+
+| Path | Call | When |
+|---|---|---|
+| `ApplyOnExit()` | `WaitExitThenApplyUpdates(silent: true, restart: false)` | Every shutdown, from `App`'s `Exit` handler |
+| `ApplyAndRestartAsync()` | `ApplyUpdatesAndRestart(asset)` | The "Install and restart now" button |
+
+`ApplyOnExit` is **synchronous** on purpose. A shutdown handler is not a reliable
+place to await a continuation, so the hand-off must complete inline; it only needs
+to launch `Update.exe`, which then waits for this process to exit, so there is
+nothing worth awaiting anyway. A `_applying` latch keeps the shutdown path from
+racing an explicit restart that is already exiting through Velopack.
+
+The user-visible wording follows the real behaviour: "installs when you quit
+Parlotype", not "restart to finish updating".
+
 ### Uninstall cleanup: consent recorded in advance
 
 Leaving several GB of models behind forever is untidy; deleting them without
@@ -140,6 +169,13 @@ unambiguous opt-in.
 
 The hook runs before DI exists, so it parses `settings.json` directly with
 `System.Text.Json` rather than through `ISettingsService`.
+
+Because that flag gates a destructive action, the write is **not** fire-and-forget
+like every other settings toggle. `DataSettingsViewModel` awaits the write, reads
+it back to confirm it landed, and reverts the toggle with a visible warning if it
+did not — a switch showing "keep my data" while `settings.json` still says "delete
+everything" is silent data loss. The pending write is exposed as `PendingWrite` and
+awaited during shutdown so the process cannot exit with the two disagreeing.
 
 Default-off matters: a large share of uninstalls are really troubleshooting
 reinstalls, where discarding the model cache is the wrong outcome. The same page

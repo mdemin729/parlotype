@@ -64,6 +64,86 @@ public class DataSettingsViewModelTests
     }
 
     [Fact]
+    public async Task TogglingUninstallRemovesData_ExposesTheWriteForShutdownToAwait()
+    {
+        using var paths = new MockAppPaths();
+        var settings = new MockSettingsService();
+        var vm = Build(paths, settings, new MockUserDialogService());
+        await WaitForInitializationAsync(vm);
+
+        vm.UninstallRemovesData = true;
+        await vm.PendingWrite;
+
+        // Shutdown awaits this, so it must represent the write and not be left
+        // as the already-completed placeholder.
+        Assert.True(vm.PendingWrite.IsCompletedSuccessfully);
+        Assert.Equal(
+            "True",
+            await settings.GetAsync<string>(
+                SettingsKeys.UninstallRemovesUserData, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task TurningCleanupOff_WhenTheWriteIsLost_RevertsTheToggleAndWarns()
+    {
+        using var paths = new MockAppPaths();
+        var settings = new MockSettingsService();
+        await settings.SetAsync(
+            SettingsKeys.UninstallRemovesUserData, "True", TestContext.Current.CancellationToken);
+
+        var vm = Build(paths, settings, new MockUserDialogService());
+        await WaitForInitializationAsync(vm);
+        Assert.True(vm.UninstallRemovesData);
+
+        // The dangerous direction: the user asks to keep their data, but the write
+        // never lands, so uninstall would still delete it.
+        settings.FailWritesFor.Add(SettingsKeys.UninstallRemovesUserData);
+        vm.UninstallRemovesData = false;
+        await vm.PendingWrite;
+
+        // The toggle must not show a promise the disk does not back.
+        Assert.True(vm.UninstallRemovesData);
+        Assert.NotNull(vm.StatusMessage);
+        Assert.Contains("still delete", vm.StatusMessage);
+    }
+
+    [Fact]
+    public async Task TurningCleanupOn_WhenTheWriteThrows_RevertsToTheSafeState()
+    {
+        using var paths = new MockAppPaths();
+        var settings = new MockSettingsService();
+        settings.ThrowWritesFor.Add(SettingsKeys.UninstallRemovesUserData);
+
+        var vm = Build(paths, settings, new MockUserDialogService());
+        await WaitForInitializationAsync(vm);
+
+        vm.UninstallRemovesData = true;
+        await vm.PendingWrite;
+
+        Assert.False(vm.UninstallRemovesData);
+        Assert.Contains("keep your data", vm.StatusMessage);
+    }
+
+    [Fact]
+    public async Task RevertingTheToggle_DoesNotTriggerAnotherWrite()
+    {
+        using var paths = new MockAppPaths();
+        var settings = new MockSettingsService();
+        settings.ThrowWritesFor.Add(SettingsKeys.UninstallRemovesUserData);
+
+        var vm = Build(paths, settings, new MockUserDialogService());
+        await WaitForInitializationAsync(vm);
+
+        vm.UninstallRemovesData = true;
+        await vm.PendingWrite;
+
+        // The revert must not re-enter PersistConsentAsync — if it did, the throwing
+        // store would flip the toggle back and forth indefinitely.
+        Assert.False(vm.UninstallRemovesData);
+        Assert.True(vm.PendingWrite.IsCompleted);
+    }
+
+    [Fact]
     public async Task DeleteModels_WhenCancelled_DeletesNothing()
     {
         using var paths = new MockAppPaths();

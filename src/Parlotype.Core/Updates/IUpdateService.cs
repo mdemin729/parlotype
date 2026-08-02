@@ -41,14 +41,30 @@ public interface IUpdateService
 
     /// <summary>
     /// Checks the feed and, when a newer release exists, downloads it in the
-    /// background so it can be applied on next restart.
+    /// background so it can be applied on exit or on demand.
     /// </summary>
+    /// <remarks>
+    /// Downloading only <em>stages</em> the release. Nothing is installed until
+    /// <see cref="ApplyOnExit"/> or <see cref="ApplyAndRestartAsync"/> runs — a
+    /// staged package survives an ordinary quit-and-relaunch without being applied.
+    /// </remarks>
     /// <param name="userInitiated">
     /// True when the user pressed "Check now". Automatic checks skip the network
     /// entirely if the user opted out, and swallow offline/HTTP errors; a
     /// user-initiated check always runs and reports what went wrong.
     /// </param>
     Task<UpdateStatus> CheckAsync(bool userInitiated, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Hands a staged update to the platform updater to install once this process
+    /// exits, without relaunching. Returns false when nothing is staged.
+    /// </summary>
+    /// <remarks>
+    /// Call this from the shutdown path. It is deliberately synchronous: shutdown
+    /// handlers are not a reliable place to await a continuation, and this only
+    /// needs to hand off to the updater, not wait for it.
+    /// </remarks>
+    bool ApplyOnExit();
 
     /// <summary>
     /// Applies a downloaded update and restarts the app. Returns false when
