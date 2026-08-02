@@ -53,6 +53,12 @@ Files: `CHANGELOG.md` (new), `.github/workflows/release.yml`,
   inside a `CHANGELOG.md` version section have to be absolute.
 - Concrete release-size history for the notes: `v0.3.0` shipped two zips
   (385 MB full / 253 MB lite); `v0.4.0` ships one 82 MB `Setup.exe`.
+- **`vpk pack` refuses any `--packVersion` at or below what is already in
+  `--outputDir`**, which `vpk download` fills with the live feed for delta
+  generation. The dry-run default `0.0.1-dryrun` only ever worked because
+  `vpk download` had failed on every run — v0.4.0 created the first Velopack
+  feed, so the next PR dry run was the first success and `Pack` immediately
+  failed. Distilled to `memory/knowledge/vpk-pack-version-must-exceed-feed.md`.
 
 ## Open Blockers
 

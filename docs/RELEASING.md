@@ -58,6 +58,23 @@ A dry run cannot check the version section — there is no tag yet — so it onl
 verifies that `CHANGELOG.md` still has its `## [Unreleased]` heading, which is
 what the extractor keys off.
 
+**Dry runs pack `9999.0.0-dryrun` by default, and the absurd number is load-bearing.**
+The delta step downloads the live release feed into `Releases/`, and `vpk pack`
+refuses to build a version equal to or lower than anything already sitting there.
+A plausible-looking `0.0.1-dryrun` worked only while no Velopack release existed;
+it fails against a real feed with:
+
+```
+There is a release in channel win which is equal or greater to the current
+version 0.0.1-dryrun. Please increase the current package version or remove
+that release.
+```
+
+If you dispatch a dry run with an explicit version, pick one above the latest
+published release for the same reason. The upside of packing against a real feed
+is that dry runs now build a genuine delta, so `Verify pack output` reporting
+"Delta package built" is real evidence that delta generation still works.
+
 ---
 
 ## Writing release notes

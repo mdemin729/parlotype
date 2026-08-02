@@ -8,9 +8,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to pack (SemVer 2, no leading v)'
+        description: 'Version to pack (SemVer 2, no leading v). Must sort above every published release.'
         required: false
-        default: '0.0.1-dryrun'
+        # Deliberately absurd, and it has to be. The delta step below downloads
+        # the live release feed into Releases/, and `vpk pack` refuses to build a
+        # version equal to or lower than anything already in that folder. A
+        # plausible-looking 0.0.1-dryrun fails the moment a real release exists.
+        default: '9999.0.0-dryrun'
   # Packaging breaks quietly — a lost --self-contained flag or a Program.Main
   # that no longer calls VelopackApp.Run() only shows up at pack time. Exercise
   # the dry-run path on PRs that touch anything packaging-related.
@@ -72,7 +76,7 @@ jobs:
             version="${GITHUB_REF_NAME#v}"
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           else
-            version="${{ github.event.inputs.version || '0.0.1-dryrun' }}"
+            version="${{ github.event.inputs.version || '9999.0.0-dryrun' }}"
             echo "DRY_RUN=true" >> "$GITHUB_ENV"
           fi
 
@@ -144,6 +148,8 @@ jobs:
       # Delta packages can only be built against releases that are present
       # locally. Without this every release ships as a full ~80 MB download.
       # Expected to fail on the very first release, when no feed exists yet.
+      # Once it does succeed, everything it downloads constrains the version the
+      # Pack step below will accept — see the dry-run default at the top.
       - name: Download existing releases (for delta generation)
         continue-on-error: true
         run: >
