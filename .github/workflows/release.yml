@@ -8,9 +8,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to pack (SemVer 2, no leading v)'
+        description: 'Version to pack (SemVer 2, no leading v). Must sort above every published release.'
         required: false
-        default: '0.0.1-dryrun'
+        # Deliberately absurd, and it has to be. The delta step below downloads
+        # the live release feed into Releases/, and `vpk pack` refuses to build a
+        # version equal to or lower than anything already in that folder. A
+        # plausible-looking 0.0.1-dryrun fails the moment a real release exists.
+        default: '9999.0.0-dryrun'
   # Packaging breaks quietly — a lost --self-contained flag or a Program.Main
   # that no longer calls VelopackApp.Run() only shows up at pack time. Exercise
   # the dry-run path on PRs that touch anything packaging-related.
@@ -72,7 +76,7 @@ jobs:
             version="${GITHUB_REF_NAME#v}"
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           else
-            version="${{ github.event.inputs.version || '0.0.1-dryrun' }}"
+            version="${{ github.event.inputs.version || '9999.0.0-dryrun' }}"
             echo "DRY_RUN=true" >> "$GITHUB_ENV"
           fi
 
@@ -84,6 +88,43 @@ jobs:
 
           echo "VERSION=$version" >> "$GITHUB_ENV"
           echo "Packing version $version (dry run: ${DRY_RUN:-see above})"
+
+      # Runs before the build so a missing changelog section costs seconds
+      # rather than a 20-minute publish. CHANGELOG.md is the source of truth for
+      # what a release says (ADR-054); the body is applied after upload below.
+      - name: Extract release notes
+        shell: bash
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            # No version section exists yet on a dry run — only check the file
+            # is still shaped the way the extractor expects.
+            grep -q '^## \[Unreleased\]' CHANGELOG.md \
+              || { echo "::error::CHANGELOG.md has no '## [Unreleased]' heading."; exit 1; }
+            echo "Dry run — skipping the version-section requirement."
+            exit 0
+          fi
+
+          # A version section runs from '## [X.Y.Z]' to the next '## ' heading,
+          # or to the link-reference definitions that close the file (which
+          # would otherwise be swept into the oldest version's section).
+          # Plain string comparison, no regex: the version contains dots and the
+          # headings contain brackets, and escaping those survives neither
+          # YAML nor every awk implementation intact.
+          awk -v ver="$VERSION" '
+            BEGIN { want = "## [" ver "]"; n = length(want) }
+            !inside && substr($0, 1, n) == want { inside = 1; next }
+            inside && substr($0, 1, 3) == "## " { exit }
+            inside && substr($0, 1, 1) == "[" && index($0, "]: http") { exit }
+            inside { print }
+          ' CHANGELOG.md > release-notes.md
+
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "::error::CHANGELOG.md has no non-empty '## [$VERSION]' section. Run /release-notes and merge that PR before tagging."
+            exit 1
+          fi
+
+          echo "--- release notes for $VERSION ---"
+          cat release-notes.md
 
       - name: Restore
         run: dotnet restore Parlotype.slnx
@@ -107,6 +148,8 @@ jobs:
       # Delta packages can only be built against releases that are present
       # locally. Without this every release ships as a full ~80 MB download.
       # Expected to fail on the very first release, when no feed exists yet.
+      # Once it does succeed, everything it downloads constrains the version the
+      # Pack step below will accept — see the dry-run default at the top.
       - name: Download existing releases (for delta generation)
         continue-on-error: true
         run: >
@@ -172,3 +215,18 @@ jobs:
           --merge true
           --publish true
           --pre ${{ contains(github.ref_name, '-') }}
+
+      # vpk creates the release with a title and assets but no body, and GitHub
+      # then renders the tagged commit's message instead — which for a
+      # squash-merged PR is the whole engineering commit body. Overwrite it with
+      # the curated notes. Writing after upload (rather than passing a vpk flag)
+      # keeps this independent of the Velopack CLI and idempotent under --merge:
+      # every matrix row writes the identical body.
+      - name: Set release notes
+        if: env.DRY_RUN == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh release edit "${{ github.ref_name }}"
+          --notes-file release-notes.md
+          --repo "${{ github.repository }}"

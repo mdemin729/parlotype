@@ -73,6 +73,11 @@ Releases/
 Releases-*/
 .vpk/
 
+# Scratch output of the release workflow's "Extract release notes" step (ADR-054).
+# CHANGELOG.md is the source of truth; this is the slice cut out of it for one tag,
+# written in CI and by anyone running the gate locally.
+release-notes.md
+
 # Signing material — never commit these. Belt and braces: signing is not wired
 # up yet, so these rules exist to make an accidental `git add` fail loudly
 # rather than leak a certificate.

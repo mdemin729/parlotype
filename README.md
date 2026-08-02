@@ -29,6 +29,7 @@ Parlotype currently runs on **Windows** only. macOS and Linux support are planne
 
 Pre-built Windows binaries are published on the [Releases page](../../releases). Each
 release ships one self-contained `win-x64` build — no .NET runtime install required.
+What changed in each one is in [CHANGELOG.md](CHANGELOG.md).
 
 **Recommended: `Parlotype-win-Setup.exe`.** It installs per-user into
 `%LOCALAPPDATA%\Parlotype` with **no administrator prompt**, adds Start Menu and desktop

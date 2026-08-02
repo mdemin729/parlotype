@@ -56,6 +56,8 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[nuget-assettype-native-metadata]] | `ResolvedFileToPublish` items carry `%(AssetType) == 'native'` when resolved from a package's `runtimes/<rid>/native/` folder; Parlotype's own managed PDBs/DLLs have no `AssetType` at all — lets a `Directory.Build.targets` filter distinguish third-party native assets without a filename list | 2026-08-01 |
 
 | [[velopack-pack-folder-is-destructive]] | Velopack owns `%LOCALAPPDATA%\{packId}` and deletes it **entirely** on uninstall *and* on a Setup.exe re-run; Windows case-insensitivity means a data folder differing only in case is the same directory. Store nothing user-owned under the pack folder | 2026-08-01 |
+| [[vpk-pack-version-must-exceed-feed]] | `vpk pack` hard-fails when `--packVersion` is ≤ any release already in `--outputDir` — and `vpk download` puts the live feed there for delta generation, so the two steps are coupled. The CI dry-run default had to become `9999.0.0-dryrun`; it only worked before because `vpk download` had failed on every run until v0.4.0 created the first feed | 2026-08-02 |
+| [[github-release-empty-body-fallback]] | A GitHub Release with an empty body renders the **tagged commit's message** instead of nothing — so a release can look like it has (verbose, commit-dump) notes while `gh release view --json body` returns `""`. `vpk upload github` sets no body. Judge release notes by the API, never by the page | 2026-08-02 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history
