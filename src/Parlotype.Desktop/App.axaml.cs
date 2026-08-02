@@ -74,6 +74,12 @@ public class App : Application
             };
         }
 
+        // Launching Parlotype again — from the Start menu, a shortcut, or the
+        // installer's "run now" — is a request to see it, not to start a second
+        // copy. That process exits immediately and hands the launch here.
+        var windowManager = _services.GetRequiredService<IWindowManager>();
+        Program.SingleInstance?.ListenForActivation(() => windowManager.ShowTranscribe());
+
         _hotkeyCoordinator = _services.GetRequiredService<HotkeyCoordinator>();
         _ = _hotkeyCoordinator.StartAsync();
 
