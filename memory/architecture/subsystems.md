@@ -2,8 +2,8 @@
 title: Key Subsystems
 type: architecture
 status: active
-tags: [architecture, subsystems, hotkeys, settings, logging]
-last_updated: 2026-07-07
+tags: [architecture, subsystems, hotkeys, settings, logging, startup]
+last_updated: 2026-08-02
 summary: Speech engines, text injection, global hotkeys, settings, logging, and model management subsystems
 ---
 
@@ -241,3 +241,34 @@ Windows-only — macOS and Linux have no uninstall hooks.
   public GitHub releases API — no machine id, install id, or usage data. Default
   on (`SettingsKeys.UpdatesCheckAutomatically`), disclosed in README and in the
   page itself, one-click opt-out.
+
+## Single Instance & Activation
+
+See [[decisions/_index|ADR-055]]. Desktop-only — no Core or Platform involvement.
+
+`SingleInstanceGuard` (`Desktop/Services/`) takes the named mutex
+`Local\Parlotype.SingleInstance` in `Program.Main`, **after `VelopackApp.Run()`**
+(hook invocations re-enter the same exe and must not be turned away) **and before
+Avalonia** (a process about to exit shows nothing). A launch that loses the race
+calls `SignalPrimary()` and returns 0.
+
+- **Why it matters**: every extra process installs its own `TaskPoolGlobalHook`,
+  so one hotkey press reaches all of them — several recordings start and whichever
+  finishes first injects text. `SuppressEvent` makes the ordering worse, not
+  better.
+- **Activation**: the primary owns a named auto-reset event and watches it on a
+  background thread; `App.OnFrameworkInitializationCompleted` wires the callback to
+  `IWindowManager.ShowTranscribe()`, so re-launching a tray-only app opens its
+  window instead of appearing to do nothing. The event is created when the mutex
+  is won (not when the listener starts), so a signal arriving during startup is
+  delivered rather than dropped.
+- **Session-scoped, not machine-scoped** (`Local\`): hotkeys, audio and the tray
+  belong to a logon session, so a second signed-in user gets their own instance.
+- **Fail-open**: `AbandonedMutexException` (killed instance) counts as acquiring;
+  any other failure logs to `velopack.log` and reports primary. Not starting is
+  worse than starting twice.
+- **Windows-only activation**: named `EventWaitHandle`s throw on Unix, so macOS and
+  Linux get the lock but a second launch just exits.
+- Not a DI service — it predates `BuildServiceProvider`, and lives on
+  `Program.SingleInstance` like `Program.TextInjectionMode`.
+  `Acquire(name)` takes an override so tests never touch the real lock.
