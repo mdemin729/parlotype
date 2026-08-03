@@ -9,7 +9,7 @@ using Xunit;
 namespace Parlotype.Desktop.Tests;
 
 /// <summary>
-/// Settings → Help (ADR-055): always-visible Application section, live hotkey
+/// Settings → Help (ADR-056): always-visible Application section, live hotkey
 /// reference, and the tour re-launch command.
 /// </summary>
 public class HelpSettingsViewModelTests

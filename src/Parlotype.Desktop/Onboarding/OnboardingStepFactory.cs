@@ -6,7 +6,7 @@ using Parlotype.Desktop.ViewModels;
 namespace Parlotype.Desktop.Onboarding;
 
 /// <summary>
-/// Builds the onboarding tour's step list (ADR-055). Rebuilt on every tour
+/// Builds the onboarding tour's step list (ADR-056). Rebuilt on every tour
 /// launch so the recording step always names the user's <em>current</em>
 /// hotkey bindings, not the ones from when the app started.
 /// </summary>

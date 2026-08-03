@@ -343,7 +343,7 @@ public class SettingsWindowViewModelTests
         var vm = BuildViewModel();
         vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.XaiGrok);
 
-        // Cloud engines have no local model page (ADR-055).
+        // Cloud engines have no local model page (ADR-056).
         vm.NavigateTo(SettingsSection.EngineModel);
 
         Assert.Same(vm.SpeechEngine, vm.SelectedSection);

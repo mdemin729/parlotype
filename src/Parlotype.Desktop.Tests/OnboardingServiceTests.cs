@@ -6,7 +6,7 @@ using Xunit;
 namespace Parlotype.Desktop.Tests;
 
 /// <summary>
-/// The once-only auto-show gate (ADR-055): unset/garbage flag → show once and
+/// The once-only auto-show gate (ADR-056): unset/garbage flag → show once and
 /// stamp <c>"True"</c> first; anything already stamped → never again; a
 /// failing settings store must not take app startup down with it.
 /// </summary>

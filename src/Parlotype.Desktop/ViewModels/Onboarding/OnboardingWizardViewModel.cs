@@ -10,7 +10,7 @@ using Parlotype.Desktop.Services;
 namespace Parlotype.Desktop.ViewModels.Onboarding;
 
 /// <summary>
-/// Drives the onboarding tour (ADR-055): holds the step list, the current
+/// Drives the onboarding tour (ADR-056): holds the step list, the current
 /// index, and Back/Next/Skip. On every step change it opens the step's target
 /// window through <see cref="IWindowManager"/>. Highlighting and window
 /// placement are view concerns (<c>OnboardingWindow</c>); persistence of the

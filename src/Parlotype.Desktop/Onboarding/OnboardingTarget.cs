@@ -5,7 +5,7 @@ namespace Parlotype.Desktop.Onboarding;
 
 /// <summary>
 /// Attached property that marks a control as a highlightable onboarding target
-/// (ADR-055). Views tag elements with
+/// (ADR-056). Views tag elements with
 /// <c>onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds...}"</c> and
 /// <see cref="OnboardingHighlightService"/> finds them by scanning the visual
 /// tree, so the wizard never holds references into view internals.

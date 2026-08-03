@@ -1,7 +1,7 @@
 namespace Parlotype.Desktop.Services;
 
 /// <summary>
-/// Owns the onboarding tour's lifecycle (ADR-055): the once-only auto-show
+/// Owns the onboarding tour's lifecycle (ADR-056): the once-only auto-show
 /// after install and manual re-launches from Settings → Help.
 /// </summary>
 public interface IOnboardingService

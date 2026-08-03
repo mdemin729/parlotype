@@ -9,7 +9,7 @@ using Parlotype.Desktop.Views;
 namespace Parlotype.Desktop.Services;
 
 /// <summary>
-/// <see cref="IOnboardingService"/> over the real wizard window (ADR-055).
+/// <see cref="IOnboardingService"/> over the real wizard window (ADR-056).
 /// The auto-show flag is written <em>before</em> the window opens so a crash
 /// mid-tour still counts as offered; the tour remains reachable from
 /// Settings → Help. Window lifetime mirrors <see cref="WindowManager"/>:

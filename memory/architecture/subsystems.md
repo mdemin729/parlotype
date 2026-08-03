@@ -2,9 +2,9 @@
 title: Key Subsystems
 type: architecture
 status: active
-tags: [architecture, subsystems, hotkeys, settings, logging]
+tags: [architecture, subsystems, hotkeys, settings, logging, startup]
 last_updated: 2026-08-02
-summary: Speech engines, text injection, global hotkeys, settings, logging, model management, onboarding, and localization subsystems
+summary: Speech engines, text injection, global hotkeys, settings, logging, model management, startup, onboarding, and localization subsystems
 ---
 
 # Key Subsystems
@@ -244,7 +244,7 @@ Windows-only — macOS and Linux have no uninstall hooks.
 
 ## Onboarding Tour
 
-See [[decisions/_index|ADR-055]]. Desktop-only (Core gains just
+See [[decisions/_index|ADR-056]]. Desktop-only (Core gains just
 `SettingsKeys.OnboardingCompleted`); everything lives under
 `src/Parlotype.Desktop/Onboarding/`, `ViewModels/Onboarding/`,
 `Views/OnboardingWindow.axaml` and `Services/OnboardingService.cs`.
@@ -278,7 +278,7 @@ See [[decisions/_index|ADR-055]]. Desktop-only (Core gains just
 
 ## Localization (Strings)
 
-First externalized-strings layer (ADR-055): `Resources/Strings.resx` +
+First externalized-strings layer (ADR-056): `Resources/Strings.resx` +
 hand-written public `Strings` accessor (`ResourceManager`, key-name fallback,
 deterministic under CLI builds). Only tour + Help copy so far; all of it flows
 AXAML ← VM property ← `Strings`, so a translation is a satellite
@@ -286,3 +286,34 @@ AXAML ← VM property ← `Strings`, so a translation is a satellite
 accessor property lacks a resx entry. The rest of the app's copy (including
 user-visible strings in Core: `HotkeyHint`, `DictationHotkey.ModeLabel`) is
 still hardcoded.
+
+## Single Instance & Activation
+
+See [[decisions/_index|ADR-055]]. Desktop-only — no Core or Platform involvement.
+
+`SingleInstanceGuard` (`Desktop/Services/`) takes the named mutex
+`Local\Parlotype.SingleInstance` in `Program.Main`, **after `VelopackApp.Run()`**
+(hook invocations re-enter the same exe and must not be turned away) **and before
+Avalonia** (a process about to exit shows nothing). A launch that loses the race
+calls `SignalPrimary()` and returns 0.
+
+- **Why it matters**: every extra process installs its own `TaskPoolGlobalHook`,
+  so one hotkey press reaches all of them — several recordings start and whichever
+  finishes first injects text. `SuppressEvent` makes the ordering worse, not
+  better.
+- **Activation**: the primary owns a named auto-reset event and watches it on a
+  background thread; `App.OnFrameworkInitializationCompleted` wires the callback to
+  `IWindowManager.ShowTranscribe()`, so re-launching a tray-only app opens its
+  window instead of appearing to do nothing. The event is created when the mutex
+  is won (not when the listener starts), so a signal arriving during startup is
+  delivered rather than dropped.
+- **Session-scoped, not machine-scoped** (`Local\`): hotkeys, audio and the tray
+  belong to a logon session, so a second signed-in user gets their own instance.
+- **Fail-open**: `AbandonedMutexException` (killed instance) counts as acquiring;
+  any other failure logs to `velopack.log` and reports primary. Not starting is
+  worse than starting twice.
+- **Windows-only activation**: named `EventWaitHandle`s throw on Unix, so macOS and
+  Linux get the lock but a second launch just exits.
+- Not a DI service — it predates `BuildServiceProvider`, and lives on
+  `Program.SingleInstance` like `Program.TextInjectionMode`.
+  `Acquire(name)` takes an override so tests never touch the real lock.

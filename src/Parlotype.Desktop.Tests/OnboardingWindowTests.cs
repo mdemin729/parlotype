@@ -13,7 +13,7 @@ using Xunit;
 namespace Parlotype.Desktop.Tests;
 
 /// <summary>
-/// Wizard window chrome and interaction (ADR-055): frameless Topmost card,
+/// Wizard window chrome and interaction (ADR-056): frameless Topmost card,
 /// step content bound to the VM, Next/Back buttons drive the index, Esc and ✕
 /// skip the tour.
 /// </summary>

@@ -8,7 +8,7 @@ using Xunit;
 namespace Parlotype.Desktop.Tests;
 
 /// <summary>
-/// Wizard navigation state (ADR-055): Back/Next/Skip semantics, progress
+/// Wizard navigation state (ADR-056): Back/Next/Skip semantics, progress
 /// bookkeeping, and the per-step window-manager side effects.
 /// </summary>
 public class OnboardingWizardViewModelTests

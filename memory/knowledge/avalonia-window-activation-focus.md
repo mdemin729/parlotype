@@ -10,7 +10,7 @@ summary: Window.Activate() focuses no control inside the window, and a window sh
 # Activating a window is not focusing anything in it
 
 Two traps that together broke the onboarding tour's keyboard navigation
-(ADR-055) — neither is visible from reading a single file.
+(ADR-056) — neither is visible from reading a single file.
 
 ## 1. `Activate()` moves the window, not the caret
 

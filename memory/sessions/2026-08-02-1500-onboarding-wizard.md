@@ -4,7 +4,7 @@ type: session
 status: active
 tags: [onboarding, wizard, adorner, localization, settings, help, focus, adr-055]
 created: 2026-08-02
-summary: "Built the 8-step first-run onboarding tour (ADR-055): floating Topmost wizard that opens real windows and highlights live controls via OnboardingTarget.Id + AdornerLayer; OnboardingCompleted flag; Settings → Help; first Strings.resx localization layer. Fixed a keyboard-focus bug on the Settings steps. Shipped as PR #14."
+summary: "Built the 8-step first-run onboarding tour (ADR-056): floating Topmost wizard that opens real windows and highlights live controls via OnboardingTarget.Id + AdornerLayer; OnboardingCompleted flag; Settings → Help; first Strings.resx localization layer. Fixed a keyboard-focus bug on the Settings steps. Shipped as PR #14."
 ---
 
 # Session: 2026-08-02 — First-run onboarding wizard
@@ -15,7 +15,7 @@ The app starts tray-only, so a fresh install shows literally nothing. Built a
 step-by-step onboarding tour whose differentiator is that each step **opens the
 real app window and highlights the live controls** it describes. Plan folder:
 `plans/2026-08-02-onboarding-wizard/` (completed). ADR:
-`docs/decisions/055-first-run-onboarding-wizard.md`.
+`docs/decisions/056-first-run-onboarding-wizard.md`.
 PR: [#14](https://github.com/mdemin729/parlotype/pull/14) (open, 3 commits).
 
 New code: `src/Parlotype.Desktop/Onboarding/*` (target markers, highlight
@@ -82,7 +82,7 @@ recorded earlier in this session.
 
 ## Documentation Status
 
-- ADR: done — `docs/decisions/055-first-run-onboarding-wizard.md` (includes the
+- ADR: done — `docs/decisions/056-first-run-onboarding-wizard.md` (includes the
   keyboard/activation-ordering rationale).
 - Vault: done — `memory/services/desktop.md` (onboarding entries + keyboard
   behaviour + fixed stale `SilentModelDownloadService` row + Application

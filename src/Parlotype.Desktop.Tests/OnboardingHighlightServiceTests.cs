@@ -8,7 +8,7 @@ using Xunit;
 namespace Parlotype.Desktop.Tests;
 
 /// <summary>
-/// The onboarding highlight mechanism (ADR-055): controls marked with
+/// The onboarding highlight mechanism (ADR-056): controls marked with
 /// <see cref="OnboardingTarget.IdProperty"/> get an
 /// <see cref="OnboardingHighlight"/> adorner via the window's adorner layer;
 /// unknown ids never throw; invisible targets are picked up later by the

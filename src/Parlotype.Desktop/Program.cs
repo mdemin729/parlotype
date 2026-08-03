@@ -12,6 +12,14 @@ public static class Program
 {
     internal static TextInjectionMode TextInjectionMode { get; private set; } = TextInjectionMode.Clipboard;
 
+    /// <summary>
+    /// The lock this process holds for as long as it runs. <see cref="App"/>
+    /// reads it to attach the activation listener once the window manager
+    /// exists; it is created here because the check has to happen before
+    /// Avalonia starts.
+    /// </summary>
+    internal static SingleInstanceGuard? SingleInstance { get; private set; }
+
     [STAThread]
     public static void Main(string[] args)
     {
@@ -33,7 +41,26 @@ public static class Program
         velopack.Run();
 
         ParseArgs(args);
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+
+        // After Velopack (its install/update/uninstall hooks re-invoke this exe
+        // and must never be turned away as a "second instance") and before
+        // Avalonia (nothing should be on screen if we are about to exit).
+        SingleInstance = SingleInstanceGuard.Acquire();
+        if (!SingleInstance.IsPrimary)
+        {
+            var activated = SingleInstance.SignalPrimary();
+            VelopackFileLogger.Instance.LogInformation(
+                activated
+                    ? "Parlotype is already running — asked it to show itself and exiting"
+                    : "Parlotype is already running — exiting");
+
+            SingleInstance.Dispose();
+            SingleInstance = null;
+            return;
+        }
+
+        using (SingleInstance)
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
     public static AppBuilder BuildAvaloniaApp()

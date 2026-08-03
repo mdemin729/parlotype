@@ -7,7 +7,7 @@ using Xunit;
 namespace Parlotype.Desktop.Tests;
 
 /// <summary>
-/// The onboarding tour's step list (ADR-055): fixed order, complete copy, and
+/// The onboarding tour's step list (ADR-056): fixed order, complete copy, and
 /// the recording step naming the user's actual hotkeys — including the case
 /// where the user deliberately removed them all.
 /// </summary>

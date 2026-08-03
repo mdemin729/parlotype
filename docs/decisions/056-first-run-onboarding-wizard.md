@@ -3,7 +3,7 @@ status: accepted
 date: 2026-08-02
 ---
 
-# 055. First-Run Onboarding Wizard with Live UI Highlighting
+# 056. First-Run Onboarding Wizard with Live UI Highlighting
 
 ## Context
 

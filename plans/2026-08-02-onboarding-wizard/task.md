@@ -53,7 +53,7 @@ Full details: [implementation-plan.md](implementation-plan.md).
 - [x] `IOnboardingService`/`OnboardingService` + App wiring
 - [x] Tests (factory, VM, service, highlight, window, Help, Strings,
       SettingsWindowViewModelTests update) — 385 Desktop tests green
-- [x] Build/test green (0 warnings, 1109 tests), ADR-055, vault updates
+- [x] Build/test green (0 warnings, 1109 tests), ADR-056, vault updates
 - [x] Live verification: first launch auto-opened "Parlotype tour"
       (Win32-verified — screen was occupied by a fullscreen game, so no
       screenshot), flag stamped `"True"`, second launch tray-only; flag then

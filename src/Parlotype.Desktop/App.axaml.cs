@@ -76,10 +76,16 @@ public class App : Application
             };
         }
 
+        // Launching Parlotype again — from the Start menu, a shortcut, or the
+        // installer's "run now" — is a request to see it, not to start a second
+        // copy. That process exits immediately and hands the launch here.
+        var windowManager = _services.GetRequiredService<IWindowManager>();
+        Program.SingleInstance?.ListenForActivation(() => windowManager.ShowTranscribe());
+
         _hotkeyCoordinator = _services.GetRequiredService<HotkeyCoordinator>();
         _ = _hotkeyCoordinator.StartAsync();
 
-        // First-run onboarding tour (ADR-055). Fire-and-forget like its
+        // First-run onboarding tour (ADR-056). Fire-and-forget like its
         // neighbours; the service catches its own failures — a broken tour
         // must never stop the app from starting.
         _ = _services.GetRequiredService<IOnboardingService>().MaybeShowOnFirstRunAsync();

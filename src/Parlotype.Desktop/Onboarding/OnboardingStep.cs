@@ -3,7 +3,7 @@ using Parlotype.Desktop.ViewModels;
 namespace Parlotype.Desktop.Onboarding;
 
 /// <summary>
-/// One page of the onboarding tour (ADR-055). Declarative: the wizard
+/// One page of the onboarding tour (ADR-056). Declarative: the wizard
 /// view-model opens <see cref="TargetWindow"/> (at
 /// <see cref="SettingsSection"/> when it is the Settings window) and the
 /// wizard window highlights <see cref="TargetIds"/> in it.

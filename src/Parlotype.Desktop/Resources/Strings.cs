@@ -5,7 +5,7 @@ namespace Parlotype.Desktop.Resources;
 
 /// <summary>
 /// Strongly-typed accessor for <c>Strings.resx</c> — the app's externalized
-/// user-facing copy (ADR-055). Hand-written rather than designer-generated so
+/// user-facing copy (ADR-056). Hand-written rather than designer-generated so
 /// the CLI build stays deterministic under warnings-as-errors. Translations are
 /// added later as satellite <c>Strings.&lt;culture&gt;.resx</c> files; no
 /// markup or code changes needed. A missing key falls back to the key name so

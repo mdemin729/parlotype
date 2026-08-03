@@ -28,7 +28,7 @@ Dispatcher.UIThread.RunJobs();
 ```
 
 Run `Dispatcher.UIThread.RunJobs()` (or `UpdateLayout`) before translating so
-layout has happened. Discovered while testing `OnboardingWindow` (ADR-055) —
+layout has happened. Discovered while testing `OnboardingWindow` (ADR-056) —
 see the `Click` helper in `OnboardingWindowTests`.
 
 Related: [[avalonia-popup-patterns]] for other headless-testing traps, and

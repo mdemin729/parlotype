@@ -17,7 +17,7 @@ public sealed partial class SpeechEngineDisplayItem(
     public string Description { get; } = description;
     public ICommand SelectCommand { get; } = selectCommand;
 
-    /// <summary>Onboarding highlight id for this card (ADR-055).</summary>
+    /// <summary>Onboarding highlight id for this card (ADR-056).</summary>
     public string OnboardingId { get; } = OnboardingTargetIds.EngineCard(type);
 
     [ObservableProperty]

@@ -10,7 +10,7 @@ using Parlotype.Desktop.ViewModels.Onboarding;
 namespace Parlotype.Desktop.Views;
 
 /// <summary>
-/// The onboarding tour window (ADR-055): a frameless Topmost card that shows
+/// The onboarding tour window (ADR-056): a frameless Topmost card that shows
 /// the current step's text and, per step, waits for the step's target window
 /// to appear, moves itself next to it, and applies the element highlights.
 /// The view owns presentation only — step state lives in

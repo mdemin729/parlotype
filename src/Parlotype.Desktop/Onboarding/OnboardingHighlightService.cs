@@ -5,7 +5,7 @@ using Avalonia.VisualTree;
 namespace Parlotype.Desktop.Onboarding;
 
 /// <summary>
-/// Applies onboarding highlights to a window (ADR-055): finds controls marked
+/// Applies onboarding highlights to a window (ADR-056): finds controls marked
 /// with <see cref="OnboardingTarget.IdProperty"/> in the window's visual tree
 /// and attaches an <see cref="OnboardingHighlight"/> adorner to each. Ids that
 /// are not found or not yet visible stay pending and are retried on every

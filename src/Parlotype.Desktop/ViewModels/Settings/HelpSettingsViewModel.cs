@@ -8,7 +8,7 @@ using Parlotype.Desktop.Services;
 namespace Parlotype.Desktop.ViewModels.Settings;
 
 /// <summary>
-/// Settings → Help (ADR-055): re-launches the onboarding tour and lists the
+/// Settings → Help (ADR-056): re-launches the onboarding tour and lists the
 /// currently configured dictation hotkeys, kept fresh via
 /// <see cref="IGlobalHotkeyService.BindingsChanged"/>. All copy comes from
 /// <see cref="Strings"/> so the view holds no text of its own.

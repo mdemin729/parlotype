@@ -7,7 +7,7 @@ namespace Parlotype.Desktop.Onboarding;
 
 /// <summary>
 /// The pulsing outline drawn over an onboarding target while its wizard step is
-/// active (ADR-055). Attached via <c>AdornerLayer.SetAdorner</c>, so the
+/// active (ADR-056). Attached via <c>AdornerLayer.SetAdorner</c>, so the
 /// adorner layer keeps it aligned with the target through layout changes.
 /// Animated the house way — <see cref="DispatcherTimer"/> + <see cref="Render"/>,
 /// like <c>WaveformView</c> — with the timer stopped whenever the control
