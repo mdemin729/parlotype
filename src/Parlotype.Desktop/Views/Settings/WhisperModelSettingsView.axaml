@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:onb="using:Parlotype.Desktop.Onboarding"
              x:Class="Parlotype.Desktop.Views.Settings.WhisperModelSettingsView"
              x:DataType="vms:WhisperModelSettingsViewModel"
              x:CompileBindings="True">
@@ -10,7 +11,8 @@
         <TextBlock Text="Larger models are more accurate but use more disk and CPU/GPU."
                    Opacity="0.7" />
 
-        <ItemsControl ItemsSource="{Binding ModelOptions}">
+        <ItemsControl ItemsSource="{Binding ModelOptions}"
+                      onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds.SettingsModelList}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:WhisperModelDisplayItem">
                     <Button HorizontalAlignment="Stretch"

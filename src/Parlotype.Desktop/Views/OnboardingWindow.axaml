@@ -1,0 +1,147 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vmo="using:Parlotype.Desktop.ViewModels.Onboarding"
+        x:Class="Parlotype.Desktop.Views.OnboardingWindow"
+        x:DataType="vmo:OnboardingWizardViewModel"
+        x:CompileBindings="True"
+        Title="{Binding WindowTitleText}"
+        Width="380"
+        SizeToContent="Height"
+        CanResize="False"
+        Topmost="True"
+        WindowDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen">
+
+    <!-- Styles live on the window (not App.axaml) so headless tests render
+         the same chrome the app does. -->
+    <Window.Styles>
+        <Style Selector="Ellipse.progressDot">
+            <Setter Property="Width" Value="8" />
+            <Setter Property="Height" Value="8" />
+            <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            <Setter Property="Opacity" Value="0.3" />
+        </Style>
+        <Style Selector="Ellipse.progressDot.active">
+            <Setter Property="Fill" Value="#378ADD" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Button.windowClose">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="5" />
+        </Style>
+        <Style Selector="Button.subtle">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Opacity" Value="0.7" />
+        </Style>
+    </Window.Styles>
+
+    <!-- Frameless card chrome, matching the Transcribe widget (ADR-040). -->
+    <Border Name="RootChrome"
+            CornerRadius="12"
+            BorderThickness="1"
+            Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+            BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+        <Grid RowDefinitions="24,Auto">
+
+            <!-- Header: drag strip + ✕ (skips the tour, like Esc). -->
+            <Border Name="DragZone"
+                    Grid.Row="0"
+                    Background="Transparent"
+                    Cursor="SizeAll"
+                    PointerPressed="DragZone_PointerPressed">
+                <Border Width="40" Height="4"
+                        CornerRadius="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" />
+            </Border>
+            <Button Name="CloseButton"
+                    Grid.Row="0"
+                    Classes="windowClose"
+                    Width="22" Height="22"
+                    Margin="0,2,4,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Command="{Binding SkipCommand}">
+                <TextBlock Text="&#x2715;" FontSize="12" Opacity="0.7" />
+            </Button>
+
+            <StackPanel Grid.Row="1" Margin="20,4,20,16" Spacing="12">
+                <TextBlock Name="StepTitle"
+                           Text="{Binding CurrentStep.Title}"
+                           FontSize="18" FontWeight="SemiBold"
+                           TextWrapping="Wrap" />
+                <TextBlock Name="StepBody"
+                           Text="{Binding CurrentStep.Body}"
+                           TextWrapping="Wrap"
+                           Opacity="0.85" />
+
+                <ItemsControl Name="DetailLines"
+                              ItemsSource="{Binding CurrentStep.DetailLines}"
+                              IsVisible="{Binding HasDetailLines}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Grid ColumnDefinitions="16,*" Margin="0,2">
+                                <TextBlock Grid.Column="0" Text="&#x2022;" Opacity="0.6" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding}"
+                                           TextWrapping="Wrap"
+                                           Opacity="0.85" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Progress: "Step N of M" + one dot per step. -->
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4,0,0">
+                    <TextBlock Grid.Column="0"
+                               Name="ProgressLabel"
+                               Text="{Binding ProgressText}"
+                               FontSize="12" Opacity="0.6"
+                               VerticalAlignment="Center" />
+                    <ItemsControl Grid.Column="2"
+                                  ItemsSource="{Binding Steps}"
+                                  VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vmo:OnboardingStepItemViewModel">
+                                <Ellipse Classes="progressDot"
+                                         Classes.active="{Binding IsCurrent}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*,Auto,8,Auto" Margin="0,4,0,0">
+                    <Button Grid.Column="0"
+                            Name="SkipButton"
+                            Classes="subtle"
+                            Content="{Binding SkipButtonText}"
+                            Command="{Binding SkipCommand}" />
+                    <Button Grid.Column="2"
+                            Name="BackButton"
+                            Content="{Binding BackButtonText}"
+                            Command="{Binding BackCommand}"
+                            IsEnabled="{Binding !IsFirstStep}" />
+                    <!-- IsDefault: Enter advances from anywhere in the card, so the
+                         tour is drivable without a mouse even if focus wandered. -->
+                    <Button Grid.Column="4"
+                            Name="NextButton"
+                            Classes="accent"
+                            IsDefault="True"
+                            Content="{Binding NextButtonText}"
+                            Command="{Binding NextCommand}" />
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

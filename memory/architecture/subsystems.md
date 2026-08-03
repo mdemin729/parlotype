@@ -4,7 +4,7 @@ type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging, startup]
 last_updated: 2026-08-02
-summary: Speech engines, text injection, global hotkeys, settings, logging, and model management subsystems
+summary: Speech engines, text injection, global hotkeys, settings, logging, model management, startup, onboarding, and localization subsystems
 ---
 
 # Key Subsystems
@@ -241,6 +241,51 @@ Windows-only — macOS and Linux have no uninstall hooks.
   public GitHub releases API — no machine id, install id, or usage data. Default
   on (`SettingsKeys.UpdatesCheckAutomatically`), disclosed in README and in the
   page itself, one-click opt-out.
+
+## Onboarding Tour
+
+See [[decisions/_index|ADR-056]]. Desktop-only (Core gains just
+`SettingsKeys.OnboardingCompleted`); everything lives under
+`src/Parlotype.Desktop/Onboarding/`, `ViewModels/Onboarding/`,
+`Views/OnboardingWindow.axaml` and `Services/OnboardingService.cs`.
+
+- **Step model**: `OnboardingStepFactory.Build(bindings)` → eight declarative
+  `OnboardingStep` records (welcome / recording / widget / engine / model /
+  cloud / tray / recap). `OnboardingWizardViewModel` owns index + Back/Next/Skip
+  and opens each step's target window through `IWindowManager`; the recording
+  step lists the user's actual `DictationHotkey.DisplayString`s (empty list →
+  fallback line, never resurrected defaults — ADR-047).
+- **Highlighting**: attached property `OnboardingTarget.Id` marks controls in
+  AXAML (ids in `OnboardingTargetIds`, referenced via `{x:Static}` and
+  `SpeechEngineDisplayItem.OnboardingId`). `OnboardingHighlightService.Apply`
+  scans the visual tree and attaches a pulsing `OnboardingHighlight`
+  (DispatcherTimer + `Render`, `WaveformView` idiom) via
+  `AdornerLayer.SetAdorner`; unresolved ids retry on `Window.LayoutUpdated`;
+  missing/invisible targets are silently skipped. Works headlessly.
+- **Window**: `OnboardingWindow` — frameless Topmost 380 px card (ADR-040
+  chrome), polls the desktop lifetime for the step's target window
+  (`WindowManager` posts fire-and-forget — no completion signal), positions
+  itself beside it clamped to the working area, re-activates above the Topmost
+  widget. Esc/✕ = Skip.
+- **Trigger**: `IOnboardingService`/`OnboardingService`.
+  `MaybeShowOnFirstRunAsync` (fire-and-forget from
+  `App.OnFrameworkInitializationCompleted`) stamps the flag **before** showing;
+  not Velopack-gated, so updaters and dev builds also see it exactly once.
+  Re-launch from Settings → Help (`HelpSettingsViewModel`, Application
+  category, also a live hotkey reference).
+- **Deep links**: `SettingsSection.Engine` / `EngineModel` (resolves to the
+  active engine's model page; cloud → Engine fallback) / `Help`.
+
+## Localization (Strings)
+
+First externalized-strings layer (ADR-056): `Resources/Strings.resx` +
+hand-written public `Strings` accessor (`ResourceManager`, key-name fallback,
+deterministic under CLI builds). Only tour + Help copy so far; all of it flows
+AXAML ← VM property ← `Strings`, so a translation is a satellite
+`Strings.<culture>.resx` with zero markup changes. `StringsTests` fails if any
+accessor property lacks a resx entry. The rest of the app's copy (including
+user-visible strings in Core: `HotkeyHint`, `DictationHotkey.ModeLabel`) is
+still hardcoded.
 
 ## Single Instance & Activation
 

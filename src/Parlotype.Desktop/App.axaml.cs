@@ -10,8 +10,10 @@ using Parlotype.Core.Speech;
 using Parlotype.Core.LlamaServer;
 using Parlotype.Core.TextInjection;
 using Parlotype.Core.Updates;
+using Parlotype.Desktop.Onboarding;
 using Parlotype.Desktop.Services;
 using Parlotype.Desktop.ViewModels;
+using Parlotype.Desktop.ViewModels.Onboarding;
 using Parlotype.Desktop.ViewModels.Settings;
 using Parlotype.Platform;
 using Parlotype.Platform.Speech;
@@ -82,6 +84,11 @@ public class App : Application
 
         _hotkeyCoordinator = _services.GetRequiredService<HotkeyCoordinator>();
         _ = _hotkeyCoordinator.StartAsync();
+
+        // First-run onboarding tour (ADR-056). Fire-and-forget like its
+        // neighbours; the service catches its own failures — a broken tour
+        // must never stop the app from starting.
+        _ = _services.GetRequiredService<IOnboardingService>().MaybeShowOnFirstRunAsync();
 
         _ = Task.Run(() => LogNvidiaEnvironmentAsync(_services));
         _ = Task.Run(() => LogVulkanEnvironmentAsync(_services));
@@ -289,14 +296,18 @@ public class App : Application
         services.AddSingleton<ThemeSettingsViewModel>();
         services.AddSingleton<UpdateSettingsViewModel>();
         services.AddSingleton<DataSettingsViewModel>();
+        services.AddSingleton<HelpSettingsViewModel>();
         services.AddSingleton<SettingsWindowViewModel>();
         services.AddSingleton<TranscribeViewModel>();
+        services.AddSingleton<OnboardingWizardViewModel>();
         services.AddSingleton<AppViewModel>();
 
         services.AddSingleton<IWindowManager, WindowManager>();
         services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddSingleton<IShellService, ShellService>();
         services.AddSingleton<HotkeyCoordinator>();
+        services.AddSingleton<OnboardingHighlightService>();
+        services.AddSingleton<IOnboardingService, OnboardingService>();
 
         return services.BuildServiceProvider();
     }

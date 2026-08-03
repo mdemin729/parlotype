@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:onb="using:Parlotype.Desktop.Onboarding"
              x:Class="Parlotype.Desktop.Views.Settings.Gemma4ModelSettingsView"
              x:DataType="vms:Gemma4ModelSettingsViewModel"
              x:CompileBindings="True">
@@ -10,7 +11,8 @@
         <TextBlock Text="Choose a Gemma 4 variant for the llama.cpp engine. E4B is more accurate; E2B is faster (fewer active parameters). Each download includes a vision projector (mmproj)."
                    Opacity="0.7" TextWrapping="Wrap" />
 
-        <ItemsControl ItemsSource="{Binding ModelOptions}">
+        <ItemsControl ItemsSource="{Binding ModelOptions}"
+                      onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds.SettingsModelList}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:Gemma4ModelDisplayItem">
                     <Border Padding="0,2" Margin="0,2">

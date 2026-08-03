@@ -33,10 +33,11 @@ public class SettingsWindowViewModelTests
         var theme = new ThemeSettingsViewModel(settings);
         var updates = new UpdateSettingsViewModel(settings, new MockUpdateService());
         var data = new DataSettingsViewModel(settings);
+        var help = new HelpSettingsViewModel(new MockOnboardingService(), hotkeyService: null);
 
         return new SettingsWindowViewModel(
             engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, parakeetModel,
-            cloudProviders, prompts, llamaCpp, hotkey, theme, updates, data);
+            cloudProviders, prompts, llamaCpp, hotkey, theme, updates, data, help);
     }
 
     [Fact]
@@ -62,7 +63,8 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
             n => AssertSection(n, "Updates"),
-            n => AssertSection(n, "Data"));
+            n => AssertSection(n, "Data"),
+            n => AssertSection(n, "Help"));
     }
 
     [Fact]
@@ -92,7 +94,8 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
             n => AssertSection(n, "Updates"),
-            n => AssertSection(n, "Data"));
+            n => AssertSection(n, "Data"),
+            n => AssertSection(n, "Help"));
     }
 
     [Fact]
@@ -116,7 +119,8 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
             n => AssertSection(n, "Updates"),
-            n => AssertSection(n, "Data"));
+            n => AssertSection(n, "Data"),
+            n => AssertSection(n, "Help"));
     }
 
     [Fact]
@@ -141,7 +145,8 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
             n => AssertSection(n, "Updates"),
-            n => AssertSection(n, "Data"));
+            n => AssertSection(n, "Data"),
+            n => AssertSection(n, "Help"));
     }
 
     [Fact]
@@ -301,6 +306,58 @@ public class SettingsWindowViewModelTests
         vm.NavigateTo(SettingsSection.CloudProviders);
 
         Assert.Same(before, vm.SelectedNavItem);
+    }
+
+    [Fact]
+    public void NavigateTo_Engine_SelectsEngineSection()
+    {
+        var vm = BuildViewModel();
+        vm.SelectedNavItem = vm.NavItems.Single(n => n.Section is HotkeySettingsViewModel);
+
+        vm.NavigateTo(SettingsSection.Engine);
+
+        Assert.Same(vm.SpeechEngine, vm.SelectedSection);
+    }
+
+    [Fact]
+    public void NavigateTo_EngineModel_SelectsTheActiveEnginesModelPage()
+    {
+        var vm = BuildViewModel();
+
+        // Parakeet (default) → Parakeet model page.
+        vm.NavigateTo(SettingsSection.EngineModel);
+        Assert.Same(vm.ParakeetModel, vm.SelectedSection);
+
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Whisper);
+        vm.NavigateTo(SettingsSection.EngineModel);
+        Assert.Same(vm.WhisperModel, vm.SelectedSection);
+
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.Gemma4);
+        vm.NavigateTo(SettingsSection.EngineModel);
+        Assert.Same(vm.Gemma4Model, vm.SelectedSection);
+    }
+
+    [Fact]
+    public void NavigateTo_EngineModel_FallsBackToEngine_ForCloudEngines()
+    {
+        var vm = BuildViewModel();
+        vm.SpeechEngine.SelectEngineCommand.Execute(SpeechEngine.XaiGrok);
+
+        // Cloud engines have no local model page (ADR-056).
+        vm.NavigateTo(SettingsSection.EngineModel);
+
+        Assert.Same(vm.SpeechEngine, vm.SelectedSection);
+    }
+
+    [Fact]
+    public void NavigateTo_Help_SelectsHelpSection()
+    {
+        var vm = BuildViewModel();
+
+        vm.NavigateTo(SettingsSection.Help);
+
+        Assert.Same(vm.Help, vm.SelectedSection);
+        Assert.Equal("Help", vm.SelectedNavItem!.Label);
     }
 
     private static void AssertHeader(SettingsNavItem item, string label)

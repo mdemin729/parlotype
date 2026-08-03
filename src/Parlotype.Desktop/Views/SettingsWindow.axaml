@@ -7,7 +7,7 @@
         x:DataType="vm:SettingsWindowViewModel"
         x:CompileBindings="True"
         Title="Parlotype — Settings"
-        Width="900" Height="720"
+        Width="900" Height="770"
         WindowStartupLocation="CenterScreen">
 
     <Window.DataTemplates>
@@ -58,6 +58,9 @@
         </DataTemplate>
         <DataTemplate DataType="vms:DataSettingsViewModel">
             <v:DataSettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vms:HelpSettingsViewModel">
+            <v:HelpSettingsView />
         </DataTemplate>
     </Window.DataTemplates>
 

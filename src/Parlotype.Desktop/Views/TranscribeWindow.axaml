@@ -3,6 +3,7 @@
         xmlns:vm="using:Parlotype.Desktop.ViewModels"
         xmlns:views="using:Parlotype.Desktop.Views"
         xmlns:settingsViews="using:Parlotype.Desktop.Views.Settings"
+        xmlns:onb="using:Parlotype.Desktop.Onboarding"
         x:Class="Parlotype.Desktop.Views.TranscribeWindow"
         x:DataType="vm:TranscribeViewModel"
         x:CompileBindings="True"
@@ -95,6 +96,7 @@
                  Voice Typing style); the ✕ hides the widget to the tray. -->
             <Border Name="GripZone"
                     Grid.Row="0"
+                    onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds.TranscribeGrip}"
                     Background="Transparent"
                     Cursor="SizeAll"
                     PointerPressed="GripZone_PointerPressed">
@@ -123,6 +125,7 @@
 
             <Button Name="CloseButton"
                     Grid.Row="0"
+                    onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds.TranscribeClose}"
                     Classes="windowClose"
                     Width="22" Height="22"
                     Margin="0,2,4,0"
@@ -140,6 +143,7 @@
                      specific tip wins over RootChrome's status tooltip. -->
                 <Button Name="RecordButton"
                         Grid.Column="0"
+                        onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds.TranscribeRecord}"
                         Classes.recording="{Binding IsRecording}"
                         Classes.loading="{Binding IsLoading}"
                         Command="{Binding TogglePlayCommand}"
@@ -182,6 +186,7 @@
             <!-- Quick-picker strip: source · connector · target (spec §2.2). -->
             <Border Name="LanguageStrip"
                     Grid.Row="2"
+                    onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds.TranscribeLanguageStrip}"
                     IsVisible="{Binding HasLanguageStrip}"
                     Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                     CornerRadius="9" Padding="2"
