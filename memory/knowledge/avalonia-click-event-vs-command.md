@@ -1,7 +1,9 @@
 ---
+title: RaiseEvent(Button.ClickEvent) does not execute the bound Command
 type: knowledge
 tags: [avalonia, headless-testing, xunit, button, command]
 created: 2026-08-02
+last_updated: 2026-08-02
 summary: Raising Button.ClickEvent via RaiseEvent does not invoke a bound Command — headless tests must click through the input pipeline
 ---
 
@@ -29,4 +31,6 @@ Run `Dispatcher.UIThread.RunJobs()` (or `UpdateLayout`) before translating so
 layout has happened. Discovered while testing `OnboardingWindow` (ADR-055) —
 see the `Click` helper in `OnboardingWindowTests`.
 
-Related: [[avalonia-popup-patterns]] for other headless-testing traps.
+Related: [[avalonia-popup-patterns]] for other headless-testing traps, and
+[[avalonia-window-activation-focus]] for the runtime counterpart — activating a
+window focuses nothing inside it.
