@@ -152,4 +152,13 @@ public static class SettingsKeys
     /// discarding several GB of models is the wrong outcome.
     /// </remarks>
     public const string UninstallRemovesUserData = "UninstallRemovesUserData";
+
+    /// <summary>
+    /// Whether the first-run onboarding tour has already been offered
+    /// (ADR-055). Stored as a string bool; unset or unparsable means "not yet"
+    /// and the tour auto-opens once. Written <c>"True"</c> at the moment the
+    /// tour is shown — not when it finishes — so a crash mid-tour still counts
+    /// as offered. The tour stays reachable from Settings → Help afterwards.
+    /// </summary>
+    public const string OnboardingCompleted = "OnboardingCompleted";
 }

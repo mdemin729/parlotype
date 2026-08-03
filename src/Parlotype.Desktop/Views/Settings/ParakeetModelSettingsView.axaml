@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:onb="using:Parlotype.Desktop.Onboarding"
              x:Class="Parlotype.Desktop.Views.Settings.ParakeetModelSettingsView"
              x:DataType="vms:ParakeetModelSettingsViewModel"
              x:CompileBindings="True">
@@ -10,7 +11,8 @@
         <TextBlock Text="NVIDIA Parakeet runs fully on the CPU — no GPU needed. It transcribes 25 European languages (detected automatically) with punctuation and capitalization. INT8 is the recommended default: small and fast. Full precision (fp32) is slightly more accurate but 4× larger and slower to decode."
                    Opacity="0.7" TextWrapping="Wrap" />
 
-        <ItemsControl ItemsSource="{Binding ModelOptions}">
+        <ItemsControl ItemsSource="{Binding ModelOptions}"
+                      onb:OnboardingTarget.Id="{x:Static onb:OnboardingTargetIds.SettingsModelList}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:ParakeetModelDisplayItem">
                     <Border Padding="0,2" Margin="0,2">

@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.HelpSettingsView"
+             x:DataType="vms:HelpSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding IntroText}"
+                   Opacity="0.7"
+                   TextWrapping="Wrap" />
+
+        <Button Name="OpenTourButton"
+                Content="{Binding OpenTourButtonText}"
+                Command="{Binding OpenTourCommand}" />
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,8" />
+
+        <TextBlock Text="{Binding HotkeysHeadingText}"
+                   FontSize="14" FontWeight="SemiBold" />
+        <ItemsControl ItemsSource="{Binding HotkeyLines}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <TextBlock Text="{Binding}"
+                               TextWrapping="Wrap"
+                               Opacity="0.75"
+                               Margin="0,2" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

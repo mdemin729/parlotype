@@ -14,4 +14,17 @@ public enum SettingsSection
     /// cloud engines, ADR-043). Only visible while a cloud engine is selected.
     /// </summary>
     CloudProviders,
+
+    /// <summary>The Engine selection section (ADR-055, onboarding tour).</summary>
+    Engine,
+
+    /// <summary>
+    /// The model page of whichever engine is currently active — Parakeet,
+    /// Whisper or Gemma 4 (ADR-055). Falls back to the Engine section for
+    /// cloud engines, which have no local model page.
+    /// </summary>
+    EngineModel,
+
+    /// <summary>The Help section (hotkey reference + onboarding tour, ADR-055).</summary>
+    Help,
 }

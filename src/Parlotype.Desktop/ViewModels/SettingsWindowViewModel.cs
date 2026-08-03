@@ -38,6 +38,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public ThemeSettingsViewModel Theme { get; }
     public UpdateSettingsViewModel Updates { get; }
     public DataSettingsViewModel Data { get; }
+    public HelpSettingsViewModel Help { get; }
 
     public SettingsWindowViewModel(
         SpeechEngineSettingsViewModel speechEngine,
@@ -55,7 +56,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
         HotkeySettingsViewModel hotkey,
         ThemeSettingsViewModel theme,
         UpdateSettingsViewModel updates,
-        DataSettingsViewModel data)
+        DataSettingsViewModel data,
+        HelpSettingsViewModel help)
     {
         SpeechEngine = speechEngine;
         Microphone = microphone;
@@ -73,6 +75,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         Theme = theme;
         Updates = updates;
         Data = data;
+        Help = help;
 
         // Fixed authoring order — engine-filtered rows are dropped per active
         // engine, but the order of those that survive is preserved.
@@ -94,6 +97,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             theme,
             updates,
             data,
+            help,
         ];
 
         speechEngine.PropertyChanged += OnSpeechEnginePropertyChanged;
@@ -179,6 +183,9 @@ public partial class SettingsWindowViewModel : ViewModelBase
         {
             SettingsSection.Language => (SettingsSectionViewModelBase)Language,
             SettingsSection.CloudProviders => CloudProviders,
+            SettingsSection.Engine => SpeechEngine,
+            SettingsSection.EngineModel => ModelSectionForActiveEngine(),
+            SettingsSection.Help => Help,
             _ => null,
         };
         if (target is null)
@@ -188,4 +195,17 @@ public partial class SettingsWindowViewModel : ViewModelBase
         if (navItem is not null)
             SelectedNavItem = navItem;
     }
+
+    /// <summary>
+    /// The model page of the active engine (<see cref="SettingsSection.EngineModel"/>).
+    /// Cloud engines have no local model page, so they land on the engine list.
+    /// </summary>
+    private SettingsSectionViewModelBase ModelSectionForActiveEngine() =>
+        SpeechEngine.SelectedEngine switch
+        {
+            Core.Speech.SpeechEngine.Whisper => WhisperModel,
+            Core.Speech.SpeechEngine.Gemma4 => Gemma4Model,
+            Core.Speech.SpeechEngine.Parakeet => ParakeetModel,
+            _ => (SettingsSectionViewModelBase)SpeechEngine,
+        };
 }

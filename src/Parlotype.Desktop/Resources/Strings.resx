@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Onboarding_WindowTitle" xml:space="preserve">
+    <value>Parlotype tour</value>
+  </data>
+  <data name="Onboarding_Welcome_Title" xml:space="preserve">
+    <value>Welcome to Parlotype</value>
+  </data>
+  <data name="Onboarding_Welcome_Body" xml:space="preserve">
+    <value>Parlotype turns speech into text anywhere on your computer: dictate into any app, and the recognized text is typed right where your cursor is. By default, recognition runs entirely on this machine — your audio never leaves it unless you deliberately switch to a cloud engine.</value>
+  </data>
+  <data name="Onboarding_Recording_Title" xml:space="preserve">
+    <value>Start dictating</value>
+  </data>
+  <data name="Onboarding_Recording_Body" xml:space="preserve">
+    <value>Press one of your dictation hotkeys, or click the highlighted record button on the widget. When you finish speaking, the recognized text is typed into the app you were using last. Your hotkeys:</value>
+  </data>
+  <data name="Onboarding_Recording_EscLine" xml:space="preserve">
+    <value>Esc — cancel the current recording without typing anything</value>
+  </data>
+  <data name="Onboarding_Hotkeys_None" xml:space="preserve">
+    <value>No dictation hotkey is set — use the record button on the widget, or add a hotkey in Settings → Hotkeys.</value>
+  </data>
+  <data name="Onboarding_Widget_Title" xml:space="preserve">
+    <value>The recording widget</value>
+  </data>
+  <data name="Onboarding_Widget_Body" xml:space="preserve">
+    <value>This small always-on-top window is your dictation control. The big button starts and stops recording; hover the card to see the current status. Drag the grip strip at the top to move it anywhere, and the ✕ button hides it to the tray. Engines that offer a language choice show a language strip along the bottom.</value>
+  </data>
+  <data name="Onboarding_Engine_Title" xml:space="preserve">
+    <value>Choose a speech engine</value>
+  </data>
+  <data name="Onboarding_Engine_Body" xml:space="preserve">
+    <value>Parlotype ships several recognition engines — switch between them in the highlighted list. Parakeet v3 is the default: fast, fully on-device, and it auto-detects 25 European languages. Each engine adds its own pages to the navigation on the left.</value>
+  </data>
+  <data name="Onboarding_Model_Title" xml:space="preserve">
+    <value>Pick a model</value>
+  </data>
+  <data name="Onboarding_Model_Body" xml:space="preserve">
+    <value>Each local engine offers models of different sizes — larger models are more accurate but slower and take more disk space. Model files are downloaded automatically the first time they are used; models already on disk are marked in the list.</value>
+  </data>
+  <data name="Onboarding_Cloud_Title" xml:space="preserve">
+    <value>Cloud engines are opt-in</value>
+  </data>
+  <data name="Onboarding_Cloud_Body" xml:space="preserve">
+    <value>The two cloud engines are off by default and require your own API key. While one is active, your audio is sent to that provider for transcription and the widget shows a persistent Cloud badge. Everything else in Parlotype stays fully local.</value>
+  </data>
+  <data name="Onboarding_Tray_Title" xml:space="preserve">
+    <value>Parlotype lives in the tray</value>
+  </data>
+  <data name="Onboarding_Tray_Body" xml:space="preserve">
+    <value>Hiding or closing the widget does not quit Parlotype — it keeps listening for your hotkeys from the system tray. Click the tray icon to bring the widget back. To exit completely, right-click the tray icon and choose Exit.</value>
+  </data>
+  <data name="Onboarding_Recap_Title" xml:space="preserve">
+    <value>You're all set</value>
+  </data>
+  <data name="Onboarding_Recap_Body" xml:space="preserve">
+    <value>Dictate anywhere with your hotkeys or the widget button. Engines, models, hotkeys and languages live in Settings — and this tour, together with a hotkey reference, is always available under Settings → Help.</value>
+  </data>
+  <data name="Onboarding_Nav_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Onboarding_Nav_Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Onboarding_Nav_Finish" xml:space="preserve">
+    <value>Finish</value>
+  </data>
+  <data name="Onboarding_Nav_Skip" xml:space="preserve">
+    <value>Skip tour</value>
+  </data>
+  <data name="Onboarding_Progress_Format" xml:space="preserve">
+    <value>Step {0} of {1}</value>
+  </data>
+  <data name="Help_Title" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="Help_Intro" xml:space="preserve">
+    <value>New to Parlotype? The guided tour walks through recording, the widget, engines and models — opening each screen and highlighting the controls as it goes.</value>
+  </data>
+  <data name="Help_OpenTourButton" xml:space="preserve">
+    <value>Open the tour</value>
+  </data>
+  <data name="Help_HotkeysHeading" xml:space="preserve">
+    <value>Current dictation hotkeys</value>
+  </data>
+  <data name="Help_NoHotkeys" xml:space="preserve">
+    <value>No dictation hotkeys are configured. Add one in the Hotkeys section.</value>
+  </data>
+  <data name="Help_EscCancelLine" xml:space="preserve">
+    <value>Esc — cancel the current recording</value>
+  </data>
+</root>

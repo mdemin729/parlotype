@@ -59,6 +59,9 @@
         <DataTemplate DataType="vms:DataSettingsViewModel">
             <v:DataSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:HelpSettingsViewModel">
+            <v:HelpSettingsView />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <Window.Styles>
