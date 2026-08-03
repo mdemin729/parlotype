@@ -132,9 +132,12 @@
                             Content="{Binding BackButtonText}"
                             Command="{Binding BackCommand}"
                             IsEnabled="{Binding !IsFirstStep}" />
+                    <!-- IsDefault: Enter advances from anywhere in the card, so the
+                         tour is drivable without a mouse even if focus wandered. -->
                     <Button Grid.Column="4"
                             Name="NextButton"
                             Classes="accent"
+                            IsDefault="True"
                             Content="{Binding NextButtonText}"
                             Command="{Binding NextCommand}" />
                 </Grid>

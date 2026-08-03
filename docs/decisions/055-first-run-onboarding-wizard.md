@@ -28,7 +28,16 @@ constant, because that is where settings keys live).
 
 **Tour mechanics.** `OnboardingWindow` is a frameless Topmost card (380 px,
 matching the ADR-040 widget chrome) with Back/Next/Skip, a "Step N of M" label
-and progress dots. The step list is declarative:
+and progress dots. It is fully keyboard-drivable: Next is the default button
+(Enter advances even when nothing inside the card holds focus) and each step
+ends by focusing Next with `NavigationMethod.Tab` so the focus ring is drawn.
+That focus has to be taken back deliberately, because the Settings window
+activates itself whenever `ShowSettings` runs — and since `WindowManager`
+shows windows from a Normal-priority dispatcher post, a step whose target was
+*already* open would otherwise find it synchronously and activate the wizard
+*before* that post ran, handing the keyboard straight back to Settings.
+`PresentStepAsync` therefore yields at `DispatcherPriority.Background` before
+searching, so the show-post always runs first. The step list is declarative:
 `OnboardingStepFactory.Build(bindings)` returns eight `OnboardingStep` records
 (welcome, recording, widget anatomy, engine, model, cloud, tray, recap). On
 each step change `OnboardingWizardViewModel` opens the step's target window

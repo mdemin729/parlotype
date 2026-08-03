@@ -122,6 +122,36 @@ public class OnboardingWindowTests
     }
 
     [AvaloniaFact]
+    public void NextButton_TakesFocus_SoTheTourIsKeyboardDrivable()
+    {
+        var (window, _) = CreateWindow();
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(window.FindControl<Button>("NextButton")!.IsFocused);
+
+        window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Enter_AdvancesStep_EvenWithNothingFocused()
+    {
+        var (window, vm) = CreateWindow();
+        window.Show();
+
+        // Reproduces the state the wizard is left in after another window took
+        // and released the keyboard: no focused element inside the card. Enter
+        // must still advance, which is what IsDefault on Next buys us.
+        TopLevel.GetTopLevel(window)!.FocusManager!.Focus(null);
+        Dispatcher.UIThread.RunJobs();
+
+        window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+
+        Assert.Equal(1, vm.CurrentIndex);
+        window.Close();
+    }
+
+    [AvaloniaFact]
     public void Escape_RaisesCloseRequested()
     {
         var (window, vm) = CreateWindow();

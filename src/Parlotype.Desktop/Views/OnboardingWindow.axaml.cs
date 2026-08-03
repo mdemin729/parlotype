@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using Parlotype.Desktop.Onboarding;
 using Parlotype.Desktop.ViewModels.Onboarding;
 
@@ -80,7 +81,20 @@ public partial class OnboardingWindow : Window
             return;
 
         if (step.TargetWindow == OnboardingTargetWindow.None)
-            return; // text-only step — keep whatever position we have
+        {
+            // Text-only step — keep whatever position we have.
+            FocusNextButton();
+            return;
+        }
+
+        // `IWindowManager` shows windows from a Normal-priority dispatcher post,
+        // so when the target is *already* open the search below would succeed
+        // synchronously and we would activate ourselves before that post runs —
+        // and `SettingsWindow.Activate()` would then take the keyboard straight
+        // back. Yielding below Normal first makes the post run before we do.
+        await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+        if (version != _presentVersion)
+            return;
 
         var target = await WaitForTargetWindowAsync(step.TargetWindow, version);
         if (target is null || version != _presentVersion)
@@ -89,10 +103,20 @@ public partial class OnboardingWindow : Window
         PositionRelativeTo(target);
         HighlightService?.Apply(target, step.TargetIds);
 
-        // The Transcribe widget is Topmost too and was just shown; re-activate
-        // so the wizard stays readable above it.
+        // The Transcribe widget is Topmost too and the Settings window activates
+        // itself when shown; re-activate so the wizard stays readable above them,
+        // and take the keyboard back so the tour stays drivable from Enter.
         Activate();
+        FocusNextButton();
     }
+
+    /// <summary>
+    /// Puts keyboard focus on Next. <see cref="NavigationMethod.Tab"/> so the
+    /// focus ring is actually drawn — the user has to be able to see that Enter
+    /// will advance.
+    /// </summary>
+    private void FocusNextButton() =>
+        this.FindControl<Button>("NextButton")?.Focus(NavigationMethod.Tab);
 
     private async Task<Window?> WaitForTargetWindowAsync(OnboardingTargetWindow kind, int version)
     {
