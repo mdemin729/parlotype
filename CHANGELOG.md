@@ -12,6 +12,52 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-08-02
+
+### Highlights
+
+- **A guided tour greets you on first launch.** It opens the real Transcribe
+  and Settings windows and points at the real controls, naming your actual
+  configured hotkeys instead of showing generic defaults — so it can't go
+  stale the way a screenshot walkthrough would. Replay it anytime from
+  **Settings → Help**.
+- **Running Parlotype twice is safe now.** Opening it again — a Start-menu
+  tile, a pinned shortcut, "Run now" after install — used to silently start a
+  second, competing copy. Now it just brings the existing window forward.
+
+### Added
+
+- **First-run tour.** An 8-step walkthrough covering recording, the speech
+  engine, model selection, cloud engines, and the tray icon. It shows once,
+  including on your first launch after upgrading from an earlier version.
+- **Settings → Help.** Replay the tour with **Open the tour**, and see a live
+  reference of your current hotkeys.
+
+### Fixed
+
+- **Launching Parlotype a second time no longer creates two competing
+  copies.** Each extra process used to load its own model and race the others
+  to answer the same hotkey press, so which one (if either) typed your
+  dictation was undefined. A second launch now just brings the existing
+  recording window to the front, the same as clicking the tray icon.
+
+<details>
+<summary>Under the hood</summary>
+
+Full rationale for each item is in the linked decision record.
+
+- Single-instance enforcement via a named mutex acquired in `Program.Main`,
+  with cross-process activation of the existing window
+  ([ADR-055](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/055-single-instance-guard.md)).
+- The onboarding tour's live UI highlighting, deep links into Settings
+  sections, and the repo's first externalized-strings layer
+  ([ADR-056](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/056-first-run-onboarding-wizard.md)).
+- Release notes are now curated from this file instead of falling back to the
+  raw squash-merge commit body
+  ([ADR-054](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/054-curated-release-notes.md)).
+
+</details>
+
 ## [0.4.0] — 2026-08-02
 
 ### Highlights
@@ -226,7 +272,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.1
 [0.4.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.0
 [0.3.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.3.0
 [0.2.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.2.0
