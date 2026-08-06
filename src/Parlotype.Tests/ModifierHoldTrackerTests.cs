@@ -47,15 +47,45 @@ public class ModifierHoldTrackerTests
     }
 
     [Fact]
-    public void Key_Pressed_After_Grace_Window_Does_Not_Abort()
+    public void Key_Pressed_After_Grace_Window_Still_Aborts_A_Ctrl_Hold()
     {
-        // Users do type while dictating.
+        // Nothing typed with Ctrl down arrives as text, so however long the user
+        // took to reach for it, this is a shortcut and not dictation.
         var tracker = RightCtrlTracker();
 
         Assert.Equal(HoldOutcome.Started, tracker.Process(CtrlDown(0)));
-        Assert.Equal(HoldOutcome.None,
+        Assert.Equal(HoldOutcome.Aborted,
             tracker.Process(HotkeyKeyEvent.KeyDown("C", 900, HotkeyModifiers.Ctrl)));
-        Assert.Equal(HoldOutcome.Stopped, tracker.Process(CtrlUp(3000)));
+        Assert.Equal(HoldOutcome.None, tracker.Process(CtrlUp(3000)));
+    }
+
+    [Fact]
+    public void Key_Pressed_After_Grace_Window_Also_Aborts_An_Alt_Hold()
+    {
+        // Alt is a command modifier too — same rule as Ctrl.
+        var tracker = new ModifierHoldTracker(
+            HotkeyGesture.ForHold(ModifierKey.Alt, ModifierSide.Right), deferStart: false);
+
+        Assert.Equal(HoldOutcome.Started, tracker.Process(
+            HotkeyKeyEvent.ModifierDown(ModifierKey.Alt, ModifierSide.Right, 0)));
+        Assert.Equal(HoldOutcome.Aborted,
+            tracker.Process(HotkeyKeyEvent.KeyDown("Tab", 900, HotkeyModifiers.Alt)));
+    }
+
+    [Fact]
+    public void Key_Pressed_After_Grace_Window_Does_Not_Abort_A_Shift_Hold()
+    {
+        // Users do type while dictating, and Shift composes text rather than
+        // commands, so the grace window still governs there.
+        var tracker = new ModifierHoldTracker(
+            HotkeyGesture.ForHold(ModifierKey.Shift, ModifierSide.Right), deferStart: false);
+
+        Assert.Equal(HoldOutcome.Started, tracker.Process(
+            HotkeyKeyEvent.ModifierDown(ModifierKey.Shift, ModifierSide.Right, 0)));
+        Assert.Equal(HoldOutcome.None,
+            tracker.Process(HotkeyKeyEvent.KeyDown("C", 900, HotkeyModifiers.Shift)));
+        Assert.Equal(HoldOutcome.Stopped, tracker.Process(
+            HotkeyKeyEvent.ModifierUp(ModifierKey.Shift, ModifierSide.Right, 3000)));
     }
 
     [Fact]

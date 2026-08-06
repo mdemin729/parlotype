@@ -33,7 +33,10 @@ public class HotkeyCancelTests
         await vm.CancelRecordingAsync();
 
         Assert.False(vm.IsRecording);
-        Assert.Equal(1, pipeline.StopCount);
+        // The discard path, not the draining stop — the buffered audio is never
+        // transcribed rather than transcribed and then thrown away.
+        Assert.Equal(1, pipeline.CancelCount);
+        Assert.Equal(0, pipeline.StopCount);
         Assert.Equal("Cancelled", vm.StatusText);
 
         // A transcription that lands after the cancel has nowhere to go.
@@ -51,6 +54,7 @@ public class HotkeyCancelTests
 
         await vm.CancelRecordingAsync();
 
+        Assert.Equal(0, pipeline.CancelCount);
         Assert.Equal(0, pipeline.StopCount);
         Assert.False(vm.IsRecording);
     }
@@ -94,7 +98,8 @@ public class HotkeyCancelTests
         await SettleAsync();
 
         Assert.False(vm.IsRecording);
-        Assert.Equal(1, pipeline.StopCount);
+        Assert.Equal(1, pipeline.CancelCount);
+        Assert.Equal(0, pipeline.StopCount);
         Assert.Equal("Cancelled", vm.StatusText);
 
         pipeline.RaiseTranscriptionAvailable("discard me");

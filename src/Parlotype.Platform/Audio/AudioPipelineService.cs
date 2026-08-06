@@ -53,9 +53,30 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     private Task? _transcriptionTask;
     private bool _disposed;
 
+    /// <summary>Cancels the recognizer call in flight when the user discards a recording.</summary>
+    private CancellationTokenSource? _transcribeCts;
+
+    /// <summary>
+    /// Set by <see cref="CancelAsync"/>. Read by the segmenter and transcription
+    /// stages as they wind down, which is what turns the ordinary drain into a
+    /// discard. Volatile because the three stages run on different threads.
+    /// </summary>
+    private volatile bool _discarding;
+
     /// <summary>Serialises model initialisation so a background prewarm and an
     /// interactive start never load the model (or mutate cached settings) concurrently.</summary>
     private readonly SemaphoreSlim _initLock = new(1, 1);
+
+    /// <summary>
+    /// Serialises <see cref="StartAsync"/> against <see cref="ShutdownAsync"/>.
+    /// Nothing upstream guarantees a stop/cancel and a start never overlap — the
+    /// view model's own cancel path deliberately does not wait on an in-flight
+    /// start (ADR-039/057) — and without this lock two overlapping calls could
+    /// both pass the `IsRunning` gate, or a stale call's cleanup tail could null
+    /// out the fields of a session a concurrent <see cref="StartAsync"/> had
+    /// already begun. No disposal needed: same reasoning as <see cref="_initLock"/>.
+    /// </summary>
+    private readonly SemaphoreSlim _lifecycleLock = new(1, 1);
 
     // Incremental VAD state for batch mode
     private int _vadProcessedUpTo;
@@ -123,35 +144,47 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (IsRunning)
-            return;
-
-        _mode = mode;
-
-        // Pre-size once (Clear keeps capacity): avoids staged growth re-allocations
-        // of the up-to-1.92 MB backing array on the capture path. Slack covers the
-        // chunk that lands just before the overflow check trips.
-        _sampleBuffer.EnsureCapacity(MaxBatchBufferSamples + SampleRate);
-
-        await EnsureModelInitializedAsync(cancellationToken);
-
-        _rawChannel = Channel.CreateUnbounded<RawChunk>(new UnboundedChannelOptions
+        await _lifecycleLock.WaitAsync(cancellationToken);
+        try
         {
-            SingleReader = true,
-        });
-        _utteranceChannel = Channel.CreateUnbounded<float[]>(new UnboundedChannelOptions
+            if (IsRunning)
+                return;
+
+            _mode = mode;
+            _discarding = false;
+
+            // Pre-size once (Clear keeps capacity): avoids staged growth re-allocations
+            // of the up-to-1.92 MB backing array on the capture path. Slack covers the
+            // chunk that lands just before the overflow check trips.
+            _sampleBuffer.EnsureCapacity(MaxBatchBufferSamples + SampleRate);
+
+            await EnsureModelInitializedAsync(cancellationToken);
+
+            _rawChannel = Channel.CreateUnbounded<RawChunk>(new UnboundedChannelOptions
+            {
+                SingleReader = true,
+            });
+            _utteranceChannel = Channel.CreateUnbounded<float[]>(new UnboundedChannelOptions
+            {
+                SingleReader = true,
+                SingleWriter = true,
+            });
+
+            _transcribeCts = new CancellationTokenSource();
+            var transcribeToken = _transcribeCts.Token;
+
+            _segmenterTask = Task.Run(() => SegmentLoopAsync(_rawChannel.Reader, _utteranceChannel.Writer));
+            _transcriptionTask = Task.Run(() => TranscribeLoopAsync(_utteranceChannel.Reader, transcribeToken));
+
+            _capture.DataAvailable += OnAudioDataAvailable;
+            await _capture.StartAsync(null, cancellationToken);
+            IsRunning = true;
+            _logger.LogInformation("Pipeline starting in {Mode} mode", _mode);
+        }
+        finally
         {
-            SingleReader = true,
-            SingleWriter = true,
-        });
-
-        _segmenterTask = Task.Run(() => SegmentLoopAsync(_rawChannel.Reader, _utteranceChannel.Writer));
-        _transcriptionTask = Task.Run(() => TranscribeLoopAsync(_utteranceChannel.Reader));
-
-        _capture.DataAvailable += OnAudioDataAvailable;
-        await _capture.StartAsync(null, cancellationToken);
-        IsRunning = true;
-        _logger.LogInformation("Pipeline starting in {Mode} mode", _mode);
+            _lifecycleLock.Release();
+        }
     }
 
     /// <summary>
@@ -178,37 +211,88 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         }
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken = default)
+    public Task StopAsync(CancellationToken cancellationToken = default) =>
+        ShutdownAsync(discard: false, cancellationToken);
+
+    /// <inheritdoc />
+    public Task CancelAsync(CancellationToken cancellationToken = default) =>
+        ShutdownAsync(discard: true, cancellationToken);
+
+    /// <summary>Longest a stop waits for the pipeline to drain — Whisper may still be mid-utterance.</summary>
+    private static readonly TimeSpan StopDrainTimeout = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// A discard cancels the recognizer instead of waiting for it, so the stages
+    /// should unwind at once. The wait exists only so a decode already inside
+    /// native code (sherpa-onnx cannot be interrupted there) doesn't leave a
+    /// detached task writing into fields the next start is about to reuse.
+    /// </summary>
+    private static readonly TimeSpan CancelDrainTimeout = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// Winds the pipeline down. With <paramref name="discard"/> the buffered
+    /// audio is thrown away rather than transcribed: the segmenter skips its
+    /// final flush and the transcription stage drops whatever is queued instead
+    /// of recognizing it.
+    /// </summary>
+    private async Task ShutdownAsync(bool discard, CancellationToken cancellationToken)
     {
-        if (!IsRunning)
-            return;
-
-        await _capture.StopAsync(cancellationToken);
-        _capture.DataAvailable -= OnAudioDataAvailable;
-
-        // Completing the raw writer lets the segmenter drain pending chunks, run
-        // the final buffer flush, and complete the utterance writer, which in
-        // turn lets the transcription loop drain and exit.
-        _rawChannel?.Writer.TryComplete();
-
-        if (_segmenterTask is not null && _transcriptionTask is not null)
+        await _lifecycleLock.WaitAsync(cancellationToken);
+        try
         {
-            // Wait for drain with a generous timeout for Whisper processing
-            var pipelineDrained = Task.WhenAll(_segmenterTask, _transcriptionTask);
-            var completed = await Task.WhenAny(
-                pipelineDrained,
-                Task.Delay(TimeSpan.FromSeconds(30), cancellationToken));
-            if (completed != pipelineDrained)
-                _logger.LogWarning("Pipeline drain timed out after 30s");
+            if (!IsRunning)
+                return;
+
+            // Both flags must be set before the writer completes, or the segmenter
+            // could reach its flush — and the recognizer its next utterance —
+            // believing this is an ordinary stop.
+            if (discard)
+            {
+                _discarding = true;
+                _transcribeCts?.Cancel();
+            }
+
+            await _capture.StopAsync(cancellationToken);
+            _capture.DataAvailable -= OnAudioDataAvailable;
+
+            // Completing the raw writer lets the segmenter drain pending chunks, run
+            // the final buffer flush, and complete the utterance writer, which in
+            // turn lets the transcription loop drain and exit.
+            _rawChannel?.Writer.TryComplete();
+
+            var drained = true;
+            if (_segmenterTask is not null && _transcriptionTask is not null)
+            {
+                // Wait for drain with a generous timeout for Whisper processing
+                var pipelineDrained = Task.WhenAll(_segmenterTask, _transcriptionTask);
+                var timeout = discard ? CancelDrainTimeout : StopDrainTimeout;
+                var completed = await Task.WhenAny(
+                    pipelineDrained,
+                    Task.Delay(timeout, cancellationToken));
+                drained = completed == pipelineDrained;
+                if (!drained)
+                    _logger.LogWarning("Pipeline drain timed out after {Seconds}s", timeout.TotalSeconds);
+            }
+
+            _rawChannel = null;
+            _utteranceChannel = null;
+            _segmenterTask = null;
+            _transcriptionTask = null;
+
+            // Only safe to dispose once the loop that observes the token has exited;
+            // after a timed-out drain it is still running, and a CTS needs no
+            // disposal anyway unless its WaitHandle was used, which it never is.
+            if (drained)
+                _transcribeCts?.Dispose();
+            _transcribeCts = null;
+
+            IsRunning = false;
+            _logger.LogInformation(discard ? "Pipeline cancelled, audio discarded" : "Pipeline stopped");
         }
-
-        _rawChannel = null;
-        _utteranceChannel = null;
-        _segmenterTask = null;
-        _transcriptionTask = null;
-
-        IsRunning = false;
-        _logger.LogInformation("Pipeline stopped");
+        finally
+        {
+            _lifecycleLock.Release();
+        }
     }
 
     private void OnAudioDataAvailable(object? sender, AudioDataEventArgs e)
@@ -391,7 +475,9 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     /// <summary>Final flush when capture ends: VAD over the whole remaining buffer.</summary>
     private void FlushBuffer(ChannelWriter<float[]> utterances)
     {
-        if (_sampleBuffer.Count < 1024)
+        // The user discarded this recording — running VAD over the tail only to
+        // queue an utterance nobody will transcribe is wasted work.
+        if (_discarding || _sampleBuffer.Count < 1024)
         {
             ClearBufferState();
             return;
@@ -446,16 +532,35 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     /// previous design polled a ConcurrentQueue every 50 ms) and raises the
     /// pipeline events. Exits when the utterance channel completes and drains.
     /// </summary>
-    private async Task TranscribeLoopAsync(ChannelReader<float[]> reader)
+    private async Task TranscribeLoopAsync(ChannelReader<float[]> reader, CancellationToken cancellationToken)
     {
         await foreach (var samples in reader.ReadAllAsync())
         {
+            // Keep reading so the channel drains and the loop terminates, but
+            // recognize nothing: the user threw this recording away.
+            if (_discarding)
+                continue;
+
             try
             {
                 _logger.LogDebug("Sending {SampleCount} samples ({Duration:F1}s) to speech recognizer",
                     samples.Length, samples.Length / 16_000.0);
-                // Use CancellationToken.None so in-flight transcription completes even during shutdown
-                var result = await _recognizer.TranscribeAsync(samples, CancellationToken.None);
+                // The token fires only on CancelAsync, so an ordinary stop still
+                // lets an in-flight transcription complete.
+                var result = await _recognizer.TranscribeAsync(samples, cancellationToken);
+
+                // sherpa-onnx cannot observe cancellation mid-decode, so a call
+                // already in flight when CancelAsync fired can return normally
+                // instead of throwing, long after ShutdownAsync gave up waiting
+                // and a brand-new session started. cancellationToken is the one
+                // this loop was handed at StartAsync — it stays bound to *this*
+                // session's (now-cancelled) source even after a new StartAsync
+                // replaces the field, so this check can't be fooled by a restart.
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogDebug("Transcription finished after cancellation; discarding the result");
+                    continue;
+                }
 
                 if (_textProcessor is not null)
                     result = result with { Text = _textProcessor.Process(result.Text) };
@@ -474,6 +579,12 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                 {
                     _logger.LogDebug("Transcription returned empty text");
                 }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // A discard, not a failure — raising TranscriptionFailed here
+                // would put an error dialog in front of a user who just cancelled.
+                _logger.LogDebug("Transcription cancelled; discarding the utterance");
             }
             catch (Exception ex)
             {

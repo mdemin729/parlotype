@@ -80,6 +80,20 @@ capture callback ──Channel<RawChunk>──▶ segmenter task ──Channel<f
 - Shutdown = channel completion: StopAsync completes the raw writer, the
   segmenter drains + flushes + completes the utterance writer, the
   transcription loop drains (30 s cap). No polling loops remain.
+- `CancelAsync` is the discard counterpart (ADR-057), sharing
+  `ShutdownAsync(discard, ct)`: `_discarding` + a cancelled `_transcribeCts` are
+  set *before* the writer completes, so the segmenter skips its final flush and
+  the transcription loop drains without recognizing. Cancellation is not a
+  failure — it does not raise `TranscriptionFailed`. 5 s cap.
+- Two concurrency hardenings added after code review of ADR-057: (1)
+  `TranscribeLoopAsync` rechecks its own session-scoped `cancellationToken`
+  right before publishing — sherpa-onnx can't observe cancellation mid-decode,
+  so a call already in flight can return normally well after the drain gave up
+  waiting, and without the recheck that result could land in a session that
+  had since restarted; (2) `StartAsync`/`ShutdownAsync` serialize behind a
+  `_lifecycleLock`, since nothing upstream guarantees a stop/cancel and a start
+  never overlap and two overlapping shutdown calls could otherwise corrupt a
+  newly-started session's fields.
 - Transcripts are never logged (security audit S1, [[decisions/_index|ADR-046]])
 - UI updates dispatch to `Avalonia.Threading.Dispatcher.UIThread`
 

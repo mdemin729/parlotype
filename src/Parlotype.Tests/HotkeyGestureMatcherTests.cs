@@ -81,19 +81,55 @@ public class HotkeyGestureMatcherTests
     }
 
     [Fact]
-    public void Typing_Well_Into_A_Hold_Does_Not_Abort_It()
+    public void A_Slow_Right_Ctrl_Shortcut_Still_Cancels_The_Recording()
     {
-        // People do type while dictating; only keys pressed right at the start
-        // suggest the hold was really a shortcut.
+        // Nothing typed with Ctrl down reaches the app as text, so a keystroke
+        // this late is still a shortcut rather than dictation — however long the
+        // user took to reach for it.
         var matcher = Default();
 
         matcher.Process(RCtrlDown(0));
         Assert.Equal(DictationAction.Start, matcher.ProcessTimeout(250).Action);
         matcher.SetDictationActive(true);
 
+        var result = matcher.Process(HotkeyKeyEvent.KeyDown("C", 2000, HotkeyModifiers.Ctrl));
+        Assert.Equal(DictationAction.Cancel, result.Action);
+        Assert.False(result.Suppress); // the app still gets its Ctrl+C
+
+        // The abort latches: releasing the key must not transcribe after all.
+        Assert.Equal(DictationAction.None, matcher.Process(RCtrlUp(3000)).Action);
+    }
+
+    [Fact]
+    public void An_Alt_Hold_Cancels_On_Any_Key()
+    {
+        var matcher = new HotkeyGestureMatcher(
+            [DictationHotkey.Hold(ModifierKey.Alt, ModifierSide.Right)]);
+
+        Assert.Equal(DictationAction.Start, matcher.Process(
+            HotkeyKeyEvent.ModifierDown(ModifierKey.Alt, ModifierSide.Right, 0, HotkeyModifiers.Alt)).Action);
+        matcher.SetDictationActive(true);
+
+        Assert.Equal(DictationAction.Cancel,
+            matcher.Process(HotkeyKeyEvent.KeyDown("Tab", 2000, HotkeyModifiers.Alt)).Action);
+    }
+
+    [Fact]
+    public void Typing_Well_Into_A_Shift_Hold_Does_Not_Abort_It()
+    {
+        // Shift composes text rather than commands, so the grace window still
+        // applies there: people do type while dictating.
+        var matcher = new HotkeyGestureMatcher(
+            [DictationHotkey.Hold(ModifierKey.Shift, ModifierSide.Right)]);
+
+        Assert.Equal(DictationAction.Start, matcher.Process(
+            HotkeyKeyEvent.ModifierDown(ModifierKey.Shift, ModifierSide.Right, 0, HotkeyModifiers.Shift)).Action);
+        matcher.SetDictationActive(true);
+
         Assert.Equal(DictationAction.None,
-            matcher.Process(HotkeyKeyEvent.KeyDown("C", 900, HotkeyModifiers.Ctrl)).Action);
-        Assert.Equal(DictationAction.Stop, matcher.Process(RCtrlUp(3000)).Action);
+            matcher.Process(HotkeyKeyEvent.KeyDown("C", 900, HotkeyModifiers.Shift)).Action);
+        Assert.Equal(DictationAction.Stop, matcher.Process(
+            HotkeyKeyEvent.ModifierUp(ModifierKey.Shift, ModifierSide.Right, 3000)).Action);
     }
 
     [Fact]

@@ -17,8 +17,17 @@ public interface IAudioPipeline : IAsyncDisposable
     /// <summary>Starts the audio pipeline with the specified mode.</summary>
     Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default);
 
-    /// <summary>Stops the audio pipeline.</summary>
+    /// <summary>Stops the audio pipeline, draining and transcribing whatever it still holds.</summary>
     Task StopAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Stops the audio pipeline and throws away everything still in flight:
+    /// buffered audio is dropped without a final flush, queued utterances are
+    /// discarded, and any running recognizer call is cancelled. Unlike
+    /// <see cref="StopAsync"/> this does not drain, so no
+    /// <see cref="TranscriptionAvailable"/> can follow it.
+    /// </summary>
+    Task CancelAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Whether the pipeline is currently running.</summary>
     bool IsRunning { get; }
