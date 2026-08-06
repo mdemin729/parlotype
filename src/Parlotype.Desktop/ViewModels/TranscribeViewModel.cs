@@ -556,9 +556,9 @@ public partial class TranscribeViewModel : ViewModelBase
 
     /// <summary>
     /// Stops recording and throws the audio away — nothing is transcribed and
-    /// nothing is typed. Detaching the handlers before stopping the pipeline is
-    /// what makes it a discard: whatever the pipeline still produces has nowhere
-    /// left to go.
+    /// nothing is typed. The pipeline's own discard path drops the buffered
+    /// audio and cancels any recognizer call in flight; detaching the handlers
+    /// first covers the utterance that finished between the keystroke and here.
     /// </summary>
     public async Task CancelRecordingAsync()
     {
@@ -587,7 +587,7 @@ public partial class TranscribeViewModel : ViewModelBase
 
         try
         {
-            await _pipeline.StopAsync();
+            await _pipeline.CancelAsync();
         }
         catch (Exception ex)
         {
@@ -611,7 +611,7 @@ public partial class TranscribeViewModel : ViewModelBase
 
         try
         {
-            await pipeline.StopAsync();
+            await pipeline.CancelAsync();
         }
         catch (Exception ex)
         {

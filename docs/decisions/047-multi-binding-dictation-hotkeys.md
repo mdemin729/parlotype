@@ -131,6 +131,12 @@ as active so Escape can abandon a start that is still waiting on the model.
 still produces has nowhere to go — no transcription, no injection. No Core
 audio contract changed; the discard decision lives in the view model.
 
+> **Amended by [ADR-057](057-cancel-dictation-on-command-shortcuts.md):** detaching
+> stops the text reaching the user but not the work — `StopAsync` still drains and
+> transcribes. Cancel now goes through `IAudioPipeline.CancelAsync`, which drops the
+> buffered audio and cancels the recognizer. The detach stays, first, as cover for an
+> utterance that completed in the meantime.
+
 Unlike `StopRecordingAsync`, cancel deliberately **does not wait** on an
 in-flight start. A stop waits because the user wants that recording (ADR-039);
 someone pressing Escape wants out immediately, and a cold model load can run
@@ -211,6 +217,9 @@ of breaking.
 - The abort grace window (300 ms) only covers shortcuts typed at normal speed.
   A slow Right Ctrl+C leaves a short recording that stops normally; it captures
   silence, so nothing is injected, but the widget does appear.
+  **Superseded by [ADR-057](057-cancel-dictation-on-command-shortcuts.md):** the
+  claim only holds when the user is not speaking, so Ctrl and Alt holds now abort
+  on any keystroke regardless of timing. Shift and Meta holds keep this window.
 
 **Verified:** besides the unit suites, an integration harness drove the real
 `SharpHookHotkeyService` against a real global hook using synthesized key

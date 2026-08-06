@@ -66,9 +66,18 @@ Users configure a *list* of gestures, not a single chord (ADR-047).
 - **State feedback**: `IGlobalHotkeyService.SetDictationActive(bool)`, fed by
   `HotkeyCoordinator` from `TranscribeViewModel.RecordingState` — toggle and
   Escape need state the hook cannot observe (widget button, failed model load).
+- **Hold aborts** (ADR-057): a keystroke during a hold means the user reached for
+  a shortcut, so the recording is discarded. For **Ctrl and Alt** holds that
+  applies to any keystroke at any time — nothing typed under a command modifier
+  reaches the app as text, so the "users type while dictating" case cannot arise
+  there. Shift and Meta keep the 300 ms `HoldAbortGraceMs` window. Scope is holds
+  only: `Ctrl+S` during toggle-mode dictation saves the file and keeps recording.
+  Suppression is unchanged, so the shortcut itself still reaches the target app.
 - **Cancel**: `TranscribeViewModel.CancelRecordingAsync()` detaches
-  `TranscriptionAvailable` *before* stopping the pipeline, so nothing is
-  transcribed or injected.
+  `TranscriptionAvailable` *before* calling `IAudioPipeline.CancelAsync()`, which
+  drops the buffered audio unflushed and cancels the recognizer rather than
+  draining it (ADR-057). The detach stays as cover for an utterance that
+  completed between the keystroke and the cancel.
 - **Validation**: `HotkeyConflictDetector.Check` returns `HotkeyConflict` with
   Blocking (OS-reserved, or duplicate/overlapping with existing bindings) or
   Warning (`Ctrl+Shift+Space` = IDE parameter hints; `Ctrl+Alt+<letter>` = AltGr)

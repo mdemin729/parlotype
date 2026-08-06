@@ -17,9 +17,14 @@ public static class HotkeyGestureTiming
 
     /// <summary>
     /// A hold that sees another key this soon after starting was a keyboard
-    /// shortcut, not a dictation gesture — Right Ctrl+C, say — so the recording
-    /// it began is discarded. Later keypresses are ignored, since users do type
-    /// while dictating.
+    /// shortcut, not a dictation gesture, so the recording it began is
+    /// discarded. Later keypresses are ignored, since users do type while
+    /// dictating.
+    /// <para>
+    /// This window only applies to Shift and Meta holds. A Ctrl or Alt hold
+    /// turns every keystroke into a command — nothing typed under it can be
+    /// text — so those abort on any keypress, whenever it lands.
+    /// </para>
     /// </summary>
     public const int HoldAbortGraceMs = 300;
 }

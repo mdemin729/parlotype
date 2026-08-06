@@ -696,6 +696,277 @@ public class AudioPipelineTests
             "clearing the source buffer afterwards should not erase them.");
     }
 
+    /// <summary>
+    /// Recognizer fake that blocks until its cancellation token fires, standing
+    /// in for a multi-second Whisper decode.
+    /// </summary>
+    private sealed class BlockingSpeechRecognizer : ISpeechRecognizer
+    {
+        private readonly TaskCompletionSource _entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public bool IsReady => true;
+
+        /// <summary>Completes as soon as a transcription starts.</summary>
+        public Task Entered => _entered.Task;
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public async Task<TranscriptionResult> TranscribeAsync(
+            ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
+        {
+            _entered.TrySetResult();
+            await Task.Delay(Timeout.Infinite, cancellationToken);
+            return new TranscriptionResult { Text = "never returned" };
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// A cancel discards rather than drains: the buffered speech never reaches
+    /// the recognizer, so no transcription is raised. The equivalent StopAsync
+    /// is covered by StopAsync_FlushesBufferedSpeech_BeforeReturning.
+    /// </summary>
+    [Fact]
+    public async Task CancelAsync_DiscardsBufferedSpeech_WithoutTranscribing()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        // Long threshold so silence-based flushing cannot fire first
+        await settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.VeryLong.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
+
+        var transcriptions = 0;
+        pipeline.TranscriptionAvailable += (_, _) => Interlocked.Increment(ref transcriptions);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        capture.SimulateAudioData(CreateSpeechSamples(1000)); // no trailing silence
+        await pipeline.CancelAsync();
+
+        Assert.Equal(0, transcriptions);
+        Assert.False(pipeline.IsRunning);
+    }
+
+    /// <summary>
+    /// The point of the discard path: a cancel must not sit waiting out a decode
+    /// the user has already abandoned. It cancels the recognizer instead.
+    /// </summary>
+    [Fact]
+    public async Task CancelAsync_AbortsATranscriptionAlreadyInFlight()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new BlockingSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
+
+        var failures = 0;
+        pipeline.TranscriptionFailed += (_, _) => Interlocked.Increment(ref failures);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+
+        // Speech plus enough silence to flush an utterance into the recognizer,
+        // which then blocks until cancelled.
+        capture.SimulateAudioData(CreateSpeechSamples(1000));
+        capture.SimulateAudioData(CreateSilenceSamples(600));
+
+        var entered = await Task.WhenAny(recognizer.Entered, Task.Delay(TimeSpan.FromSeconds(5)));
+        Assert.True(entered == recognizer.Entered, "the recognizer was never reached");
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        await pipeline.CancelAsync();
+        sw.Stop();
+
+        Assert.True(sw.ElapsedMilliseconds < 3000,
+            $"cancel blocked for {sw.ElapsedMilliseconds} ms waiting on the recognizer");
+        Assert.False(pipeline.IsRunning);
+        // A user cancel is not a transcription error — no dialog should follow.
+        Assert.Equal(0, failures);
+    }
+
+    /// <summary>
+    /// Recognizer fake that ignores its cancellation token entirely — standing
+    /// in for a sherpa-onnx decode already running in native code, which cannot
+    /// be interrupted once started (see the caveat on ADR-057).
+    /// </summary>
+    private sealed class UncancellableSpeechRecognizer : ISpeechRecognizer
+    {
+        private readonly TaskCompletionSource _entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource<string> _release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public bool IsReady => true;
+
+        /// <summary>Completes as soon as a transcription starts.</summary>
+        public Task Entered => _entered.Task;
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public async Task<TranscriptionResult> TranscribeAsync(
+            ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
+        {
+            _entered.TrySetResult();
+            var text = await _release.Task; // never observes cancellationToken
+            return new TranscriptionResult { Text = text };
+        }
+
+        /// <summary>Lets the "decode" finish, as if the native call had just returned.</summary>
+        public void Release(string text) => _release.TrySetResult(text);
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Regression for a race code review caught in the discard path: sherpa-onnx
+    /// cannot be interrupted mid-decode, so a cancel's drain wait can time out
+    /// while the recognizer is still running. If the eventual result were
+    /// published unconditionally, it could land on a brand-new session's live
+    /// handler instead of being discarded — the "zombie result after restart"
+    /// scenario this test drives end to end.
+    /// </summary>
+    [Fact]
+    public async Task CancelAsync_DiscardsADecodeThatOutlivesTheDrainTimeout_EvenAcrossARestart()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        var recognizer = new UncancellableSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        await settings.SetAsync(SettingsKeys.WaitTime, WaitTimeOption.Medium.ToString());
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
+
+        var received = new List<string>();
+        pipeline.TranscriptionAvailable += (_, e) =>
+        {
+            lock (received) received.Add(e.Result.Text);
+        };
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        capture.SimulateAudioData(CreateSpeechSamples(1000));
+        capture.SimulateAudioData(CreateSilenceSamples(600));
+
+        var entered = await Task.WhenAny(recognizer.Entered, Task.Delay(TimeSpan.FromSeconds(5)));
+        Assert.True(entered == recognizer.Entered, "the recognizer was never reached");
+
+        // The recognizer never observes cancellation, so this pays out the full
+        // 5s CancelDrainTimeout before ShutdownAsync gives up waiting.
+        await pipeline.CancelAsync();
+
+        // A brand-new session starts before the zombie decode finishes.
+        await pipeline.StartAsync(PipelineMode.Batch);
+
+        recognizer.Release("zombie result");
+        await Task.Delay(TimeSpan.FromSeconds(1)); // give the orphaned loop a chance to (wrongly) fire
+
+        lock (received)
+            Assert.DoesNotContain("zombie result", received);
+
+        await pipeline.CancelAsync();
+        await recognizer.DisposeAsync();
+    }
+
+    /// <summary>Capture double whose StopAsync hangs until the test releases it.</summary>
+    private sealed class GatedCaptureService : IAudioCaptureService
+    {
+        private readonly TaskCompletionSource _stopGate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public bool IsCapturing { get; private set; }
+        public int StartCount { get; private set; }
+
+        // This double never simulates audio, so the event is never raised —
+        // required by IAudioCaptureService regardless.
+#pragma warning disable CS0067
+        public event EventHandler<AudioDataEventArgs>? DataAvailable;
+#pragma warning restore CS0067
+
+        public Task StartAsync(MicrophoneInfo? device = null, CancellationToken cancellationToken = default)
+        {
+            StartCount++;
+            IsCapturing = true;
+            return Task.CompletedTask;
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken = default)
+        {
+            await _stopGate.Task;
+            IsCapturing = false;
+        }
+
+        /// <summary>Lets a pending StopAsync complete.</summary>
+        public void ReleaseStop() => _stopGate.TrySetResult();
+
+        public ValueTask DisposeAsync()
+        {
+            IsCapturing = false;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    /// <summary>
+    /// Regression for the lifecycle lock code review asked for: without it, a
+    /// StartAsync racing a still-in-flight ShutdownAsync could either silently
+    /// no-op (IsRunning was still true) or — worse — have the older call's
+    /// cleanup tail null out the fields of the session the start had already
+    /// begun. The lock makes the second call queue instead.
+    /// </summary>
+    [Fact]
+    public async Task StartAsync_WaitsForAConcurrentShutdownToFinish()
+    {
+        var capture = new GatedCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer();
+        var settings = new FakeSettingsService();
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(),
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        Assert.Equal(1, capture.StartCount);
+
+        // Begin a shutdown that will hang inside capture.StopAsync until
+        // released. Guard with try/finally: if an assertion below fails before
+        // the gate is released, the pipeline's own DisposeAsync would otherwise
+        // call StopAsync again and hang the whole test run on the same gate.
+        var shutdown = pipeline.CancelAsync();
+        try
+        {
+            // A concurrent start must queue behind it rather than racing it.
+            var restart = pipeline.StartAsync(PipelineMode.Batch);
+            await Task.Delay(200);
+            Assert.False(restart.IsCompleted, "start should be waiting on the in-flight shutdown");
+            Assert.Equal(1, capture.StartCount); // not yet re-started
+
+            capture.ReleaseStop();
+            await Task.WhenAll(shutdown, restart);
+
+            Assert.True(pipeline.IsRunning);
+            Assert.Equal(2, capture.StartCount);
+        }
+        finally
+        {
+            capture.ReleaseStop();
+        }
+
+        await pipeline.CancelAsync();
+    }
+
     [Fact]
     public async Task Pipeline_WithVadAndWhisper_ProducesTranscription()
     {

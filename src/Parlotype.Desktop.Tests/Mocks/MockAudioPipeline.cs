@@ -11,6 +11,7 @@ public sealed class MockAudioPipeline : IAudioPipeline
     public bool IsRunning { get; private set; }
     public int StartCount { get; private set; }
     public int StopCount { get; private set; }
+    public int CancelCount { get; private set; }
     public int PrewarmCount { get; private set; }
 
     /// <summary>When set, <see cref="StartAsync"/> will throw this exception.</summary>
@@ -41,6 +42,13 @@ public sealed class MockAudioPipeline : IAudioPipeline
     {
         IsRunning = false;
         StopCount++;
+        return Task.CompletedTask;
+    }
+
+    public Task CancelAsync(CancellationToken cancellationToken = default)
+    {
+        IsRunning = false;
+        CancelCount++;
         return Task.CompletedTask;
     }
 

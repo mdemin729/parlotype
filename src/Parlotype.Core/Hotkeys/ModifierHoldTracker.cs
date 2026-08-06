@@ -52,10 +52,12 @@ internal sealed class ModifierHoldTracker
         if (IsOwnModifier(e))
             return e.IsDown ? OnModifierDown(e) : OnModifierUp(e);
 
-        // Any other key going down shortly after the hold began means the user
-        // was reaching for a shortcut, not dictating.
+        // Any other key going down means the user was reaching for a shortcut,
+        // not dictating — immediately for a command modifier, and only within
+        // the grace window otherwise.
         if (e.IsDown && !e.IsModifier && _holding && !_aborted &&
-            e.TimestampMs - _holdStartMs <= HotkeyGestureTiming.HoldAbortGraceMs)
+            (IsCommandModifierHold ||
+             e.TimestampMs - _holdStartMs <= HotkeyGestureTiming.HoldAbortGraceMs))
         {
             _aborted = true;
             return _startEmitted ? HoldOutcome.Aborted : HoldOutcome.None;
@@ -122,6 +124,18 @@ internal sealed class ModifierHoldTracker
             ? HoldOutcome.Aborted
             : HoldOutcome.Stopped;
     }
+
+    /// <summary>
+    /// True when this hold is on a modifier that turns every other keystroke
+    /// into a command. Nothing typed while Ctrl or Alt is down reaches the
+    /// target app as text, so a keypress at any point during the hold — not
+    /// just inside <see cref="HotkeyGestureTiming.HoldAbortGraceMs"/> — means
+    /// the user is driving their application, and the dictation is discarded.
+    /// Shift composes text and Meta is not a shipped gesture, so both keep the
+    /// grace window.
+    /// </summary>
+    private bool IsCommandModifierHold =>
+        _gesture.Modifier is ModifierKey.Ctrl or ModifierKey.Alt;
 
     private bool IsOwnModifier(in HotkeyKeyEvent e) =>
         e.Modifier == _gesture.Modifier && _gesture.MatchesSide(e.Side);
