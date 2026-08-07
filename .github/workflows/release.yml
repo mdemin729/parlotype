@@ -28,6 +28,10 @@ on:
 
 permissions:
   contents: write
+  # Azure Artifact Signing authenticates by OIDC — no client secret is stored
+  # anywhere. Fork PRs get this downgraded to read, which is fine: they take the
+  # dry-run path and never reach the login step (ADR-058).
+  id-token: write
 
 env:
   # Permanent (ADR-053). Velopack derives the install directory
@@ -44,6 +48,11 @@ jobs:
     name: Pack ${{ matrix.rid }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 90
+    # Names the subject of the Entra federated credential
+    # (repo:mdemin729/parlotype:environment:release). It must carry no deployment
+    # branch/tag policy — one would block the PR and dispatch dry runs, which
+    # declare the same environment but never sign.
+    environment: release
 
     strategy:
       fail-fast: false
@@ -63,10 +72,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 8.0 is not used to build anything. The Artifact Signing dlib that vpk
+      # bundles for Azure signing is built against .NET 8 and will not load
+      # without that runtime present.
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       # Tag pushes release; everything else is a dry run that must not upload.
       - name: Resolve version and mode
@@ -159,10 +173,56 @@ jobs:
           --outputDir Releases
           --token "${{ secrets.GITHUB_TOKEN }}"
 
-      # Unsigned by design for now: code signing is planned but out of scope, and
-      # a build without credentials must still succeed so developers (and PRs)
-      # can test packaging. When certificates arrive, add --signParams /
-      # --azureTrustedSignFile here; nothing else in this workflow changes.
+      # Only tag pushes have credentials. vpk's bundled dlib authenticates via
+      # DefaultAzureCredential, which falls through to the Azure CLI credential
+      # this step leaves behind — no client secret is involved.
+      - name: Azure login (signing)
+        if: env.DRY_RUN == 'false'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # vpk reads VPK_AZURE_TRUSTED_SIGN_FILE from the environment, so signing is
+      # enabled by setting a variable rather than by changing the Pack command —
+      # the pack invocation below is byte-for-byte what an unsigned dry run runs.
+      - name: Enable code signing
+        if: env.DRY_RUN == 'false'
+        shell: pwsh
+        run: |
+          $missing = @()
+          if (-not $env:SIGN_ENDPOINT) { $missing += 'SIGN_ENDPOINT' }
+          if (-not $env:SIGN_ACCOUNT)  { $missing += 'SIGN_ACCOUNT' }
+          if (-not $env:SIGN_PROFILE)  { $missing += 'SIGN_PROFILE' }
+          if ($missing) {
+            Write-Host "::error::Repository variables not set: $($missing -join ', ') — cannot sign this release."
+            exit 1
+          }
+          # The endpoint must name the same region the signing account and the
+          # certificate profile live in; a mismatch surfaces as a 403 from
+          # SignerSign() rather than as anything that mentions regions.
+          $json = @{
+            Endpoint               = $env:SIGN_ENDPOINT
+            CodeSigningAccountName = $env:SIGN_ACCOUNT
+            CertificateProfileName = $env:SIGN_PROFILE
+          } | ConvertTo-Json
+          # UTF-8 *without* BOM. The dlib fails to parse the file if one is present,
+          # and Set-Content/Out-File on Windows PowerShell would write one.
+          $path = Join-Path $PWD 'signing.json'
+          [IO.File]::WriteAllText($path, $json, [Text.UTF8Encoding]::new($false))
+          "VPK_AZURE_TRUSTED_SIGN_FILE=$path" >> $env:GITHUB_ENV
+        env:
+          SIGN_ENDPOINT: ${{ vars.SIGN_ENDPOINT }}
+          SIGN_ACCOUNT: ${{ vars.SIGN_ACCOUNT }}
+          SIGN_PROFILE: ${{ vars.SIGN_PROFILE }}
+
+      # Signing is switched on by the two steps above, purely through
+      # VPK_AZURE_TRUSTED_SIGN_FILE. Signing must run inside vpk rather than over
+      # Releases/ afterwards: Update.exe is signed before it is embedded in the
+      # .nupkg, and Setup.exe after its payload is appended (ADR-058). A run with
+      # no credentials simply packs unsigned, which is what dry runs and fork PRs
+      # need.
       # Every value is quoted: PACK_AUTHORS ("Maksim Demin") has a space, and an
       # unquoted interpolation here splits on it — vpk then sees a stray
       # positional argument and rejects the whole command.
@@ -191,6 +251,38 @@ jobs:
           else
             echo "::notice::No delta package — expected only for the first release on this channel."
           fi
+
+      # A signing failure inside vpk is not always fatal to the pack, so assert on
+      # the output rather than on the exit code. Checking the portable zip as well
+      # as Setup.exe is deliberate: it proves the *packaged application* binaries
+      # were signed, not just the installer wrapping them.
+      - name: Verify signatures
+        if: env.DRY_RUN == 'false' && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          function Assert-Signed($path) {
+            $sig = Get-AuthenticodeSignature $path
+            Write-Host "$([IO.Path]::GetFileName($path)): $($sig.Status) — $($sig.SignerCertificate.Subject)"
+            if ($sig.Status -ne 'Valid') {
+              Write-Host "::error::$path is not validly signed ($($sig.Status))."
+              exit 1
+            }
+            # Artifact Signing certificates are valid for 72 hours. Without a
+            # timestamp every signature starts failing three days after release.
+            if (-not $sig.TimeStamperCertificate) {
+              Write-Host "::error::$path has no RFC3161 timestamp; the signature expires in 72 hours."
+              exit 1
+            }
+          }
+
+          Assert-Signed "Releases/${{ env.PACK_ID }}-${{ matrix.channel }}-Setup.exe"
+
+          $portable = "Releases/${{ env.PACK_ID }}-${{ matrix.channel }}-Portable.zip"
+          if (Test-Path $portable) {
+            Expand-Archive $portable -DestinationPath sigcheck -Force
+            Assert-Signed "sigcheck/${{ matrix.main_exe }}"
+            Remove-Item sigcheck -Recurse -Force
+          }
 
       - name: Upload artifacts (dry run)
         if: env.DRY_RUN == 'true'
