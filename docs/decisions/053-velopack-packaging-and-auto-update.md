@@ -208,6 +208,8 @@ until those platforms grow an equivalent.
 - Builds are unsigned, so Windows SmartScreen warns on first run. Code signing is
   planned separately; the pipeline has a documented slot for it and must keep
   working without credentials.
+  *Resolved by [ADR-058](058-installer-code-signing.md): tag builds sign through
+  `vpk` with Azure Artifact Signing; dry runs and fork PRs still pack unsigned.*
 - The app now makes a network request by default. Mitigated by disclosure and a
   one-click opt-out, but it is a real change to the app's behaviour.
 - Update operations only work in an installed build. `dotnet run` reports

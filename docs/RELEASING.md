@@ -38,10 +38,41 @@ not offered to users automatically.
 
 ### Required secrets
 
-**None beyond the built-in `GITHUB_TOKEN`.** Code signing is not wired up yet, so
-there are no certificates to configure and CI passes on a fork or a PR with no
-secrets at all. Unsigned builds trigger a Windows SmartScreen warning on first
-run; that is expected until signing lands.
+Tag builds sign the output with **Azure Artifact Signing**
+([ADR-058](decisions/058-installer-code-signing.md)). Dry runs and pull requests
+do not, and still pass with no secrets at all — the signing steps are gated on
+`DRY_RUN == 'false'`.
+
+| Kind | Name | Value |
+|---|---|---|
+| Secret | `AZURE_CLIENT_ID` | App registration (client) id |
+| Secret | `AZURE_TENANT_ID` | Directory (tenant) id |
+| Secret | `AZURE_SUBSCRIPTION_ID` | Subscription holding the signing account |
+| Variable | `SIGN_ENDPOINT` | Region URI, e.g. `https://weu.codesigning.azure.net` |
+| Variable | `SIGN_ACCOUNT` | Artifact Signing account name |
+| Variable | `SIGN_PROFILE` | Certificate profile name |
+
+No client secret is stored. The workflow authenticates by OIDC, and the app
+registration carries a federated credential with subject
+`repo:mdemin729/parlotype:environment:release` plus the **Artifact Signing
+Certificate Profile Signer** role on the signing account.
+
+> The GitHub environment named `release` must have **no** deployment branch or tag
+> policy. One would block the PR and dispatch dry runs, which declare the same
+> environment but never sign.
+
+**`SIGN_ENDPOINT` must name the region the signing account *and* the certificate
+profile live in.** A mismatch fails as a bare 403 from `SignerSign()` that says
+nothing about regions — it is the single most common setup error.
+
+Signing runs inside `vpk` (via `VPK_AZURE_TRUSTED_SIGN_FILE`), never over
+`Releases/` afterwards: `Update.exe` is signed before it is embedded in the
+`.nupkg` and `Setup.exe` after its payload is appended, so a post-hoc `signtool`
+or `azure/artifact-signing-action` pass can break the installer. Everything in the
+package is signed, not just `Setup.exe` — see ADR-058 for why.
+
+If a release must ship unsigned, remove the `Enable code signing` step; the `Pack`
+step needs no edit, because it never mentions signing.
 
 ### Dry runs
 
