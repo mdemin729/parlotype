@@ -12,6 +12,54 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.4.2] — 2026-08-06
+
+### Highlights
+
+- **The installer is digitally signed.** Windows SmartScreen no longer shows the
+  full-screen "Windows protected your PC" warning on install, with the run
+  button hidden behind "More info" — this is the first signed release.
+- **Canceling a dictation while holding Ctrl or Alt now always works.** A
+  shortcut typed at normal speed mid-recording — a slow Ctrl+C, say — used to
+  still transcribe what you'd said and type it into whatever you were working
+  in. Now any keystroke during the hold cancels, however fast you type it.
+
+### Changed
+
+- **Every file Parlotype ships is signed, not just `Setup.exe`.** `Update.exe`
+  and the bundled Whisper/Parakeet/Vulkan native libraries are covered too, so
+  Smart App Control and enterprise publisher-rule policies can run Parlotype
+  without extra exceptions.
+
+### Fixed
+
+- **Canceling a dictation while holding Ctrl or Alt now always cancels.**
+  Previously only a shortcut typed within 300ms of the key-down counted as a
+  cancel; anything slower let the recording finish normally and transcribe
+  into your target app. Holding Shift is unaffected — typing while Shift is
+  held still composes text as before, since dictation and Shift-modified
+  typing were never distinguishable.
+- **Canceling a dictation now actually throws the recording away**, instead of
+  quietly transcribing it in the background for up to 30 seconds afterward. A
+  cancel followed immediately by a new recording could previously be dropped
+  because of this.
+
+<details>
+<summary>Under the hood</summary>
+
+Full rationale for each item is in the linked decision record.
+
+- Installer and native-library signing via Azure Artifact Signing, invoked
+  from inside `vpk` rather than as a separate post-pack step, over OIDC with
+  no stored secret
+  ([ADR-058](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/058-installer-code-signing.md)).
+- Ctrl/Alt holds drop the abort grace window entirely, and cancel now drives a
+  real discard path (`IAudioPipeline.CancelAsync`) instead of draining through
+  the normal stop
+  ([ADR-057](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/057-cancel-dictation-on-command-shortcuts.md)).
+
+</details>
+
 ## [0.4.1] — 2026-08-02
 
 ### Highlights
@@ -272,7 +320,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.2
 [0.4.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.1
 [0.4.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.0
 [0.3.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.3.0
