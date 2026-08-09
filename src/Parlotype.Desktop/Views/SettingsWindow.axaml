@@ -53,6 +53,9 @@
         <DataTemplate DataType="vms:ThemeSettingsViewModel">
             <v:ThemeSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:StartupSettingsViewModel">
+            <v:StartupSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:UpdateSettingsViewModel">
             <v:UpdateSettingsView />
         </DataTemplate>

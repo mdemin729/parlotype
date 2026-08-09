@@ -251,6 +251,28 @@ Windows-only — macOS and Linux have no uninstall hooks.
   on (`SettingsKeys.UpdatesCheckAutomatically`), disclosed in README and in the
   page itself, one-click opt-out.
 
+### Launch at sign-in
+
+See [[decisions/_index|ADR-059]] and [[windows-run-key-startup-approval]].
+
+- **Core**: `ILaunchAtLoginService` (`IsSupported`/`GetState`/`SetEnabled`, never
+  throws), `LaunchAtLoginState` (`Unsupported`/`Disabled`/`Enabled`/
+  `BlockedByOperatingSystem`), `SettingsKeys.LaunchAtLogin`.
+- **Platform**: `WindowsRunKeyLaunchAtLoginService` over the per-user `HKCU` Run
+  key, registering the Velopack **stub** at the install root (never
+  `current\`, which is replaced on update) and only for Velopack-installed
+  builds. `NoOpLaunchAtLoginService` elsewhere. `LaunchAtLoginCoordinator` owns
+  the default-on policy and writes only when preference and OS state differ.
+- **Desktop**: `App` reconciles once at startup, fire-and-forget off the UI
+  thread; `StartupSettingsViewModel` drives Settings → Application → Startup and
+  reconciles again on page load.
+- **The OS gets a vote**: Windows stores a Task Manager veto in
+  `…\Explorer\StartupApproved\Run`, *separately* from the entry — so the state is
+  a 4-value enum, not a bool. Parlotype detects and explains that state but never
+  writes the approval blob.
+- **Default on, disclosed**: absent preference means on, so upgrades adopt it
+  too; the first-run tour's tray step says so and points at the opt-out.
+
 ## Onboarding Tour
 
 See [[decisions/_index|ADR-056]]. Desktop-only (Core gains just

@@ -154,6 +154,23 @@ public static class SettingsKeys
     public const string UninstallRemovesUserData = "UninstallRemovesUserData";
 
     /// <summary>
+    /// Whether Parlotype registers itself to start when the user signs in
+    /// (ADR-059). Stored as a string bool. Defaults to <c>true</c> when unset —
+    /// a dictation tool bound to a global hotkey is useless if it is not
+    /// running, and the app starts tray-only, so an autostart costs the user no
+    /// screen real estate. The default is disclosed in the first-run tour, and
+    /// the toggle lives at Settings → Application → Startup.
+    /// </summary>
+    /// <remarks>
+    /// This records the user's <em>intent</em>. What the OS will actually do is
+    /// <see cref="ILaunchAtLoginService.GetState"/>, which can disagree — the
+    /// user may have vetoed the entry in Task Manager, or this build may not be
+    /// registrable at all. Startup reconciles the two; where they conflict, the
+    /// OS wins and the UI explains why.
+    /// </remarks>
+    public const string LaunchAtLogin = "LaunchAtLogin";
+
+    /// <summary>
     /// Whether the first-run onboarding tour has already been offered
     /// (ADR-056). Stored as a string bool; unset or unparsable means "not yet"
     /// and the tour auto-opens once. Written <c>"True"</c> at the moment the

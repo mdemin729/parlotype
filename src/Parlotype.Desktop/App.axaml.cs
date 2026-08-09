@@ -17,6 +17,7 @@ using Parlotype.Desktop.ViewModels.Onboarding;
 using Parlotype.Desktop.ViewModels.Settings;
 using Parlotype.Platform;
 using Parlotype.Platform.Speech;
+using Parlotype.Platform.Startup;
 using Parlotype.Platform.TextInjection;
 using ZLogger;
 
@@ -90,6 +91,13 @@ public class App : Application
         // must never stop the app from starting.
         _ = _services.GetRequiredService<IOnboardingService>().MaybeShowOnFirstRunAsync();
 
+        // Bring the sign-in registration in line with the stored preference —
+        // default-on, so a fresh install and an upgrade both pick it up here
+        // (ADR-059). Also repairs an entry left pointing at an old install
+        // location. Off the UI thread: it touches the registry and settings.json,
+        // and nothing on screen depends on the outcome.
+        _ = Task.Run(() => ReconcileLaunchAtLoginAsync(_services));
+
         _ = Task.Run(() => LogNvidiaEnvironmentAsync(_services));
         _ = Task.Run(() => LogVulkanEnvironmentAsync(_services));
 
@@ -116,6 +124,22 @@ public class App : Application
         {
             // A broken updater must never stop the app from transcribing.
             logger.LogWarning(ex, "Could not start the update checker");
+        }
+    }
+
+    private static async Task ReconcileLaunchAtLoginAsync(IServiceProvider provider)
+    {
+        var logger = provider.GetRequiredService<ILogger<App>>();
+        try
+        {
+            var state = await provider.GetRequiredService<LaunchAtLoginCoordinator>().ReconcileAsync();
+            logger.LogInformation("Launch at sign-in: {State}", state);
+        }
+        catch (Exception ex)
+        {
+            // Starting with Windows is a convenience; failing to arrange it is
+            // never a reason to disrupt a launch the user already performed.
+            logger.LogWarning(ex, "Could not reconcile launch at sign-in");
         }
     }
 
@@ -294,6 +318,7 @@ public class App : Application
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();
+        services.AddSingleton<StartupSettingsViewModel>();
         services.AddSingleton<UpdateSettingsViewModel>();
         services.AddSingleton<DataSettingsViewModel>();
         services.AddSingleton<HelpSettingsViewModel>();

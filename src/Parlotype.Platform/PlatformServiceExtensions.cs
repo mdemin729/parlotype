@@ -10,6 +10,7 @@ using Parlotype.Platform.Hotkeys;
 using Parlotype.Platform.Settings;
 using Parlotype.Platform.Speech;
 using Parlotype.Platform.LlamaServer;
+using Parlotype.Platform.Startup;
 using Parlotype.Platform.Updates;
 
 namespace Parlotype.Platform;
@@ -77,18 +78,26 @@ public static class PlatformServiceExtensions
         // ILlamaServerInstaller for callers that just want the headless impl.
         services.AddSingleton<LlamaServerInstaller>();
         services.AddSingleton<ILlamaServerInstaller>(sp => sp.GetRequiredService<LlamaServerInstaller>());
+        // Owns the default-on policy for launch at sign-in and keeps the OS in
+        // step with it; the per-OS registration itself is ILaunchAtLoginService
+        // below (ADR-059).
+        services.AddSingleton<LaunchAtLoginCoordinator>();
 
         if (OperatingSystem.IsWindows())
         {
             services.AddSingleton<INvidiaEnvironmentProvider, WindowsNvidiaEnvironmentProvider>();
             services.AddSingleton<IVulkanEnvironmentProvider, WindowsVulkanEnvironmentProvider>();
             services.AddSingleton<IKeyboardLayoutService, Win32KeyboardLayoutService>();
+            // Per-user HKCU Run key. Registers only for Velopack-installed
+            // builds; opt-out lives at SettingsKeys.LaunchAtLogin (ADR-059).
+            services.AddSingleton<ILaunchAtLoginService, WindowsRunKeyLaunchAtLoginService>();
         }
         else
         {
             services.AddSingleton<INvidiaEnvironmentProvider, NoOpNvidiaEnvironmentProvider>();
             services.AddSingleton<IVulkanEnvironmentProvider, NoOpVulkanEnvironmentProvider>();
             services.AddSingleton<IKeyboardLayoutService, NoOpKeyboardLayoutService>();
+            services.AddSingleton<ILaunchAtLoginService, NoOpLaunchAtLoginService>();
         }
 
         return services;

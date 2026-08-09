@@ -4,6 +4,8 @@ using Parlotype.Core.Speech;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.ViewModels.Settings;
+using Parlotype.Platform.Startup;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Parlotype.Desktop.Tests;
@@ -31,13 +33,17 @@ public class SettingsWindowViewModelTests
         var llamaCpp = new LlamaCppSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
         var theme = new ThemeSettingsViewModel(settings);
+        var startup = new StartupSettingsViewModel(new LaunchAtLoginCoordinator(
+            settings,
+            new MockLaunchAtLoginService(),
+            NullLogger<LaunchAtLoginCoordinator>.Instance));
         var updates = new UpdateSettingsViewModel(settings, new MockUpdateService());
         var data = new DataSettingsViewModel(settings);
         var help = new HelpSettingsViewModel(new MockOnboardingService(), hotkeyService: null);
 
         return new SettingsWindowViewModel(
             engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, parakeetModel,
-            cloudProviders, prompts, llamaCpp, hotkey, theme, updates, data, help);
+            cloudProviders, prompts, llamaCpp, hotkey, theme, startup, updates, data, help);
     }
 
     [Fact]
@@ -62,6 +68,7 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Startup"),
             n => AssertSection(n, "Updates"),
             n => AssertSection(n, "Data"),
             n => AssertSection(n, "Help"));
@@ -93,6 +100,7 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Startup"),
             n => AssertSection(n, "Updates"),
             n => AssertSection(n, "Data"),
             n => AssertSection(n, "Help"));
@@ -118,6 +126,7 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Startup"),
             n => AssertSection(n, "Updates"),
             n => AssertSection(n, "Data"),
             n => AssertSection(n, "Help"));
@@ -144,6 +153,7 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Appearance"),
             n => AssertSection(n, "Theme"),
             n => AssertHeader(n, "Application"),
+            n => AssertSection(n, "Startup"),
             n => AssertSection(n, "Updates"),
             n => AssertSection(n, "Data"),
             n => AssertSection(n, "Help"));
