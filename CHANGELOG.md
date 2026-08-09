@@ -12,6 +12,36 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.4.3] — 2026-08-08
+
+### Highlights
+
+- **Parlotype now starts with Windows, so your hotkey works right after a
+  reboot.** Parlotype only listens for its dictation hotkey while it's running,
+  and until now nothing started it after sign-in — a restart left the hotkey
+  silently dead until you opened the app yourself. This is on by default; turn
+  it off anytime at **Settings → Application → Startup**.
+
+### Added
+
+- **Settings → Application → Startup.** A single toggle for launching at
+  sign-in, with status text that reflects what Windows will actually do — for
+  example if you've separately switched Parlotype off in Task Manager's
+  Startup apps tab, the page tells you that instead of showing a switch that
+  claims to be on while nothing launches.
+
+<details>
+<summary>Under the hood</summary>
+
+Full rationale for each item is in the linked decision record.
+
+- Registers via the per-user `HKCU\...\Run` key (no elevation, no service, no
+  scheduled task) pointed at the Velopack install stub, reconciled against both
+  the stored preference and Windows' own Task Manager veto
+  ([ADR-059](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/059-launch-at-sign-in.md)).
+
+</details>
+
 ## [0.4.2] — 2026-08-06
 
 ### Highlights
@@ -320,7 +350,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.3
 [0.4.2]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.2
 [0.4.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.1
 [0.4.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.0
