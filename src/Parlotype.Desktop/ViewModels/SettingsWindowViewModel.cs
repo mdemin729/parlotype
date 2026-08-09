@@ -36,6 +36,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public LlamaCppSettingsViewModel LlamaCpp { get; }
     public HotkeySettingsViewModel Hotkey { get; }
     public ThemeSettingsViewModel Theme { get; }
+    public StartupSettingsViewModel Startup { get; }
     public UpdateSettingsViewModel Updates { get; }
     public DataSettingsViewModel Data { get; }
     public HelpSettingsViewModel Help { get; }
@@ -55,6 +56,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         LlamaCppSettingsViewModel llamaCpp,
         HotkeySettingsViewModel hotkey,
         ThemeSettingsViewModel theme,
+        StartupSettingsViewModel startup,
         UpdateSettingsViewModel updates,
         DataSettingsViewModel data,
         HelpSettingsViewModel help)
@@ -73,6 +75,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         LlamaCpp = llamaCpp;
         Hotkey = hotkey;
         Theme = theme;
+        Startup = startup;
         Updates = updates;
         Data = data;
         Help = help;
@@ -95,6 +98,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             llamaCpp,
             hotkey,
             theme,
+            startup,
             updates,
             data,
             help,

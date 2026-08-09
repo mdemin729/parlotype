@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             x:Class="Parlotype.Desktop.Views.Settings.StartupSettingsView"
+             x:DataType="vms:StartupSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="Startup" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="Parlotype listens for your dictation hotkey from the system tray, so it has to be running before you can dictate."
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding LaunchAtLogin, Mode=TwoWay}"
+                          IsEnabled="{Binding IsSupported}"
+                          OnContent="Start Parlotype when I sign in to Windows"
+                          OffContent="Do not start Parlotype automatically" />
+            <TextBlock Text="{Binding StatusText}"
+                       Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Only Task Manager can lift its own veto, so send the user there
+             rather than implying this switch can override it. -->
+        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                CornerRadius="4" Padding="12"
+                IsVisible="{Binding IsBlockedByWindows}">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Switched off in Windows" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Opacity="0.75" FontSize="12" TextWrapping="Wrap"
+                           Text="Open Task Manager, go to the Startup apps tab, select Parlotype and choose Enable. Windows keeps that decision separately from this setting, and only Task Manager can undo it." />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                CornerRadius="4" Padding="12"
+                IsVisible="{Binding IsSupported}">
+            <StackPanel Spacing="6">
+                <TextBlock Text="What this changes" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Opacity="0.75" FontSize="12" TextWrapping="Wrap"
+                           Text="A single entry under your own user account (HKCU Run), pointing at Parlotype. No service, no scheduled task, no administrator rights, nothing machine-wide. You can see and remove it yourself in Task Manager → Startup apps." />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>
