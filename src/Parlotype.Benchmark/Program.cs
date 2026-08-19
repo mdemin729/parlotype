@@ -172,6 +172,18 @@ runCommand.SetAction(async parseResult =>
     else
     {
         services.AddSingleton<IModelDownloadService, HeadlessModelDownloadService>();
+        // Pin the engine to Whisper for the same reason the other branches pin their
+        // model: without an override the recognizer resolves through
+        // DelegatingSpeechRecognizer, which reads SpeechEngine from the *user's*
+        // settings.json. Since Parakeet became the app default (ADR-041), that made
+        // every Whisper config silently benchmark Parakeet instead.
+        services.AddSingleton<ISettingsService>(new InMemorySettingsService(
+            new Dictionary<string, string?>
+            {
+                [SettingsKeys.SpeechEngine]         = nameof(SpeechEngine.Whisper),
+                [SettingsKeys.SelectedWhisperModel] = benchmarkConfig.EffectiveWhisper.Model.ToString(),
+                [SettingsKeys.RuntimePreference]    = benchmarkConfig.EffectiveWhisper.RuntimePreference.ToString(),
+            }));
     }
 
     await using var serviceProvider = services.BuildServiceProvider();
@@ -202,7 +214,9 @@ runCommand.SetAction(async parseResult =>
     }
     else
     {
-        recognizer = serviceProvider.GetRequiredService<ISpeechRecognizer>();
+        // Concrete type, not ISpeechRecognizer: bypasses DelegatingSpeechRecognizer's
+        // settings-driven routing entirely, matching the Parakeet/llama.cpp branches.
+        recognizer = serviceProvider.GetRequiredService<WhisperSpeechRecognizer>();
     }
 
     var vadService = benchmarkConfig.Vad.Enabled

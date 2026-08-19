@@ -284,4 +284,88 @@ public class SweepExpanderTests
         Assert.Equal(500, configs[1].Vad.MinSilenceDurationMs);
         Assert.Equal(800, configs[2].Vad.MinSilenceDurationMs);
     }
+    [Fact]
+    public void Expand_ParakeetSweep_CarriesEngineOntoEveryConfig()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Parakeet = new ParakeetConfig { ModelId = "parakeet-tdt-0.6b-v3-int8" },
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["vad.silenceThresholdMs"] = ToElements(500, 3000),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.Equal(2, configs.Count);
+        Assert.All(configs, c =>
+        {
+            Assert.True(c.IsParakeet);
+            Assert.False(c.IsWhisper);
+            Assert.Equal("parakeet-tdt-0.6b-v3-int8", c.Parakeet!.ModelId);
+        });
+    }
+
+    [Fact]
+    public void Expand_WithoutEngineBlock_StaysWhisper()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["whisper.model"] = ToElements("Base"),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.True(configs[0].IsWhisper);
+        Assert.Null(configs[0].Parakeet);
+    }
+
+    [Fact]
+    public void Expand_NullSilenceThreshold_SelectsOneShotMode()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["vad.silenceThresholdMs"] = ToElements(3000, null!),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.Equal(3000, configs[0].Vad.SilenceThresholdMs);
+        Assert.Null(configs[1].Vad.SilenceThresholdMs);
+        Assert.Contains("flushnone", configs[1].Name);
+    }
+
+    [Fact]
+    public void Expand_MaxBufferSeconds_AppliesToConfigAndName()
+    {
+        var sweep = new SweepConfig
+        {
+            Name = "test",
+            Datasets = ["ds"],
+            Sweep = new Dictionary<string, JsonElement[]>
+            {
+                ["vad.maxBufferSeconds"] = ToElements(30, 90),
+            },
+        };
+
+        var configs = SweepExpander.Expand(sweep);
+
+        Assert.Equal(30, configs[0].Vad.MaxBufferSeconds);
+        Assert.Equal(90, configs[1].Vad.MaxBufferSeconds);
+        Assert.Contains("cap90s", configs[1].Name);
+    }
+
 }

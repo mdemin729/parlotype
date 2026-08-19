@@ -62,11 +62,11 @@ public sealed class HotkeyCoordinator : IDisposable
         }
     }
 
-    private void OnStartRequested(object? sender, EventArgs e) =>
+    private void OnStartRequested(object? sender, DictationStartEventArgs e) =>
         Dispatcher.UIThread.Post(async () =>
         {
             _windowManager.ShowTranscribe(activate: false);
-            await _transcribeViewModel.StartRecordingAsync();
+            await _transcribeViewModel.StartRecordingAsync(e.HoldScoped);
         });
 
     private void OnStopRequested(object? sender, EventArgs e) =>

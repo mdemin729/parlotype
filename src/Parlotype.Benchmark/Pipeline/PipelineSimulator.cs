@@ -12,7 +12,7 @@ public static class PipelineSimulator
     private const int SampleRate = 16_000;
     private const int VadMinChunkSamples = 8_000;  // 500ms
     private const int SegmentMergeTolerance = 1024;  // 64ms
-    private const int MaxBatchBufferSamples = 16_000 * 30;  // 30s
+    private const int DefaultMaxBufferSeconds = 30;
     private const int CallbackSamples = 160;  // 10ms at 16kHz
 
     /// <summary>
@@ -20,14 +20,19 @@ public static class PipelineSimulator
     /// running VAD in 500ms chunks, and flushing when silence exceeds the threshold.
     /// No clamping is applied — the raw silenceThresholdMs value is used.
     /// </summary>
+    /// <param name="maxBufferSeconds">Force-flush ceiling, mirroring
+    /// <c>AudioPipelineService.MaxBatchBufferSamples</c>. Swept rather than fixed so the
+    /// hold-scoped push-to-talk work can measure what the ceiling costs per engine.</param>
     /// <returns>List of audio segments, one per flush event.</returns>
     public static List<float[]> Simulate(
         ReadOnlySpan<float> audioSamples,
         IVadService vadService,
         VadOptions vadOptions,
-        int silenceThresholdMs)
+        int silenceThresholdMs,
+        int maxBufferSeconds = DefaultMaxBufferSeconds)
     {
         int silenceThresholdSamples = silenceThresholdMs * SampleRate / 1000;
+        int maxBatchBufferSamples = maxBufferSeconds * SampleRate;
 
         var results = new List<float[]>();
         var buffer = new List<float>();
@@ -65,7 +70,7 @@ public static class PipelineSimulator
             }
 
             // No speech and buffer too large — discard
-            if (accumulatedSegments.Count == 0 && buffer.Count > MaxBatchBufferSamples)
+            if (accumulatedSegments.Count == 0 && buffer.Count > maxBatchBufferSamples)
             {
                 buffer.Clear();
                 vadProcessedUpTo = 0;
@@ -93,7 +98,7 @@ public static class PipelineSimulator
             }
 
             // Force-flush if buffer is too large with speech
-            if (buffer.Count > MaxBatchBufferSamples)
+            if (buffer.Count > maxBatchBufferSamples)
             {
                 var speechSamples = buffer.ToArray();
                 results.Add(speechSamples);

@@ -26,8 +26,13 @@ public sealed class MockAudioPipeline : IAudioPipeline
         return Task.CompletedTask;
     }
 
+    /// <summary>Mode the last <see cref="StartAsync"/> ran with (ADR-060 plumbing).</summary>
+    public PipelineMode? LastStartMode { get; private set; }
+
     public async Task StartAsync(PipelineMode mode = PipelineMode.Batch, CancellationToken cancellationToken = default)
     {
+        LastStartMode = mode;
+
         if (ThrowOnStart is not null)
             throw ThrowOnStart;
 

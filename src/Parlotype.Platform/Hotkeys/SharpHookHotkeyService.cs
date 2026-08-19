@@ -28,7 +28,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
     private SimpleGlobalHook? _hook;
     private bool _disposed;
 
-    public event EventHandler? DictationStartRequested;
+    public event EventHandler<DictationStartEventArgs>? DictationStartRequested;
     public event EventHandler? DictationStopRequested;
     public event EventHandler? DictationCancelRequested;
     public event EventHandler? BindingsChanged;
@@ -127,7 +127,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         if (result.Suppress)
             e.SuppressEvent = true;
 
-        Raise(result.Action);
+        Raise(result.Action, result.HoldScoped);
     }
 
     private void OnTimeout()
@@ -139,7 +139,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
             ScheduleTimeout();
         }
 
-        Raise(result.Action);
+        Raise(result.Action, result.HoldScoped);
     }
 
     /// <summary>Must be called with <see cref="_matcherLock"/> held.</summary>
@@ -175,13 +175,13 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         };
     }
 
-    private void Raise(DictationAction action)
+    private void Raise(DictationAction action, bool holdScoped = false)
     {
         switch (action)
         {
             case DictationAction.Start:
-                _logger.LogDebug("Dictation start requested");
-                DictationStartRequested?.Invoke(this, EventArgs.Empty);
+                _logger.LogDebug("Dictation start requested (holdScoped={HoldScoped})", holdScoped);
+                DictationStartRequested?.Invoke(this, new DictationStartEventArgs { HoldScoped = holdScoped });
                 break;
             case DictationAction.Stop:
                 _logger.LogDebug("Dictation stop requested");

@@ -92,3 +92,8 @@ release-notes.md
 # Azure Trusted Signing config passed to `vpk pack --azureTrustedSignFile`.
 # Named specifically rather than ignoring every metadata.json in the tree.
 azure-trusted-signing.json
+
+# Generated benchmark audio (regenerate with datasets/build-long-audio-ladder.py)
+datasets/long-audio-ladder/samples/
+datasets/long-audio-probe/samples/
+datasets/__pycache__/

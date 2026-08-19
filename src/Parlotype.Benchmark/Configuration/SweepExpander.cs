@@ -41,7 +41,12 @@ public static class SweepExpander
                 Description = sweep.Description,
                 Datasets = sweep.Datasets,
                 Repetitions = sweep.Repetitions,
-                Whisper = whisper,
+                // A non-Whisper engine on the sweep wins: BenchmarkConfig picks the
+                // backend by which engine block is non-null, so handing it a Whisper
+                // block as well would leave IsWhisper false but the block misleading.
+                Whisper = sweep.Parakeet is null && sweep.LlamaCpp is null ? whisper : null,
+                Parakeet = sweep.Parakeet,
+                LlamaCpp = sweep.LlamaCpp,
                 Vad = vad,
             });
         }
@@ -171,8 +176,17 @@ public static class SweepExpander
                 return (whisper, vad with { InterSegmentSilenceMs = gapMs }, $"gap{gapMs}");
 
             case "vad.silencethresholdms":
+                // null is a meaningful value here, not a missing one: it selects the
+                // one-shot path (whole buffer, single decode) that hold-scoped
+                // push-to-talk would use, so both arms fit in a single sweep.
+                if (value.ValueKind == JsonValueKind.Null)
+                    return (whisper, vad with { SilenceThresholdMs = null }, "flushnone");
                 var flushMs = value.GetInt32();
                 return (whisper, vad with { SilenceThresholdMs = flushMs }, $"flush{flushMs}");
+
+            case "vad.maxbufferseconds":
+                var maxBufSec = value.GetInt32();
+                return (whisper, vad with { MaxBufferSeconds = maxBufSec }, $"cap{maxBufSec}s");
 
             default:
                 throw new InvalidOperationException(
@@ -180,7 +194,8 @@ public static class SweepExpander
                     $"Valid paths: whisper.model, whisper.beamSize, whisper.temperature, " +
                     $"whisper.language, whisper.threads, whisper.initialPrompt, whisper.runtimePreference, " +
                     $"vad.enabled, vad.threshold, vad.speechPadMs, vad.minSilenceDurationMs, " +
-                    $"vad.minSpeechDurationMs, vad.interSegmentSilenceMs, vad.silenceThresholdMs");
+                    $"vad.minSpeechDurationMs, vad.interSegmentSilenceMs, vad.silenceThresholdMs, " +
+                    $"vad.maxBufferSeconds");
         }
     }
 

@@ -7,5 +7,19 @@ public enum PipelineMode
     Batch,
 
     /// <summary>Sends audio in fixed-size windows continuously to Whisper.</summary>
-    Streaming
+    Streaming,
+
+    /// <summary>
+    /// Treats the whole session as one utterance: silence never ends it, only the
+    /// explicit stop does. For push-to-talk, where the key release already says
+    /// "I am done", a silence timeout is a guess layered on top of a fact — and a
+    /// wrong guess cuts the recording mid-sentence, corrupting the words either
+    /// side of the cut and punctuating a fragment (ADR-060).
+    /// </summary>
+    /// <remarks>
+    /// Not unbounded: audio still splits at
+    /// <see cref="Speech.SpeechEngineLimits.MaxUtteranceSeconds"/>, on a speech
+    /// boundary so the cut lands in a pause.
+    /// </remarks>
+    SingleUtterance
 }

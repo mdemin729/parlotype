@@ -7,8 +7,10 @@
              x:CompileBindings="True">
     <StackPanel Spacing="16">
         <TextBlock Text="Silence timeout" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="How long to wait after speech ends before transcribing. Applies to all speech engines."
-                   Opacity="0.7" />
+        <TextBlock Text="How long to wait after speech ends before transcribing."
+                   Opacity="0.7" TextWrapping="Wrap" />
+        <TextBlock Text="Applies when you toggle dictation on and off. Hold-to-talk ignores this — holding the key already says when you are done, so the whole hold is transcribed at once."
+                   Opacity="0.7" TextWrapping="Wrap" />
 
         <ItemsControl ItemsSource="{Binding WaitTimeOptions}">
             <ItemsControl.ItemTemplate>

@@ -3,7 +3,7 @@ title: sherpa-onnx Quirks
 type: knowledge
 tags: [sherpa-onnx, parakeet, onnx, gotchas]
 created: 2026-07-07
-last_updated: 2026-07-07
+last_updated: 2026-08-18
 summary: Non-obvious behaviours of the org.k2fsa.sherpa.onnx 1.13.3 NuGet package used by the Parakeet engine
 ---
 
@@ -64,3 +64,41 @@ same directory, and deleting a cached model must remove it too.
 - Output includes punctuation + capitalization natively
 - `OfflineRecognizer` construction and `Decode` are synchronous — wrap in
   `Task.Run` (same lesson as [[whisper-ui-thread-loading]])
+
+## 7. Hard 400-second decode ceiling (native crash)
+
+Parakeet TDT v3 through sherpa-onnx **crashes** on audio longer than 400 s in a
+single `Decode` call. Not a graceful error — an `SEHException` out of native ONNX
+Runtime, a C++ exception crossing the C boundary:
+
+```
+Non-zero status code returned while running Add node. Name:'/layers.0/self_attn/Add_2'
+Attempting to broadcast an axis by a dimension other than 1. 1886 by 6886
+```
+
+Bisected to a sharp cliff: **400 s decodes, 405 s crashes** (`datasets/long-audio-probe`).
+The cause is a fixed 5000-frame positional-encoding buffer in the exported encoder —
+the model emits one frame per 80 ms (10 ms hop × 8× subsampling), and
+5000 × 80 ms = exactly 400.0 s. The error's own numbers confirm it: the failing
+input was 6886 frames (550.9 s of extracted speech) and 6886 − 1886 = 5000.
+
+**Quality degrades long before that.** Single-decode word retention against a
+known reference, INT8:
+
+| audio length | words kept | WER |
+|---|---|---|
+| 60 s | 100% | 4.0 |
+| 120 s | 60% | 43.2 |
+| 300 s | 48% | 54.7 |
+
+CER tracks WER almost exactly, which is the signature of *dropped* text rather
+than misrecognised text. So the usable one-shot ceiling is **~60 s**, not 400 s.
+Anything longer must be chunked on VAD boundaries.
+
+Whisper has no equivalent limit — it chunks internally at 30 s and holds 99%
+word retention with flat WER out to 600 s.
+
+Measured in `plans/2026-08-18-hold-scoped-push-to-talk/research.md`. Today's app
+never hits either limit because `AudioPipelineService.MaxBatchBufferSamples`
+force-flushes at 30 s; removing that cap without an engine-aware replacement
+would introduce a hard crash.
