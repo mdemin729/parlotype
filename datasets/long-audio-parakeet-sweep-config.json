@@ -1,0 +1,15 @@
+{
+  "name": "long-audio-parakeet",
+  "description": "Parakeet TDT v3 INT8 across the duration ladder. Sweeps the pipeline flush threshold from the current UI range (0.5/1/3 s) to null, where null means the hold-scoped push-to-talk behaviour: no mid-recording flush, one decode over the whole buffer. Answers (a) what a single long decode costs in time and RSS, which sets the buffer ceiling, and (b) whether suppressing the flush changes WER.",
+  "datasets": ["long-audio-ladder"],
+  "repetitions": 1,
+  "parakeet": {
+    "modelId": "parakeet-tdt-0.6b-v3-int8"
+  },
+  "vad": {
+    "enabled": true
+  },
+  "sweep": {
+    "vad.silenceThresholdMs": [500, 1000, 3000, null]
+  }
+}

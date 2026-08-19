@@ -23,4 +23,14 @@ public sealed class SweepConfig
 
     [JsonPropertyName("vad")]
     public VadConfig Vad { get; init; } = new();
+
+    /// <summary>Engine selector carried onto every expanded config. Without it a sweep
+    /// is implicitly Whisper-only, which makes cross-engine sweeps (e.g. buffer-ceiling
+    /// cost curves) impossible to express.</summary>
+    [JsonPropertyName("parakeet")]
+    public ParakeetConfig? Parakeet { get; init; }
+
+    /// <inheritdoc cref="Parakeet"/>
+    [JsonPropertyName("llamaCpp")]
+    public LlamaCppConfig? LlamaCpp { get; init; }
 }

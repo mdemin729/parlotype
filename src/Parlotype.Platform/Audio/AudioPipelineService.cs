@@ -91,6 +91,30 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     /// <summary>Maximum buffer before forced processing in batch mode (30 seconds at 16kHz).</summary>
     private const int MaxBatchBufferSamples = 16_000 * 30;
 
+    /// <summary>
+    /// Ceiling for <see cref="PipelineMode.SingleUtterance"/>, cached at pipeline start
+    /// from the selected engine (ADR-060). Unlike <see cref="MaxBatchBufferSamples"/> this
+    /// is not a memory guard: past it Parakeet starts dropping text outright, so exceeding
+    /// it silently loses words rather than merely costing time.
+    /// </summary>
+    /// <remarks>
+    /// Measured against <see cref="AccumulatedSpeechSamples"/> — the audio the recognizer
+    /// will actually receive — not against the raw buffer. The limits come from decode-input
+    /// benchmarks, and <see cref="SpeechSegmentExtractor"/> throws away everything between
+    /// the segments, so a hold made mostly of thinking pauses produces far less audio than
+    /// it takes wall-clock. Checking the raw buffer would split such a hold for no reason,
+    /// reintroducing the mid-sentence cut this mode exists to remove.
+    /// </remarks>
+    private int _maxUtteranceSamples = SpeechEngineLimits.UnmeasuredMaxUtteranceSeconds * 16_000;
+
+    /// <summary>
+    /// Memory backstop for a hold that never ends — a missed key-up, a lost focus event.
+    /// Not a quality limit: <see cref="_maxUtteranceSamples"/> governs decode input, and a
+    /// hold that is mostly silence stays under it indefinitely while the raw buffer grows
+    /// at 64 KB/s. Ten minutes is far past any real dictation hold.
+    /// </summary>
+    private const int MaxHoldBufferSamples = 16_000 * 600;
+
     private const int SampleRate = 16_000;
 
     /// <summary>Silence threshold in samples, cached at pipeline start from settings.</summary>
@@ -204,6 +228,15 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                 await _recognizer.InitializeAsync(_whisperOptions, cancellationToken);
             else if (!_recognizer.IsReady)
                 await _recognizer.InitializeAsync(cancellationToken);
+
+            // Deliberately last. SpeechRecognizerFactory re-reads SettingsKeys.SpeechEngine
+            // on its own, so this read and that one can straddle a settings change: the
+            // engine can be switched while a start is in flight (the settings view model
+            // only blocks while IsRecording, which is not yet true during the model load).
+            // Reading after the recognizer has resolved makes the only possible
+            // disagreement a conservative one — a ceiling lower than this engine could
+            // take — instead of handing Parakeet a Whisper-sized 300 s utterance.
+            await CacheUtteranceCeilingAsync(cancellationToken);
         }
         finally
         {
@@ -363,6 +396,9 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                         case PipelineMode.Streaming:
                             ProcessStreaming(utterances);
                             break;
+                        case PipelineMode.SingleUtterance:
+                            ProcessSingleUtterance(utterances);
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -395,25 +431,166 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     /// for its min_silence/speech_pad post-processing.</summary>
     private const int VadMinChunkSamples = 8_000;
 
+    /// <summary>
+    /// Advances VAD over whatever samples arrived since the last pass, merging the
+    /// results into <see cref="_accumulatedSegments"/>. Runs only once enough new
+    /// audio has piled up: shorter chunks don't give GetSpeechTimestamps the context
+    /// its min_silence/speech_pad post-processing needs.
+    /// </summary>
+    private void RunIncrementalVad()
+    {
+        int newSamplesCount = _sampleBuffer.Count - _vadProcessedUpTo;
+        if (newSamplesCount < VadMinChunkSamples)
+            return;
+
+        var bufferSpan = CollectionsMarshal.AsSpan(_sampleBuffer);
+        var newSegments = _vad.DetectSpeech(bufferSpan[_vadProcessedUpTo..]);
+
+        foreach (var seg in newSegments)
+        {
+            var adjusted = new VadSpeechSegment(
+                seg.StartSample + _vadProcessedUpTo,
+                seg.EndSample + _vadProcessedUpTo);
+            MergeOrAddSegment(_accumulatedSegments, adjusted);
+        }
+
+        _vadProcessedUpTo = _sampleBuffer.Count;
+    }
+
+    /// <summary>
+    /// Hold-scoped segmentation (ADR-060): silence never ends the utterance, because
+    /// the caller already knows when it ended — the key came up. The only reason to
+    /// split is the engine ceiling, and that split goes on a speech boundary.
+    /// </summary>
+    private void ProcessSingleUtterance(ChannelWriter<float[]> utterances)
+    {
+        RunIncrementalVad();
+
+        if (_accumulatedSegments.Count == 0)
+        {
+            // Nothing but silence, and more of it than any hold needs. There is no
+            // speech here to preserve, so drop it rather than buffer it forever.
+            if (_sampleBuffer.Count > MaxHoldBufferSamples)
+                ClearBufferState();
+            return;
+        }
+
+        // The ceiling governs what the recognizer receives, not how long the key was
+        // held; the raw cap is only there so a hold that never ends cannot grow without
+        // bound.
+        if (AccumulatedSpeechSamples() <= _maxUtteranceSamples
+            && _sampleBuffer.Count <= MaxHoldBufferSamples)
+            return;
+
+        FlushAtSpeechBoundary(utterances);
+    }
+
+    /// <summary>
+    /// Speech samples accumulated so far — what <see cref="SpeechSegmentExtractor"/> would
+    /// hand the recognizer, since it copies only the segments and drops the gaps between
+    /// them. This is the quantity <see cref="SpeechEngineLimits"/> was measured against.
+    /// </summary>
+    private int AccumulatedSpeechSamples()
+    {
+        var total = 0;
+        foreach (var segment in _accumulatedSegments)
+        {
+            var start = Math.Max(0, segment.StartSample);
+            var end = Math.Min(_sampleBuffer.Count, segment.EndSample);
+            if (end > start)
+                total += end - start;
+        }
+
+        return total;
+    }
+
+    /// <summary>
+    /// Splits an over-long hold without cutting through a word. Everything up to the
+    /// final speech run is complete and safe to transcribe; the final run may still be
+    /// mid-word, so it stays buffered and becomes the head of the next utterance.
+    /// </summary>
+    private void FlushAtSpeechBoundary(ChannelWriter<float[]> utterances)
+    {
+        var buffer = CollectionsMarshal.AsSpan(_sampleBuffer);
+
+        if (_accumulatedSegments.Count > 1)
+        {
+            var completed = _accumulatedSegments.GetRange(0, _accumulatedSegments.Count - 1);
+            var keepFrom = _accumulatedSegments[^1].StartSample;
+
+            _logger.LogInformation(
+                "Utterance ceiling reached ({Speech:F0}s speech over {Held:F0}s); splitting after {Count} completed segment(s)",
+                AccumulatedSpeechSamples() / (double)SampleRate,
+                _sampleBuffer.Count / (double)SampleRate, completed.Count);
+
+            utterances.TryWrite(ExtractSpeechSamples(buffer, completed));
+            RetainFrom(keepFrom);
+            return;
+        }
+
+        // A single run, so there is no pause to cut in. Take it up to the ceiling, or to
+        // its own end if it closed first — the ceiling has to bind either way, because a
+        // run that closed *after* growing past it is exactly the audio the engine
+        // silently truncates.
+        var only = _accumulatedSegments[0];
+        var cutEnd = Math.Min(only.EndSample, only.StartSample + _maxUtteranceSamples);
+
+        if (cutEnd < only.EndSample)
+            _logger.LogWarning(
+                "Utterance ceiling reached ({Seconds:F0}s speech) with no pause to split on; cutting mid-speech",
+                (cutEnd - only.StartSample) / (double)SampleRate);
+        else
+            _logger.LogInformation(
+                "Utterance ceiling reached over {Held:F0}s held; flushing the completed {Seconds:F0}s run",
+                _sampleBuffer.Count / (double)SampleRate,
+                (cutEnd - only.StartSample) / (double)SampleRate);
+
+        // The overrun stays buffered rather than being discarded: VAD lags the buffer by
+        // up to 500 ms, so the tail it has not scanned yet is live speech.
+        utterances.TryWrite(ExtractSpeechSamples(
+            buffer, [new VadSpeechSegment(only.StartSample, cutEnd)]));
+        RetainFrom(cutEnd);
+    }
+
+    /// <summary>
+    /// Drops the first <paramref name="startSample"/> samples and rebases the VAD state
+    /// onto what is left, so the retained tail keeps its segment without a re-scan.
+    /// </summary>
+    private void RetainFrom(int startSample)
+    {
+        if (startSample <= 0)
+            return;
+
+        if (startSample >= _sampleBuffer.Count)
+        {
+            ClearBufferState();
+            return;
+        }
+
+        _sampleBuffer.RemoveRange(0, startSample);
+        _vadProcessedUpTo = Math.Clamp(_vadProcessedUpTo - startSample, 0, _sampleBuffer.Count);
+
+        // Rebase whatever straddles or follows the cut; segments wholly before it have
+        // just been transcribed. Rebuilt rather than mutated in place because the cut can
+        // land inside a segment, before one, or after all of them.
+        var retained = new List<VadSpeechSegment>(_accumulatedSegments.Count);
+        foreach (var segment in _accumulatedSegments)
+        {
+            if (segment.EndSample <= startSample)
+                continue;
+
+            retained.Add(new VadSpeechSegment(
+                Math.Max(0, segment.StartSample - startSample),
+                segment.EndSample - startSample));
+        }
+
+        _accumulatedSegments.Clear();
+        _accumulatedSegments.AddRange(retained);
+    }
+
     private void ProcessBatch(ChannelWriter<float[]> utterances)
     {
-        // Run VAD only when enough new samples have accumulated
-        int newSamplesCount = _sampleBuffer.Count - _vadProcessedUpTo;
-        if (newSamplesCount >= VadMinChunkSamples)
-        {
-            var bufferSpan = CollectionsMarshal.AsSpan(_sampleBuffer);
-            var newSegments = _vad.DetectSpeech(bufferSpan[_vadProcessedUpTo..]);
-
-            foreach (var seg in newSegments)
-            {
-                var adjusted = new VadSpeechSegment(
-                    seg.StartSample + _vadProcessedUpTo,
-                    seg.EndSample + _vadProcessedUpTo);
-                MergeOrAddSegment(_accumulatedSegments, adjusted);
-            }
-
-            _vadProcessedUpTo = _sampleBuffer.Count;
-        }
+        RunIncrementalVad();
 
         // Silence-after-speech and overflow checks run on every chunk
         // so end-of-utterance is detected promptly.
@@ -444,11 +621,16 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
             }
         }
 
-        // Force-flush if buffer is too large
+        // Force-flush if buffer is too large. Extract rather than dumping the raw
+        // buffer: every other path hands the recognizer VAD-extracted speech, and the
+        // raw dump measured materially worse — 89 % word retention against 100 % at the
+        // same length, purely because this branch ran more often (ADR-060).
         if (_sampleBuffer.Count > MaxBatchBufferSamples)
         {
-            var allSamples = _sampleBuffer.ToArray();
-            utterances.TryWrite(allSamples);
+            var speechSamples = ExtractSpeechSamples(
+                CollectionsMarshal.AsSpan(_sampleBuffer), _accumulatedSegments);
+            if (speechSamples.Length > 0)
+                utterances.TryWrite(speechSamples);
             ClearBufferState();
         }
     }
@@ -596,9 +778,28 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         }
     }
 
-    private static float[] ExtractSpeechSamples(ReadOnlySpan<float> buffer, List<VadSpeechSegment> segments)
+    private static float[] ExtractSpeechSamples(ReadOnlySpan<float> buffer, IReadOnlyList<VadSpeechSegment> segments)
     {
         return SpeechSegmentExtractor.Extract(buffer, segments);
+    }
+
+    /// <summary>
+    /// Caches the engine-specific utterance ceiling (ADR-060). Separate from
+    /// <see cref="CacheSettingsAsync"/> so it can run *after* the recognizer resolves —
+    /// see the call site for why the ordering matters. Engine parsing matches
+    /// <c>SpeechRecognizerFactory.GetRecognizerAsync</c> exactly, fallback included.
+    /// </summary>
+    private async Task CacheUtteranceCeilingAsync(CancellationToken ct)
+    {
+        var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine, ct);
+        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var se)
+            ? se
+            : SpeechEngine.Parakeet;
+
+        var maxUtteranceSeconds = SpeechEngineLimits.MaxUtteranceSeconds(engine);
+        _maxUtteranceSamples = maxUtteranceSeconds * SampleRate;
+        _logger.LogInformation("Utterance ceiling: {Seconds}s of speech ({Engine})",
+            maxUtteranceSeconds, engine);
     }
 
     private async Task CacheSettingsAsync(CancellationToken ct)

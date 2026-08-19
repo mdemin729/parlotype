@@ -1,0 +1,8 @@
+{
+  "name": "long-audio-whisper-oneshot",
+  "description": "Whisper Base across the duration ladder in one-shot mode. Whisper chunks internally at 30 s, so it should not show Parakeet's long-form knee; this measures whether that holds and what a long decode costs.",
+  "datasets": ["long-audio-ladder"],
+  "repetitions": 1,
+  "whisper": { "model": "Base", "language": "en", "beamSize": 1 },
+  "vad": { "enabled": true }
+}

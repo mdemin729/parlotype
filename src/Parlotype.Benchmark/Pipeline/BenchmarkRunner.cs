@@ -238,7 +238,8 @@ public sealed class BenchmarkRunner
             {
                 // Pipeline simulation mode: simulate real-time flush behavior
                 pipelineFlushSegments = PipelineSimulator.Simulate(
-                    samples.AsSpan(), _vadService, vadOptions, silenceThresholdMs);
+                    samples.AsSpan(), _vadService, vadOptions, silenceThresholdMs,
+                    vadConfig.MaxBufferSeconds);
                 audioForRecognition = samples; // won't be used directly
                 _logger.LogDebug("Pipeline simulation: {FlushCount} flush(es) from {Duration:F1}s audio with {ThresholdMs}ms threshold",
                     pipelineFlushSegments.Count, durationSeconds, silenceThresholdMs);

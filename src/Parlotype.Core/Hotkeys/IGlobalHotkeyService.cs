@@ -12,8 +12,11 @@ public interface IGlobalHotkeyService : IDisposable
     /// <summary>Stops listening for global hotkeys.</summary>
     Task StopAsync(CancellationToken cancellationToken = default);
 
-    /// <summary>A gesture asked for dictation to begin.</summary>
-    event EventHandler DictationStartRequested;
+    /// <summary>
+    /// A gesture asked for dictation to begin. The args say whether the gesture is
+    /// hold-scoped, which decides whether silence may end the utterance (ADR-060).
+    /// </summary>
+    event EventHandler<DictationStartEventArgs> DictationStartRequested;
 
     /// <summary>A gesture asked for dictation to finish and transcribe.</summary>
     event EventHandler DictationStopRequested;

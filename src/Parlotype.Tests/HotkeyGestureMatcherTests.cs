@@ -394,4 +394,75 @@ public class HotkeyGestureMatcherTests
         Assert.Equal(HotkeyMatchResult.None, matcher.Process(HotkeyKeyEvent.KeyDown("Space", 100,
             HotkeyModifiers.Ctrl | HotkeyModifiers.Alt)));
     }
+    // --- hold-scoped reporting (ADR-060) ---
+
+    [Fact]
+    public void Hold_Start_Is_HoldScoped()
+    {
+        var matcher = Default();
+
+        Assert.Equal(DictationAction.None, matcher.Process(RCtrlDown(0)).Action);
+
+        var started = matcher.ProcessTimeout(250);
+        Assert.Equal(DictationAction.Start, started.Action);
+        Assert.True(started.HoldScoped);
+    }
+
+    [Fact]
+    public void DoubleTap_Start_Is_Not_HoldScoped()
+    {
+        var matcher = Default();
+
+        // Double-tap Ctrl toggles: nothing about it says when the user stops talking.
+        matcher.Process(LCtrlDown(0));
+        matcher.Process(LCtrlUp(50));
+        matcher.Process(LCtrlDown(120));
+        var result = matcher.Process(LCtrlUp(160));
+
+        Assert.Equal(DictationAction.Start, result.Action);
+        Assert.False(result.HoldScoped);
+    }
+
+    [Fact]
+    public void PushToTalk_Chord_Start_Is_HoldScoped()
+    {
+        var chord = new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Alt, "Space");
+        var matcher = new HotkeyGestureMatcher(
+            [DictationHotkey.Chord(chord, ActivationMode.PushToTalk)]);
+
+        var result = matcher.Process(HotkeyKeyEvent.KeyDown(
+            "Space", 0, HotkeyModifiers.Ctrl | HotkeyModifiers.Alt));
+
+        Assert.Equal(DictationAction.Start, result.Action);
+        Assert.True(result.HoldScoped);
+    }
+
+    [Fact]
+    public void Toggle_Chord_Start_Is_Not_HoldScoped()
+    {
+        var chord = new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Alt, "Space");
+        var matcher = new HotkeyGestureMatcher(
+            [DictationHotkey.Chord(chord, ActivationMode.Toggle)]);
+
+        var result = matcher.Process(HotkeyKeyEvent.KeyDown(
+            "Space", 0, HotkeyModifiers.Ctrl | HotkeyModifiers.Alt));
+
+        Assert.Equal(DictationAction.Start, result.Action);
+        Assert.False(result.HoldScoped);
+    }
+
+    [Fact]
+    public void Stop_Never_Reports_HoldScoped()
+    {
+        var matcher = Default();
+
+        matcher.Process(RCtrlDown(0));
+        matcher.ProcessTimeout(250);
+        matcher.SetDictationActive(true);
+
+        var stopped = matcher.Process(RCtrlUp(3000));
+        Assert.Equal(DictationAction.Stop, stopped.Action);
+        Assert.False(stopped.HoldScoped);
+    }
+
 }

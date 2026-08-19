@@ -390,13 +390,19 @@ public partial class TranscribeViewModel : ViewModelBase
         }
     }
 
-    public async Task StartRecordingAsync()
+    /// <param name="holdScoped">True when the caller's gesture ends the utterance on
+    /// key release (a hold, or a push-to-talk chord). Such a session runs as
+    /// <see cref="PipelineMode.SingleUtterance"/>: the release is a better
+    /// end-of-utterance signal than any silence timeout, and letting silence cut first
+    /// splits sentences mid-flow (ADR-060). The widget's record button leaves this
+    /// false — it has no release to wait for.</param>
+    public async Task StartRecordingAsync(bool holdScoped = false)
     {
         if (_pipeline is null || IsRecording || _startTask is not null)
             return;
 
         _cancelRequested = false;
-        var startTask = StartRecordingCoreAsync(_pipeline);
+        var startTask = StartRecordingCoreAsync(_pipeline, holdScoped);
         _startTask = startTask;
         try
         {
@@ -409,7 +415,7 @@ public partial class TranscribeViewModel : ViewModelBase
         }
     }
 
-    private async Task StartRecordingCoreAsync(IAudioPipeline pipeline)
+    private async Task StartRecordingCoreAsync(IAudioPipeline pipeline, bool holdScoped)
     {
         try
         {
@@ -418,7 +424,8 @@ public partial class TranscribeViewModel : ViewModelBase
             if (_audioLevelProvider is not null)
                 _audioLevelProvider.LevelChanged += OnAudioLevelChanged;
 
-            var startTask = pipeline.StartAsync(PipelineMode.Batch);
+            var startTask = pipeline.StartAsync(
+                holdScoped ? PipelineMode.SingleUtterance : PipelineMode.Batch);
 
             // Defer the spinner: a hot model starts almost instantly, so only show
             // the loading state when the load actually outlasts the threshold —

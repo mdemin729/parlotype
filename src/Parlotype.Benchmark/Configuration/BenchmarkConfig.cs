@@ -125,6 +125,12 @@ public sealed record VadConfig
     /// are concatenated. When null (default), the entire file is processed in one shot.</summary>
     [JsonPropertyName("silenceThresholdMs")]
     public int? SilenceThresholdMs { get; init; }
+
+    /// <summary>Force-flush ceiling in seconds for pipeline simulation, mirroring
+    /// <c>AudioPipelineService.MaxBatchBufferSamples</c> (30 s in the shipping app).
+    /// Only meaningful alongside <see cref="SilenceThresholdMs"/>; ignored in one-shot mode.</summary>
+    [JsonPropertyName("maxBufferSeconds")]
+    public int MaxBufferSeconds { get; init; } = 30;
 }
 
 /// <summary>Configuration for the Gemma 4 llama.cpp engine in benchmark runs.</summary>

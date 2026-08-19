@@ -1,0 +1,8 @@
+{
+  "name": "long-audio-parakeet-oneshot",
+  "description": "Hold-scoped arm: no mid-recording flush, one decode over the whole buffer. Excludes the 600s rung, which exceeds the 400s sherpa-onnx decode ceiling.",
+  "datasets": ["long-audio-ladder"],
+  "repetitions": 1,
+  "parakeet": { "modelId": "parakeet-tdt-0.6b-v3-int8" },
+  "vad": { "enabled": true }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "long-audio-probe-parakeet",
+  "description": "Bisects an engine's hard decode ceiling. Requires `build-long-audio-ladder.py --probe LOW HIGH STEP` first. VAD off so decoded length equals file length; only pass/fail is meaningful (reference text is a placeholder). Run one sample at a time -- a native crash aborts the whole run.",
+  "datasets": ["long-audio-probe"],
+  "repetitions": 1,
+  "parakeet": { "modelId": "parakeet-tdt-0.6b-v3-int8" },
+  "vad": { "enabled": false }
+}

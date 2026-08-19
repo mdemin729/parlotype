@@ -4,7 +4,7 @@ namespace Parlotype.Desktop.Tests.Mocks;
 
 public sealed class MockGlobalHotkeyService : IGlobalHotkeyService
 {
-    public event EventHandler? DictationStartRequested;
+    public event EventHandler<DictationStartEventArgs>? DictationStartRequested;
     public event EventHandler? DictationStopRequested;
     public event EventHandler? DictationCancelRequested;
     public event EventHandler? BindingsChanged;
@@ -35,7 +35,10 @@ public sealed class MockGlobalHotkeyService : IGlobalHotkeyService
 
     public void SetDictationActive(bool active) => DictationActive = active;
 
-    public void SimulateStart() => DictationStartRequested?.Invoke(this, EventArgs.Empty);
+    /// <param name="holdScoped">Mirrors the real service: true for a hold or a
+    /// push-to-talk chord, false for a toggle gesture.</param>
+    public void SimulateStart(bool holdScoped = false) =>
+        DictationStartRequested?.Invoke(this, new DictationStartEventArgs { HoldScoped = holdScoped });
     public void SimulateStop() => DictationStopRequested?.Invoke(this, EventArgs.Empty);
     public void SimulateCancel() => DictationCancelRequested?.Invoke(this, EventArgs.Empty);
 

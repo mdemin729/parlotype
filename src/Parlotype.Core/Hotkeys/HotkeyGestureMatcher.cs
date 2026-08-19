@@ -16,7 +16,11 @@ public enum DictationAction
 }
 
 /// <summary>The resolved action plus whether the key event should be hidden from other applications.</summary>
-public readonly record struct HotkeyMatchResult(DictationAction Action, bool Suppress)
+/// <param name="HoldScoped">Only meaningful when <paramref name="Action"/> is
+/// <see cref="DictationAction.Start"/>: true when the gesture ends the utterance on key
+/// release (a hold, or a push-to-talk chord), so silence must not end it instead (ADR-060).</param>
+public readonly record struct HotkeyMatchResult(
+    DictationAction Action, bool Suppress, bool HoldScoped = false)
 {
     public static HotkeyMatchResult None { get; } = new(DictationAction.None, false);
 }
@@ -129,7 +133,7 @@ public sealed class HotkeyGestureMatcher
 
         // Trackers see every event regardless of what else matched — that is how
         // they notice the keystrokes that disqualify a gesture.
-        var gesture = FeedTrackers(e);
+        var (gesture, gestureHoldScoped) = FeedTrackers(e);
 
         if (isEscapeCancel)
             return new HotkeyMatchResult(DictationAction.Cancel, Suppress: true);
@@ -139,7 +143,7 @@ public sealed class HotkeyGestureMatcher
 
         return gesture == DictationAction.None
             ? HotkeyMatchResult.None
-            : new HotkeyMatchResult(gesture, Suppress: false);
+            : new HotkeyMatchResult(gesture, Suppress: false, HoldScoped: gestureHoldScoped);
     }
 
     /// <summary>Advances any deferred hold whose start window has now elapsed.</summary>
@@ -148,15 +152,21 @@ public sealed class HotkeyGestureMatcher
         foreach (var (_, tracker) in _holds)
         {
             if (tracker.ProcessTimeout(nowMs) == HoldOutcome.Started)
-                return new HotkeyMatchResult(DictationAction.Start, Suppress: false);
+                return new HotkeyMatchResult(DictationAction.Start, Suppress: false, HoldScoped: true);
         }
 
         return HotkeyMatchResult.None;
     }
 
-    private DictationAction FeedTrackers(in HotkeyKeyEvent e)
+    /// <summary>
+    /// Feeds every tracker and reports the first action produced. A hold gesture is
+    /// always hold-scoped — the tracker's own Started/Stopped pair is tied to the key
+    /// going down and up — whereas a double tap toggles and is not.
+    /// </summary>
+    private (DictationAction Action, bool HoldScoped) FeedTrackers(in HotkeyKeyEvent e)
     {
         var action = DictationAction.None;
+        var holdScoped = false;
 
         foreach (var (_, tracker) in _holds)
         {
@@ -171,6 +181,9 @@ public sealed class HotkeyGestureMatcher
                 HoldOutcome.Aborted => DictationAction.Cancel,
                 _ => DictationAction.None
             };
+
+            if (action == DictationAction.Start)
+                holdScoped = true;
         }
 
         foreach (var (_, tracker) in _taps)
@@ -179,7 +192,7 @@ public sealed class HotkeyGestureMatcher
                 action = _dictationActive ? DictationAction.Stop : DictationAction.Start;
         }
 
-        return action;
+        return (action, holdScoped);
     }
 
     private HotkeyMatchResult MatchChord(in HotkeyKeyEvent e)
@@ -234,7 +247,9 @@ public sealed class HotkeyGestureMatcher
                 ? DictationAction.Start
                 : DictationAction.Stop;
 
-            return new HotkeyMatchResult(action, Suppress: true);
+            return new HotkeyMatchResult(
+                action, Suppress: true,
+                HoldScoped: action == DictationAction.Start && _heldChordIsPushToTalk);
         }
 
         return HotkeyMatchResult.None;
