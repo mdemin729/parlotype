@@ -12,6 +12,49 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.4.4] — 2026-08-25
+
+### Highlights
+
+- **Push-to-talk holds are no longer cut mid-sentence.** Pausing briefly while
+  holding your dictation key used to end the recording early — corrupting the
+  words either side of the cut and deciding punctuation on half a sentence.
+  Now only releasing the key ends it, so a full sentence goes in as one
+  transcription, however long you pause mid-way through it.
+
+### Changed
+
+- **Long recordings get more context before they're capped**, and the cap now
+  depends on the speech engine instead of a flat 30 seconds: up to 60s on the
+  default Parakeet engine (the point past which it starts silently dropping
+  words) and 300s on Whisper. Go past it and Parlotype now splits at your next
+  pause instead of cutting wherever the cap landed.
+- **Settings → Speech → Silence timeout** now explains itself correctly: it
+  only governs toggle-mode dictation. Push-to-talk holds ignore it — releasing
+  the key already marks the end of your sentence — and the description used
+  to claim otherwise.
+- Text now appears only once you release the push-to-talk key, instead of
+  trickling in during pauses, since the whole hold is transcribed together.
+  A typical sentence still finishes well under a second on Parakeet.
+
+### Fixed
+
+- A recording that ran past the old 30-second cap used to be transcribed from
+  raw, un-filtered audio; it now goes through the same silence-trimming as
+  every other recording.
+
+<details>
+<summary>Under the hood</summary>
+
+Full rationale for each item is in the linked decision record.
+
+- Hold-scoped push-to-talk gestures now select a `SingleUtterance` pipeline
+  mode carrying no silence-based cutoff, derived from the gesture rather than
+  a setting; per-engine ceilings and boundary-aware splitting on overflow
+  ([ADR-060](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/060-hold-scoped-push-to-talk.md)).
+
+</details>
+
 ## [0.4.3] — 2026-08-08
 
 ### Highlights
@@ -350,7 +393,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.4...HEAD
+[0.4.4]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.4
 [0.4.3]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.3
 [0.4.2]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.2
 [0.4.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.1
