@@ -27,6 +27,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Test-only seams on ParentProcessExitWatcher (ADR-062). Kept narrow: the
+         app's public surface is otherwise deliberately closed to the test project. -->
+    <InternalsVisibleTo Include="Parlotype.Desktop.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.0.2" />
     <PackageReference Include="Avalonia.Desktop" Version="12.0.2" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.2" />

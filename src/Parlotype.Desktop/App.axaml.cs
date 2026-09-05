@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Settings;
@@ -29,6 +30,7 @@ public class App : Application
 
     private IServiceProvider? _services;
     private HotkeyCoordinator? _hotkeyCoordinator;
+    private ParentProcessExitWatcher? _parentProcessExitWatcher;
 
     public override void Initialize()
     {
@@ -61,14 +63,20 @@ public class App : Application
                 // reliable place for a continuation to resume.
                 _services.GetService<IUpdateService>()?.ApplyOnExit();
 
+                // Release the global keyboard hook and disarm the dev watchdog
+                // before any await. This is an async void handler: a continuation
+                // that never resumes (a pending settings write, a slow recognizer
+                // teardown) must not be able to leave the hook installed on a
+                // process that outlives its window (ADR-062).
+                _hotkeyCoordinator?.Dispose();
+                _parentProcessExitWatcher?.Dispose();
+
                 // Flush the uninstall-consent write before the process goes away —
                 // it gates a destructive action taken later by a process that
                 // cannot ask.
                 var dataSettings = _services.GetService<DataSettingsViewModel>();
                 if (dataSettings is not null)
                     await dataSettings.PendingWrite;
-
-                _hotkeyCoordinator?.Dispose();
 
                 // Stop the llama-server sidecar (if running) before exiting
                 var recognizer = _services.GetService<ISpeechRecognizer>();
@@ -85,6 +93,17 @@ public class App : Application
 
         _hotkeyCoordinator = _services.GetRequiredService<HotkeyCoordinator>();
         _ = _hotkeyCoordinator.StartAsync();
+
+        // Development builds only (ADR-062): if the launching process — the
+        // `dotnet run` host, an IDE — is stopped without cleanly terminating this
+        // one, the app would keep running headless with the keyboard hook live.
+        // Bind our lifetime to the launcher and shut down when it goes. Off the UI
+        // thread: resolving the parent process touches native APIs. Installed
+        // builds are excluded inside Start().
+        _parentProcessExitWatcher = _services.GetRequiredService<ParentProcessExitWatcher>();
+        _ = Task.Run(() => _parentProcessExitWatcher.Start(() =>
+            Dispatcher.UIThread.Post(() =>
+                (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown())));
 
         // First-run onboarding tour (ADR-056). Fire-and-forget like its
         // neighbours; the service catches its own failures — a broken tour
@@ -331,6 +350,7 @@ public class App : Application
         services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddSingleton<IShellService, ShellService>();
         services.AddSingleton<HotkeyCoordinator>();
+        services.AddSingleton<ParentProcessExitWatcher>();
         services.AddSingleton<OnboardingHighlightService>();
         services.AddSingleton<IOnboardingService, OnboardingService>();
 

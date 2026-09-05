@@ -348,3 +348,23 @@ calls `SignalPrimary()` and returns 0.
 - Not a DI service — it predates `BuildServiceProvider`, and lives on
   `Program.SingleInstance` like `Program.TextInjectionMode`.
   `Acquire(name)` takes an override so tests never touch the real lock.
+
+### Dev-only lifetime binding
+
+See [[decisions/_index|ADR-062]]. `ParentProcessExitWatcher` (Desktop singleton, armed
+in `App.OnFrameworkInitializationCompleted`). A `dotnet run` / IDE session stopped
+abnormally left the real (child) `Parlotype` process alive and headless — no window,
+tray icon in the overflow, `dotnet.exe` in Task Manager — with the SharpHook keyboard
+hook still injecting text (the hook runs on a background thread: it neither keeps the
+process alive nor stops until the process ends). The single-instance guard then had
+every later `dotnet run` defer to that zombie.
+
+- **Dev builds only**: no-op when `InstalledBuild.IsInstalled` (`VelopackLocator.Current`,
+  same test as ADR-059), on non-Windows, or when the parent can't be resolved to a live
+  process (a detection miss must not take the app down).
+- Resolves the launcher via `NativeParentProcess` (`ntdll!NtQueryInformationProcess` —
+  the only way to read a parent PID in .NET), holds its `Process` handle, and on its
+  exit posts `desktop.Shutdown()` then `Environment.Exit(0)` after a 5 s grace.
+- `App`'s `async void` `desktop.Exit` handler was hardened alongside: the hotkey
+  coordinator and watcher are now disposed **before** the first `await`, so a stranded
+  continuation can't leave the hook installed.
