@@ -43,6 +43,21 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // Not every host that reaches this method wants a running Parlotype
+        // (ADR-063). The XAML previewer in Rider and Visual Studio loads this
+        // assembly, takes `Program` from its entry point *without calling
+        // Main*, and drives `BuildAvaloniaApp().SetupWithoutStarting()` — which
+        // lands here. Everything below is the real app: the global keyboard
+        // hook, the microphone, a prewarmed multi-gigabyte speech model. In the
+        // previewer they start outside the single-instance guard, in a process
+        // named `dotnet.exe` that lives as long as the IDE, with no desktop
+        // lifetime to ever shut them down again.
+        if (ResolveRuntimeLifetime(ApplicationLifetime, Design.IsDesignMode) is not { } desktop)
+        {
+            base.OnFrameworkInitializationCompleted();
+            return;
+        }
+
         _services = BuildServiceProvider();
 
         DataContext = _services.GetRequiredService<AppViewModel>();
@@ -51,39 +66,36 @@ public class App : Application
         ApplyTheme(themeVm.SelectedTheme);
         themeVm.ThemeChanged += (_, theme) => ApplyTheme(theme);
 
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        desktop.Exit += async (_, _) =>
         {
-            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            desktop.Exit += async (_, _) =>
-            {
-                // First, and synchronously: a downloaded update is only staged, and
-                // Velopack installs nothing without an explicit apply (ADR-053).
-                // This hands it to Update.exe, which waits for us to exit. Runs
-                // before the awaits below because a shutdown handler is not a
-                // reliable place for a continuation to resume.
-                _services.GetService<IUpdateService>()?.ApplyOnExit();
+            // First, and synchronously: a downloaded update is only staged, and
+            // Velopack installs nothing without an explicit apply (ADR-053).
+            // This hands it to Update.exe, which waits for us to exit. Runs
+            // before the awaits below because a shutdown handler is not a
+            // reliable place for a continuation to resume.
+            _services.GetService<IUpdateService>()?.ApplyOnExit();
 
-                // Release the global keyboard hook and disarm the dev watchdog
-                // before any await. This is an async void handler: a continuation
-                // that never resumes (a pending settings write, a slow recognizer
-                // teardown) must not be able to leave the hook installed on a
-                // process that outlives its window (ADR-062).
-                _hotkeyCoordinator?.Dispose();
-                _parentProcessExitWatcher?.Dispose();
+            // Release the global keyboard hook and disarm the dev watchdog
+            // before any await. This is an async void handler: a continuation
+            // that never resumes (a pending settings write, a slow recognizer
+            // teardown) must not be able to leave the hook installed on a
+            // process that outlives its window (ADR-062).
+            _hotkeyCoordinator?.Dispose();
+            _parentProcessExitWatcher?.Dispose();
 
-                // Flush the uninstall-consent write before the process goes away —
-                // it gates a destructive action taken later by a process that
-                // cannot ask.
-                var dataSettings = _services.GetService<DataSettingsViewModel>();
-                if (dataSettings is not null)
-                    await dataSettings.PendingWrite;
+            // Flush the uninstall-consent write before the process goes away —
+            // it gates a destructive action taken later by a process that
+            // cannot ask.
+            var dataSettings = _services.GetService<DataSettingsViewModel>();
+            if (dataSettings is not null)
+                await dataSettings.PendingWrite;
 
-                // Stop the llama-server sidecar (if running) before exiting
-                var recognizer = _services.GetService<ISpeechRecognizer>();
-                if (recognizer is not null)
-                    await recognizer.DisposeAsync();
-            };
-        }
+            // Stop the llama-server sidecar (if running) before exiting
+            var recognizer = _services.GetService<ISpeechRecognizer>();
+            if (recognizer is not null)
+                await recognizer.DisposeAsync();
+        };
 
         // Launching Parlotype again — from the Start menu, a shortcut, or the
         // installer's "run now" — is a request to see it, not to start a second
@@ -101,9 +113,8 @@ public class App : Application
         // thread: resolving the parent process touches native APIs. Installed
         // builds are excluded inside Start().
         _parentProcessExitWatcher = _services.GetRequiredService<ParentProcessExitWatcher>();
-        _ = Task.Run(() => _parentProcessExitWatcher.Start(() =>
-            Dispatcher.UIThread.Post(() =>
-                (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown())));
+        _ = Task.Run(() => _parentProcessExitWatcher.Start(
+            () => Dispatcher.UIThread.Post(() => desktop.Shutdown())));
 
         // First-run onboarding tour (ADR-056). Fire-and-forget like its
         // neighbours; the service catches its own failures — a broken tour
@@ -131,6 +142,32 @@ public class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
+
+    /// <summary>
+    /// The desktop lifetime to bootstrap the real app against, or <see langword="null"/>
+    /// when this process is not a real Parlotype run but a tool that merely loaded
+    /// the assembly to look at it (ADR-063).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Two independent conditions, because either one alone is a single point of
+    /// failure. <paramref name="isDesignMode"/> is Avalonia's own flag, set by
+    /// <c>Avalonia.DesignerSupport</c> before it constructs the app — it names the
+    /// intent exactly, but it is the previewer's internal contract, not ours. The
+    /// lifetime check is structural: everything the caller goes on to do needs a
+    /// desktop lifetime (shutdown mode, the Exit handler, windows, the tray), so a
+    /// host that supplies none was never going to get a working app anyway.
+    /// </para>
+    /// <para>
+    /// Deliberately <em>not</em> keyed on "did <c>Program.Main</c> run": that would
+    /// also be true, but it couples <c>App</c> to a static on <c>Program</c> for a
+    /// third signal when two orthogonal ones already agree.
+    /// </para>
+    /// </remarks>
+    internal static IClassicDesktopStyleApplicationLifetime? ResolveRuntimeLifetime(
+        IApplicationLifetime? lifetime,
+        bool isDesignMode) =>
+        isDesignMode ? null : lifetime as IClassicDesktopStyleApplicationLifetime;
 
     private static async Task StartUpdateCheckerAsync(IServiceProvider provider)
     {

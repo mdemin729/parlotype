@@ -349,6 +349,28 @@ calls `SignalPrimary()` and returns 0.
   `Program.SingleInstance` like `Program.TextInjectionMode`.
   `Acquire(name)` takes an override so tests never touch the real lock.
 
+### The XAML previewer is not a Parlotype run
+
+See [[decisions/_index|ADR-063]]. `App.OnFrameworkInitializationCompleted` starts with
+`ResolveRuntimeLifetime(ApplicationLifetime, Design.IsDesignMode)`; a null result returns
+before the container is built.
+
+- **Why**: the Avalonia XAML previewer (Rider/VS) loads `Parlotype.dll`, takes the entry
+  point *only for its declaring type*, sets `Design.IsDesignMode = true`, resolves the
+  public `Program.BuildAvaloniaApp()` and calls `SetupWithoutStarting()` — which invokes
+  this method. **`Program.Main` never runs**, so there is no `SingleInstanceGuard` and no
+  desktop lifetime: the `desktop.Exit` handler is never registered and nothing disposes
+  the global hook. Observed: a `dotnet.exe` under `rider64.exe` owning a `libuiohook`
+  window, with a prewarmed 2.6 GB Parakeet model and the microphone open — answering the
+  dictation hotkey with no tray icon and no window.
+- **Two orthogonal conditions on purpose**: `Design.IsDesignMode` is Avalonia's flag and
+  names the intent, but it is the previewer's contract, not ours; the lifetime check is
+  structural and ours. Either alone is a single point of failure.
+- **Cost**: XAML previews render in the default theme — `ApplyTheme` needs the container,
+  which now sits behind the guard. Design-time `<Design.DataContext>` is unaffected.
+- ADR-062's watchdog cannot cover this: it arms on the immediate parent, which here is the
+  long-lived IDE.
+
 ### Dev-only lifetime binding
 
 See [[decisions/_index|ADR-062]]. `ParentProcessExitWatcher` (Desktop singleton, armed
