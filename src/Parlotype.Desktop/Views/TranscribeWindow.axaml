@@ -20,7 +20,10 @@
         <SolidColorBrush x:Key="WaveformActiveBrush" Color="White" />
         <SolidColorBrush x:Key="WaveformIdleBrush" Color="White" />
         <SolidColorBrush x:Key="WaveformDisabledBrush" Color="#378ADD" />
+        <!-- Warn (translation paused / unavailable) tokens; see the note on the
+             matching dictionary in LanguageSelectionSettingsView. -->
         <SolidColorBrush x:Key="WarnForegroundBrush" Color="#E0A23A" />
+        <SolidColorBrush x:Key="WarnBackgroundBrush" Color="#24E0A23A" />
     </Window.Resources>
 
     <Window.Styles>
@@ -53,7 +56,11 @@
         <Style Selector="Button.stripConnector.on">
             <Setter Property="Background" Value="#378ADD" />
         </Style>
-        <Style Selector="Button.stripConnector.on TextBlock">
+        <!-- Scoped to the glyph's own class, never a bare descendant TextBlock:
+             a tooltip's content is a logical child of the control it hangs off,
+             so `Button.connector.on TextBlock` also repainted the tooltip's text
+             white on its light background — an invisible tooltip (ADR-061). -->
+        <Style Selector="Button.stripConnector.on TextBlock.connectorGlyph">
             <Setter Property="Foreground" Value="White" />
         </Style>
         <Style Selector="Button.stripConnector.off">
@@ -61,6 +68,14 @@
         </Style>
         <Style Selector="Button.stripConnector.locked">
             <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <!-- Paused: amber fill instead of the accent blue, so the always-visible
+             strip never shows a translation that will not happen (ADR-061). -->
+        <Style Selector="Button.stripConnector.paused">
+            <Setter Property="Background" Value="#C68A28" />
+        </Style>
+        <Style Selector="Button.stripConnector.paused TextBlock.connectorGlyph">
+            <Setter Property="Foreground" Value="White" />
         </Style>
 
         <Style Selector="Button.windowClose">
@@ -200,10 +215,12 @@
                             Classes.on="{Binding Relationship.IsConnectorOn}"
                             Classes.off="{Binding Relationship.IsConnectorOff}"
                             Classes.locked="{Binding Relationship.IsConnectorLocked}"
+                            Classes.paused="{Binding Relationship.IsTranslationPaused}"
                             IsEnabled="{Binding !Relationship.IsConnectorLocked}"
                             Command="{Binding ToggleTranslationCommand}"
-                            ToolTip.Tip="Toggle translation">
-                        <TextBlock Text="{Binding Relationship.ConnectorGlyph}" FontSize="12" />
+                            ToolTip.Tip="{Binding Relationship.ConnectorTooltip}">
+                        <TextBlock Classes="connectorGlyph"
+                                   Text="{Binding Relationship.ConnectorGlyph}" FontSize="12" />
                     </Button>
                     <Button Classes="chip"
                             Command="{Binding OpenLanguageFlyoutCommand}"
@@ -233,6 +250,19 @@
                                           OnContent="" OffContent=""
                                           VerticalAlignment="Center" Margin="10,0,0,0" />
                         </Grid>
+
+                        <!-- Paused: the switch above is on, this model can't act
+                             on it. Says so and offers the page that fixes it. -->
+                        <StackPanel IsVisible="{Binding Relationship.IsTranslationPaused}"
+                                    Spacing="6">
+                            <TextBlock Text="{Binding Relationship.TranslationPausedNote}"
+                                       Foreground="{DynamicResource WarnForegroundBrush}"
+                                       FontSize="12" TextWrapping="Wrap" />
+                            <Button Content="Choose a model that translates"
+                                    Command="{Binding GoToModelSettingsCommand}"
+                                    HorizontalAlignment="Left"
+                                    FontSize="11" Padding="8,3" CornerRadius="6" />
+                        </StackPanel>
 
                         <!-- None form: short amber explanation. -->
                         <TextBlock IsVisible="{Binding Relationship.IsNoneForm}"

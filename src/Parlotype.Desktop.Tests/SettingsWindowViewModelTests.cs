@@ -262,16 +262,16 @@ public class SettingsWindowViewModelTests
         vm.Language.ToggleTranslationCommand.Execute(null);
 
         // Base (default) supports translation — note stays hidden.
-        Assert.False(vm.Language.Relationship.ShowTranslationPausedNote);
+        Assert.False(vm.Language.Relationship.IsTranslationPaused);
 
         // Large v3 Turbo does not — the model change must propagate through the
         // SettingsWindowViewModel wiring and surface the paused note.
         vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.LargeV3Turbo);
-        Assert.True(vm.Language.Relationship.ShowTranslationPausedNote);
+        Assert.True(vm.Language.Relationship.IsTranslationPaused);
 
         // Switching back to a translation-capable model hides the note again.
         vm.WhisperModel.SelectModelCommand.Execute(WhisperModelType.Medium);
-        Assert.False(vm.Language.Relationship.ShowTranslationPausedNote);
+        Assert.False(vm.Language.Relationship.IsTranslationPaused);
     }
 
     [Fact]

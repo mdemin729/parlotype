@@ -8,7 +8,11 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
-                <!-- Warn (translation unavailable) tokens per the redlines. -->
+                <!-- Warn (translation unavailable / paused) tokens per the redlines.
+                     Deliberately per-view rather than app-scoped: the headless
+                     screenshot tests host controls under their own Application, so
+                     an App.axaml dictionary would silently vanish from every
+                     rendering test that verifies this state. -->
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="WarnForegroundBrush" Color="#E0A23A" />
                     <SolidColorBrush x:Key="WarnBackgroundBrush" Color="#24E0A23A" />
@@ -49,7 +53,11 @@
         <Style Selector="Button.connector.on">
             <Setter Property="Background" Value="#378ADD" />
         </Style>
-        <Style Selector="Button.connector.on TextBlock">
+        <!-- Scoped to the glyph's own class, never a bare descendant TextBlock:
+             a tooltip's content is a logical child of the control it hangs off,
+             so `Button.connector.on TextBlock` also repainted the tooltip's text
+             white on its light background — an invisible tooltip (ADR-061). -->
+        <Style Selector="Button.connector.on TextBlock.connectorGlyph">
             <Setter Property="Foreground" Value="White" />
         </Style>
         <Style Selector="Button.connector.off">
@@ -57,6 +65,18 @@
         </Style>
         <Style Selector="Button.connector.locked">
             <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <!-- Paused: on but not acting. Amber rather than accent so it never
+             reads as a working translation (ADR-061). -->
+        <Style Selector="Button.connector.paused">
+            <Setter Property="Background" Value="#C68A28" />
+        </Style>
+        <Style Selector="Button.connector.paused TextBlock.connectorGlyph">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+
+        <Style Selector="Border.targetCard.paused">
+            <Setter Property="BorderBrush" Value="#C68A28" />
         </Style>
 
         <Style Selector="TextBlock.fieldCaption">
@@ -106,12 +126,14 @@
                     Classes.on="{Binding Relationship.IsConnectorOn}"
                     Classes.off="{Binding Relationship.IsConnectorOff}"
                     Classes.locked="{Binding Relationship.IsConnectorLocked}"
+                    Classes.paused="{Binding Relationship.IsTranslationPaused}"
                     IsEnabled="{Binding !Relationship.IsConnectorLocked}"
                     Command="{Binding ToggleTranslationCommand}"
                     Margin="14,18,14,0"
                     VerticalAlignment="Top"
-                    ToolTip.Tip="Toggle translation">
-                <TextBlock Text="{Binding Relationship.ConnectorGlyph}" FontSize="17" />
+                    ToolTip.Tip="{Binding Relationship.ConnectorTooltip}">
+                <TextBlock Classes="connectorGlyph"
+                           Text="{Binding Relationship.ConnectorGlyph}" FontSize="17" />
             </Button>
 
             <!-- Target side: form picked by the engine's capabilities (spec §4). -->
@@ -119,14 +141,23 @@
                 <TextBlock Classes="fieldCaption" Text="Parlotype types" />
 
                 <!-- Toggle form (Whisper): a labelled switch, never a list. -->
-                <Border IsVisible="{Binding Relationship.IsToggleForm}"
+                <Border Classes="targetCard"
+                        Classes.paused="{Binding Relationship.IsTranslationPaused}"
+                        IsVisible="{Binding Relationship.IsToggleForm}"
                         MinHeight="60" CornerRadius="10"
                         BorderThickness="1.5" Padding="14,13"
                         BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}">
                     <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding Relationship.ToggleSwitchLabel}"
-                                   FontSize="14" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="{Binding Relationship.ToggleSwitchLabel}"
+                                       FontSize="14" />
+                            <!-- The switch stays on and operable: the preference is
+                                 kept, only its effect is suspended (ADR-061). -->
+                            <TextBlock Text="Paused — this model can't translate"
+                                       IsVisible="{Binding Relationship.IsTranslationPaused}"
+                                       Foreground="{DynamicResource WarnForegroundBrush}"
+                                       FontSize="12" TextWrapping="Wrap" />
+                        </StackPanel>
                         <ToggleSwitch Grid.Column="1"
                                       IsChecked="{Binding Relationship.TranslationSwitch, Mode=TwoWay}"
                                       OnContent="" OffContent=""
@@ -186,11 +217,22 @@
         <TextBlock Text="{Binding Relationship.SummaryText}"
                    FontSize="13" Opacity="0.75" TextWrapping="Wrap" />
 
-        <!-- "Translation paused" hint (Whisper + non-translation-capable model, ADR-033). -->
-        <TextBlock Text="{Binding TranslationPausedNote}"
-                   Foreground="{DynamicResource SystemAccentColor}"
-                   FontSize="12" TextWrapping="Wrap"
-                   IsVisible="{Binding Relationship.ShowTranslationPausedNote}" />
+        <!-- Paused banner (Whisper + non-translation-capable model, ADR-033/061).
+             Amber like the unavailable note, but it names the model and offers
+             the one action that resumes translation. -->
+        <Border IsVisible="{Binding Relationship.IsTranslationPaused}"
+                Background="{DynamicResource WarnBackgroundBrush}"
+                CornerRadius="8" Padding="12,8">
+            <StackPanel Spacing="8">
+                <TextBlock Text="{Binding Relationship.TranslationPausedNote}"
+                           Foreground="{DynamicResource WarnForegroundBrush}"
+                           FontSize="12" TextWrapping="Wrap" />
+                <Button Content="Choose a model that translates"
+                        Command="{Binding GoToWhisperModelCommand}"
+                        HorizontalAlignment="Left"
+                        FontSize="12" Padding="10,4" CornerRadius="6" />
+            </StackPanel>
+        </Border>
 
         <!-- Amber unavailable note, naming the model (spec §4, none form only). -->
         <Border IsVisible="{Binding Relationship.IsNoneForm}"

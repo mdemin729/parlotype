@@ -125,6 +125,21 @@ public class TranscribeWindowScreenshotTests : IClassFixture<TranscribeScreensho
     }
 
     [AvaloniaFact]
+    public async Task Scenario_Strip_TranslationPaused()
+    {
+        var vm = await CreateVmAsync();
+        vm.Relationship!.SelectSource("ru");
+        vm.Relationship.ToggleTranslation();
+        vm.Relationship.SetWhisperModel(WhisperModelType.LargeV3Turbo);
+
+        await AddBothThemesAsync(vm,
+            "Transcribe — Strip, Translation Paused",
+            "Translation is on but the Whisper model can't translate: the connector turns amber " +
+            "at \"=\" and the target chip mirrors the source, so the strip never advertises a " +
+            "translation that will not happen (ADR-061).");
+    }
+
+    [AvaloniaFact]
     public async Task Scenario_Strip_Locked()
     {
         var vm = await CreateVmAsync();

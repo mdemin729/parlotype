@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-08-02
+last_updated: 2026-09-05
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -63,6 +63,8 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[avalonia-click-event-vs-command]] | `button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))` bypasses `OnClick`, so a bound `Command` never executes — fine for `Click`-handler dialogs, silent no-op for command-bound buttons; headless tests must simulate a real `MouseDown`/`MouseUp` at the button's point instead. `AdornerLayer.SetAdorner` *does* work under Avalonia.Headless (FluentTheme window template supplies the layer) | 2026-08-02 |
 | [[windows-run-key-startup-approval]] | The HKCU `Run` key is only half of Windows autostart: Explorer records the user's Task Manager decision in a *separate* `StartupApproved\Run` blob (low bit of byte 0 = disabled) that silently overrides the entry, so a bool-valued setting reads "on" while nothing launches — detect it, never forge it. Also: `Microsoft.Win32.Registry` needs no PackageReference on a plain `net10.0` TFM (only `[SupportedOSPlatform]` for CA1416), and the autorun target must be the Velopack **stub** at the install root, not the versioned exe under `current\` | 2026-08-08 |
 | [[avalonia-window-activation-focus]] | `Window.Activate()` focuses **no control** inside the window (use `IsDefault` + `Focus(NavigationMethod.Tab)`, the latter for a visible ring), and a window shown from a queued `Dispatcher.Post` activates *after* a caller that found it synchronously — yield at `DispatcherPriority.Background` first. Order-dependent, so the first visit looks fine and later ones don't. Verify cross-window focus with `GetGUIThreadInfo().hwndFocus` + `PostMessage`, never `SendKeys`/`SetForegroundWindow` | 2026-08-02 |
+
+| [[avalonia-resource-scope-in-headless-tests]] | `Parlotype.Desktop.Tests` runs under its own `TestApp`, so anything in `App.axaml`'s `Application.Resources` resolves to **null** in every headless/screenshot test — colours blank out with no error and all assertions still pass; `DynamicResource` in a `Styles` setter does not see the view's own `Resources`, so the styled control draws fully transparent; and a descendant selector (`Button.x TextBlock`) also matches the **tooltip's** content, painting the tooltip's own text with the control's colour. Keep such palettes per-view, use literals in class styles, and verify visual changes by sampling pixels out of the `reports/` HTML | 2026-09-05 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

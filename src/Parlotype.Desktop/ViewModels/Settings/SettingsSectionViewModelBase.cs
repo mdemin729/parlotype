@@ -30,4 +30,16 @@ public abstract class SettingsSectionViewModelBase : ViewModelBase
     /// </summary>
     public virtual bool IsVisibleFor(SpeechEngine engine) =>
         RestrictToEngine is null || RestrictToEngine == engine;
+
+    /// <summary>
+    /// Raised when a section wants the Settings shell to show a different
+    /// section — e.g. the Language page's paused-translation note routing to the
+    /// model page that can lift the pause (ADR-061). The shell owns navigation,
+    /// so sections never reach for each other directly.
+    /// </summary>
+    public event EventHandler<SettingsSection>? NavigationRequested;
+
+    /// <summary>Asks the shell to navigate to <paramref name="section"/>.</summary>
+    protected void RequestNavigation(SettingsSection section) =>
+        NavigationRequested?.Invoke(this, section);
 }

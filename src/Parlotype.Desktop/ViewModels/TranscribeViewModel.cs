@@ -290,11 +290,15 @@ public partial class TranscribeViewModel : ViewModelBase
 
     /// <summary>
     /// Compact target chip: the target name while translating, otherwise the
-    /// source mirrored — "English = English" reads "typed as spoken".
+    /// source mirrored — "English = English" reads "typed as spoken". A paused
+    /// translation mirrors too (ADR-061): the strip states what will actually be
+    /// typed, and the amber connector says why it isn't the chosen target.
     /// </summary>
     public string TargetShort =>
         _relationship is null ? ""
-        : _relationship.TranslationEnabled && !_relationship.IsNoneForm
+        : _relationship.TranslationEnabled
+          && !_relationship.IsNoneForm
+          && !_relationship.IsTranslationPaused
             ? LanguageCatalog.GetEnglishName(_relationship.TargetCode)
             : SourceShort;
 
@@ -329,6 +333,17 @@ public partial class TranscribeViewModel : ViewModelBase
         _windowManager.ShowSettings(SettingsSection.Language);
     }
 
+    /// <summary>
+    /// The paused-translation note's way out (ADR-061): the model page of the
+    /// active engine, where a multilingual model resumes translation.
+    /// </summary>
+    [RelayCommand]
+    private void GoToModelSettings()
+    {
+        IsLanguageFlyoutOpen = false;
+        _windowManager.ShowSettings(SettingsSection.EngineModel);
+    }
+
     private void SelectTargetFromFlyout(string code)
     {
         _relationship?.SelectTarget(code);
@@ -343,6 +358,7 @@ public partial class TranscribeViewModel : ViewModelBase
             case nameof(LanguageRelationshipViewModel.DetectedKeyboardLayout):
             case nameof(LanguageRelationshipViewModel.TranslationEnabled):
             case nameof(LanguageRelationshipViewModel.TargetCode):
+            case nameof(LanguageRelationshipViewModel.IsTranslationPaused):
                 OnPropertyChanged(nameof(SourceShort));
                 OnPropertyChanged(nameof(TargetShort));
                 break;
