@@ -339,17 +339,15 @@ public class LanguageSettingsScreenshotTests : IClassFixture<SpeechScreenshotRep
         vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
         await SettleAsync();
 
-        var steps = new List<ScenarioStep>();
-        var screenshot = await ScreenshotHelper.CaptureBase64Async(
-            new LanguageSelectionSettingsView(), vm, theme: Avalonia.Styling.ThemeVariant.Dark);
-        steps.Add(new ScenarioStep(
-            "Translation is on but the selected Whisper model (Large v3 Turbo) can't translate. " +
-            "Controls stay enabled (preference preserved); the accent note explains why nothing will be translated.",
-            screenshot));
+        var steps = await CaptureBothThemesAsync(vm,
+            "Translation is on but Large v3 Turbo can't translate (ADR-061). The connector turns " +
+            "amber at \"=\", the target card carries a \"Paused\" sub-line, the summary says the " +
+            "output matches the spoken language, and the amber banner names the model and offers " +
+            "the model page. The switch stays on and operable — the preference is preserved.");
 
         _report.AddScenario(new Scenario(
-            "Language — Translation Paused (accent note)",
-            "Large v3 Turbo + translation on: accent note visible.",
+            "Language — Translation Paused (amber, reversible)",
+            "Large v3 Turbo + translation on, dark + light.",
             steps));
     }
 

@@ -848,4 +848,33 @@ public class TranscribeLanguageStripTests
         Assert.Equal("=", relationship.ConnectorGlyph);
         Assert.Equal(vm.SourceShort, vm.TargetShort); // output mirrors spoken
     }
+
+    [AvaloniaFact]
+    public async Task ModelWithoutTranslation_PausesTheStrip()
+    {
+        var (vm, relationship, _, _) = await CreateAsync();
+        relationship.SelectSource("ru");
+        relationship.ToggleTranslation();
+        Assert.Equal("English", vm.TargetShort);
+
+        relationship.SetWhisperModel(WhisperModelType.LargeV3Turbo);
+
+        // ADR-061: the always-visible strip states what will actually be typed.
+        Assert.True(relationship.IsConnectorPaused);
+        Assert.Equal("=", relationship.ConnectorGlyph);
+        Assert.Equal(vm.SourceShort, vm.TargetShort);
+    }
+
+    [AvaloniaFact]
+    public async Task PausedNote_RoutesToTheModelPage_AndClosesTheFlyout()
+    {
+        var (vm, _, _, wm) = await CreateAsync();
+        vm.OpenLanguageFlyoutCommand.Execute(null);
+
+        vm.GoToModelSettingsCommand.Execute(null);
+
+        Assert.False(vm.IsLanguageFlyoutOpen);
+        Assert.Equal(1, wm.ShowSettingsCount);
+        Assert.Equal(SettingsSection.EngineModel, wm.LastSettingsSection);
+    }
 }

@@ -104,6 +104,9 @@ public partial class SettingsWindowViewModel : ViewModelBase
             help,
         ];
 
+        foreach (var section in _allSections)
+            section.NavigationRequested += (_, target) => NavigateTo(target);
+
         speechEngine.PropertyChanged += OnSpeechEnginePropertyChanged;
         whisperModel.PropertyChanged += OnWhisperModelPropertyChanged;
         language.UpdateForEngine(speechEngine.SelectedEngine);

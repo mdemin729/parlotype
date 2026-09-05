@@ -29,7 +29,11 @@ model (Large v3 Turbo), not a bug.
 3. **User intent is preserved.** The `TranslateToEnglish` setting is *not* overwritten when
    an incompatible model is selected; only the *effective* value is gated. Switching back
    to a translation-capable model restores the user's previous choice.
-4. **UI signals the constraint twice:**
+4. **UI signals the constraint twice:** *(amended by
+   [ADR-061](061-translation-paused-state.md) — the ADR-036 language rebuild dropped all of
+   this except the note, and the toggle is no longer disabled: the paused state is now
+   rendered on the connector, the summary, the target card, the model list and the
+   Transcribe strip, with the preference left on and operable.)*
    - The Whisper model list (`WhisperModelSettingsView`) shows a muted "no translation"
      hint next to models where `!SupportsTranslation`.
    - The translate toggle (`WhisperOutputSettingsViewModel.CanTranslate`) is disabled with
@@ -47,6 +51,9 @@ model (Large v3 Turbo), not a bug.
 
 ### Easier
 - The toggle can no longer silently fail; the user always sees why translation is off.
+  *(Held only until ADR-036 rebuilt the language UX around a shared relationship view model
+  and carried over just one note — see [ADR-061](061-translation-paused-state.md). A
+  consequence recorded as accepted is not a consequence verified as delivered.)*
 - Capability lives in one place (`WhisperModelInfo`) consumed by pipeline, model list, and toggle.
 
 ### Harder

@@ -373,10 +373,10 @@ public class LanguageRelationshipViewModelTests
 
         vm.SetWhisperModel(WhisperModelType.LargeV3Turbo);
 
-        Assert.True(vm.ShowTranslationPausedNote);
+        Assert.True(vm.IsTranslationPaused);
 
         vm.SetWhisperModel(WhisperModelType.Medium);
-        Assert.False(vm.ShowTranslationPausedNote);
+        Assert.False(vm.IsTranslationPaused);
     }
 
     [Fact]
@@ -387,7 +387,116 @@ public class LanguageRelationshipViewModelTests
 
         vm.SetWhisperModel(WhisperModelType.LargeV3Turbo);
 
-        Assert.False(vm.ShowTranslationPausedNote);
+        Assert.False(vm.IsTranslationPaused);
+    }
+
+    // ----- ADR-061 paused connector ---------------------------------------------
+
+    [Fact]
+    public async Task Paused_ConnectorIsPaused_NotOn()
+    {
+        var (vm, _, _) = await CreateAsync();
+        vm.ToggleTranslation();
+        Assert.Equal(ConnectorState.On, vm.Connector);
+
+        vm.SetWhisperModel(WhisperModelType.LargeV3Turbo);
+
+        Assert.Equal(ConnectorState.Paused, vm.Connector);
+        Assert.True(vm.IsConnectorPaused);
+        Assert.False(vm.IsConnectorOn);
+        Assert.False(vm.IsConnectorOff);
+        Assert.False(vm.IsConnectorLocked);
+        // The glyph states the outcome: output will match the spoken language.
+        Assert.Equal("=", vm.ConnectorGlyph);
+    }
+
+    [Fact]
+    public async Task Paused_Summary_DoesNotClaimATranslation()
+    {
+        var (vm, _, _) = await CreateAsync();
+        vm.SelectSource("ru");
+        vm.ToggleTranslation();
+        Assert.Equal("You speak Russian → Parlotype types English.", vm.SummaryText);
+
+        vm.SetWhisperModel(WhisperModelType.LargeV3Turbo);
+
+        Assert.Equal("You speak Russian → Parlotype types Russian (translation paused).", vm.SummaryText);
+    }
+
+    [Fact]
+    public async Task Paused_PreservesThePreference_AndResumesOnACapableModel()
+    {
+        var (vm, settings, _) = await CreateAsync();
+        vm.ToggleTranslation();
+
+        vm.SetWhisperModel(WhisperModelType.MediumEn);
+
+        // ADR-033: intent is never overwritten, only its effect suspended.
+        Assert.True(vm.TranslationEnabled);
+        Assert.Equal(
+            bool.TrueString,
+            await settings.GetAsync<string>(SettingsKeys.TranslationEnabled, TestContext.Current.CancellationToken));
+
+        vm.SetWhisperModel(WhisperModelType.LargeV3);
+
+        Assert.Equal(ConnectorState.On, vm.Connector);
+        Assert.Equal("→", vm.ConnectorGlyph);
+    }
+
+    [Fact]
+    public async Task Paused_Toast_NamesTheModelThatCausedIt()
+    {
+        var (vm, _, _) = await CreateAsync();
+        vm.ToggleTranslation();
+
+        vm.SetWhisperModel(WhisperModelType.MediumEn);
+
+        Assert.Equal(
+            "\"Medium (English)\" can't translate — translation is paused until you pick a multilingual model.",
+            vm.ToastMessage);
+    }
+
+    [Fact]
+    public async Task Paused_NoToast_WhenTranslationIsOff()
+    {
+        var (vm, _, _) = await CreateAsync();
+
+        vm.SetWhisperModel(WhisperModelType.MediumEn);
+
+        Assert.False(vm.IsTranslationPaused);
+        Assert.Null(vm.ToastMessage);
+    }
+
+    [Fact]
+    public async Task Paused_NoToast_AtStartup_ButStateIsPaused()
+    {
+        var settings = new MockSettingsService();
+        var ct = TestContext.Current.CancellationToken;
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Whisper.ToString(), ct);
+        await settings.SetAsync(SettingsKeys.TranslationEnabled, bool.TrueString, ct);
+        await settings.SetAsync(SettingsKeys.SelectedTargetLanguage, LanguageCatalog.EnglishCode, ct);
+        await settings.SetAsync(SettingsKeys.SelectedWhisperModel, WhisperModelType.LargeV3Turbo.ToString(), ct);
+
+        var vm = new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService());
+        await vm.InitializeAsync(ct);
+
+        // Startup reconciliation is silent — the inline paused state carries it.
+        Assert.True(vm.IsTranslationPaused);
+        Assert.Null(vm.ToastMessage);
+    }
+
+    [Fact]
+    public async Task Paused_TooltipAndNote_NameTheModel()
+    {
+        var (vm, _, _) = await CreateAsync();
+        vm.ToggleTranslation();
+
+        vm.SetWhisperModel(WhisperModelType.LargeV3Turbo);
+
+        Assert.Equal("Large v3 Turbo", vm.WhisperModelDisplayName);
+        Assert.Equal("Translation paused — \"Large v3 Turbo\" can't translate", vm.ConnectorTooltip);
+        Assert.Contains("\"Large v3 Turbo\" is transcription-only", vm.TranslationPausedNote);
+        Assert.Contains("Pick Medium or Large v1/v2/v3", vm.TranslationPausedNote);
     }
 
     // ----- Summary line (spec §7 derived rendering) ------------------------------

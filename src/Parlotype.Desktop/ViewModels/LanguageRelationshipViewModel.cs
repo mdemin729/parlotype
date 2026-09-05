@@ -18,6 +18,14 @@ public enum ConnectorState
 
     /// <summary>Engine cannot translate — locked "=" at half opacity.</summary>
     Locked,
+
+    /// <summary>
+    /// Translation is switched on but the active Whisper model can't perform it
+    /// (ADR-061) — amber "=". Distinct from <see cref="Locked"/>: the engine is
+    /// capable, only this model isn't, so the state is reversible by picking a
+    /// multilingual model and the user's preference stays on.
+    /// </summary>
+    Paused,
 }
 
 /// <summary>
@@ -95,20 +103,39 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Connector))]
     [NotifyPropertyChangedFor(nameof(ConnectorGlyph))]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
-    [NotifyPropertyChangedFor(nameof(ShowTranslationPausedNote))]
+    [NotifyPropertyChangedFor(nameof(IsTranslationPaused))]
+    [NotifyPropertyChangedFor(nameof(ConnectorTooltip))]
     [NotifyPropertyChangedFor(nameof(TranslationSwitch))]
     [NotifyPropertyChangedFor(nameof(IsConnectorOn))]
     [NotifyPropertyChangedFor(nameof(IsConnectorOff))]
+    [NotifyPropertyChangedFor(nameof(IsConnectorPaused))]
     [NotifyPropertyChangedFor(nameof(TargetDisplayLabel))]
     private bool _translationEnabled;
 
     /// <summary>
     /// Whether the active Whisper model can translate (ADR-033). Drives the
-    /// "translation paused" note; only meaningful on the toggle form.
+    /// paused state; only meaningful on the toggle form.
     /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowTranslationPausedNote))]
+    [NotifyPropertyChangedFor(nameof(IsTranslationPaused))]
+    [NotifyPropertyChangedFor(nameof(Connector))]
+    [NotifyPropertyChangedFor(nameof(ConnectorGlyph))]
+    [NotifyPropertyChangedFor(nameof(ConnectorTooltip))]
+    [NotifyPropertyChangedFor(nameof(IsConnectorOn))]
+    [NotifyPropertyChangedFor(nameof(IsConnectorOff))]
+    [NotifyPropertyChangedFor(nameof(IsConnectorPaused))]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
     private bool _whisperModelSupportsTranslation = true;
+
+    /// <summary>
+    /// The active Whisper model, kept so the paused note and tooltip can name
+    /// the model that caused the pause rather than blaming "the model" vaguely.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WhisperModelDisplayName))]
+    [NotifyPropertyChangedFor(nameof(TranslationPausedNote))]
+    [NotifyPropertyChangedFor(nameof(ConnectorTooltip))]
+    private WhisperModelType _whisperModel = WhisperModelType.Base;
 
     /// <summary>Transient one-line fallback explanation (spec §8); auto-clears.</summary>
     [ObservableProperty]
@@ -148,10 +175,27 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
 
     public ConnectorState Connector =>
         TargetForm == TranslationForm.None ? ConnectorState.Locked
-        : TranslationEnabled ? ConnectorState.On
-        : ConnectorState.Off;
+        : !TranslationEnabled ? ConnectorState.Off
+        : IsTranslationPaused ? ConnectorState.Paused
+        : ConnectorState.On;
 
+    // Only a live translation earns the arrow. Paused shares the "=" of an off
+    // connector because that is what the output will actually be — the amber
+    // styling and the tooltip carry the difference.
     public string ConnectorGlyph => Connector == ConnectorState.On ? "→" : "=";
+
+    /// <summary>
+    /// Tooltip for the connector control on both surfaces. The paused case is
+    /// the only way the compact strip can explain itself without being opened.
+    /// </summary>
+    public string ConnectorTooltip => Connector switch
+    {
+        ConnectorState.Locked => UnavailableNote,
+        ConnectorState.Paused =>
+            $"Translation paused — \"{WhisperModelDisplayName}\" can't translate",
+        ConnectorState.On => "Turn translation off",
+        _ => "Turn translation on",
+    };
 
     // Boolean projections of TargetForm / Connector for Classes.* and IsVisible
     // bindings, shared by the Settings page and the Transcribe strip/flyout.
@@ -161,6 +205,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     public bool IsConnectorOn => Connector == ConnectorState.On;
     public bool IsConnectorOff => Connector == ConnectorState.Off;
     public bool IsConnectorLocked => Connector == ConnectorState.Locked;
+    public bool IsConnectorPaused => Connector == ConnectorState.Paused;
 
     /// <summary>
     /// Two-way surface for <c>ToggleSwitch</c> bindings. Routed through
@@ -227,10 +272,14 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
                     ? "any language"
                     : LanguageCatalog.GetEnglishName(SourceCode);
 
-            var translating = TranslationEnabled && TargetForm != TranslationForm.None;
+            var translating = TranslationEnabled
+                              && TargetForm != TranslationForm.None
+                              && !IsTranslationPaused;
             var typed = translating
                 ? LanguageCatalog.GetEnglishName(TargetCode)
-                : $"{spoken} (no translation)";
+                : IsTranslationPaused
+                    ? $"{spoken} (translation paused)"
+                    : $"{spoken} (no translation)";
 
             return $"You speak {spoken} → Parlotype types {typed}.";
         }
@@ -238,12 +287,26 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
 
     /// <summary>
     /// True when translation is on but the active Whisper model can't honour it
-    /// (ADR-033). Toggle form only — full-form engines translate via prompt.
+    /// (ADR-033/ADR-061). Toggle form only — full-form engines translate via
+    /// prompt, and the none form is already locked. The preference itself stays
+    /// on; only the effective behaviour is suspended, so every surface renders
+    /// this as a reversible "paused", never as a silent "off".
     /// </summary>
-    public bool ShowTranslationPausedNote =>
+    public bool IsTranslationPaused =>
         TargetForm == TranslationForm.Toggle
         && TranslationEnabled
         && !WhisperModelSupportsTranslation;
+
+    /// <summary>Display name of the active Whisper model, for paused copy.</summary>
+    public string WhisperModelDisplayName => WhisperModelInfo.Get(WhisperModel).DisplayName;
+
+    /// <summary>
+    /// Amber note shown wherever the paused state needs explaining, naming the
+    /// offending model and the way out.
+    /// </summary>
+    public string TranslationPausedNote =>
+        $"Translation is paused — \"{WhisperModelDisplayName}\" is transcription-only. " +
+        "Pick Medium or Large v1/v2/v3 to resume.";
 
     /// <summary>Per-role MRU for the source picker's Recent cluster.</summary>
     public IReadOnlyList<string> SourceRecent => _sourceRecent;
@@ -301,7 +364,18 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
 
         var modelStr = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel, ct);
         var model = Enum.TryParse<WhisperModelType>(modelStr, out var m) ? m : WhisperModelType.Base;
-        SetWhisperModel(model);
+
+        // Startup reconciliation is silent — the paused state is rendered inline
+        // on both surfaces; a toast is only for a live model switch.
+        _suppressToasts = true;
+        try
+        {
+            SetWhisperModel(model);
+        }
+        finally
+        {
+            _suppressToasts = false;
+        }
     }
 
     /// <summary>
@@ -456,9 +530,24 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         }
     }
 
-    /// <summary>Updates the Whisper-model translation-availability flag (ADR-033).</summary>
-    public void SetWhisperModel(WhisperModelType model) =>
+    /// <summary>
+    /// Applies the active Whisper model (ADR-033). A switch that newly pauses a
+    /// live translation is explained by a toast, so the cause is learned at the
+    /// moment the model is chosen rather than from silent output later.
+    /// </summary>
+    public void SetWhisperModel(WhisperModelType model)
+    {
+        var wasPaused = IsTranslationPaused;
+
+        WhisperModel = model;
         WhisperModelSupportsTranslation = WhisperModelInfo.Get(model).SupportsTranslation;
+
+        if (IsTranslationPaused && !wasPaused)
+        {
+            ShowToast($"\"{WhisperModelDisplayName}\" can't translate — translation is " +
+                      "paused until you pick a multilingual model.");
+        }
+    }
 
     // ----- Transitions (spec §7) -------------------------------------------
 
@@ -566,13 +655,15 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         OnPropertyChanged(nameof(ConnectorGlyph));
         OnPropertyChanged(nameof(SummaryText));
         OnPropertyChanged(nameof(TargetLanguages));
-        OnPropertyChanged(nameof(ShowTranslationPausedNote));
+        OnPropertyChanged(nameof(IsTranslationPaused));
+        OnPropertyChanged(nameof(ConnectorTooltip));
         OnPropertyChanged(nameof(IsToggleForm));
         OnPropertyChanged(nameof(IsFullForm));
         OnPropertyChanged(nameof(IsNoneForm));
         OnPropertyChanged(nameof(IsConnectorOn));
         OnPropertyChanged(nameof(IsConnectorOff));
         OnPropertyChanged(nameof(IsConnectorLocked));
+        OnPropertyChanged(nameof(IsConnectorPaused));
         OnPropertyChanged(nameof(ToggleSwitchLabel));
         OnPropertyChanged(nameof(UnavailableNote));
         OnPropertyChanged(nameof(TargetDisplayLabel));

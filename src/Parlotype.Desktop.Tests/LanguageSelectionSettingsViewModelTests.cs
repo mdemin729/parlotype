@@ -330,10 +330,10 @@ public class LanguageSelectionSettingsViewModelTests
         vm.ToggleTranslationCommand.Execute(null);
 
         vm.UpdateTranslationAvailability(WhisperModelType.LargeV3Turbo);
-        Assert.True(vm.Relationship.ShowTranslationPausedNote);
+        Assert.True(vm.Relationship.IsTranslationPaused);
 
         vm.UpdateTranslationAvailability(WhisperModelType.Medium);
-        Assert.False(vm.Relationship.ShowTranslationPausedNote);
+        Assert.False(vm.Relationship.IsTranslationPaused);
     }
 
     // ----- Legacy migration (ADR-034) ------------------------------------------------

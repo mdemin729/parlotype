@@ -94,9 +94,12 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
             ? Relationship.TargetCode.ToUpperInvariant()
             : "⊘";
 
-    public string TranslationPausedNote =>
-        "Translation is paused — the selected Whisper model can't translate. " +
-        "Pick Medium or Large v1/v2/v3 to resume.";
+    /// <summary>
+    /// Jumps to the Whisper model page — the action offered alongside the
+    /// paused-translation note, since the model is what has to change (ADR-061).
+    /// </summary>
+    [RelayCommand]
+    private void GoToWhisperModel() => RequestNavigation(SettingsSection.EngineModel);
 
     // ----- Engine / model hooks (called by SettingsWindowViewModel) ---------
 
