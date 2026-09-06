@@ -3,7 +3,7 @@ title: Key Subsystems
 type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging, startup]
-last_updated: 2026-08-02
+last_updated: 2026-09-05
 summary: Speech engines, text injection, global hotkeys, settings, logging, model management, startup, onboarding, and localization subsystems
 ---
 

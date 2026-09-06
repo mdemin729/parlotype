@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [desktop, avalonia, avalonia12, tray, ui, mvvm]
 criticality: medium
-last_updated: 2026-08-02
+last_updated: 2026-09-05
 summary: Avalonia 12 tray-based desktop frontend — sole desktop app
 ---
 

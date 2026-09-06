@@ -81,8 +81,30 @@ Process notes worth keeping:
 
 ## Next Action
 
-Open the PR from `claude/xaml-previewer-runs-the-app` (branched fresh off master — PR #24 is
-merged and closed). Ask the user to kill any surviving `dotnet.exe` previewer once, then
-confirm in Rider that editing a `.axaml` no longer produces a process holding the hotkey.
-
+**PR #25 is open** — https://github.com/mdemin729/parlotype/pull/25, from
+`claude/xaml-previewer-runs-the-app` (branched fresh off master; PR #24 was already merged
+and closed, so reusing that branch would have made a confusing second PR from a spent head).
 Not user-facing (dev-only), so no CHANGELOG entry.
+
+Two things the user still has to do by hand, neither of which the merge does for them:
+
+1. **Kill the surviving pre-fix previewer** (`PID 77708` at the time of writing, parent
+   `rider64.exe`). It predates the guard and will keep answering the hotkey until killed.
+2. **Rebuild Release in the main checkout** (`C:\projects\parlotype`) after merging — the
+   previewer loads `src\Parlotype.Desktop\bin\Release\net10.0\Parlotype.dll` from *there*,
+   not from a worktree, and will keep previewing the old unguarded binary otherwise.
+
+Then confirm in Rider: open a `.axaml`, and check that no `dotnet.exe` running
+`Avalonia.Designer.HostApp.dll` owns a `libuiohook` window.
+
+Deferred, not forgotten — vault maintenance, all of it pre-existing and none of it introduced
+here (`generate-index.sh`: 123 notes, no orphans, no missing frontmatter):
+
+- `memory/sessions/` holds **60 notes**, ~50 older than 30 days; the rule says archive to
+  `memory/sessions/archive/`.
+- `check-staleness.sh 30` reports **36 stale** notes and **19 missing `last_updated`** —
+  including `_index/vault-map.md`, `_index/glossary.md` and `services/_index.md`, the ones a
+  cold agent reads first.
+
+Left out of this PR on purpose: a large, mechanical diff that would bury a 10-file bug fix.
+Worth its own PR.
