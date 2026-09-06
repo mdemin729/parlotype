@@ -411,6 +411,26 @@ today because `LanguageCatalog.GetEnglishName` returns indeclinable English name
 phase 6's ICU-localized names make it live. See
 [[../../plans/2026-09-05-ui-localization/terminology|terminology sheet]].
 
+**Two flicker bugs found via user report (2026-09-06), both in the live-switch
+path, neither an ADR-064 decision change:** `SettingsWindowViewModel.RebuildNavItems`
+ran on every `CultureChanged` via `NavItems.Clear()` + re-`Add` — clearing a
+collection bound to `ListBox.SelectedItem` (two-way) deselects it even mid-rebuild,
+so `SelectedSection` (bound to the content pane's `ContentControl.Content`)
+observed `value → null → value`, tearing down and rebuilding whichever settings
+page was open. Fixed by appending the new rows, reselecting, *then* removing the
+old ones, so the bound collection never loses the still-selected row — see
+[[../knowledge/avalonia-itemssource-clear-deselects-and-recreates-content]]. That
+was a real defect but not what the user reported: the interface-language picker's
+four rows share **one** `SelectLanguageCommand` instance, and it was `async Task`
+— CommunityToolkit.Mvvm's generated `AsyncRelayCommand` disables every button
+bound to a command for as long as it runs, so all four rows flashed
+disabled/re-enabled together for the length of the settings write. Fixed the same
+way as the earlier Whisper-model-picker occurrence of this exact pattern: keep the
+command synchronous, fire-and-forget the async apply — see
+[[../knowledge/asyncrelaycommand-flicker]]. Any settings picker built from several
+rows sharing one command is worth checking first when the symptom is "the list
+flickers."
+
 ## Single Instance & Activation
 
 See [[decisions/_index|ADR-055]]. Desktop-only — no Core or Platform involvement.
