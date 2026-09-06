@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [desktop, avalonia, avalonia12, tray, ui, mvvm]
 criticality: medium
-last_updated: 2026-08-02
+last_updated: 2026-09-05
 summary: Avalonia 12 tray-based desktop frontend — sole desktop app
 ---
 
@@ -16,7 +16,7 @@ Tray-first desktop frontend on Avalonia 12.0.2 (GA). Sole desktop app after V1 s
 
 ## Key Paths
 
-- `src/Parlotype.Desktop/App.axaml(.cs)` — TrayIcon + NativeMenu, DI bootstrap, `ShutdownMode.OnExplicitShutdown`
+- `src/Parlotype.Desktop/App.axaml(.cs)` — TrayIcon + NativeMenu, DI bootstrap, `ShutdownMode.OnExplicitShutdown`. **`OnFrameworkInitializationCompleted` opens with a runtime guard (ADR-063)**: `ResolveRuntimeLifetime(ApplicationLifetime, Design.IsDesignMode)` returns the desktop lifetime or null, and a null returns immediately without building the container. The XAML previewer reaches this method (it calls `BuildAvaloniaApp().SetupWithoutStarting()` without ever running `Program.Main`) and used to start the global hook, the microphone and a prewarmed multi-GB model in a `dotnet.exe` owned by the IDE. Two orthogonal conditions on purpose — Avalonia's own `Design.IsDesignMode`, plus the structural "is there a desktop lifetime". Everything after the guard may assume `desktop` is non-null
 - `src/Parlotype.Desktop/Services/IWindowManager.cs` + `WindowManager.cs` — single-instance Transcribe + Settings windows; `Closing` handler hides instead of closes; `ShowTranscribe(activate: false)` shows without stealing focus (used by hotkey path); calls `TranscribeWindow.RestorePositionAsync(IWindowStateService)` before the first show so the frameless widget reopens where the user left it (ADR-040)
 - `src/Parlotype.Desktop/Services/HotkeyCoordinator.cs` — bridges `IGlobalHotkeyService` → `ShowTranscribe()` + `StartRecordingAsync()`/`StopRecordingAsync()`/`CancelRecordingAsync()`. Also runs the loop back the other way (ADR-047): observes `TranscribeViewModel.RecordingState` and calls `SetDictationActive` (treating `Loading` as active), which toggle gestures and Escape depend on; and republishes `HotkeyHint.Describe(...)` into `TranscribeViewModel.HotkeyHintText` on `BindingsChanged`. `CancelRecordingAsync` and `DiscardStartedRecordingAsync` both go through `IAudioPipeline.CancelAsync` (ADR-057) — the pre-`StopAsync` `DetachPipelineHandlers()` alone stopped the text reaching the user but not the transcription work
 - `src/Parlotype.Desktop/Program.cs` — `VelopackApp.Build().Run()` is the **first statement** in `Main`, before Avalonia/DI/ZLogger/arg parsing (ADR-053); `vpk pack` verifies this statically and fails the build if it moves. `OnFirstRun` pre-creates the `IAppPaths` directories; `OnBeforeUninstallFastCallback` (guarded by `OperatingSystem.IsWindows()` — FastCallbacks are Windows-only) keeps user data by default and deletes `IAppPaths.DataDirectory` only when `SettingsKeys.UninstallRemovesUserData` is set. Hooks may not show UI, so consent is captured in advance from Settings → Application → Data and the hook merely executes it; it runs before DI exists so it parses settings.json directly with `System.Text.Json` (`UserAskedForDataRemoval`), and anything ambiguous — missing file, corrupt JSON, absent key, unexpected `JsonValueKind` — reads as false
@@ -71,6 +71,8 @@ App starts hidden — only the tray icon is visible. Click the tray icon to open
 Only one instance runs per logon session (ADR-055): launching a second one shows the running instance's Transcribe window and exits. Quit the installed app before `dotnet run`, or the dev build will defer to it.
 
 A `dotnet run` / IDE build now **exits when its launching process exits** (`ParentProcessExitWatcher`, ADR-062) — stopping the run no longer leaves an invisible `Parlotype` orphan holding the global keyboard hook. Installed builds are unaffected (the watcher no-ops for them).
+
+**The XAML previewer is not a Parlotype run** (ADR-063). Opening a `.axaml` file in Rider/VS starts `dotnet.exe → Avalonia.Designer.HostApp.dll → Parlotype.dll`, which lands in `OnFrameworkInitializationCompleted` without ever running `Program.Main`. Before the guard it started the global hook, the microphone and the speech model there — outside the single-instance guard, with no lifetime to shut it down, in a process owned by the IDE. If you ever see a `dotnet.exe` answering the dictation hotkey with no tray icon, check whether it owns a `libuiohook` window and who its parent is.
 
 ## Conventions
 

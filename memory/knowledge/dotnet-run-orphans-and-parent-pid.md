@@ -68,6 +68,10 @@ this version.
 
 ## Related
 
+- [[avalonia-xaml-previewer-runs-your-app]] — **the other, more common cause of the same
+  symptom**, and the one behind the original report: the XAML previewer runs
+  `OnFrameworkInitializationCompleted` in an IDE-owned `dotnet.exe`. Everything below is
+  still a real failure mode; it just was not that one.
 - [[named-sync-primitives]] — the single-instance guard that makes an orphan worse
   (every later `dotnet run` defers to it).
 - [[sharphook-suppress-event]], [[sharphook-modifier-sides]] — SharpHook behaviour.
