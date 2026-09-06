@@ -23,6 +23,66 @@ public static class Strings
     /// <summary>Show / hide key</summary>
     public static string ApiKeyBox_ShowHideTooltip => Localizer.Lookup(nameof(ApiKeyBox_ShowHideTooltip));
 
+    /// <summary>not a valid absolute URL</summary>
+    public static string Cloud_BaseUrl_NotAbsolute => Localizer.Lookup(nameof(Cloud_BaseUrl_NotAbsolute));
+
+    /// <summary>plain http is only allowed for localhost — the API key and audio would leave this machine unencrypted</summary>
+    public static string Cloud_BaseUrl_PlainHttp => Localizer.Lookup(nameof(Cloud_BaseUrl_PlainHttp));
+
+    /// <summary>unsupported scheme '{0}' — use https</summary>
+    public static string Cloud_BaseUrl_UnsupportedSchemeFormat => Localizer.Lookup(nameof(Cloud_BaseUrl_UnsupportedSchemeFormat));
+    /// <summary>unsupported scheme '{0}' — use https</summary>
+    public static string Format_Cloud_BaseUrl_UnsupportedSchemeFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_BaseUrl_UnsupportedSchemeFormat, arg0);
+
+    /// <summary>{0}: the API key was rejected (HTTP {1}). {2} Check the key in Settings → Speech engine.</summary>
+    public static string Cloud_Error_KeyRejectedFormat => Localizer.Lookup(nameof(Cloud_Error_KeyRejectedFormat));
+    /// <summary>{0}: the API key was rejected (HTTP {1}). {2} Check the key in Settings → Speech engine.</summary>
+    public static string Format_Cloud_Error_KeyRejectedFormat(object? arg0, object? arg1, object? arg2) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_Error_KeyRejectedFormat, arg0, arg1, arg2);
+
+    /// <summary>{0}: transcription failed (HTTP {1}). {2}</summary>
+    public static string Cloud_Error_OtherFormat => Localizer.Lookup(nameof(Cloud_Error_OtherFormat));
+    /// <summary>{0}: transcription failed (HTTP {1}). {2}</summary>
+    public static string Format_Cloud_Error_OtherFormat(object? arg0, object? arg1, object? arg2) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_Error_OtherFormat, arg0, arg1, arg2);
+
+    /// <summary>{0} is unavailable right now (HTTP {1}) — try again shortly. ({2})</summary>
+    public static string Cloud_Error_ProviderUnavailableFormat => Localizer.Lookup(nameof(Cloud_Error_ProviderUnavailableFormat));
+    /// <summary>{0} is unavailable right now (HTTP {1}) — try again shortly. ({2})</summary>
+    public static string Format_Cloud_Error_ProviderUnavailableFormat(object? arg0, object? arg1, object? arg2) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_Error_ProviderUnavailableFormat, arg0, arg1, arg2);
+
+    /// <summary>{0}: API quota exceeded — check your plan and billing with the provider. ({1})</summary>
+    public static string Cloud_Error_QuotaExceededFormat => Localizer.Lookup(nameof(Cloud_Error_QuotaExceededFormat));
+    /// <summary>{0}: API quota exceeded — check your plan and billing with the provider. ({1})</summary>
+    public static string Format_Cloud_Error_QuotaExceededFormat(object? arg0, object? arg1) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_Error_QuotaExceededFormat, arg0, arg1);
+
+    /// <summary>{0}: rate limit reached — wait a moment and try again. ({1})</summary>
+    public static string Cloud_Error_RateLimitedFormat => Localizer.Lookup(nameof(Cloud_Error_RateLimitedFormat));
+    /// <summary>{0}: rate limit reached — wait a moment and try again. ({1})</summary>
+    public static string Format_Cloud_Error_RateLimitedFormat(object? arg0, object? arg1) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_Error_RateLimitedFormat, arg0, arg1);
+
+    /// <summary>{0}: the base URL is rejected ({1}). Fix it in Settings → Speech engine.</summary>
+    public static string Cloud_NotConfigured_InvalidBaseUrlFormat => Localizer.Lookup(nameof(Cloud_NotConfigured_InvalidBaseUrlFormat));
+    /// <summary>{0}: the base URL is rejected ({1}). Fix it in Settings → Speech engine.</summary>
+    public static string Format_Cloud_NotConfigured_InvalidBaseUrlFormat(object? arg0, object? arg1) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_NotConfigured_InvalidBaseUrlFormat, arg0, arg1);
+
+    /// <summary>{0}: no API key configured. Add one in Settings → Speech engine.</summary>
+    public static string Cloud_NotConfigured_MissingKeyFormat => Localizer.Lookup(nameof(Cloud_NotConfigured_MissingKeyFormat));
+    /// <summary>{0}: no API key configured. Add one in Settings → Speech engine.</summary>
+    public static string Format_Cloud_NotConfigured_MissingKeyFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Cloud_NotConfigured_MissingKeyFormat, arg0);
+
+    /// <summary>OpenAI-compatible provider</summary>
+    public static string Cloud_ProviderName_OpenAiCompatible => Localizer.Lookup(nameof(Cloud_ProviderName_OpenAiCompatible));
+
+    /// <summary>xAI Grok</summary>
+    public static string Cloud_ProviderName_XaiGrok => Localizer.Lookup(nameof(Cloud_ProviderName_XaiGrok));
+
     /// <summary>Cancel</summary>
     public static string Common_Cancel => Localizer.Lookup(nameof(Common_Cancel));
 
@@ -464,6 +524,39 @@ public static class Strings
     /// <summary>Add hotkey</summary>
     public static string Settings_Hotkeys_AddButton => Localizer.Lookup(nameof(Settings_Hotkeys_AddButton));
 
+    /// <summary>{0} is already bound to {1}.</summary>
+    public static string Settings_Hotkeys_Conflict_AlreadyBoundFormat => Localizer.Lookup(nameof(Settings_Hotkeys_Conflict_AlreadyBoundFormat));
+    /// <summary>{0} is already bound to {1}.</summary>
+    public static string Format_Settings_Hotkeys_Conflict_AlreadyBoundFormat(object? arg0, object? arg1) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_Hotkeys_Conflict_AlreadyBoundFormat, arg0, arg1);
+
+    /// <summary>On European keyboard layouts AltGr acts as Ctrl+Alt, so {0} can fire while typing accented characters. Ctrl+Alt+Space...</summary>
+    public static string Settings_Hotkeys_Conflict_AltGrFormat => Localizer.Lookup(nameof(Settings_Hotkeys_Conflict_AltGrFormat));
+    /// <summary>On European keyboard layouts AltGr acts as Ctrl+Alt, so {0} can fire while typing accented characters. Ctrl+Alt+Space...</summary>
+    public static string Format_Settings_Hotkeys_Conflict_AltGrFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_Hotkeys_Conflict_AltGrFormat, arg0);
+
+    /// <summary>That combination can't be used as a dictation hotkey.</summary>
+    public static string Settings_Hotkeys_Conflict_Invalid => Localizer.Lookup(nameof(Settings_Hotkeys_Conflict_Invalid));
+
+    /// <summary>push to talk</summary>
+    public static string Settings_Hotkeys_Conflict_Mode_PushToTalk => Localizer.Lookup(nameof(Settings_Hotkeys_Conflict_Mode_PushToTalk));
+
+    /// <summary>toggle</summary>
+    public static string Settings_Hotkeys_Conflict_Mode_Toggle => Localizer.Lookup(nameof(Settings_Hotkeys_Conflict_Mode_Toggle));
+
+    /// <summary>{0} shows parameter hints in Visual Studio and VS Code.</summary>
+    public static string Settings_Hotkeys_Conflict_ParameterHintsFormat => Localizer.Lookup(nameof(Settings_Hotkeys_Conflict_ParameterHintsFormat));
+    /// <summary>{0} shows parameter hints in Visual Studio and VS Code.</summary>
+    public static string Format_Settings_Hotkeys_Conflict_ParameterHintsFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_Hotkeys_Conflict_ParameterHintsFormat, arg0);
+
+    /// <summary>{0} is reserved: {1}</summary>
+    public static string Settings_Hotkeys_Conflict_ReservedFormat => Localizer.Lookup(nameof(Settings_Hotkeys_Conflict_ReservedFormat));
+    /// <summary>{0} is reserved: {1}</summary>
+    public static string Format_Settings_Hotkeys_Conflict_ReservedFormat(object? arg0, object? arg1) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_Hotkeys_Conflict_ReservedFormat, arg0, arg1);
+
     /// <summary>Hold a key to talk, or double-tap to dictate hands-free. Press Esc while recording to discard it.</summary>
     public static string Settings_Hotkeys_Description => Localizer.Lookup(nameof(Settings_Hotkeys_Description));
 
@@ -517,6 +610,57 @@ public static class Strings
 
     /// <summary>Remove this hotkey</summary>
     public static string Settings_Hotkeys_RemoveTooltip => Localizer.Lookup(nameof(Settings_Hotkeys_RemoveTooltip));
+
+    /// <summary>Open File Explorer</summary>
+    public static string Settings_Hotkeys_Reserved_FileExplorer => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_FileExplorer));
+
+    /// <summary>Open Game Bar</summary>
+    public static string Settings_Hotkeys_Reserved_GameBar => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_GameBar));
+
+    /// <summary>Lock workstation</summary>
+    public static string Settings_Hotkeys_Reserved_LockWorkstation => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_LockWorkstation));
+
+    /// <summary>Close window (macOS)</summary>
+    public static string Settings_Hotkeys_Reserved_MacCloseWindow => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_MacCloseWindow));
+
+    /// <summary>Quit application (macOS)</summary>
+    public static string Settings_Hotkeys_Reserved_MacQuit => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_MacQuit));
+
+    /// <summary>Project display</summary>
+    public static string Settings_Hotkeys_Reserved_ProjectDisplay => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_ProjectDisplay));
+
+    /// <summary>Quick Link menu</summary>
+    public static string Settings_Hotkeys_Reserved_QuickLinkMenu => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_QuickLinkMenu));
+
+    /// <summary>Open Run dialog</summary>
+    public static string Settings_Hotkeys_Reserved_RunDialog => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_RunDialog));
+
+    /// <summary>Screenshot</summary>
+    public static string Settings_Hotkeys_Reserved_Screenshot => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_Screenshot));
+
+    /// <summary>Security screen</summary>
+    public static string Settings_Hotkeys_Reserved_SecurityScreen => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_SecurityScreen));
+
+    /// <summary>Show/hide desktop</summary>
+    public static string Settings_Hotkeys_Reserved_ShowDesktop => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_ShowDesktop));
+
+    /// <summary>Spotlight search (macOS) / input source switching</summary>
+    public static string Settings_Hotkeys_Reserved_Spotlight => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_Spotlight));
+
+    /// <summary>Switch input source</summary>
+    public static string Settings_Hotkeys_Reserved_SwitchInputSource => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_SwitchInputSource));
+
+    /// <summary>Task View</summary>
+    public static string Settings_Hotkeys_Reserved_TaskView => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_TaskView));
+
+    /// <summary>Windows Voice Typing; hide window on macOS and GNOME</summary>
+    public static string Settings_Hotkeys_Reserved_VoiceTyping => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_VoiceTyping));
+
+    /// <summary>Open Settings</summary>
+    public static string Settings_Hotkeys_Reserved_WindowsSettings => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_WindowsSettings));
+
+    /// <summary>Windows Speech Recognition</summary>
+    public static string Settings_Hotkeys_Reserved_WindowsSpeechRecognition => Localizer.Lookup(nameof(Settings_Hotkeys_Reserved_WindowsSpeechRecognition));
 
     /// <summary>Hotkeys</summary>
     public static string Settings_Hotkeys_Title => Localizer.Lookup(nameof(Settings_Hotkeys_Title));

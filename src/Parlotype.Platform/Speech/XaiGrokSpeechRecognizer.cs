@@ -78,11 +78,13 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
             var savedBaseUrl = await _settings.GetAsync<string>(SettingsKeys.XaiGrokBaseUrl, cancellationToken);
             // HTTPS-or-loopback only — the request carries the bearer key and
             // recorded audio (security audit 2026-07-11, S3).
-            if (!CloudBaseUrlValidator.TryValidate(savedBaseUrl, out var urlError))
+            if (!CloudBaseUrlValidator.TryValidate(savedBaseUrl, out var urlFailure))
                 throw new CloudProviderNotConfiguredException(
                     SpeechEngine.XaiGrok,
-                    $"The xAI Grok base URL is rejected: {urlError}. " +
-                    "Fix it in Settings → Speech engine.");
+                    CloudConfigurationError.InvalidBaseUrl,
+                    $"The xAI Grok base URL is rejected: {urlFailure!.Value.Description}. " +
+                    "Fix it in Settings → Speech engine.",
+                    urlFailure);
             _baseUrl = string.IsNullOrWhiteSpace(savedBaseUrl) ? DefaultBaseUrl : savedBaseUrl.TrimEnd('/');
 
             var savedModel = await _settings.GetAsync<string>(SettingsKeys.XaiGrokModel, cancellationToken);
@@ -92,6 +94,7 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new CloudProviderNotConfiguredException(
                     SpeechEngine.XaiGrok,
+                    CloudConfigurationError.MissingApiKey,
                     "No API key configured for the xAI Grok provider. Add one in Settings → Speech engine.");
 
             _httpClient?.Dispose();
@@ -144,7 +147,7 @@ public sealed class XaiGrokSpeechRecognizer : ISpeechRecognizer
         using var response = await _httpClient.PostAsync($"{_baseUrl}/stt", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw await CloudSpeechHttpError.BuildAsync(response, ProviderDisplayName, _logger, cancellationToken);
+            throw await CloudSpeechHttpError.BuildAsync(response, SpeechEngine.XaiGrok, ProviderDisplayName, _logger, cancellationToken);
 
         var text = await ParseTextAsync(response, cancellationToken);
 

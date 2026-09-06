@@ -1,13 +1,13 @@
 ---
-title: "Session: 2026-09-05 — UI localization, plan through phase 6 (partial)"
+title: "Session: 2026-09-05 — UI localization, phases 1-6 (polish outstanding)"
 type: session
 status: active
 tags: [localization, i18n, avalonia, settings, adr-064]
 created: 2026-09-05
-summary: Wrote the six-phase UI localization plan and shipped phases 1-5 plus half of 6 — Localizer + {loc:Tr} compiled binding, generated Strings.cs, guardrails (script, parity tests, skill, hooks), the full 340-key extraction into en/ru/es, a rendered layout review, and localized hotkey display. Left: hotkey conflict messages and cloud exception bodies (both need a Core change), and the phase-6 polish
+summary: Wrote the six-phase UI localization plan and shipped phases 1-6 — Localizer + {loc:Tr} compiled binding, generated Strings.cs, guardrails (script, parity tests, skill, hooks), 376 keys across en/ru/es, a rendered layout review, and the ADR-064 amendment that moved the sentences Core builds (hotkey conflicts, cloud errors) behind reason enums so Desktop can word them. Nothing user-facing is untranslated; what is left is phase-6 polish: pseudo-locale, ICU language names, the add-a-language doc
 ---
 
-# Session: 2026-09-05 — UI localization: foundation, guardrails, extraction, review
+# Session: 2026-09-05 — UI localization: foundation, guardrails, extraction, review, Core split
 
 ## Active Focus
 
@@ -199,6 +199,46 @@ Rendered all 19 settings pages in en/ru/es via a new `LocalizedLayoutReviewTests
   consumers of that slot read "verb + side + key", so one genitive form serves both.
   That makes three findings from reading rendered screenshots that no test produced.
 
+## Phase 6 notes - the messages Core builds
+
+The remaining copy was not labels but **sentences**, assembled from things only Core knows:
+which reserved shortcut a chord hit, which mode a binding already uses, why a base URL was
+refused, what HTTP status a provider returned. Core has no resources and must not get any.
+
+- **The reason travels as data; the words are chosen in Desktop.** Core gained
+  `HotkeyConflictReason` + `ReservedShortcut`, and `CloudConfigurationError` +
+  `CloudBaseUrlError` + a `CloudBaseUrlFailure` record; both cloud exceptions now carry the
+  parts (engine, HTTP status, the provider's own parsed text) instead of only a finished
+  sentence. `HotkeyText.Conflict` and a new `CloudErrorText` do the wording. The English in
+  Core stays as the **invariant** form the logs write - the same split
+  `HotkeyGesture.DisplayString` already had.
+- **`CloudBaseUrlValidator` came along.** Its error fragment was user-facing too: the Cloud
+  providers page shows it under the base-URL field. It now returns the failure as data.
+- **Every `Cloud_*` format opens with the provider slot**, followed by a colon or a verb.
+  Not incidental: the provider name is itself translated, and a mid-sentence slot would ask
+  Russian to inflect a string it is handed verbatim. Pinned by a test rather than a comment,
+  because it is a constraint on *future copy edits*, not on today's.
+- **The provider's own error text is substituted, never translated.** It arrives already
+  written, in whatever language the provider chose.
+
+**The guardrail these enums need is a different shape.** The resx parity checks cannot see a
+member added without its key: the key is absent from every language at once, so the
+languages still agree with each other and every existing check passes. `LocalizationTests`
+therefore loops each enum and asserts the *Russian* rendering contains Cyrillic - which
+fails both for a missing key (the lookup returns the key name) and for a fallback to Core's
+English. Verified by blanking one RU value: it fails naming `ReservedShortcut.GameBar`.
+Worth noting the nearest existing check, `NoKeyIsAccidentallyUntranslated`, would not have
+caught it either - it only looks at values longer than 25 characters.
+
+**The layout review earned its keep a fourth time.** These sentences are only reachable
+after an interaction, so the harness never rendered them; it now drives three hotkey
+conflicts and a rejected base URL. Reading the Russian images immediately showed
+«... в режиме «Вкл./выкл.».» - the badge abbreviation's period stacked against the
+sentence's. Fixed by giving the in-sentence mode its own keys, spelled out in the genitive
+(«переключения»), leaving the badge abbreviated. English wants the opposite split
+(lowercase in the sentence, capitalized on the badge), which is the argument for two keys
+rather than one reused.
+
 ## Open Blockers
 
 None blocking. Two things a next session should know:
@@ -234,21 +274,20 @@ None blocking. Two things a next session should know:
 
 ## Next Action
 
-Phase 6, remainder:
+Phase 6, remainder - all of it optional polish now; nothing user-facing is untranslated.
 
-1. **Hotkey conflict messages** — `HotkeyConflictDetector` builds user-facing sentences
-   ("… is reserved: Lock workstation", "… is already bound to push to talk") from ~16
-   reserved-shortcut descriptions, all in Core. Unlike the display strings this genuinely
-   needs a **reason enum in Core** plus formatting in Desktop, so it is the piece that
-   warrants an ADR-064 amendment. Only visible when a user picks a conflicting hotkey.
-2. **Cloud exception message bodies** — `CloudProviderNotConfiguredException`,
-   `CloudSpeechTranscriptionException`. Same shape: text built in Core/Platform, shown
-   verbatim in dialogs whose titles and buttons are already translated.
-3. **The planned polish** — pseudo-locale (`qps-ploc`), ICU-localized speech-language names
-   (**not free**: case table in terminology.md, and
-   `Language_ToggleSwitch_TranslateToFormat` then needs accusative in Russian),
-   `docs/localization.md` add-a-language recipe, website note.
+1. **Pseudo-locale** (`qps-ploc`) for catching stragglers and truncation.
+2. **ICU-localized speech-language names.** Still **not free**: it changes what gets
+   substituted into ~6 `Language_*` keys, and `Language_ToggleSwitch_TranslateToFormat` is
+   the one Russian slot that then needs the accusative. Case table in
+   `plans/2026-09-05-ui-localization/terminology.md`.
+3. **`docs/localization.md`** - the add-a-language recipe (one row in
+   `SupportedUiLanguages`, one resx, render and read the images).
+4. **Website note** on language support (separate repo, see the user memory entry).
 
-Render the screenshots after each (`PARLOTYPE_LAYOUT_REVIEW=1`) and *look at them* — that
-has now caught three things nothing else did: two untranslated paragraphs hiding as element
-content, and a Russian case error.
+Then close the plan: `task.md` `status: in_progress` -> `completed`, and this note ->
+`status: complete`.
+
+Render the screenshots after any copy change (`PARLOTYPE_LAYOUT_REVIEW=1`) and *look at
+them*. That has now caught four things nothing else did: two untranslated paragraphs hiding
+as element content, a Russian case error, and the abbreviation/period collision above.

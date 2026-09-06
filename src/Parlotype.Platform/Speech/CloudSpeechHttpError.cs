@@ -24,6 +24,7 @@ internal static class CloudSpeechHttpError
     /// <summary>Reads the response body, logs it, and returns the exception to throw. Never throws itself.</summary>
     internal static async Task<CloudSpeechTranscriptionException> BuildAsync(
         HttpResponseMessage response,
+        SpeechEngine engine,
         string providerDisplayName,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -59,7 +60,10 @@ internal static class CloudSpeechHttpError
                 $"{providerDisplayName} transcription failed (HTTP {status}): {providerMessage}",
         };
 
-        return new CloudSpeechTranscriptionException(kind, providerDisplayName, message);
+        // The message above is the invariant form for logs; the parts travel
+        // alongside it so the UI can build a translated sentence (ADR-064).
+        return new CloudSpeechTranscriptionException(
+            kind, engine, providerDisplayName, message, status, providerMessage);
     }
 
     /// <summary>

@@ -119,3 +119,58 @@ resolve as extraction proceeds.
 `LocalizationTests` runs in its own non-parallel collection for that reason. A future
 localization parity check (key sets, placeholder sets, hardcoded-literal scan) has a stable
 registry and a stable generator to build on.
+
+## Amendment (2026-09-06): sentences Core builds, Desktop words
+
+Extraction finished at 376 keys, and the paragraph above about a bilingual
+mid-migration window no longer applies: every surface the user reads is
+translated. Two clusters held out until last, and both needed a change in Core
+rather than in markup.
+
+`HotkeyConflictDetector` and the cloud speech exceptions do not label controls —
+they build *sentences*, out of parts only Core knows: which reserved shortcut was
+hit, which mode a binding already uses, why a base URL was refused, what HTTP
+status a provider returned. Core has no resources, and giving it any would
+invert the dependency direction the whole architecture rests on.
+
+**The reason travels as data; the wording is chosen in Desktop.** Core gained
+`HotkeyConflictReason` and `ReservedShortcut` (Hotkeys), and
+`CloudConfigurationError`, `CloudBaseUrlError` and the `CloudBaseUrlFailure`
+record (Speech). `HotkeyConflict` carries its reason plus the payload the
+sentence needs; `CloudProviderNotConfiguredException` carries its error and the
+URL failure; `CloudSpeechTranscriptionException` carries the engine, the HTTP
+status and the provider's own parsed message. `HotkeyText.Conflict` and the new
+`CloudErrorText` in Desktop turn those into copy.
+
+**The English text stays in Core, as the invariant form.** `HotkeyConflict.Description`,
+`CloudBaseUrlFailure.Description` and both exceptions' `Message` are what the log
+lines write — the same split `HotkeyGesture.DisplayString` already had, and for
+the same reason: a log that changes language with the interface is a log nobody
+can grep. Nothing user-facing reads them any more.
+
+**The provider's own error text is never translated.** It arrives already
+written, in whatever language the provider chose; rewording it would misquote
+them. It is substituted into the sentence, not localized.
+
+**Every `Cloud_*` format opens with the provider slot**, followed by a colon or a
+verb. That is a constraint on the copy, not an accident: the slot then never
+needs a grammatical case, so Russian and Spanish can translate "OpenAI-compatible
+provider" without the sentence around it having to agree with it.
+`LocalizationTests.TheProviderNameNeverNeedsAGrammaticalCase` pins the shape.
+
+### Consequences
+
+A member added to one of these enums without its resx key falls through to Core's
+invariant English, and the resx parity checks cannot see it — the key is missing
+from every language at once, so the languages still agree with each other. The
+guardrail for that is a different shape: `LocalizationTests` loops over each enum
+and asserts the Russian rendering actually contains Cyrillic. Verified by
+blanking one key: it fails naming the member.
+
+`LocalizedLayoutReviewTests` now also renders the states these sentences appear
+in — three hotkey conflicts and a rejected base URL — because they are only
+reachable after an interaction, and unreviewed copy is where every defect this
+work produced has hidden. Reviewing them caught one immediately: Russian
+«... в режиме «Вкл./выкл.».» stacked the badge abbreviation's period against the
+sentence's, so the in-sentence mode names are separate keys from the badge
+labels and spelled out in the genitive.

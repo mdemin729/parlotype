@@ -156,11 +156,27 @@ independent of each other; everything else is sequential.
       ("правого Ctrl"). Still open in this cluster: **`HotkeyConflictDetector`'s conflict
       sentences** and its ~16 reserved-shortcut descriptions ("Lock workstation", "Open File
       Explorer"). Those genuinely need a reason enum in Core, so they are the one part that
-      warrants an ADR amendment.
-      **(b) cloud exception message bodies** — still open.
-      `CloudProviderNotConfiguredException` / `CloudSpeechTranscriptionException` build their
-      text in Core/Platform and it is shown verbatim in dialogs whose titles and buttons are
-      already translated.
+      warrants an ADR amendment. *Done 2026-09-06 — see below.*
+      **(b) cloud exception message bodies** — *done 2026-09-06*, same shape as (a).
+      `CloudProviderNotConfiguredException` / `CloudSpeechTranscriptionException` now carry
+      the reason (`CloudConfigurationError`, `CloudBaseUrlError`, the engine, the HTTP status
+      and the provider's own parsed text) instead of only a finished sentence, and a new
+      `CloudErrorText` in Desktop words it. The base-URL hint in Cloud providers settings
+      came along: `CloudBaseUrlValidator` returns a `CloudBaseUrlFailure` rather than an
+      English fragment.
+
+      **The Core change both clusters needed** — [ADR-064 amendment](../../docs/decisions/064-ui-localization-foundation.md),
+      2026-09-06, 36 keys, 376 total. `HotkeyConflictReason` + `ReservedShortcut` in
+      Hotkeys, `CloudConfigurationError` + `CloudBaseUrlError` + `CloudBaseUrlFailure` in
+      Speech; the English sentences stay in Core as the **invariant** form the logs write,
+      exactly like `HotkeyGesture.DisplayString`. Two rules fell out and are now in the
+      skill: every `Cloud_*` format opens with the provider slot so no language has to
+      inflect a name it is handed verbatim, and each of these enums needs a test that loops
+      it — resx parity cannot catch a member added without its key, because the key is
+      missing from every language at once and the languages therefore still agree.
+      `LocalizedLayoutReviewTests` grew four warning states (three hotkey conflicts, a
+      rejected base URL); reading them caught the Russian «в режиме «Вкл./выкл.».», where
+      the badge abbreviation's period collided with the sentence's.
 
       The originally planned polish also remains: pseudo-locale (`qps-ploc`) for catching
       stragglers and truncation, ICU-localized speech-language names, a
@@ -190,13 +206,13 @@ independent of each other; everything else is sequential.
   else is hardcoded English. Expected, and it shrinks with each Phase 3 batch.
 - The translated tour copy names controls that are still drawn in English. 3a fixed the tray
   ("Выход" is now real); "Настройки → Приложение → Запуск" waits on 3b.
-- **User-facing exception messages are still English.** The cloud dialogs show `ex.Message`
+- ~~**User-facing exception messages are still English.**~~ *Resolved in Phase 6.* The cloud dialogs showed `ex.Message`
   from `CloudProviderNotConfiguredException` / `CloudSpeechTranscriptionException`, built in
   Core/Platform where there are no resources. 3a localized the titles and buttons around
-  them and 3c localized the Cloud providers page, but the message bodies still need the
-  construction moved into Desktop (or a key passed through the exception). **Carried to
-  3d/6** — it is a Core/Platform refactor rather than a copy extraction, and it was better
-  to finish the markup sweep first than to half-do both.
+  them and 3c localized the Cloud providers page, leaving the bodies English until Phase 6
+  moved the wording into Desktop behind a reason enum. Deferring it was right: it is a
+  Core/Platform refactor rather than a copy extraction, and finishing the markup sweep first
+  meant the shape it needed was already obvious by the time it came up.
 - **The default body for a new custom prompt stays English** (`PromptSettingsViewModel`,
   "Transcribe the following speech in {speech_lang} verbatim…"). It is text sent to an LLM,
   not UI chrome — the same reason the built-in prompt bodies in `JsonPromptTemplateRegistry`

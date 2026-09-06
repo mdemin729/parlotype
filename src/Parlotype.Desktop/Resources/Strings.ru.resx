@@ -1147,4 +1147,132 @@
     <value>правого {0}</value>
     <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last. Both callers read "verb + side + key" (Hold / Double-tap), so Russian uses the genitive here.</comment>
   </data>
+  <data name="Settings_Hotkeys_Conflict_Invalid" xml:space="preserve">
+    <comment>Shown when the recorded gesture cannot be combined with its activation mode at all.</comment>
+    <value>Это сочетание нельзя использовать как горячую клавишу диктовки.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AlreadyBoundFormat" xml:space="preserve">
+    <comment>{0} is the gesture ("Hold Right Ctrl"), {1} the mode it is already bound to (Settings_Hotkeys_Conflict_Mode_*). Each language decides how the mode reads inside the sentence, which is why those are separate keys from the badge labels.</comment>
+    <value>{0} уже используется в режиме {1}.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_PushToTalk" xml:space="preserve">
+    <comment>Push-to-talk inside Settings_Hotkeys_Conflict_AlreadyBoundFormat, which reads "in {1} mode" - so this is the genitive, and deliberately not the badge label: the badge abbreviation ends in a period that would collide with the sentence's.</comment>
+    <value>удержания</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_Toggle" xml:space="preserve">
+    <comment>See Settings_Hotkeys_Conflict_Mode_PushToTalk - genitive, and spelled out rather than abbreviated like the badge.</comment>
+    <value>переключения</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ReservedFormat" xml:space="preserve">
+    <comment>{0} is the chord ("Win+L") — never translated; {1} is what the system does with it (Settings_Hotkeys_Reserved_*).</comment>
+    <value>{0} зарезервировано системой: {1}</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ParameterHintsFormat" xml:space="preserve">
+    <comment>{0} is the chord. "Visual Studio" and "VS Code" are product names — do not translate them.</comment>
+    <value>{0} показывает подсказки параметров в Visual Studio и VS Code.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AltGrFormat" xml:space="preserve">
+    <comment>{0} is the chord. "AltGr", "Ctrl", "Alt" and "Space" are key names — never translated.</comment>
+    <value>В европейских раскладках AltGr работает как Ctrl+Alt, поэтому {0} может срабатывать при вводе букв с диакритикой. Сочетание Ctrl+Alt+Space этого избегает.</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_LockWorkstation" xml:space="preserve">
+    <comment>What Windows or macOS does with a shortcut Parlotype refuses to take over. These are OS feature names — use the wording the user's own operating system uses, not a literal translation of the English.</comment>
+    <value>Блокировка компьютера</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_FileExplorer" xml:space="preserve">
+    <value>Открыть Проводник</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_RunDialog" xml:space="preserve">
+    <value>Открыть окно «Выполнить»</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ShowDesktop" xml:space="preserve">
+    <value>Показать или скрыть рабочий стол</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSettings" xml:space="preserve">
+    <value>Открыть Параметры Windows</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_TaskView" xml:space="preserve">
+    <value>Представление задач</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ProjectDisplay" xml:space="preserve">
+    <value>Проецирование экрана</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_QuickLinkMenu" xml:space="preserve">
+    <value>Меню быстрых ссылок</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_GameBar" xml:space="preserve">
+    <value>Открыть Игровую панель</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Screenshot" xml:space="preserve">
+    <value>Снимок экрана</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SecurityScreen" xml:space="preserve">
+    <value>Экран безопасности</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSpeechRecognition" xml:space="preserve">
+    <value>Распознавание речи Windows</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SwitchInputSource" xml:space="preserve">
+    <value>Переключение раскладки</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacQuit" xml:space="preserve">
+    <value>Выход из приложения (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacCloseWindow" xml:space="preserve">
+    <value>Закрытие окна (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Spotlight" xml:space="preserve">
+    <value>Поиск Spotlight (macOS) / переключение раскладки</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_VoiceTyping" xml:space="preserve">
+    <value>Голосовой ввод Windows; скрытие окна в macOS и GNOME</value>
+  </data>
+  <data name="Cloud_ProviderName_OpenAiCompatible" xml:space="preserve">
+    <comment>Names the provider inside error messages. Every Cloud_* format below puts this slot first, followed by a colon or a verb, so the name is always nominative and no language needs to inflect it. "OpenAI" is a product name — do not translate it.</comment>
+    <value>Провайдер, совместимый с OpenAI</value>
+  </data>
+  <data name="Cloud_ProviderName_XaiGrok" xml:space="preserve">
+    <comment>Product name — identical in every language.</comment>
+    <value>xAI Grok</value>
+  </data>
+  <data name="Cloud_NotConfigured_MissingKeyFormat" xml:space="preserve">
+    <comment>{0} is the provider name (Cloud_ProviderName_*).</comment>
+    <value>{0}: не задан API-ключ. Добавьте его в разделе «Настройки → Движок распознавания».</value>
+  </data>
+  <data name="Cloud_NotConfigured_InvalidBaseUrlFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the reason the URL was refused (Cloud_BaseUrl_*).</comment>
+    <value>{0}: базовый URL отклонён ({1}). Исправьте его в разделе «Настройки → Движок распознавания».</value>
+  </data>
+  <data name="Cloud_BaseUrl_NotAbsolute" xml:space="preserve">
+    <comment>A sentence fragment: it is shown on its own under the base-URL field, and also embedded in Cloud_NotConfigured_InvalidBaseUrlFormat.</comment>
+    <value>это не корректный абсолютный URL</value>
+  </data>
+  <data name="Cloud_BaseUrl_PlainHttp" xml:space="preserve">
+    <comment>See Cloud_BaseUrl_NotAbsolute. "http", "https" and "localhost" are literals.</comment>
+    <value>обычный http разрешён только для localhost — API-ключ и звук ушли бы с этого компьютера незашифрованными</value>
+  </data>
+  <data name="Cloud_BaseUrl_UnsupportedSchemeFormat" xml:space="preserve">
+    <comment>{0} is the URL scheme the user typed ("ftp", "file"). See Cloud_BaseUrl_NotAbsolute.</comment>
+    <value>схема «{0}» не поддерживается — используйте https</value>
+  </data>
+  <data name="Cloud_Error_KeyRejectedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text (arrives already written, in whatever language the provider chose).</comment>
+    <value>{0}: API-ключ отклонён (HTTP {1}). {2} Проверьте ключ в разделе «Настройки → Движок распознавания».</value>
+  </data>
+  <data name="Cloud_Error_QuotaExceededFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: превышена квота API — проверьте тариф и оплату у провайдера. ({1})</value>
+  </data>
+  <data name="Cloud_Error_RateLimitedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: превышен лимит запросов — подождите немного и повторите. ({1})</value>
+  </data>
+  <data name="Cloud_Error_ProviderUnavailableFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0} сейчас недоступен (HTTP {1}) — попробуйте чуть позже. ({2})</value>
+  </data>
+  <data name="Cloud_Error_OtherFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0}: расшифровка не удалась (HTTP {1}). {2}</value>
+  </data>
 </root>

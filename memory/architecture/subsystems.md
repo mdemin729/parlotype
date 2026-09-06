@@ -81,7 +81,10 @@ Users configure a *list* of gestures, not a single chord (ADR-047).
 - **Validation**: `HotkeyConflictDetector.Check` returns `HotkeyConflict` with
   Blocking (OS-reserved, or duplicate/overlapping with existing bindings) or
   Warning (`Ctrl+Shift+Space` = IDE parameter hints; `Ctrl+Alt+<letter>` = AltGr)
-  severity.
+  severity. The conflict also carries a `HotkeyConflictReason` and, for a
+  reserved chord, which `ReservedShortcut` it hit — that is what the UI words
+  (`HotkeyText.Conflict`); the conflict's own `Description` is the invariant
+  English the log line writes (ADR-064 amendment).
 - **UI**: `HotkeySettingsView` is a binding list (add via presets or chord
   recorder, remove, per-chord mode); `TranscribeWindow`'s record button tooltip
   shows the current gesture via `HotkeyHint`.
@@ -368,7 +371,7 @@ foundation. Ships EN (neutral `Strings.resx`) + RU/ES satellites.
   and XML numeric entities (`&#x2715;`) contain a letter, so they are stripped before
   the "is this real copy" test or every glyph counts as translatable.
 
-Migration state: **extraction is complete** — 331 keys x 3 languages, and
+Migration state: **extraction is complete** — 376 keys x 3 languages, and
 `scripts/localization-baseline.json` has an empty `pendingFiles`, so a new
 hardcoded literal in any `.axaml` now fails the check outright rather than being
 measured against a debt allowance. The `ru`/`es` layout review is done too:
@@ -382,10 +385,25 @@ Core's `DisplayString` stays the **invariant** form the hotkey logs write. Key
 names are never translated; the side is a format, not a prefix, because Spanish
 puts it after the key and Russian wants the genitive.
 
-Still English on purpose: `HotkeyHint`, `HotkeyConflictDetector`'s messages; the
-cloud exception message bodies (built in Core/Platform, where there are no
-resources); model catalog names and disk sizes (identifiers); and the default
-prompt body (text sent to an LLM, not UI chrome).
+**Sentences Core builds are worded in Desktop** (ADR-064 amendment). Core has no
+resources and must not get any, so the reason travels as data — `HotkeyConflictReason`
++ `ReservedShortcut`, `CloudConfigurationError`, `CloudBaseUrlError` /
+`CloudBaseUrlFailure`, plus the engine, HTTP status and provider text on
+`CloudSpeechTranscriptionException` — and `HotkeyText.Conflict` /
+`CloudErrorText` (Desktop, `ViewModels/`) choose the words. The English strings
+stay in Core as the invariant form the logs write. Every `Cloud_*` format opens
+with the provider slot so no language has to inflect a name handed to it
+verbatim.
+
+These enums need their own guardrail: resx parity cannot see a member added
+without its key, because the key is absent from every language at once and the
+languages still agree. `LocalizationTests` loops each enum and asserts the
+Russian rendering contains Cyrillic.
+
+Still English on purpose: `HotkeyHint`; model catalog names and disk sizes
+(identifiers); a cloud provider's own error text (someone else's wording,
+substituted not translated); and the default prompt body (text sent to an LLM,
+not UI chrome).
 
 Every key that substitutes a **language name** was written so the slot needs no
 grammatical case — leading the sentence, or after a colon or dash. That is latent

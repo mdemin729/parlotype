@@ -379,4 +379,107 @@ public class LocalizationTests : IDisposable
             SupportedUiLanguages.SystemSettingValue,
             await new UiLanguageService(settings).GetStoredSettingValueAsync(TestContext.Current.CancellationToken));
     }
+
+    // ---- messages Core classifies and Desktop words (ADR-064 amendment) ----
+    //
+    // These loops are exhaustive over the Core enums on purpose. A member added
+    // without its resx key falls through to the invariant English wording, and
+    // no parity check can catch that: the key is missing from every language at
+    // once, so the languages still agree with each other. Asking for Cyrillic in
+    // the Russian rendering is what makes the omission visible - it fails both
+    // when the key is absent (Localizer returns the key name) and when the
+    // mapper falls back to Core's English.
+
+    private static void AssertReadsAsRussian(string? text, string what)
+    {
+        Assert.False(string.IsNullOrWhiteSpace(text), $"{what} produced no text at all.");
+        Assert.True(
+            text!.Any(c => c is >= '\u0400' and <= '\u04FF'),
+            $"{what} is still English under ru: \"{text}\". Add its key to all three resx files.");
+    }
+
+    [AvaloniaFact]
+    public void EveryReservedShortcut_IsTranslated()
+    {
+        Localizer.Instance.SetCulture(Russian);
+
+        foreach (var shortcut in Enum.GetValues<ReservedShortcut>())
+            AssertReadsAsRussian(HotkeyText.Reserved(shortcut), $"ReservedShortcut.{shortcut}");
+    }
+
+    [AvaloniaFact]
+    public void EveryHotkeyConflictReason_IsTranslated()
+    {
+        Localizer.Instance.SetCulture(Russian);
+
+        var candidate = DictationHotkey.Chord(
+            new HotkeyBinding(HotkeyModifiers.Meta, "L"), ActivationMode.Toggle);
+
+        foreach (var reason in Enum.GetValues<HotkeyConflictReason>())
+        {
+            if (reason == HotkeyConflictReason.None)
+                continue;
+
+            var conflict = reason switch
+            {
+                HotkeyConflictReason.InvalidCombination => HotkeyConflict.Invalid("invariant"),
+                HotkeyConflictReason.AlreadyBound =>
+                    HotkeyConflict.AlreadyBound("invariant", ActivationMode.PushToTalk),
+                HotkeyConflictReason.Reserved =>
+                    HotkeyConflict.ReservedBy("invariant", ReservedShortcut.LockWorkstation),
+                _ => HotkeyConflict.Warning("invariant", reason),
+            };
+
+            AssertReadsAsRussian(
+                HotkeyText.Conflict(candidate, conflict), $"HotkeyConflictReason.{reason}");
+        }
+    }
+
+    [AvaloniaFact]
+    public void EveryCloudFailure_IsTranslated()
+    {
+        Localizer.Instance.SetCulture(Russian);
+
+        foreach (var kind in Enum.GetValues<CloudSpeechErrorKind>())
+        {
+            var ex = new CloudSpeechTranscriptionException(
+                kind, SpeechEngine.OpenAiCompatible, "OpenAI-compatible provider",
+                "invariant", 429, "provider said so");
+            AssertReadsAsRussian(CloudErrorText.Transcription(ex), $"CloudSpeechErrorKind.{kind}");
+        }
+
+        foreach (var error in Enum.GetValues<CloudBaseUrlError>())
+        {
+            AssertReadsAsRussian(
+                CloudErrorText.BaseUrl(new CloudBaseUrlFailure(error, "ftp")),
+                $"CloudBaseUrlError.{error}");
+        }
+
+        AssertReadsAsRussian(
+            CloudErrorText.NotConfigured(new CloudProviderNotConfiguredException(
+                SpeechEngine.XaiGrok, CloudConfigurationError.MissingApiKey, "invariant")),
+            "CloudConfigurationError.MissingApiKey");
+
+        AssertReadsAsRussian(
+            CloudErrorText.NotConfigured(new CloudProviderNotConfiguredException(
+                SpeechEngine.OpenAiCompatible, CloudConfigurationError.InvalidBaseUrl, "invariant",
+                new CloudBaseUrlFailure(CloudBaseUrlError.PlainHttpNotLoopback))),
+            "CloudConfigurationError.InvalidBaseUrl");
+    }
+
+    [AvaloniaFact]
+    public void TheProviderNameNeverNeedsAGrammaticalCase()
+    {
+        // Every Cloud_* format opens with the provider slot, so translations can
+        // keep the name in the nominative. If a format ever moves the slot into
+        // the middle of a sentence, Russian would need to inflect a name it is
+        // handed verbatim - this pins the shape instead.
+        Localizer.Instance.SetCulture(Russian);
+
+        var provider = CloudErrorText.Provider(SpeechEngine.OpenAiCompatible);
+        var message = CloudErrorText.NotConfigured(new CloudProviderNotConfiguredException(
+            SpeechEngine.OpenAiCompatible, CloudConfigurationError.MissingApiKey, "invariant"));
+
+        Assert.StartsWith(provider, message, StringComparison.Ordinal);
+    }
 }

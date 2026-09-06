@@ -52,6 +52,74 @@ public static class HotkeyText
     public static string Line(DictationHotkey hotkey) =>
         Strings.Format_Settings_Hotkeys_LineFormat(Gesture(hotkey.Gesture), Mode(hotkey.Mode));
 
+    /// <summary>
+    /// The warning a rejected or flagged binding shows in Settings. Built from
+    /// <see cref="HotkeyConflict.Reason"/> rather than from the conflict's own
+    /// <c>Description</c>, which stays the invariant form the log line writes
+    /// (ADR-064 amendment).
+    /// </summary>
+    /// <returns>Null when there is nothing to say.</returns>
+    public static string? Conflict(DictationHotkey candidate, HotkeyConflict conflict)
+    {
+        var gesture = Gesture(candidate.Gesture);
+
+        return conflict.Reason switch
+        {
+            HotkeyConflictReason.InvalidCombination => Strings.Settings_Hotkeys_Conflict_Invalid,
+
+            HotkeyConflictReason.AlreadyBound when conflict.ConflictingMode is { } mode =>
+                Strings.Format_Settings_Hotkeys_Conflict_AlreadyBoundFormat(gesture, ConflictMode(mode)),
+
+            HotkeyConflictReason.Reserved when conflict.Reserved is { } reserved =>
+                Strings.Format_Settings_Hotkeys_Conflict_ReservedFormat(gesture, Reserved(reserved)),
+
+            HotkeyConflictReason.ParameterHints =>
+                Strings.Format_Settings_Hotkeys_Conflict_ParameterHintsFormat(gesture),
+
+            HotkeyConflictReason.AltGrCollision =>
+                Strings.Format_Settings_Hotkeys_Conflict_AltGrFormat(gesture),
+
+            _ => null,
+        };
+    }
+
+    /// <summary>What the OS does with a shortcut Parlotype refuses to take over.</summary>
+    public static string Reserved(ReservedShortcut shortcut) => shortcut switch
+    {
+        ReservedShortcut.LockWorkstation => Strings.Settings_Hotkeys_Reserved_LockWorkstation,
+        ReservedShortcut.FileExplorer => Strings.Settings_Hotkeys_Reserved_FileExplorer,
+        ReservedShortcut.RunDialog => Strings.Settings_Hotkeys_Reserved_RunDialog,
+        ReservedShortcut.ShowDesktop => Strings.Settings_Hotkeys_Reserved_ShowDesktop,
+        ReservedShortcut.WindowsSettings => Strings.Settings_Hotkeys_Reserved_WindowsSettings,
+        ReservedShortcut.TaskView => Strings.Settings_Hotkeys_Reserved_TaskView,
+        ReservedShortcut.ProjectDisplay => Strings.Settings_Hotkeys_Reserved_ProjectDisplay,
+        ReservedShortcut.QuickLinkMenu => Strings.Settings_Hotkeys_Reserved_QuickLinkMenu,
+        ReservedShortcut.GameBar => Strings.Settings_Hotkeys_Reserved_GameBar,
+        ReservedShortcut.Screenshot => Strings.Settings_Hotkeys_Reserved_Screenshot,
+        ReservedShortcut.SecurityScreen => Strings.Settings_Hotkeys_Reserved_SecurityScreen,
+        ReservedShortcut.WindowsSpeechRecognition => Strings.Settings_Hotkeys_Reserved_WindowsSpeechRecognition,
+        ReservedShortcut.SwitchInputSource => Strings.Settings_Hotkeys_Reserved_SwitchInputSource,
+        ReservedShortcut.MacQuit => Strings.Settings_Hotkeys_Reserved_MacQuit,
+        ReservedShortcut.MacCloseWindow => Strings.Settings_Hotkeys_Reserved_MacCloseWindow,
+        ReservedShortcut.Spotlight => Strings.Settings_Hotkeys_Reserved_Spotlight,
+        ReservedShortcut.VoiceTyping => Strings.Settings_Hotkeys_Reserved_VoiceTyping,
+
+        // Unreachable while the enum and the resx agree; the parity test is what
+        // keeps them agreeing, so fall back to Core's invariant wording rather
+        // than throwing at the user.
+        _ => HotkeyConflictDetector.Describe(shortcut),
+    };
+
+    /// <summary>
+    /// The activation mode as it reads inside a conflict sentence — separate
+    /// from <see cref="Mode"/> because English wants it lowercase there and the
+    /// badge capitalized, and other languages disagree about which.
+    /// </summary>
+    private static string ConflictMode(ActivationMode mode) =>
+        mode == ActivationMode.PushToTalk
+            ? Strings.Settings_Hotkeys_Conflict_Mode_PushToTalk
+            : Strings.Settings_Hotkeys_Conflict_Mode_Toggle;
+
     private static string Modifier(HotkeyGesture gesture)
     {
         var key = gesture.Modifier switch

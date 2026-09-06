@@ -169,16 +169,18 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
         var existing = Bindings.Select(b => b.Hotkey).ToList();
         var conflict = HotkeyConflictDetector.Check(candidate, existing);
 
+        // The warning the user reads is built here from the conflict's reason;
+        // conflict.Description is the invariant form, which is what the log wants.
         if (conflict.IsBlocking)
         {
-            BlockingWarning = conflict.Description;
+            BlockingWarning = HotkeyText.Conflict(candidate, conflict);
             _logger.LogInformation("Rejected hotkey {Binding}: {Reason}",
                 candidate.DisplayString, conflict.Description);
             return;
         }
 
         if (conflict.HasMessage)
-            AdvisoryWarning = conflict.Description;
+            AdvisoryWarning = HotkeyText.Conflict(candidate, conflict);
 
         Bindings.Add(CreateItem(candidate));
         Commit();

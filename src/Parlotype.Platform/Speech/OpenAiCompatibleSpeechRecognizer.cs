@@ -78,11 +78,13 @@ public sealed class OpenAiCompatibleSpeechRecognizer : ISpeechRecognizer
             var savedBaseUrl = await _settings.GetAsync<string>(SettingsKeys.OpenAiCompatBaseUrl, cancellationToken);
             // HTTPS-or-loopback only — the request carries the bearer key and
             // recorded audio (security audit 2026-07-11, S3).
-            if (!CloudBaseUrlValidator.TryValidate(savedBaseUrl, out var urlError))
+            if (!CloudBaseUrlValidator.TryValidate(savedBaseUrl, out var urlFailure))
                 throw new CloudProviderNotConfiguredException(
                     SpeechEngine.OpenAiCompatible,
-                    $"The OpenAI-compatible base URL is rejected: {urlError}. " +
-                    "Fix it in Settings → Speech engine.");
+                    CloudConfigurationError.InvalidBaseUrl,
+                    $"The OpenAI-compatible base URL is rejected: {urlFailure!.Value.Description}. " +
+                    "Fix it in Settings → Speech engine.",
+                    urlFailure);
             _baseUrl = string.IsNullOrWhiteSpace(savedBaseUrl) ? DefaultBaseUrl : savedBaseUrl.TrimEnd('/');
 
             var savedModel = await _settings.GetAsync<string>(SettingsKeys.OpenAiCompatModel, cancellationToken);
@@ -92,6 +94,7 @@ public sealed class OpenAiCompatibleSpeechRecognizer : ISpeechRecognizer
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new CloudProviderNotConfiguredException(
                     SpeechEngine.OpenAiCompatible,
+                    CloudConfigurationError.MissingApiKey,
                     "No API key configured for the OpenAI-compatible provider. " +
                     "Add one in Settings → Speech engine.");
 
@@ -147,7 +150,7 @@ public sealed class OpenAiCompatibleSpeechRecognizer : ISpeechRecognizer
             $"{_baseUrl}/audio/transcriptions", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw await CloudSpeechHttpError.BuildAsync(response, ProviderDisplayName, _logger, cancellationToken);
+            throw await CloudSpeechHttpError.BuildAsync(response, SpeechEngine.OpenAiCompatible, ProviderDisplayName, _logger, cancellationToken);
 
         var text = await ParseTextAsync(response, cancellationToken);
 

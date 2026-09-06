@@ -75,3 +75,28 @@ language names through ICU, and at that moment these keys need re-reading:
 
 Spanish needs no case but does need article/gender agreement in the same places; the same
 colon-and-dash shapes avoid it.
+
+### Phase 6 additions
+
+Two more slots take a noun the sentence cannot inflect, and both are shaped the same way.
+
+| Key family | Slot | Shape |
+|---|---|---|
+| `Cloud_*` (all 8) | provider name | **always leads**, followed by a colon or a verb |
+| `Settings_Hotkeys_Conflict_*` | gesture / chord | leads |
+
+The provider name is translated (`Провайдер, совместимый с OpenAI`), so a mid-sentence slot
+would demand a case Russian cannot get from a verbatim substitution. Putting it first is
+what makes the translation possible at all;
+`LocalizationTests.TheProviderNameNeverNeedsAGrammaticalCase` pins the shape so a later
+rewording cannot quietly break it.
+
+The activation mode inside a conflict sentence is the one place a **separate key from the
+badge** was needed. The badge reads «Вкл./выкл.», and «…в режиме «Вкл./выкл.».» stacks the
+abbreviation's period against the sentence's. `Settings_Hotkeys_Conflict_Mode_*` therefore
+spells the mode out in the genitive («переключения», «удержания») — the badge stays
+abbreviated. English wants the opposite split: lowercase in the sentence, capitalized on the
+badge. Which is why the two are keys, not one key reused.
+
+**Never translated, added:** the provider's own error text. It arrives from the API already
+written, in whatever language the provider chose, and is substituted verbatim.

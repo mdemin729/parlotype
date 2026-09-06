@@ -1147,4 +1147,132 @@ Your settings and API keys are kept. Models download again automatically the nex
     <value>Right {0}</value>
     <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
   </data>
+  <data name="Settings_Hotkeys_Conflict_Invalid" xml:space="preserve">
+    <comment>Shown when the recorded gesture cannot be combined with its activation mode at all.</comment>
+    <value>That combination can't be used as a dictation hotkey.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AlreadyBoundFormat" xml:space="preserve">
+    <comment>{0} is the gesture ("Hold Right Ctrl"), {1} the mode it is already bound to (Settings_Hotkeys_Conflict_Mode_*). Each language decides how the mode reads inside the sentence, which is why those are separate keys from the badge labels.</comment>
+    <value>{0} is already bound to {1}.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_PushToTalk" xml:space="preserve">
+    <comment>Push-to-talk as it reads inside Settings_Hotkeys_Conflict_AlreadyBoundFormat (English wants it lowercase mid-sentence; Russian quotes it, so it stays capitalized).</comment>
+    <value>push to talk</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_Toggle" xml:space="preserve">
+    <comment>Toggle mode as it reads inside Settings_Hotkeys_Conflict_AlreadyBoundFormat.</comment>
+    <value>toggle</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ReservedFormat" xml:space="preserve">
+    <comment>{0} is the chord ("Win+L") — never translated; {1} is what the system does with it (Settings_Hotkeys_Reserved_*).</comment>
+    <value>{0} is reserved: {1}</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ParameterHintsFormat" xml:space="preserve">
+    <comment>{0} is the chord. "Visual Studio" and "VS Code" are product names — do not translate them.</comment>
+    <value>{0} shows parameter hints in Visual Studio and VS Code.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AltGrFormat" xml:space="preserve">
+    <comment>{0} is the chord. "AltGr", "Ctrl", "Alt" and "Space" are key names — never translated.</comment>
+    <value>On European keyboard layouts AltGr acts as Ctrl+Alt, so {0} can fire while typing accented characters. Ctrl+Alt+Space avoids this.</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_LockWorkstation" xml:space="preserve">
+    <comment>What Windows or macOS does with a shortcut Parlotype refuses to take over. These are OS feature names — use the wording the user's own operating system uses, not a literal translation of the English.</comment>
+    <value>Lock workstation</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_FileExplorer" xml:space="preserve">
+    <value>Open File Explorer</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_RunDialog" xml:space="preserve">
+    <value>Open Run dialog</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ShowDesktop" xml:space="preserve">
+    <value>Show/hide desktop</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSettings" xml:space="preserve">
+    <value>Open Settings</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_TaskView" xml:space="preserve">
+    <value>Task View</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ProjectDisplay" xml:space="preserve">
+    <value>Project display</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_QuickLinkMenu" xml:space="preserve">
+    <value>Quick Link menu</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_GameBar" xml:space="preserve">
+    <value>Open Game Bar</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Screenshot" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SecurityScreen" xml:space="preserve">
+    <value>Security screen</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSpeechRecognition" xml:space="preserve">
+    <value>Windows Speech Recognition</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SwitchInputSource" xml:space="preserve">
+    <value>Switch input source</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacQuit" xml:space="preserve">
+    <value>Quit application (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacCloseWindow" xml:space="preserve">
+    <value>Close window (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Spotlight" xml:space="preserve">
+    <value>Spotlight search (macOS) / input source switching</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_VoiceTyping" xml:space="preserve">
+    <value>Windows Voice Typing; hide window on macOS and GNOME</value>
+  </data>
+  <data name="Cloud_ProviderName_OpenAiCompatible" xml:space="preserve">
+    <comment>Names the provider inside error messages. Every Cloud_* format below puts this slot first, followed by a colon or a verb, so the name is always nominative and no language needs to inflect it. "OpenAI" is a product name — do not translate it.</comment>
+    <value>OpenAI-compatible provider</value>
+  </data>
+  <data name="Cloud_ProviderName_XaiGrok" xml:space="preserve">
+    <comment>Product name — identical in every language.</comment>
+    <value>xAI Grok</value>
+  </data>
+  <data name="Cloud_NotConfigured_MissingKeyFormat" xml:space="preserve">
+    <comment>{0} is the provider name (Cloud_ProviderName_*).</comment>
+    <value>{0}: no API key configured. Add one in Settings → Speech engine.</value>
+  </data>
+  <data name="Cloud_NotConfigured_InvalidBaseUrlFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the reason the URL was refused (Cloud_BaseUrl_*).</comment>
+    <value>{0}: the base URL is rejected ({1}). Fix it in Settings → Speech engine.</value>
+  </data>
+  <data name="Cloud_BaseUrl_NotAbsolute" xml:space="preserve">
+    <comment>A sentence fragment: it is shown on its own under the base-URL field, and also embedded in Cloud_NotConfigured_InvalidBaseUrlFormat.</comment>
+    <value>not a valid absolute URL</value>
+  </data>
+  <data name="Cloud_BaseUrl_PlainHttp" xml:space="preserve">
+    <comment>See Cloud_BaseUrl_NotAbsolute. "http", "https" and "localhost" are literals.</comment>
+    <value>plain http is only allowed for localhost — the API key and audio would leave this machine unencrypted</value>
+  </data>
+  <data name="Cloud_BaseUrl_UnsupportedSchemeFormat" xml:space="preserve">
+    <comment>{0} is the URL scheme the user typed ("ftp", "file"). See Cloud_BaseUrl_NotAbsolute.</comment>
+    <value>unsupported scheme '{0}' — use https</value>
+  </data>
+  <data name="Cloud_Error_KeyRejectedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text (arrives already written, in whatever language the provider chose).</comment>
+    <value>{0}: the API key was rejected (HTTP {1}). {2} Check the key in Settings → Speech engine.</value>
+  </data>
+  <data name="Cloud_Error_QuotaExceededFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: API quota exceeded — check your plan and billing with the provider. ({1})</value>
+  </data>
+  <data name="Cloud_Error_RateLimitedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: rate limit reached — wait a moment and try again. ({1})</value>
+  </data>
+  <data name="Cloud_Error_ProviderUnavailableFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0} is unavailable right now (HTTP {1}) — try again shortly. ({2})</value>
+  </data>
+  <data name="Cloud_Error_OtherFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0}: transcription failed (HTTP {1}). {2}</value>
+  </data>
 </root>

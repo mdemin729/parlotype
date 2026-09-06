@@ -536,7 +536,7 @@ public partial class TranscribeViewModel : ViewModelBase
         {
             var openSettings = await _dialogService.ShowConfirmationAsync(
                 Strings.Dialog_CloudNotConfigured_Title,
-                ex.Message,
+                CloudErrorText.NotConfigured(ex),
                 confirmText: Strings.Common_OpenSettings,
                 cancelText: Strings.Common_Cancel);
 
@@ -732,7 +732,7 @@ public partial class TranscribeViewModel : ViewModelBase
             {
                 var openSettings = await _dialogService.ShowConfirmationAsync(
                     Strings.Dialog_CloudTranscriptionFailed_Title,
-                    ex.Message,
+                    CloudErrorText.Transcription(ex),
                     confirmText: Strings.Common_OpenSettings,
                     cancelText: Strings.Common_Cancel);
 
@@ -741,7 +741,10 @@ public partial class TranscribeViewModel : ViewModelBase
             }
             else
             {
-                await _dialogService.ShowMessageAsync(Strings.Dialog_CloudTranscriptionFailed_Title, ex.Message, Strings.Common_Ok);
+                await _dialogService.ShowMessageAsync(
+                    Strings.Dialog_CloudTranscriptionFailed_Title,
+                    CloudErrorText.Transcription(ex),
+                    Strings.Common_Ok);
             }
         }
         catch (Exception dialogEx)

@@ -355,7 +355,9 @@ public class TranscribeViewModelTests
         var pipeline = new MockAudioPipeline
         {
             ThrowOnStart = new CloudProviderNotConfiguredException(
-                SpeechEngine.XaiGrok, "No API key configured for the xAI Grok provider.")
+                SpeechEngine.XaiGrok,
+                CloudConfigurationError.MissingApiKey,
+                "No API key configured for the xAI Grok provider.")
         };
         var wm = new MockWindowManager();
         var dialog = new MockUserDialogService { ConfirmationResult = true };
@@ -369,7 +371,10 @@ public class TranscribeViewModelTests
         Assert.Equal("Cloud provider not configured", vm.StatusText);
         Assert.Equal(1, dialog.ShowConfirmationCount);
         Assert.Equal("Cloud provider not configured", dialog.LastTitle);
-        Assert.Contains("No API key configured", dialog.LastMessage);
+        // The dialog body is built by CloudErrorText, not taken from the
+        // exception's invariant message.
+        Assert.StartsWith("xAI Grok:", dialog.LastMessage);
+        Assert.Contains("no API key configured", dialog.LastMessage);
         Assert.Equal(1, wm.ShowSettingsCount);
         Assert.Equal(SettingsSection.CloudProviders, wm.LastSettingsSection);
     }
@@ -380,7 +385,9 @@ public class TranscribeViewModelTests
         var pipeline = new MockAudioPipeline
         {
             ThrowOnStart = new CloudProviderNotConfiguredException(
-                SpeechEngine.OpenAiCompatible, "No API key configured for the OpenAI-compatible provider.")
+                SpeechEngine.OpenAiCompatible,
+                CloudConfigurationError.MissingApiKey,
+                "No API key configured for the OpenAI-compatible provider.")
         };
         var wm = new MockWindowManager();
         var dialog = new MockUserDialogService { ConfirmationResult = false };
@@ -403,8 +410,11 @@ public class TranscribeViewModelTests
 
         pipeline.RaiseTranscriptionFailed(new CloudSpeechTranscriptionException(
             CloudSpeechErrorKind.QuotaExceeded,
+            SpeechEngine.OpenAiCompatible,
             "OpenAI-compatible provider",
-            "OpenAI-compatible provider: API quota exceeded — check your plan and billing with the provider."));
+            "OpenAI-compatible provider: API quota exceeded — check your plan and billing with the provider.",
+            statusCode: 429,
+            providerMessage: "You exceeded your current quota."));
         await Task.Delay(100, TestContext.Current.CancellationToken);
 
         Assert.True(vm.IsRecording); // informational only — recording keeps running
@@ -425,7 +435,12 @@ public class TranscribeViewModelTests
         await vm.StartRecordingAsync();
 
         pipeline.RaiseTranscriptionFailed(new CloudSpeechTranscriptionException(
-            CloudSpeechErrorKind.KeyRejected, "xAI Grok", "xAI Grok rejected the API key (HTTP 401)."));
+            CloudSpeechErrorKind.KeyRejected,
+            SpeechEngine.XaiGrok,
+            "xAI Grok",
+            "xAI Grok rejected the API key (HTTP 401).",
+            statusCode: 401,
+            providerMessage: "Incorrect API key provided."));
         await Task.Delay(100, TestContext.Current.CancellationToken);
 
         Assert.Equal("Cloud API key rejected — check Settings", vm.StatusText);
@@ -460,7 +475,12 @@ public class TranscribeViewModelTests
         await vm.StartRecordingAsync();
 
         var error = new CloudSpeechTranscriptionException(
-            CloudSpeechErrorKind.RateLimited, "OpenAI-compatible provider", "rate limit reached");
+            CloudSpeechErrorKind.RateLimited,
+            SpeechEngine.OpenAiCompatible,
+            "OpenAI-compatible provider",
+            "rate limit reached",
+            statusCode: 429,
+            providerMessage: "Rate limit reached.");
         pipeline.RaiseTranscriptionFailed(error);
         await Task.Delay(50, TestContext.Current.CancellationToken);
         pipeline.RaiseTranscriptionFailed(error); // arrives while the first dialog is still up

@@ -24,26 +24,50 @@ public enum CloudSpeechErrorKind
 }
 
 /// <summary>
-/// Thrown when a cloud transcription HTTP request fails. Carries a
-/// user-presentable <see cref="Exception.Message"/> (the provider's error
-/// envelope is parsed — e.g. OpenAI's <c>{"error":{"message":…,"code":…}}</c> —
-/// rather than dumped raw), plus the failure <see cref="Kind"/> and provider
-/// name so the UI can offer the right next step. Derives from
-/// <see cref="InvalidOperationException"/> so generic failure handling keeps
-/// working (same pattern as <see cref="CloudProviderNotConfiguredException"/>).
+/// Thrown when a cloud transcription HTTP request fails. Carries the failure
+/// <see cref="Kind"/>, the engine and provider name, the HTTP status, and the
+/// provider's own parsed error text (its error envelope — e.g. OpenAI's
+/// <c>{"error":{"message":…,"code":…}}</c> — rather than the raw body). Derives
+/// from <see cref="InvalidOperationException"/> so generic failure handling
+/// keeps working (same pattern as <see cref="CloudProviderNotConfiguredException"/>).
 /// </summary>
+/// <remarks>
+/// <see cref="Exception.Message"/> is the invariant English form the logs
+/// write. The status text and dialog compose their own sentence from the parts
+/// below so it can be translated (ADR-064 amendment) — everything but
+/// <see cref="ProviderMessage"/>, which is the provider's wording and stays as
+/// it arrived.
+/// </remarks>
 public sealed class CloudSpeechTranscriptionException : InvalidOperationException
 {
     /// <summary>What went wrong, classified from the HTTP status and provider error code.</summary>
     public CloudSpeechErrorKind Kind { get; }
 
-    /// <summary>Display name of the provider that failed (e.g. "OpenAI-compatible provider").</summary>
+    /// <summary>The cloud engine that failed.</summary>
+    public SpeechEngine Engine { get; }
+
+    /// <summary>Invariant display name of the provider that failed (e.g. "OpenAI-compatible provider").</summary>
     public string Provider { get; }
 
-    public CloudSpeechTranscriptionException(CloudSpeechErrorKind kind, string provider, string message)
+    /// <summary>The HTTP status the provider returned, or 0 if there was none.</summary>
+    public int StatusCode { get; }
+
+    /// <summary>The provider's own error text, already parsed out of its envelope and length-capped.</summary>
+    public string? ProviderMessage { get; }
+
+    public CloudSpeechTranscriptionException(
+        CloudSpeechErrorKind kind,
+        SpeechEngine engine,
+        string provider,
+        string message,
+        int statusCode = 0,
+        string? providerMessage = null)
         : base(message)
     {
         Kind = kind;
+        Engine = engine;
         Provider = provider;
+        StatusCode = statusCode;
+        ProviderMessage = providerMessage;
     }
 }

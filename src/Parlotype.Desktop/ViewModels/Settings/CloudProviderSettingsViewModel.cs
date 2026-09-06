@@ -179,7 +179,9 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
         // The value is persisted regardless (no silent data loss while typing);
         // the recognizer re-validates at initialisation and refuses to send the
         // key over a rejected URL, so the hint here is a courtesy, not the gate.
-        OpenAiBaseUrlError = CloudBaseUrlValidator.TryValidate(value, out var error) ? null : error;
+        OpenAiBaseUrlError = CloudBaseUrlValidator.TryValidate(value, out var failure)
+            ? null
+            : CloudErrorText.BaseUrl(failure!.Value);
 
         if (_isLoading) return;
         _ = _settings.SetAsync(SettingsKeys.OpenAiCompatBaseUrl, value);
@@ -194,7 +196,9 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
     partial void OnXaiBaseUrlChanged(string value)
     {
         // See OnOpenAiBaseUrlChanged — hint only; the recognizer is the gate.
-        XaiBaseUrlError = CloudBaseUrlValidator.TryValidate(value, out var error) ? null : error;
+        XaiBaseUrlError = CloudBaseUrlValidator.TryValidate(value, out var failure)
+            ? null
+            : CloudErrorText.BaseUrl(failure!.Value);
 
         if (_isLoading) return;
         _ = _settings.SetAsync(SettingsKeys.XaiGrokBaseUrl, value);

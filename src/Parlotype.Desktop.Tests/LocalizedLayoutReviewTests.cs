@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Parlotype.Desktop.Resources;
+using Parlotype.Core.Hotkeys;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels.Settings;
 using Parlotype.Desktop.Views.Settings;
@@ -122,7 +123,44 @@ public class LocalizedLayoutReviewTests
         yield return ("updates", new UpdateSettingsView(), shell.Updates);
         yield return ("data", new DataSettingsView(), shell.Data);
         yield return ("help", new HelpSettingsView(), shell.Help);
+
+        // Warning states. These sentences are only reachable after an
+        // interaction, so the default pages never show them - and unreviewed
+        // copy is exactly where the untranslated paragraphs and the Russian case
+        // error hid before (ADR-064 amendment).
+        foreach (var page in WarningStates())
+            yield return page;
     }
+
+    /// <summary>
+    /// Pages driven into the states that produce a conflict or validation
+    /// sentence, so the wording gets looked at in every language too.
+    /// </summary>
+    private static IEnumerable<(string Name, Control View, object DataContext)> WarningStates()
+    {
+        var blocked = NewHotkeySection();
+        blocked.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Meta, "L"));
+        yield return ("hotkeys-conflict-reserved", new HotkeySettingsView(), blocked);
+
+        var advised = NewHotkeySection();
+        advised.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Alt, "P"));
+        yield return ("hotkeys-conflict-altgr", new HotkeySettingsView(), advised);
+
+        var duplicate = NewHotkeySection();
+        duplicate.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Shift, "F9"));
+        duplicate.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Shift, "F9"));
+        yield return ("hotkeys-conflict-already-bound", new HotkeySettingsView(), duplicate);
+
+        var badUrl = new CloudProviderSettingsViewModel(new MockSettingsService(), new MockSecretStore())
+        {
+            OpenAiBaseUrl = "ftp://example.com/v1",
+            XaiBaseUrl = "http://api.example.com/v1",
+        };
+        yield return ("cloud-providers-bad-url", new CloudProviderSettingsView(), badUrl);
+    }
+
+    private static HotkeySettingsViewModel NewHotkeySection() =>
+        new(hotkeyService: null, new MockSettingsService());
 
     private static string RepoRoot()
     {

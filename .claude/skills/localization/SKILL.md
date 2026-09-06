@@ -111,6 +111,40 @@ words go:
 *not* localized: the hotkey log lines write it, and a log that changes language with the
 UI cannot be grepped.
 
+## When Core needs to say something
+
+Core has no resources and must never get any. When a sentence has to be built from
+something only Core knows — which reserved shortcut a hotkey collided with, why a URL was
+refused, what a provider returned — **send the reason as data and choose the words in
+Desktop** (ADR-064 amendment):
+
+```csharp
+// Core: an identity plus the payload the sentence needs.
+public enum ReservedShortcut { LockWorkstation, FileExplorer, /* ... */ }
+public readonly record struct HotkeyConflict(
+    HotkeyConflictSeverity Severity, string? Description,
+    HotkeyConflictReason Reason, ReservedShortcut? Reserved, ActivationMode? ConflictingMode);
+
+// Desktop: the words.
+public static string? Conflict(DictationHotkey candidate, HotkeyConflict conflict) => ...
+```
+
+Keep the English sentence in Core as the **invariant** form and let the logs write it —
+same split as `HotkeyGesture.DisplayString`. Nothing user-facing should read it.
+
+Two things to get right:
+
+- **Shape the format so the substituted noun needs no grammatical case.** Put the slot at
+  the start followed by a colon or a verb (`"{0}: no API key configured."`). Russian
+  cannot inflect a name it is handed verbatim, and a mid-sentence slot forces it to.
+- **Add a test that loops the enum.** Parity checks cannot catch a member added without
+  its key: it is missing from *every* language at once, so the languages still agree.
+  `LocalizationTests.EveryReservedShortcut_IsTranslated` asserts the Russian rendering
+  contains Cyrillic, which fails both for an absent key and for a fallback to English.
+
+Text that arrives from outside — a cloud provider's error message, a file name — is
+substituted, never translated. It is someone else's wording.
+
 ## What is NOT localized
 
 Leave these in English — they are developer- or protocol-facing, or they are identifiers:
