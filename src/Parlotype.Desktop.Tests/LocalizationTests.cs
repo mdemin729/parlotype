@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.VisualTree;
+using CommunityToolkit.Mvvm.Input;
 using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Localization;
 using Parlotype.Core.Settings;
@@ -256,6 +257,28 @@ public class LocalizationTests : IDisposable
         Assert.Same(viewBefore, viewAfter);
 
         window.Close();
+    }
+
+    [AvaloniaFact]
+    public void SelectLanguageCommand_IsSynchronous_SoItDoesNotDisableEveryRowWhileApplying()
+    {
+        // The real cause of the reported flicker: every row's Button shares the
+        // SAME SelectLanguageCommand instance (built once in the constructor and
+        // handed to every UiLanguageDisplayItem). Had that command been declared
+        // `async Task`, CommunityToolkit.Mvvm's source generator would produce
+        // an AsyncRelayCommand whose CanExecute returns false for as long as it
+        // is running (IsRunning) unless AllowConcurrentExecutions is set — and
+        // since Avalonia's Button re-evaluates CanExecute on CanExecuteChanged,
+        // every row bound to the shared command disables and re-enables
+        // together for the length of the settings write. That is a uniform
+        // flash across the whole list, not a rebuild of any view — which is why
+        // fixing the ContentControl-recreation bug above did not make it go
+        // away. A plain synchronous RelayCommand never touches IsRunning, so
+        // CanExecute — and every bound row's IsEnabled — never changes. See
+        // memory/knowledge/asyncrelaycommand-flicker.md.
+        var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
+
+        Assert.IsNotAssignableFrom<IAsyncRelayCommand>(vm.LanguageOptions[0].SelectCommand);
     }
 
     [AvaloniaFact]

@@ -77,5 +77,10 @@ not bound) via `NavItems.Clear()` + re-`Add`. `SettingsWindow.axaml`'s `ContentC
 `Content` to `SelectedSection`, which is `SelectedNavItem?.Section`. Every interface-language
 switch tore down and rebuilt whichever settings page was open — reported by the user as the
 language picker's own rows flickering when they picked a language, since selecting a language
-is exactly what fires `CultureChanged`. See [[culture-changing-tests-need-avaloniafact]] for a
-related but different `Localizer.CultureChanged` pitfall (thread affinity, not this one).
+is exactly what fires `CultureChanged`. This turned out to be a real, independent defect —
+fixed and covered by a regression test — but it was **not** the cause of the report: the
+actual cause was [[asyncrelaycommand-flicker]] (the picker's four rows share one `async Task`
+command). Both bugs produced a similar-sounding symptom in the same feature; fixing one
+without verifying against the other's exact test wasted a round trip. See
+[[culture-changing-tests-need-avaloniafact]] for a related but different `Localizer.CultureChanged`
+pitfall (thread affinity, not this one).

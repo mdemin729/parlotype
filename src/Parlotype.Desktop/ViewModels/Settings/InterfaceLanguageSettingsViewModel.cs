@@ -51,13 +51,23 @@ public partial class InterfaceLanguageSettingsViewModel : SettingsSectionViewMod
         UpdateSelection(SelectedSettingValue);
     }
 
+    /// <summary>
+    /// Synchronous on purpose. Every row's Button binds the same
+    /// <c>SelectLanguageCommand</c> instance; had this been <c>async Task</c>,
+    /// CommunityToolkit.Mvvm's generated <c>AsyncRelayCommand</c> would set
+    /// <c>CanExecute = false</c> for the whole time the command is running (the
+    /// default unless <c>AllowConcurrentExecutions</c> is set), which disables
+    /// every button sharing it — all four rows would flash disabled/re-enabled
+    /// for the length of the settings write, which is exactly the flicker this
+    /// fixes. See <c>memory/knowledge/asyncrelaycommand-flicker.md</c>.
+    /// </summary>
     [RelayCommand]
-    private async Task SelectLanguageAsync(string settingValue)
+    private void SelectLanguage(string settingValue)
     {
         _logger.LogInformation("Interface language selected: {SettingValue}", settingValue);
         SelectedSettingValue = settingValue;
         UpdateSelection(settingValue);
-        await _uiLanguage.SetLanguageAsync(settingValue);
+        _ = _uiLanguage.SetLanguageAsync(settingValue);
     }
 
     /// <summary>
