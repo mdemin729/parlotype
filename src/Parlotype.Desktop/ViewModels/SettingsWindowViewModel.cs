@@ -150,31 +150,45 @@ public partial class SettingsWindowViewModel : ViewModelBase
             .Where(s => s.IsVisibleFor(activeEngine))
             .ToList();
 
-        NavItems.Clear();
+        var newItems = new List<SettingsNavItem>();
         foreach (var category in Enum.GetValues<SettingsCategory>())
         {
             var sectionsInCategory = visible.Where(s => s.Category == category).ToList();
             if (sectionsInCategory.Count == 0)
                 continue;
 
-            NavItems.Add(SettingsNavItem.Header(category.GetDisplayName()));
+            newItems.Add(SettingsNavItem.Header(category.GetDisplayName()));
             foreach (var section in sectionsInCategory)
-                NavItems.Add(SettingsNavItem.ForSection(section));
+                newItems.Add(SettingsNavItem.ForSection(section));
         }
 
         // Preserve selection if the previously-selected section is still
         // visible; otherwise fall back to the first non-header row.
-        if (previousSection is not null)
-        {
-            var preserved = NavItems.FirstOrDefault(n => n.Section == previousSection);
-            if (preserved is not null)
-            {
-                SelectedNavItem = preserved;
-                return;
-            }
-        }
+        var target = previousSection is not null
+            ? newItems.FirstOrDefault(n => n.Section == previousSection)
+            : null;
+        target ??= newItems.FirstOrDefault(n => !n.IsHeader);
 
-        SelectedNavItem = NavItems.FirstOrDefault(n => !n.IsHeader);
+        // Append the new rows and select the target *before* dropping the old
+        // ones, rather than Clear()-then-Add(). Clearing first would remove the
+        // currently selected row from ItemsSource, and the nav ListBox's
+        // two-way SelectedItem binding reacts by pushing SelectedNavItem back to
+        // null — which flips SelectedSection to null and back as this method
+        // runs. ContentControl.Content is bound to SelectedSection, so that
+        // null round-trip tears down and rebuilds the entire content pane (e.g.
+        // the interface-language picker) even though the selected section never
+        // actually changed - visible as a flash of that page's controls every
+        // time the culture changes (ADR-064 amendment). Never letting the
+        // selected row's section go missing from NavItems keeps SelectedItem —
+        // and therefore SelectedSection — stable throughout.
+        var oldCount = NavItems.Count;
+        foreach (var item in newItems)
+            NavItems.Add(item);
+
+        SelectedNavItem = target;
+
+        for (var i = 0; i < oldCount; i++)
+            NavItems.RemoveAt(0);
     }
 
     partial void OnSelectedNavItemChanged(SettingsNavItem? value)

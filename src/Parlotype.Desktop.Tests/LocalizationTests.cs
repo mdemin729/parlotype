@@ -11,6 +11,7 @@ using Parlotype.Desktop.Services;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.ViewModels.Settings;
+using Parlotype.Desktop.Views;
 using Parlotype.Desktop.Views.Settings;
 using Parlotype.Platform.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -218,6 +219,43 @@ public class LocalizationTests : IDisposable
 
         Assert.Same(section, vm.SelectedSection);
         Assert.Equal("Данные", vm.SelectedNavItem!.Label);
+    }
+
+    [AvaloniaFact]
+    public void SettingsWindow_DoesNotRecreateTheContentView_WhenInterfaceLanguageChanges()
+    {
+        // Reproduces the reported flicker with the real SettingsWindow markup,
+        // not just the view model: its ListBox binds SelectedItem two-way to
+        // SelectedNavItem, and its ContentControl binds Content to
+        // SelectedSection. If RebuildNavItems ever calls NavItems.Clear()
+        // before re-adding rows, the ListBox reacts to the ItemsSource reset by
+        // deselecting — SelectedNavItem goes to null, SelectedSection follows,
+        // and the ContentControl tears down and reconstructs its templated
+        // child from scratch. That freshly-built InterfaceLanguageSettingsView
+        // — new Buttons with no applied visual state yet — is what reads as
+        // the picker's rows flashing every time the culture changes
+        // (ADR-064 amendment).
+        Localizer.Instance.SetCulture(English);
+        var vm = SettingsWindowViewModelFactory.Build();
+        var window = new SettingsWindow { DataContext = vm };
+        window.Show();
+
+        var target = vm.NavItems.First(n => !n.IsHeader && n.Label == "Interface language");
+        vm.SelectedNavItem = target;
+
+        var contentControl = window.GetVisualDescendants().OfType<ContentControl>()
+            .First(c => c.Content is InterfaceLanguageSettingsViewModel);
+        var viewBefore = contentControl.GetVisualDescendants()
+            .OfType<InterfaceLanguageSettingsView>().SingleOrDefault();
+        Assert.NotNull(viewBefore);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        var viewAfter = contentControl.GetVisualDescendants()
+            .OfType<InterfaceLanguageSettingsView>().SingleOrDefault();
+        Assert.Same(viewBefore, viewAfter);
+
+        window.Close();
     }
 
     [AvaloniaFact]
