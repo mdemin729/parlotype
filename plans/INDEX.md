@@ -25,7 +25,7 @@
 
 | Plan | Started | Description |
 |------|---------|-------------|
-| _none_ | | |
+| [2026-09-05-ui-localization](2026-09-05-ui-localization/) | 2026-09-05 | **Phases 1–5 complete (ADR-064); phase 6 remains.** UI localization, Russian and Spanish first, with a repeatable path to German/French. Six phases: foundation (`UiLanguage` setting + system detection, `Localizer` + `{loc:Tr}` markup extension, generated `Strings.cs`), guardrails (`check-localization.ps1` key/placeholder/hardcoded-literal checks, parity tests, a `localization` skill and mandatory `PostToolUse` + `Stop` hooks), then ~450-key extraction in four batches, `ru`, `es`, and polish (pseudo-locale, ICU speech-language names, add-a-language recipe). Extends ADR-056's 30-key resx layer. Phase 1 settled the open decisions: switching is **live**, and it needed no `{ReflectionBinding}` exemption after all — Avalonia 12's `CompiledBinding.Create` plus a per-key `LocalizedString` keeps `{loc:Tr}` a compiled binding; `WaitTimeOption`'s display copy left Core while the model catalogs kept their English identifiers. RU/ES cover all **331** keys and the hardcoded-literal baseline is **empty** — every `.axaml` is clean, so a new literal now fails outright. All 19 settings pages were rendered and read in every language — no clipping. Left for phase 6: pseudo-locale, ICU language names, the add-a-language recipe, plus the Core-owned copy that is left: hotkey **conflict** messages (need a reason enum in Core) and the cloud exception bodies. Hotkey list/mode display is done — `HotkeyText` in Desktop, with Core's `DisplayString` kept as the invariant log form |
 
 ## Planned
 

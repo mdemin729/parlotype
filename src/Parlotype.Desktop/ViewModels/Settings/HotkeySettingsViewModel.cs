@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -14,7 +15,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private readonly ISettingsService _settings;
     private readonly ILogger<HotkeySettingsViewModel> _logger;
 
-    public override string Title => "Hotkeys";
+    public override string Title => Strings.Settings_Hotkeys_Title;
     public override SettingsCategory Category => SettingsCategory.Input;
 
     /// <summary>The configured gestures, in list order.</summary>
@@ -31,7 +32,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private bool _isRecording;
 
     [ObservableProperty]
-    private string _recorderText = "Record a chord…";
+    private string _recorderText = Strings.Settings_Hotkeys_Recorder_Idle;
 
     /// <summary>Reserved-shortcut or duplicate message; the offending binding was rejected.</summary>
     [ObservableProperty]
@@ -103,7 +104,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private void StartRecording()
     {
         IsRecording = true;
-        RecorderText = "Press a key combination…";
+        RecorderText = Strings.Settings_Hotkeys_Recorder_Listening;
         ClearWarnings();
     }
 
@@ -111,7 +112,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private void StopRecording()
     {
         IsRecording = false;
-        RecorderText = "Record a chord…";
+        RecorderText = Strings.Settings_Hotkeys_Recorder_Idle;
     }
 
     [RelayCommand]

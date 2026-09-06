@@ -2,13 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              xmlns:onb="using:Parlotype.Desktop.Onboarding"
              x:Class="Parlotype.Desktop.Views.Settings.Gemma4ModelSettingsView"
              x:DataType="vms:Gemma4ModelSettingsViewModel"
              x:CompileBindings="True">
     <StackPanel Spacing="12">
-        <TextBlock Text="Gemma 4 model" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Choose a Gemma 4 variant for the llama.cpp engine. E4B is more accurate; E2B is faster (fewer active parameters). Each download includes a vision projector (mmproj)."
+        <TextBlock Text="{loc:Tr Settings_Gemma4Model_Title}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_Gemma4Model_Description}"
                    Opacity="0.7" TextWrapping="Wrap" />
 
         <ItemsControl ItemsSource="{Binding ModelOptions}"
@@ -37,7 +38,7 @@
                                     <TextBlock Text="{Binding DisplayName}"
                                                FontSize="14"
                                                VerticalAlignment="Center" />
-                                    <TextBlock Text="Installed"
+                                    <TextBlock Text="{loc:Tr Settings_Model_Installed}"
                                                FontSize="12"
                                                Foreground="{DynamicResource SystemAccentColor}"
                                                VerticalAlignment="Center"
@@ -54,7 +55,7 @@
 
                             <!-- Download (when not installed) -->
                             <Button Grid.Column="3"
-                                    Content="Download"
+                                    Content="{loc:Tr Settings_Model_DownloadButton}"
                                     Margin="12,0,0,0"
                                     VerticalAlignment="Center"
                                     Command="{Binding DownloadCommand}"
@@ -63,7 +64,7 @@
 
                             <!-- Delete (when installed) -->
                             <Button Grid.Column="4"
-                                    Content="Delete"
+                                    Content="{loc:Tr Settings_Model_DeleteButton}"
                                     Margin="12,0,0,0"
                                     VerticalAlignment="Center"
                                     Command="{Binding DeleteCommand}"

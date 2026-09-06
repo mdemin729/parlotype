@@ -2,13 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              xmlns:onb="using:Parlotype.Desktop.Onboarding"
              x:Class="Parlotype.Desktop.Views.Settings.SpeechEngineSettingsView"
              x:DataType="vms:SpeechEngineSettingsViewModel"
              x:CompileBindings="True">
     <StackPanel Spacing="12">
-        <TextBlock Text="Speech Engine" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Choose which engine transcribes your speech. Changes take effect on next recording."
+        <TextBlock Text="{loc:Tr Settings_Engine_Heading}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_Engine_Description}"
                    Opacity="0.7"
                    TextWrapping="Wrap" />
 
@@ -49,13 +50,10 @@
 
         <!-- Gemma 4 info panel -->
         <StackPanel Spacing="4" IsVisible="{Binding IsGemma4Selected}" Margin="0,8,0,0">
-            <TextBlock Text="Gemma 4 (Experimental)"
+            <TextBlock Text="{loc:Tr Settings_Engine_Gemma4SectionLabel}"
                        FontWeight="SemiBold" FontSize="14" />
-            <TextBlock TextWrapping="Wrap" Opacity="0.7">
-                Gemma 4 E4B runs via a local llama-server process (llama.cpp, Vulkan).
-                English transcription only. Works best with clean speech and a good microphone.
-                The model files (~10 GB) will be downloaded on first use.
-            </TextBlock>
+            <TextBlock TextWrapping="Wrap" Opacity="0.7"
+                       Text="{loc:Tr Settings_Engine_Gemma4SectionNote}" />
         </StackPanel>
 
         <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,8" />
@@ -63,10 +61,10 @@
         <!-- Preload model on startup (opt-in, ADR-038) -->
         <StackPanel Spacing="4">
             <ToggleSwitch IsChecked="{Binding PreloadModelOnStartupEnabled, Mode=TwoWay}"
-                          OnContent="Preload model on startup"
-                          OffContent="Load model on first use" />
+                          OnContent="{loc:Tr Settings_Engine_PreloadToggleOn}"
+                          OffContent="{loc:Tr Settings_Engine_PreloadToggleOff}" />
             <TextBlock TextWrapping="Wrap" Opacity="0.6" FontSize="12"
-                       Text="When enabled, the speech model loads in the background at app startup so your first recording starts instantly. Uses extra memory while idle. Takes effect on next launch." />
+                       Text="{loc:Tr Settings_Engine_PreloadNote}" />
         </StackPanel>
     </StackPanel>
 </UserControl>

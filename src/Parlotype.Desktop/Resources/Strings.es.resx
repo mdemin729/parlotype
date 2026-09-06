@@ -1,0 +1,1150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Onboarding_WindowTitle" xml:space="preserve">
+    <value>Visita guiada de Parlotype</value>
+  </data>
+  <data name="Onboarding_Welcome_Title" xml:space="preserve">
+    <value>Te damos la bienvenida a Parlotype</value>
+  </data>
+  <data name="Onboarding_Welcome_Body" xml:space="preserve">
+    <value>Parlotype convierte la voz en texto en cualquier parte de tu equipo: dicta en cualquier aplicación y el texto reconocido se escribe justo donde está el cursor. De forma predeterminada, el reconocimiento se realiza por completo en este equipo: el audio nunca sale de él a menos que cambies deliberadamente a un motor en la nube.</value>
+  </data>
+  <data name="Onboarding_Recording_Title" xml:space="preserve">
+    <value>Empieza a dictar</value>
+  </data>
+  <data name="Onboarding_Recording_Body" xml:space="preserve">
+    <value>Pulsa uno de tus atajos de dictado o el botón de grabación resaltado en el widget. Cuando termines de hablar, el texto reconocido se escribirá en la aplicación que estabas usando. Tus atajos:</value>
+  </data>
+  <data name="Onboarding_Recording_EscLine" xml:space="preserve">
+    <value>Esc: cancela la grabación actual sin escribir nada</value>
+  </data>
+  <data name="Onboarding_Hotkeys_None" xml:space="preserve">
+    <value>No hay ningún atajo de dictado configurado: usa el botón de grabación del widget o añade un atajo en Configuración → Atajos.</value>
+  </data>
+  <data name="Onboarding_Widget_Title" xml:space="preserve">
+    <value>El widget de grabación</value>
+  </data>
+  <data name="Onboarding_Widget_Body" xml:space="preserve">
+    <value>Esta pequeña ventana siempre visible es tu control de dictado. El botón grande inicia y detiene la grabación; pasa el puntero por la tarjeta para ver el estado actual. Arrastra la franja superior para moverlo a donde quieras, y el botón ✕ lo oculta en la bandeja del sistema. Los motores que permiten elegir idioma muestran una franja de idioma en la parte inferior.</value>
+  </data>
+  <data name="Onboarding_Engine_Title" xml:space="preserve">
+    <value>Elige un motor de reconocimiento</value>
+  </data>
+  <data name="Onboarding_Engine_Body" xml:space="preserve">
+    <value>Parlotype incluye varios motores de reconocimiento: cambia entre ellos en la lista resaltada. Parakeet v3 es el predeterminado: rápido, totalmente local y detecta automáticamente 25 idiomas europeos. Cada motor añade sus propias páginas a la navegación de la izquierda.</value>
+  </data>
+  <data name="Onboarding_Model_Title" xml:space="preserve">
+    <value>Elige un modelo</value>
+  </data>
+  <data name="Onboarding_Model_Body" xml:space="preserve">
+    <value>Cada motor local ofrece modelos de distintos tamaños: los más grandes son más precisos, pero más lentos y ocupan más espacio en disco. Los archivos de modelo se descargan automáticamente la primera vez que se usan; los que ya están en disco aparecen marcados en la lista.</value>
+  </data>
+  <data name="Onboarding_Cloud_Title" xml:space="preserve">
+    <value>Los motores en la nube son opcionales</value>
+  </data>
+  <data name="Onboarding_Cloud_Body" xml:space="preserve">
+    <value>Los dos motores en la nube están desactivados de forma predeterminada y requieren tu propia clave de API. Mientras uno esté activo, tu audio se envía a ese proveedor para transcribirlo y el widget muestra un distintivo «Cloud» permanente. Todo lo demás en Parlotype sigue siendo totalmente local.</value>
+  </data>
+  <data name="Onboarding_Tray_Title" xml:space="preserve">
+    <value>Parlotype vive en la bandeja del sistema</value>
+  </data>
+  <data name="Onboarding_Tray_Body" xml:space="preserve">
+    <value>Ocultar o cerrar el widget no cierra Parlotype: sigue atento a tus atajos desde la bandeja del sistema. Haz clic en el icono de la bandeja para recuperar el widget. Para salir del todo, haz clic derecho en el icono y elige Salir.
+
+Para que tu atajo funcione desde que inicias sesión, Parlotype se inicia con Windows y espera en la bandeja, sin abrir ninguna ventana. Puedes desactivarlo cuando quieras en Configuración → Aplicación → Inicio.</value>
+  </data>
+  <data name="Onboarding_Recap_Title" xml:space="preserve">
+    <value>Todo listo</value>
+  </data>
+  <data name="Onboarding_Recap_Body" xml:space="preserve">
+    <value>Dicta donde quieras con tus atajos o con el botón del widget. Los motores, los modelos, los atajos y los idiomas están en Configuración, y esta visita guiada, junto con la referencia de atajos, siempre está disponible en Configuración → Ayuda.</value>
+  </data>
+  <data name="Onboarding_Nav_Back" xml:space="preserve">
+    <value>Atrás</value>
+  </data>
+  <data name="Onboarding_Nav_Next" xml:space="preserve">
+    <value>Siguiente</value>
+  </data>
+  <data name="Onboarding_Nav_Finish" xml:space="preserve">
+    <value>Finalizar</value>
+  </data>
+  <data name="Onboarding_Nav_Skip" xml:space="preserve">
+    <value>Omitir la visita</value>
+  </data>
+  <data name="Onboarding_Progress_Format" xml:space="preserve">
+    <value>Paso {0} de {1}</value>
+  </data>
+  <data name="Help_Title" xml:space="preserve">
+    <value>Ayuda</value>
+  </data>
+  <data name="Help_Intro" xml:space="preserve">
+    <value>¿Es tu primera vez en Parlotype? La visita guiada recorre la grabación, el widget, los motores y los modelos, abriendo cada pantalla y resaltando los controles a medida que avanza.</value>
+  </data>
+  <data name="Help_OpenTourButton" xml:space="preserve">
+    <value>Abrir la visita guiada</value>
+  </data>
+  <data name="Help_HotkeysHeading" xml:space="preserve">
+    <value>Atajos de dictado actuales</value>
+  </data>
+  <data name="Help_NoHotkeys" xml:space="preserve">
+    <value>No hay atajos de dictado configurados. Añade uno en la sección Atajos.</value>
+  </data>
+  <data name="Help_EscCancelLine" xml:space="preserve">
+    <value>Esc: cancela la grabación actual</value>
+  </data>
+  <data name="Settings_Theme_Title" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="Settings_Theme_Description" xml:space="preserve">
+    <value>Elige entre la apariencia del sistema, clara u oscura.</value>
+  </data>
+  <data name="Settings_Theme_Default" xml:space="preserve">
+    <value>Predeterminado (sistema)</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>Claro</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>Oscuro</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_Title" xml:space="preserve">
+    <value>Idioma de la interfaz</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_Description" xml:space="preserve">
+    <value>El idioma en el que están escritas las ventanas de Parlotype. No afecta a los idiomas en los que puedes dictar: eso se configura en Idioma.</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_System" xml:space="preserve">
+    <value>Predeterminado del sistema</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat" xml:space="preserve">
+    <value>Sigue a Windows: actualmente {0}</value>
+    <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
+    <value>Sigue a Windows: todavía no está traducido, así que se usa el inglés</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
+    <value>Media</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Long" xml:space="preserve">
+    <value>Larga</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Extended" xml:space="preserve">
+    <value>Ampliada</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_VeryLong" xml:space="preserve">
+    <value>Muy larga</value>
+  </data>
+  <data name="Settings_SilenceTimeout_WaitFormat" xml:space="preserve">
+    <value>{0} ({1} s)</value>
+    <comment>{0} is the wait-time name, {1} the duration in seconds. Keep the unit next to {1}.</comment>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Common_Ok" xml:space="preserve">
+    <value>Aceptar</value>
+  </data>
+  <data name="Common_OpenSettings" xml:space="preserve">
+    <value>Abrir Configuración</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Abrir</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Salir</value>
+  </data>
+  <data name="Transcribe_WindowTitle" xml:space="preserve">
+    <value>Parlotype — Dictado</value>
+  </data>
+  <data name="Transcribe_CloudBadge" xml:space="preserve">
+    <comment>Short badge on the widget while a cloud engine is active. Keep it very short.</comment>
+    <value>Nube</value>
+  </data>
+  <data name="Transcribe_HideWindowTooltip" xml:space="preserve">
+    <value>Ocultar la ventana</value>
+  </data>
+  <data name="Transcribe_SettingsTooltip" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Transcribe_YouSpeakLabel" xml:space="preserve">
+    <value>Hablas</value>
+  </data>
+  <data name="Transcribe_OpenSettingsLink" xml:space="preserve">
+    <comment>Link on the widget's language strip. Keep the trailing arrow.</comment>
+    <value>Configuración →</value>
+  </data>
+  <data name="Transcribe_Status_Ready" xml:space="preserve">
+    <value>Listo</value>
+  </data>
+  <data name="Transcribe_Status_LoadingModel" xml:space="preserve">
+    <value>Cargando el modelo...</value>
+  </data>
+  <data name="Transcribe_Status_Recording" xml:space="preserve">
+    <value>Grabando...</value>
+  </data>
+  <data name="Transcribe_Status_Cancelled" xml:space="preserve">
+    <value>Cancelado</value>
+  </data>
+  <data name="Transcribe_Status_CloudNotConfigured" xml:space="preserve">
+    <value>Proveedor en la nube sin configurar</value>
+  </data>
+  <data name="Transcribe_Status_RuntimeRestartRequiredFormat" xml:space="preserve">
+    <comment>{0} is a runtime name such as "Vulkan" or "Cpu" — never translated.</comment>
+    <value>Reinicia Parlotype para usar {0}</value>
+  </data>
+  <data name="Transcribe_Status_RuntimeUnavailableFormat" xml:space="preserve">
+    <comment>{0} is a runtime name such as "Vulkan" or "Cpu" — never translated.</comment>
+    <value>{0} no está disponible: cámbialo en Configuración</value>
+  </data>
+  <data name="Transcribe_Status_CloudKeyRejected" xml:space="preserve">
+    <value>Clave de API rechazada: revisa Configuración</value>
+  </data>
+  <data name="Transcribe_Status_CloudQuotaExceeded" xml:space="preserve">
+    <value>Cuota en la nube agotada: revisa tu plan y facturación</value>
+  </data>
+  <data name="Transcribe_Status_CloudRateLimited" xml:space="preserve">
+    <value>Límite de peticiones alcanzado: inténtalo en un momento</value>
+  </data>
+  <data name="Transcribe_Status_CloudProviderUnavailable" xml:space="preserve">
+    <value>Proveedor en la nube no disponible: inténtalo en un momento</value>
+  </data>
+  <data name="Transcribe_Status_CloudFailed" xml:space="preserve">
+    <value>La transcripción en la nube falló</value>
+  </data>
+  <data name="Transcribe_CloudProvider_OpenAiCompatible" xml:space="preserve">
+    <comment>Badge naming the active cloud provider. "OpenAI" is a product name — do not translate it.</comment>
+    <value>Nube: compatible con OpenAI</value>
+  </data>
+  <data name="Transcribe_CloudProvider_XaiGrok" xml:space="preserve">
+    <comment>Badge naming the active cloud provider. "xAI Grok" is a product name — do not translate it.</comment>
+    <value>Nube: xAI Grok</value>
+  </data>
+  <data name="Transcribe_TargetPicker_Header" xml:space="preserve">
+    <value>Traducir a</value>
+  </data>
+  <data name="Transcribe_TargetPicker_Off" xml:space="preserve">
+    <value>Desactivado: sin traducción</value>
+  </data>
+  <data name="Transcribe_Source_Keyboard" xml:space="preserve">
+    <comment>Source-language chip when the language follows the OS keyboard layout but it could not be resolved to a name.</comment>
+    <value>Teclado</value>
+  </data>
+  <data name="Transcribe_Source_Auto" xml:space="preserve">
+    <comment>Source-language chip when the engine detects the language itself. Keep it short — it sits in a narrow chip.</comment>
+    <value>Auto</value>
+  </data>
+  <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
+    <value>Proveedor en la nube sin configurar</value>
+  </data>
+  <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
+    <value>La transcripción en la nube falló</value>
+  </data>
+  <data name="ModelDownload_Title" xml:space="preserve">
+    <value>Descarga de modelo</value>
+  </data>
+  <data name="ModelDownload_DownloadButton" xml:space="preserve">
+    <value>Descargar</value>
+  </data>
+  <data name="ModelDownload_ConfirmFormat" xml:space="preserve">
+    <comment>{0} is the model name, {1} its download size (e.g. "1.5 GB").</comment>
+    <value>¿Descargar «{0}» ({1}) de internet?</value>
+  </data>
+  <data name="ModelDownload_ConfirmWithProjectorFormat" xml:space="preserve">
+    <comment>{0} is the model name, {1} its download size. Used for Gemma 4 models that bundle a vision projector.</comment>
+    <value>¿Descargar «{0}» ({1}, incluye proyector de visión) de internet?</value>
+  </data>
+  <data name="Settings_WindowTitle" xml:space="preserve">
+    <value>Parlotype — Configuración</value>
+  </data>
+  <data name="Settings_NavHeading" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Settings_Category_Audio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="Settings_Category_SpeechEngine" xml:space="preserve">
+    <value>Motor de reconocimiento</value>
+  </data>
+  <data name="Settings_Category_Input" xml:space="preserve">
+    <value>Entrada</value>
+  </data>
+  <data name="Settings_Category_Appearance" xml:space="preserve">
+    <value>Apariencia</value>
+  </data>
+  <data name="Settings_Category_Application" xml:space="preserve">
+    <value>Aplicación</value>
+  </data>
+  <data name="Settings_Microphone_Title" xml:space="preserve">
+    <value>Micrófono</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Title" xml:space="preserve">
+    <value>Pausa antes de transcribir</value>
+  </data>
+  <data name="Settings_Engine_Title" xml:space="preserve">
+    <value>Motor</value>
+  </data>
+  <data name="Settings_Language_Title" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="Settings_WhisperModel_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Modelo de Whisper</value>
+  </data>
+  <data name="Settings_WhisperRuntime_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Runtime de Whisper</value>
+  </data>
+  <data name="Settings_WhisperOutput_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Salida de Whisper</value>
+  </data>
+  <data name="Settings_Gemma4Model_Title" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated.</comment>
+    <value>Modelo de Gemma 4</value>
+  </data>
+  <data name="Settings_ParakeetModel_Title" xml:space="preserve">
+    <comment>"Parakeet" is a model family name — never translated.</comment>
+    <value>Modelo de Parakeet</value>
+  </data>
+  <data name="Settings_CloudProviders_Title" xml:space="preserve">
+    <value>Proveedores en la nube</value>
+  </data>
+  <data name="Settings_Prompts_Title" xml:space="preserve">
+    <value>Prompts</value>
+  </data>
+  <data name="Settings_LlamaCppServer_Title" xml:space="preserve">
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+    <value>Servidor llama.cpp</value>
+  </data>
+  <data name="Settings_Hotkeys_Title" xml:space="preserve">
+    <value>Atajos de teclado</value>
+  </data>
+  <data name="Settings_Startup_Title" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="Settings_Updates_Title" xml:space="preserve">
+    <value>Actualizaciones</value>
+  </data>
+  <data name="Settings_Data_Title" xml:space="preserve">
+    <value>Datos</value>
+  </data>
+  <data name="Settings_Microphone_Description" xml:space="preserve">
+    <value>Elige el dispositivo de entrada que se usa para transcribir.</value>
+  </data>
+  <data name="Settings_Microphone_SystemDefault" xml:space="preserve">
+    <value>Predeterminado del sistema</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Description" xml:space="preserve">
+    <value>Cuánto esperar tras el final del habla antes de transcribir.</value>
+  </data>
+  <data name="Settings_SilenceTimeout_HoldNote" xml:space="preserve">
+    <value>Se aplica cuando activas y desactivas el dictado con un interruptor. Mantener la tecla lo ignora: soltarla ya indica que has terminado, así que se transcribe toda la pulsación de una vez.</value>
+  </data>
+  <data name="Settings_Startup_Description" xml:space="preserve">
+    <value>Parlotype espera tu atajo de dictado desde la bandeja del sistema, así que tiene que estar en marcha antes de que puedas dictar.</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn" xml:space="preserve">
+    <value>Iniciar Parlotype cuando inicie sesión en Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOff" xml:space="preserve">
+    <value>No iniciar Parlotype automáticamente</value>
+  </data>
+  <data name="Settings_Startup_BlockedHeading" xml:space="preserve">
+    <value>Desactivado en Windows</value>
+  </data>
+  <data name="Settings_Startup_BlockedBody" xml:space="preserve">
+    <comment>"Startup apps" and "Enable" name real Windows UI — use the wording Windows itself uses in this language.</comment>
+    <value>Abre el Administrador de tareas, ve a la pestaña «Aplicaciones de inicio», selecciona Parlotype y elige «Habilitar». Windows guarda esa decisión aparte de este ajuste, y solo el Administrador de tareas puede deshacerla.</value>
+  </data>
+  <data name="Settings_Startup_WhatChangesHeading" xml:space="preserve">
+    <value>Qué cambia esto</value>
+  </data>
+  <data name="Settings_Startup_WhatChangesBody" xml:space="preserve">
+    <comment>"HKCU Run" is a registry path — never translated.</comment>
+    <value>Una sola entrada en tu propia cuenta de usuario (HKCU Run) que apunta a Parlotype. Ningún servicio, ninguna tarea programada, ningún permiso de administrador, nada para todo el equipo. Puedes verla y quitarla tú mismo en Administrador de tareas → Aplicaciones de inicio.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
+    <comment>"Setup.exe" is a file name — never translated.</comment>
+    <value>Esta compilación no puede iniciarse al iniciar sesión: no se instaló desde Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
+    <value>Windows tiene Parlotype desactivado en Administrador de tareas → Aplicaciones de inicio. Vuelve a habilitarlo ahí para que este ajuste surta efecto.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled" xml:space="preserve">
+    <value>Parlotype se inicia con Windows y espera en la bandeja: no se abre ninguna ventana.</value>
+  </data>
+  <data name="Settings_Startup_State_Disabled" xml:space="preserve">
+    <value>Parlotype solo se ejecuta cuando lo inicias tú.</value>
+  </data>
+  <data name="Settings_Updates_Description" xml:space="preserve">
+    <value>Parlotype puede consultar GitHub en busca de nuevas versiones, descargarlas en segundo plano e instalarlas al salir.</value>
+  </data>
+  <data name="Settings_Updates_ToggleOn" xml:space="preserve">
+    <value>Buscar actualizaciones automáticamente</value>
+  </data>
+  <data name="Settings_Updates_ToggleOff" xml:space="preserve">
+    <value>Búsqueda automática desactivada</value>
+  </data>
+  <data name="Settings_Updates_CadenceNote" xml:space="preserve">
+    <value>Cuando está activado, Parlotype busca poco después de arrancar y cada 6 horas a partir de entonces.</value>
+  </data>
+  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
+    <value>Qué envía esto</value>
+  </data>
+  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
+    <comment>"api.github.com" is a host name — never translated.</comment>
+    <value>Una petición anónima a api.github.com para obtener la lista pública de versiones de Parlotype, y la descarga del propio archivo de la versión. Sin cuenta, sin identificador del equipo, sin datos de uso. Es la única petición de red que hace Parlotype mientras todos tus motores de reconocimiento son locales.</value>
+  </data>
+  <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
+    <value>Versión instalada:</value>
+  </data>
+  <data name="Settings_Updates_LastCheckedLabel" xml:space="preserve">
+    <value>Última comprobación:</value>
+  </data>
+  <data name="Settings_Updates_CheckNowButton" xml:space="preserve">
+    <value>Buscar ahora</value>
+  </data>
+  <data name="Settings_Updates_InstallAndRestartButton" xml:space="preserve">
+    <value>Instalar y reiniciar ahora</value>
+  </data>
+  <data name="Settings_Updates_Status_NotChecked" xml:space="preserve">
+    <value>Aún no se ha comprobado.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
+    <comment>"Setup.exe" is a file name — never translated.</comment>
+    <value>Esta compilación no puede actualizarse sola: no se instaló desde Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_Checking" xml:space="preserve">
+    <value>Buscando actualizaciones…</value>
+  </data>
+  <data name="Settings_Updates_Status_UpToDate" xml:space="preserve">
+    <value>Parlotype está actualizado.</value>
+  </data>
+  <data name="Settings_Updates_Status_AvailableFormat" xml:space="preserve">
+    <comment>{0} is a version number such as "0.4.4".</comment>
+    <value>La versión {0} está disponible.</value>
+  </data>
+  <data name="Settings_Updates_Status_DownloadingFormat" xml:space="preserve">
+    <comment>{0} is a version number such as "0.4.4".</comment>
+    <value>Descargando la versión {0}…</value>
+  </data>
+  <data name="Settings_Updates_Status_ReadyFormat" xml:space="preserve">
+    <comment>{0} is a version number. The update is staged, not installed — it applies as Parlotype closes.</comment>
+    <value>La versión {0} está descargada. Se instalará cuando salgas de Parlotype.</value>
+  </data>
+  <data name="Settings_Updates_Status_Failed" xml:space="preserve">
+    <value>La búsqueda de actualizaciones falló.</value>
+  </data>
+  <data name="Settings_Updates_Never" xml:space="preserve">
+    <comment>Shown where a date would go, when no update check has ever run.</comment>
+    <value>Nunca</value>
+  </data>
+  <data name="Settings_Updates_DevelopmentBuild" xml:space="preserve">
+    <comment>Shown where a version number would go, for a build that was not installed.</comment>
+    <value>compilación de desarrollo</value>
+  </data>
+  <data name="Settings_Data_Description" xml:space="preserve">
+    <value>Dónde guarda Parlotype tus modelos, ajustes y claves de API.</value>
+  </data>
+  <data name="Settings_Data_LocationLabel" xml:space="preserve">
+    <value>Ubicación</value>
+  </data>
+  <data name="Settings_Data_CopyPathButton" xml:space="preserve">
+    <value>Copiar la ruta</value>
+  </data>
+  <data name="Settings_Data_OpenFolderButton" xml:space="preserve">
+    <value>Abrir la carpeta</value>
+  </data>
+  <data name="Settings_Data_DownloadedModelsLabel" xml:space="preserve">
+    <value>Modelos descargados:</value>
+  </data>
+  <data name="Settings_Data_DeleteModelsButton" xml:space="preserve">
+    <value>Eliminar los modelos descargados…</value>
+  </data>
+  <data name="Settings_Data_UninstallToggleOn" xml:space="preserve">
+    <value>Eliminarlo todo cuando desinstale Parlotype</value>
+  </data>
+  <data name="Settings_Data_UninstallToggleOff" xml:space="preserve">
+    <value>Conservar mis datos cuando desinstale Parlotype</value>
+  </data>
+  <data name="Settings_Data_UninstallNote" xml:space="preserve">
+    <value>Desactivado de forma predeterminada, para que reinstalar Parlotype no te cueste volver a descargar varios gigabytes. Cuando está activado, desinstalar también elimina tus modelos descargados, tus ajustes y tus claves de API guardadas.</value>
+  </data>
+  <data name="Settings_Data_NothingDownloaded" xml:space="preserve">
+    <value>Nada descargado</value>
+  </data>
+  <data name="Settings_Data_SaveFailed_Keep" xml:space="preserve">
+    <value>No se pudo guardar esa preferencia. Al desinstalar se conservarán tus datos igualmente.</value>
+  </data>
+  <data name="Settings_Data_SaveFailed_Delete" xml:space="preserve">
+    <value>No se pudo guardar esa preferencia: al desinstalar se eliminarán igualmente tus modelos descargados, tus ajustes y tus claves de API. Inténtalo de nuevo.</value>
+  </data>
+  <data name="Settings_Data_PathCopied" xml:space="preserve">
+    <value>Ruta copiada al portapapeles.</value>
+  </data>
+  <data name="Settings_Data_PathCopyFailed" xml:space="preserve">
+    <value>No se pudo copiar la ruta.</value>
+  </data>
+  <data name="Settings_Data_OpenFolderFailed" xml:space="preserve">
+    <value>No se pudo abrir la carpeta.</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_Title" xml:space="preserve">
+    <value>¿Eliminar los modelos descargados?</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_BodyFormat" xml:space="preserve">
+    <comment>{0} is a size such as "1.5 GB", {1} the models folder path. Keep the blank line between the two paragraphs.</comment>
+    <value>Esto libera {0} en {1}.
+
+Tus ajustes y claves de API se conservan. Los modelos se descargan de nuevo automáticamente la próxima vez que dictes.</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_Confirm" xml:space="preserve">
+    <value>Eliminar los modelos</value>
+  </data>
+  <data name="Settings_Data_ModelsDeleted" xml:space="preserve">
+    <value>Modelos descargados eliminados.</value>
+  </data>
+  <data name="Settings_Data_DeleteFailed" xml:space="preserve">
+    <value>No se pudieron eliminar todos los archivos: algo sigue usándolos. Reinicia Parlotype e inténtalo de nuevo.</value>
+  </data>
+  <data name="Settings_Runtime_Description" xml:space="preserve">
+    <comment>"Whisper.net" is a library name — never translated.</comment>
+    <value>Elige qué backend de Whisper.net ejecuta el modelo de reconocimiento. Los cambios surten efecto tras reiniciar.</value>
+  </data>
+  <data name="Settings_Runtime_RestartHeading" xml:space="preserve">
+    <value>Hay que reiniciar</value>
+  </data>
+  <data name="Settings_Runtime_RestartNoteFormat" xml:space="preserve">
+    <comment>{0} is the runtime already loaded, {1} the one just chosen — both names like "Vulkan" or "CPU", never translated.</comment>
+    <value>Esta sesión ya está ejecutando {0}. Whisper elige su runtime una sola vez por arranque, así que reinicia Parlotype para cambiar a {1}: hasta entonces, la grabación no se iniciará.</value>
+  </data>
+  <data name="Settings_Runtime_VulkanMissing" xml:space="preserve">
+    <comment>"vulkan-1.dll" is a file name — never translated.</comment>
+    <value>No se detectó el cargador de Vulkan (vulkan-1.dll) en este sistema.</value>
+  </data>
+  <data name="Settings_Runtime_DownloadVulkanSdkButton" xml:space="preserve">
+    <comment>Keep the trailing arrow — it marks a link that leaves the app.</comment>
+    <value>Descargar el SDK de Vulkan →</value>
+  </data>
+  <data name="Settings_Runtime_Auto_Name" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="Settings_Runtime_Auto_Description" xml:space="preserve">
+    <value>Prueba Vulkan y, si falla, usa la CPU. Recomendado.</value>
+  </data>
+  <data name="Settings_Runtime_Vulkan_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>Vulkan</value>
+  </data>
+  <data name="Settings_Runtime_Vulkan_Description" xml:space="preserve">
+    <value>Cualquier GPU mediante Vulkan (AMD, Intel, NVIDIA). Requiere controladores de GPU compatibles con Vulkan.</value>
+  </data>
+  <data name="Settings_Runtime_Cpu_Name" xml:space="preserve">
+    <comment>Kept as "CPU" in every language — it is the term users see in system tools.</comment>
+    <value>CPU</value>
+  </data>
+  <data name="Settings_Runtime_Cpu_Description" xml:space="preserve">
+    <value>Forzar la inferencia solo por CPU. Siempre funciona, pero es más lenta con modelos grandes.</value>
+  </data>
+  <data name="Settings_Runtime_VulkanUnavailableReason" xml:space="preserve">
+    <comment>"vulkan-1.dll" is a file name — never translated.</comment>
+    <value>No se detectó el cargador de Vulkan (vulkan-1.dll). Instala los controladores de GPU o el SDK de Vulkan.</value>
+  </data>
+  <data name="Settings_Hotkeys_Description" xml:space="preserve">
+    <comment>"Esc" is a key name — use whatever that key is called on a keyboard in this language, usually "Esc".</comment>
+    <value>Mantén pulsada una tecla para hablar, o púlsala dos veces para dictar con las manos libres. Pulsa Esc mientras grabas para descartarlo.</value>
+  </data>
+  <data name="Settings_Hotkeys_ModeToggleTooltip" xml:space="preserve">
+    <value>Cambiar entre mantener pulsado y activar/desactivar</value>
+  </data>
+  <data name="Settings_Hotkeys_RemoveTooltip" xml:space="preserve">
+    <value>Quitar este atajo</value>
+  </data>
+  <data name="Settings_Hotkeys_None" xml:space="preserve">
+    <value>No hay atajos configurados: el dictado solo puede iniciarse desde el widget.</value>
+  </data>
+  <data name="Settings_Hotkeys_AddButton" xml:space="preserve">
+    <value>Añadir un atajo</value>
+  </data>
+  <data name="Settings_Hotkeys_Recorder_Idle" xml:space="preserve">
+    <value>Grabar una combinación…</value>
+  </data>
+  <data name="Settings_Hotkeys_Recorder_Listening" xml:space="preserve">
+    <value>Pulsa una combinación de teclas…</value>
+  </data>
+  <data name="Settings_Model_Installed" xml:space="preserve">
+    <comment>Badge on a model that is already on disk. Shared by the Gemma 4 and Parakeet lists.</comment>
+    <value>Instalado</value>
+  </data>
+  <data name="Settings_Model_DownloadButton" xml:space="preserve">
+    <value>Descargar</value>
+  </data>
+  <data name="Settings_Model_DeleteButton" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Settings_Engine_Heading" xml:space="preserve">
+    <comment>Page heading. The shorter navigation label is Settings_Engine_Title.</comment>
+    <value>Motor de reconocimiento</value>
+  </data>
+  <data name="Settings_Engine_Description" xml:space="preserve">
+    <value>Elige qué motor transcribe tu voz. Los cambios surten efecto en la siguiente grabación.</value>
+  </data>
+  <data name="Settings_Engine_Gemma4SectionLabel" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated. Only "(Experimental)" is prose.</comment>
+    <value>Gemma 4 (experimental)</value>
+  </data>
+  <data name="Settings_Engine_PreloadToggleOn" xml:space="preserve">
+    <value>Precargar el modelo al iniciar</value>
+  </data>
+  <data name="Settings_Engine_PreloadToggleOff" xml:space="preserve">
+    <value>Cargar el modelo en el primer uso</value>
+  </data>
+  <data name="Settings_Engine_PreloadNote" xml:space="preserve">
+    <value>Cuando está activado, el modelo de reconocimiento se carga en segundo plano al arrancar la aplicación, de modo que tu primera grabación empieza al instante. Consume memoria adicional mientras está inactivo. Surte efecto en el siguiente arranque.</value>
+  </data>
+  <data name="Settings_Engine_Parakeet_Name" xml:space="preserve">
+    <comment>"Parakeet v3" is a model name — never translated. Only "(Recommended)" is prose.</comment>
+    <value>Parakeet v3 (recomendado)</value>
+  </data>
+  <data name="Settings_Engine_Parakeet_Description" xml:space="preserve">
+    <comment>"NVIDIA Parakeet" and "ONNX" are product names — never translated.</comment>
+    <value>NVIDIA Parakeet mediante ONNX. Descarga de ~670 MB. 25 idiomas europeos, detectados automáticamente. El motor más rápido: funciona en cualquier CPU, sin necesidad de GPU. Sin traducción.</value>
+  </data>
+  <data name="Settings_Engine_Whisper_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>Whisper</value>
+  </data>
+  <data name="Settings_Engine_Whisper_Description" xml:space="preserve">
+    <comment>"Whisper.net" is a library name — never translated.</comment>
+    <value>Reconocimiento de voz local mediante Whisper.net. Bien probado, ~99 idiomas, selección del idioma de origen y traducción al inglés.</value>
+  </data>
+  <data name="Settings_Engine_Gemma4_Name" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated. Only "(Experimental)" is prose.</comment>
+    <value>Gemma 4 (experimental)</value>
+  </data>
+  <data name="Settings_Engine_Gemma4_Description" xml:space="preserve">
+    <comment>"Google Gemma 4 E4B" and "llama.cpp" are product names — never translated.</comment>
+    <value>Google Gemma 4 E4B mediante llama.cpp. Requiere una descarga de ~10 GB. Solo en inglés. Mejor con voz limpia.</value>
+  </data>
+  <data name="Settings_Engine_OpenAiCompatible_Name" xml:space="preserve">
+    <comment>"OpenAI" is a product name — never translated.</comment>
+    <value>Compatible con OpenAI (nube)</value>
+  </data>
+  <data name="Settings_Engine_OpenAiCompatible_Description" xml:space="preserve">
+    <comment>"Cloud providers" must match the wording of Settings_CloudProviders_Title — it names that page.</comment>
+    <value>Transcripción en la nube con tu propia clave de OpenAI, Groq o un servicio compatible. El audio se envía al proveedor configurado: no se ejecuta nada localmente. Rápido incluso en equipos modestos. Es opcional; configura tu clave en «Proveedores en la nube», más abajo.</value>
+  </data>
+  <data name="Settings_Engine_XaiGrok_Name" xml:space="preserve">
+    <comment>"xAI Grok" is a product name — never translated.</comment>
+    <value>xAI Grok (nube)</value>
+  </data>
+  <data name="Settings_Engine_XaiGrok_Description" xml:space="preserve">
+    <comment>"Cloud providers" must match the wording of Settings_CloudProviders_Title — it names that page.</comment>
+    <value>xAI Grok Speech-to-Text con tu propia clave de xAI. El audio se envía a xAI: no se ejecuta nada localmente. Rápido incluso en equipos modestos. Es opcional; configura tu clave en «Proveedores en la nube», más abajo.</value>
+  </data>
+  <data name="Settings_WhisperModel_Heading" xml:space="preserve">
+    <comment>Page heading. The navigation label is Settings_WhisperModel_Title.</comment>
+    <value>Modelo de Whisper</value>
+  </data>
+  <data name="Settings_WhisperModel_Description" xml:space="preserve">
+    <value>Los modelos más grandes son más precisos, pero ocupan más disco y cargan más la CPU/GPU.</value>
+  </data>
+  <data name="Settings_WhisperModel_NoTranslationTooltip" xml:space="preserve">
+    <value>Solo transcripción: traducir al inglés requiere un modelo multilingüe</value>
+  </data>
+  <data name="Settings_WhisperModel_NoTranslationBadge" xml:space="preserve">
+    <comment>Small badge beside a model that cannot translate. Keep it short.</comment>
+    <value>sin traducción</value>
+  </data>
+  <data name="Settings_WhisperModel_NotDownloaded" xml:space="preserve">
+    <comment>Keep the parentheses — it sits beside the model name.</comment>
+    <value>(sin descargar)</value>
+  </data>
+  <data name="Settings_WhisperOutput_Description" xml:space="preserve">
+    <comment>"Whisper" is a product name — never translated.</comment>
+    <value>Opciones de formato del texto propias del motor Whisper.</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationOn" xml:space="preserve">
+    <value>Puntuación incluida en el texto</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationOff" xml:space="preserve">
+    <value>Texto sin puntuación</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationNote" xml:space="preserve">
+    <value>Cuando está activado, la transcripción incluye comas, puntos y otros signos de puntuación.</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityOn" xml:space="preserve">
+    <comment>The four asterisks are the literal masking Whisper applies — keep them.</comment>
+    <value>Palabrotas enmascaradas con ****</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityOff" xml:space="preserve">
+    <value>Filtro de palabrotas desactivado</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityNote" xml:space="preserve">
+    <value>Cuando está activado, las palabrotas reconocidas se sustituyen por asteriscos.</value>
+  </data>
+  <data name="Settings_Gemma4Model_Description" xml:space="preserve">
+    <comment>"Gemma 4", "llama.cpp", "E4B", "E2B" and "mmproj" are identifiers — never translated.</comment>
+    <value>Elige una variante de Gemma 4 para el motor llama.cpp. E4B es más precisa; E2B es más rápida (menos parámetros activos). Cada descarga incluye un proyector de visión (mmproj).</value>
+  </data>
+  <data name="Settings_ParakeetModel_Description" xml:space="preserve">
+    <comment>"NVIDIA Parakeet", "INT8" and "fp32" are identifiers — never translated.</comment>
+    <value>NVIDIA Parakeet funciona por completo en la CPU: no hace falta GPU. Transcribe 25 idiomas europeos (detectados automáticamente) con puntuación y mayúsculas. INT8 es la opción recomendada por defecto: pequeña y rápida. La precisión completa (fp32) es algo más exacta, pero ocupa 4 veces más y decodifica más despacio.</value>
+  </data>
+  <data name="ApiKeyBox_ShowHideTooltip" xml:space="preserve">
+    <value>Mostrar / ocultar la clave</value>
+  </data>
+  <data name="Settings_CloudProviders_OpenAi_Name" xml:space="preserve">
+    <comment>"OpenAI" is a product name — never translated.</comment>
+    <value>Compatible con OpenAI</value>
+  </data>
+  <data name="Settings_CloudProviders_OpenAi_Description" xml:space="preserve">
+    <value>Funciona con OpenAI, Groq o cualquier otro servicio que implemente la API de transcripción de OpenAI.</value>
+  </data>
+  <data name="Settings_CloudProviders_Xai_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>xAI Grok</value>
+  </data>
+  <data name="Settings_CloudProviders_Xai_Description" xml:space="preserve">
+    <value>La API Grok Speech-to-Text de xAI.</value>
+  </data>
+  <data name="Settings_CloudProviders_BaseUrlLabel" xml:space="preserve">
+    <value>URL base</value>
+  </data>
+  <data name="Settings_CloudProviders_ModelLabel" xml:space="preserve">
+    <value>Modelo</value>
+  </data>
+  <data name="Settings_CloudProviders_ApiKeyLabel" xml:space="preserve">
+    <value>Clave de API</value>
+  </data>
+  <data name="Settings_CloudProviders_KeySavedBadge" xml:space="preserve">
+    <comment>Keep the leading check mark.</comment>
+    <value>✓ Guardada</value>
+  </data>
+  <data name="Settings_CloudProviders_ChangeButton" xml:space="preserve">
+    <value>Cambiar</value>
+  </data>
+  <data name="Settings_CloudProviders_RemoveButton" xml:space="preserve">
+    <value>Quitar</value>
+  </data>
+  <data name="Settings_CloudProviders_SaveButton" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Settings_CloudProviders_KeyStatus_Saved" xml:space="preserve">
+    <value>Clave guardada</value>
+  </data>
+  <data name="Settings_CloudProviders_KeyStatus_None" xml:space="preserve">
+    <value>Sin clave</value>
+  </data>
+  <data name="Settings_Prompts_Description" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated.</comment>
+    <value>La instrucción que se envía al motor Gemma 4 con cada transcripción. El prompt activo está marcado con la barra de color.</value>
+  </data>
+  <data name="Settings_Prompts_HelpHeader" xml:space="preserve">
+    <value>Cómo funcionan los prompts</value>
+  </data>
+  <data name="Settings_Prompts_Help_PlaceholdersHeading" xml:space="preserve">
+    <value>Marcadores</value>
+  </data>
+  <data name="Settings_Prompts_Help_SpeechLangDescription" xml:space="preserve">
+    <comment>Follows the literal token {speech_lang}, which is rendered separately in bold. Keep the leading dash.</comment>
+    <value>: el idioma hablado, tomado de la página de ajustes «Idioma». Con «Detección automática» se representa como «el idioma detectado».</value>
+  </data>
+  <data name="Settings_Prompts_Help_TextLangDescription" xml:space="preserve">
+    <comment>Follows the literal token {text_lang}, which is rendered separately in bold. Keep the leading dash.</comment>
+    <value>: el idioma de salida. Solo se diferencia del idioma hablado mientras la traducción está activa; en caso contrario también se representa como el idioma hablado.</value>
+  </data>
+  <data name="Settings_Prompts_Help_TranslationHeading" xml:space="preserve">
+    <value>Cuándo se aplica la traducción</value>
+  </data>
+  <data name="Settings_Prompts_Help_TranslationBody" xml:space="preserve">
+    <value>Solo cuando se cumplen las tres condiciones: el interruptor de traducción está activado, hay un idioma de salida seleccionado, y este difiere del idioma hablado (la detección automática siempre cuenta como distinta). En caso contrario el motor solo transcribe, y el idioma de salida es el hablado.</value>
+  </data>
+  <data name="Settings_Prompts_Help_BuiltInHeading" xml:space="preserve">
+    <value>Prompts integrados frente a personalizados</value>
+  </data>
+  <data name="Settings_Prompts_Help_BuiltInBody" xml:space="preserve">
+    <comment>{speech_lang} and {text_lang} are literal placeholder tokens the user types into a prompt — never translate them, and keep the braces exactly.</comment>
+    <value>El prompt integrado predeterminado contiene tres cuerpos y el motor elige uno en cada transcripción: un cuerpo de transcripción, donde el idioma de salida coincide con el hablado, así que {speech_lang} aparece dos veces («voz en X a texto en X»); un cuerpo de traducción que combina {speech_lang} con {text_lang} para la salida; y un cuerpo de detección automática sin marcadores.</value>
+  </data>
+  <data name="Settings_Prompts_Help_CustomBody" xml:space="preserve">
+    <value>Un prompt personalizado tiene un solo cuerpo. Cuando se aplica la traducción, se le añade automáticamente una instrucción «y después tradúcelo a ...». Al duplicar el integrado solo se copia su cuerpo de transcripción.</value>
+  </data>
+  <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
+    <value>Integrado</value>
+  </data>
+  <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
+    <value>Duplicar</value>
+  </data>
+  <data name="Settings_Prompts_EditButton" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Settings_Prompts_DeleteButton" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Settings_Prompts_NewButton" xml:space="preserve">
+    <value>Nuevo prompt</value>
+  </data>
+  <data name="Settings_Prompts_NameLabel" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Settings_Prompts_NamePlaceholder" xml:space="preserve">
+    <value>Mi prompt</value>
+  </data>
+  <data name="Settings_Prompts_TextLabel" xml:space="preserve">
+    <value>Texto del prompt</value>
+  </data>
+  <data name="Settings_Prompts_SaveButton" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Settings_Prompts_Editor_PlaceholdersLabel" xml:space="preserve">
+    <comment>Leads a line that continues with the bold token {speech_lang}. Keep the colon.</comment>
+    <value>Marcadores:</value>
+  </data>
+  <data name="Settings_Prompts_Editor_SpeechLangHint" xml:space="preserve">
+    <comment>Follows the literal token {speech_lang}, rendered separately in bold. Keep the leading dash and the trailing semicolon.</comment>
+    <value>: el idioma hablado («el idioma detectado» con detección automática);</value>
+  </data>
+  <data name="Settings_Prompts_Editor_TextLangHint" xml:space="preserve">
+    <comment>Follows the literal token {text_lang}, rendered separately in bold. Keep the leading dash.</comment>
+    <value>: el idioma de salida, que coincide con el hablado salvo que la traducción esté activa.</value>
+  </data>
+  <data name="Settings_Prompts_Editor_TranslationNote" xml:space="preserve">
+    <value>Cuando la traducción está activa, se añade automáticamente a tu prompt una instrucción «y después tradúcelo a ...».</value>
+  </data>
+  <data name="Settings_Prompts_CopySuffixFormat" xml:space="preserve">
+    <comment>{0} is the name of the prompt being duplicated.</comment>
+    <value>{0} (copia)</value>
+  </data>
+  <data name="Settings_LlamaCpp_Heading" xml:space="preserve">
+    <comment>A project name — never translated, and keep the lower case.</comment>
+    <value>llama.cpp</value>
+  </data>
+  <data name="Settings_LlamaCpp_Description" xml:space="preserve">
+    <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
+    <value>Explora, instala y gestiona compilaciones de llama-server. La instalación activa es la que hace funcionar la transcripción con Gemma 4.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
+    <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
+    <value>Gestionada</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualBadge" xml:space="preserve">
+    <comment>Badge: the user pointed Parlotype at a folder they downloaded themselves.</comment>
+    <value>Manual</value>
+  </data>
+  <data name="Settings_LlamaCpp_RefreshButton" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+  <data name="Settings_LlamaCpp_RunningInstallLabel" xml:space="preserve">
+    <value>Instalación en ejecución:</value>
+  </data>
+  <data name="Settings_LlamaCpp_PathLabel" xml:space="preserve">
+    <value>Ruta:</value>
+  </data>
+  <data name="Settings_LlamaCpp_ModelLabel" xml:space="preserve">
+    <value>Modelo:</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioLabel" xml:space="preserve">
+    <value>Audio:</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioSupported" xml:space="preserve">
+    <value>Compatible</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioNotSupported" xml:space="preserve">
+    <value>No compatible</value>
+  </data>
+  <data name="Settings_LlamaCpp_BuildLabel" xml:space="preserve">
+    <value>Compilación:</value>
+  </data>
+  <data name="Settings_LlamaCpp_UpdateAvailableHeading" xml:space="preserve">
+    <value>Hay una actualización</value>
+  </data>
+  <data name="Settings_LlamaCpp_UpdateAvailableBody" xml:space="preserve">
+    <comment>The build number follows this text in bold — keep the trailing space and colon.</comment>
+    <value>Hay una compilación más reciente en GitHub: </value>
+  </data>
+  <data name="Settings_LlamaCpp_CheckUpdatesButton" xml:space="preserve">
+    <value>Buscar actualizaciones</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortConflictHeading" xml:space="preserve">
+    <comment>Keep the leading warning sign.</comment>
+    <value>⚠ Conflicto de puerto</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortConflictHint" xml:space="preserve">
+    <comment>"Save" must match Settings_LlamaCpp_SaveButton — it names that button.</comment>
+    <value>Cambia el puerto de abajo y pulsa «Guardar».</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstalledHeading" xml:space="preserve">
+    <value>Instaladas</value>
+  </data>
+  <data name="Settings_LlamaCpp_RefreshListButton" xml:space="preserve">
+    <value>Actualizar la lista</value>
+  </data>
+  <data name="Settings_LlamaCpp_UseThisTooltip" xml:space="preserve">
+    <value>Usar esta instalación</value>
+  </data>
+  <data name="Settings_LlamaCpp_MissingBadge" xml:space="preserve">
+    <comment>Keep the leading warning sign. Shown when a recorded install is no longer on disk.</comment>
+    <value>⚠ no encontrada</value>
+  </data>
+  <data name="Settings_LlamaCpp_UninstallButton" xml:space="preserve">
+    <value>Desinstalar</value>
+  </data>
+  <data name="Settings_LlamaCpp_NoManagedInstalls" xml:space="preserve">
+    <comment>"Available" must match Settings_LlamaCpp_AvailableBuildsHeading — it names that list.</comment>
+    <value>Todavía no hay instalaciones gestionadas. Elige una de la lista «Compilaciones disponibles» de abajo.</value>
+  </data>
+  <data name="Settings_LlamaCpp_SelectionNote" xml:space="preserve">
+    <value>La selección surtirá efecto en la siguiente grabación.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualInstallHeading" xml:space="preserve">
+    <value>Instalación manual</value>
+  </data>
+  <data name="Settings_LlamaCpp_NotManagedBadge" xml:space="preserve">
+    <value>No gestionada por Parlotype</value>
+  </data>
+  <data name="Settings_LlamaCpp_UseThisRadio" xml:space="preserve">
+    <value>Usar esta</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualHint" xml:space="preserve">
+    <comment>"llama-server.exe" is a file name — never translated.</comment>
+    <value>Indica una carpeta que contenga llama-server.exe y que hayas descargado tú mismo.</value>
+  </data>
+  <data name="Settings_LlamaCpp_BrowseButton" xml:space="preserve">
+    <value>Examinar…</value>
+  </data>
+  <data name="Settings_LlamaCpp_AvailableBuildsHeading" xml:space="preserve">
+    <value>Compilaciones disponibles</value>
+  </data>
+  <data name="Settings_LlamaCpp_Loading" xml:space="preserve">
+    <comment>Keep the parentheses — it sits beside a heading.</comment>
+    <value>(cargando…)</value>
+  </data>
+  <data name="Settings_LlamaCpp_CudaRuntimeBadge" xml:space="preserve">
+    <comment>"CUDA" is a product name — never translated.</comment>
+    <value>+ runtime de CUDA</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstallButton" xml:space="preserve">
+    <value>Instalar</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstalledBadge" xml:space="preserve">
+    <value>Instalada</value>
+  </data>
+  <data name="Settings_LlamaCpp_NoBuildsMatched" xml:space="preserve">
+    <value>Ninguna compilación coincide con el sistema operativo y la arquitectura actuales.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ServerPortHeading" xml:space="preserve">
+    <value>Puerto del servidor</value>
+  </data>
+  <data name="Settings_LlamaCpp_ServerPortDescription" xml:space="preserve">
+    <comment>"llama-server" is an identifier and 8321 the default port — neither is translated.</comment>
+    <value>Puerto para llama-server (8321 de forma predeterminada). Los cambios surten efecto en la siguiente grabación.</value>
+  </data>
+  <data name="Settings_LlamaCpp_SaveButton" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Settings_LlamaCpp_ResetButton" xml:space="preserve">
+    <value>Restablecer</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_NotProbed" xml:space="preserve">
+    <value>Sin comprobar</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_InvalidPort" xml:space="preserve">
+    <value>Puerto no válido</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Connected" xml:space="preserve">
+    <value>Conectado</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Disconnected" xml:space="preserve">
+    <value>Desconectado</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_PortConflict" xml:space="preserve">
+    <value>Conflicto de puerto</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_LoadingModel" xml:space="preserve">
+    <value>Cargando el modelo...</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortRangeError" xml:space="preserve">
+    <value>El puerto debe ser un número entre 1 y 65535.</value>
+  </data>
+  <data name="Settings_LlamaCpp_Backend_Unknown" xml:space="preserve">
+    <comment>Fallback for a llama-server build whose backend could not be identified. Every other backend name (CPU, CUDA, Vulkan, ROCm / HIP, SYCL, Metal, KleidiAI) is an identifier and stays as it is.</comment>
+    <value>Desconocido</value>
+  </data>
+  <data name="Settings_Language_Description" xml:space="preserve">
+    <value>Una sola relación, de izquierda a derecha: tú hablas el idioma de origen y Parlotype escribe el de destino. El conector entre ambos activa y desactiva la traducción.</value>
+  </data>
+  <data name="Settings_Language_SourceCaption" xml:space="preserve">
+    <value>Hablas</value>
+  </data>
+  <data name="Settings_Language_TargetCaption" xml:space="preserve">
+    <value>Parlotype escribe</value>
+  </data>
+  <data name="Settings_Language_PausedSubLine" xml:space="preserve">
+    <comment>Sits beside the translation switch, which stays on and operable (ADR-061). Keep it short.</comment>
+    <value>En pausa: este modelo no traduce</value>
+  </data>
+  <data name="Settings_Language_UnavailableTitle" xml:space="preserve">
+    <value>Traducción no disponible</value>
+  </data>
+  <data name="Settings_Language_UnavailableSubtitle" xml:space="preserve">
+    <value>Este modelo no la admite</value>
+  </data>
+  <data name="Language_ChooseTranslatingModel" xml:space="preserve">
+    <comment>One button, two surfaces — the Language page and the Transcribe flyout (ADR-061). They must not drift, hence one key.</comment>
+    <value>Elegir un modelo que traduzca</value>
+  </data>
+  <data name="Language_Picker_SearchPlaceholder" xml:space="preserve">
+    <value>Buscar idiomas…</value>
+  </data>
+  <data name="Language_Picker_NoResultsFormat" xml:space="preserve">
+    <comment>{0} is whatever the user typed into the search box.</comment>
+    <value>Ningún idioma coincide con «{0}».</value>
+  </data>
+  <data name="Language_Connector_PausedTooltipFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name such as "Large v3 Turbo" — never translated.</comment>
+    <value>Traducción en pausa: «{0}» no traduce</value>
+  </data>
+  <data name="Language_Connector_TurnOffTooltip" xml:space="preserve">
+    <value>Desactivar la traducción</value>
+  </data>
+  <data name="Language_Connector_TurnOnTooltip" xml:space="preserve">
+    <value>Activar la traducción</value>
+  </data>
+  <data name="Language_ToggleSwitch_TranslateToFormat" xml:space="preserve">
+    <comment>{0} is a language name. NOTE: once phase 6 localizes language names, this slot needs a case other than nominative in Russian — see the plan's "language-name cases" note.</comment>
+    <value>Traducir a {0}</value>
+  </data>
+  <data name="Language_ToggleSwitch_Translate" xml:space="preserve">
+    <comment>Fallback label when the engine has no fixed translation target to name.</comment>
+    <value>Traducir</value>
+  </data>
+  <data name="Language_UnavailableNoteFormat" xml:space="preserve">
+    <comment>{0} is an engine name ("Whisper", "Gemma 4", "Parakeet") — never translated, and it leads the sentence.</comment>
+    <value>{0} no traduce: Parlotype escribe exactamente lo que dices.</value>
+  </data>
+  <data name="Language_Source_KeyboardLayout" xml:space="preserve">
+    <value>Distribución del teclado</value>
+  </data>
+  <data name="Language_Source_AutoDetect" xml:space="preserve">
+    <value>Detección automática</value>
+  </data>
+  <data name="Language_Source_DetectedFormat" xml:space="preserve">
+    <comment>{0} is the detected keyboard layout's friendly name. The colon keeps {0} in a position that needs no grammatical case.</comment>
+    <value>Detectado: {0}</value>
+  </data>
+  <data name="Language_Source_LayoutUnavailable" xml:space="preserve">
+    <value>No se pudo detectar la distribución; se usará la detección automática</value>
+  </data>
+  <data name="Language_Source_AutoDetectHint" xml:space="preserve">
+    <value>Deja que el modelo identifique el idioma</value>
+  </data>
+  <data name="Language_Source_SpokenLanguageHint" xml:space="preserve">
+    <value>Idioma hablado</value>
+  </data>
+  <data name="Language_Target_SameAsSource" xml:space="preserve">
+    <comment>Target card while translation is off — the output matches the spoken language.</comment>
+    <value>Igual que el de origen</value>
+  </data>
+  <data name="Language_Summary_Format" xml:space="preserve">
+    <comment>{0} is the spoken language, {1} what gets typed. Both are language names, so keep each one where it needs no grammatical case — after a colon or dash rather than after a preposition.</comment>
+    <value>Hablas: {0} → Parlotype escribe: {1}</value>
+  </data>
+  <data name="Language_Summary_YourKeyboardLanguage" xml:space="preserve">
+    <comment>Substituted as {0} of Language_Summary_Format when the source follows the keyboard layout but it could not be resolved.</comment>
+    <value>el idioma de tu teclado</value>
+  </data>
+  <data name="Language_Summary_AnyLanguage" xml:space="preserve">
+    <comment>Substituted as {0} of Language_Summary_Format when the engine auto-detects.</comment>
+    <value>cualquier idioma</value>
+  </data>
+  <data name="Language_Summary_TranslationPausedFormat" xml:space="preserve">
+    <comment>{0} is the spoken language. The result is substituted as {1} of Language_Summary_Format.</comment>
+    <value>{0} (traducción en pausa)</value>
+  </data>
+  <data name="Language_Summary_NoTranslationFormat" xml:space="preserve">
+    <comment>{0} is the spoken language. The result is substituted as {1} of Language_Summary_Format.</comment>
+    <value>{0} (sin traducción)</value>
+  </data>
+  <data name="Language_TranslationPausedNoteFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name — never translated. "Medium" and "Large v1/v2/v3" are model names too.</comment>
+    <value>La traducción está en pausa: «{0}» solo transcribe. Elige Medium o Large v1/v2/v3 para reanudarla.</value>
+  </data>
+  <data name="Language_Toast_SourceUnsupportedFormat" xml:space="preserve">
+    <comment>{0} is a language name and leads the sentence; {1} is an engine name, never translated.</comment>
+    <value>{0} no está disponible como idioma de origen en {1}. Se usará la distribución del teclado.</value>
+  </data>
+  <data name="Language_Toast_EngineCannotTranslateFormat" xml:space="preserve">
+    <comment>{0} is an engine name — never translated, and it leads the sentence.</comment>
+    <value>{0} no traduce: el texto coincidirá ahora con tu idioma hablado.</value>
+  </data>
+  <data name="Language_Toast_TargetUnsupportedFormat" xml:space="preserve">
+    <comment>{0} is the language that was dropped, {1} the engine name, {2} the language it fell back to. Keep {2} after a dash or colon so it needs no grammatical case.</comment>
+    <value>{0} no está disponible en {1}. Idioma de traducción: {2}.</value>
+  </data>
+  <data name="Language_Toast_TargetResetFormat" xml:space="preserve">
+    <comment>{0} is an engine name — never translated.</comment>
+    <value>Se restableció el idioma de destino anterior: {0} no lo admite.</value>
+  </data>
+  <data name="Language_Toast_ModelPausedFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name — never translated.</comment>
+    <value>«{0}» no traduce: la traducción queda en pausa hasta que elijas un modelo multilingüe.</value>
+  </data>
+  <data name="Settings_CloudProviders_Intro" xml:space="preserve">
+    <comment>ADR-032's positioning line is quoted verbatim at the end — keep "Local by default. Cloud by choice." recognisable, and keep the ADR reference.</comment>
+    <value>Usa tu propia clave de API. Mientras haya un motor en la nube activo, tus grabaciones se envían al proveedor configurado para transcribirlas: para ese motor no se ejecuta nada localmente. La facturación es directamente entre tú y el proveedor; Parlotype no actúa como intermediario de pagos (ADR-032, «Local by default. Cloud by choice.»).</value>
+  </data>
+  <data name="Settings_Engine_Gemma4SectionNote" xml:space="preserve">
+    <comment>"Gemma 4 E4B", "llama-server", "llama.cpp" and "Vulkan" are identifiers — never translated.</comment>
+    <value>Gemma 4 E4B se ejecuta mediante un proceso local de llama-server (llama.cpp, Vulkan). Solo transcribe en inglés. Funciona mejor con voz limpia y un buen micrófono. Los archivos del modelo (~10 GB) se descargan en el primer uso.</value>
+  </data>
+  <data name="Settings_Hotkeys_Gesture_HoldFormat" xml:space="preserve">
+    <comment>{0} is a key name such as "Right Ctrl" — key names stay as they are printed on the keyboard, in every language.</comment>
+    <value>Mantener {0}</value>
+  </data>
+  <data name="Settings_Hotkeys_Gesture_DoubleTapFormat" xml:space="preserve">
+    <comment>{0} is a key name such as "Ctrl" — key names stay as they are printed on the keyboard, in every language.</comment>
+    <value>Pulsar dos veces {0}</value>
+  </data>
+  <data name="Settings_Hotkeys_Mode_PushToTalk" xml:space="preserve">
+    <comment>Badge on a hotkey row: hold the key to talk, release to stop.</comment>
+    <value>Mantener pulsado</value>
+  </data>
+  <data name="Settings_Hotkeys_Mode_Toggle" xml:space="preserve">
+    <comment>Badge on a hotkey row: press once to start, again to stop.</comment>
+    <value>Activar/desactivar</value>
+  </data>
+  <data name="Settings_Hotkeys_LineFormat" xml:space="preserve">
+    <comment>{0} is the gesture ("Hold Right Ctrl"), {1} its mode ("Push to talk"). Used in the Help page and the first-run tour.</comment>
+    <value>{0} — {1}</value>
+  </data>
+  <data name="Settings_Hotkeys_Modifier_LeftFormat" xml:space="preserve">
+    <value>{0} izquierdo</value>
+    <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
+  </data>
+  <data name="Settings_Hotkeys_Modifier_RightFormat" xml:space="preserve">
+    <value>{0} derecho</value>
+    <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
+  </data>
+</root>

@@ -1,11 +1,12 @@
 using CommunityToolkit.Mvvm.Input;
+using Parlotype.Desktop.Resources;
 using Parlotype.Desktop.Services;
 
 namespace Parlotype.Desktop.ViewModels;
 
 /// <summary>
 /// Top-level view model bound to the tray icon. Exposes commands for
-/// the Open / Settings / Exit menu items.
+/// the Open / Settings / Exit menu items, and their labels.
 /// </summary>
 public partial class AppViewModel : ViewModelBase
 {
@@ -14,10 +15,28 @@ public partial class AppViewModel : ViewModelBase
     public AppViewModel(IWindowManager windowManager)
     {
         _windowManager = windowManager;
+
+        // The tray menu is the one surface a language switch cannot reach on its
+        // own: NativeMenu is built once when App.axaml loads and never rebuilt,
+        // so its headers bind to these properties and are re-raised here
+        // (ADR-064). Everything else in the app either uses {loc:Tr} or lives in
+        // a window that is recreated.
+        Localizer.Instance.CultureChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(TrayOpenLabel));
+            OnPropertyChanged(nameof(TraySettingsLabel));
+            OnPropertyChanged(nameof(TrayExitLabel));
+        };
     }
 
     /// <summary>Parameterless constructor for designer support only.</summary>
     public AppViewModel() : this(new DesignWindowManager()) { }
+
+    public string TrayOpenLabel => Strings.Tray_Open;
+
+    public string TraySettingsLabel => Strings.Tray_Settings;
+
+    public string TrayExitLabel => Strings.Tray_Exit;
 
     [RelayCommand]
     private void Open() => _windowManager.ShowTranscribe();

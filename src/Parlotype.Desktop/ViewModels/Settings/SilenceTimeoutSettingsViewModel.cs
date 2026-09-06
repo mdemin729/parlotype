@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -17,7 +18,7 @@ public partial class SilenceTimeoutSettingsViewModel : SettingsSectionViewModelB
     private readonly TranscribeViewModel? _transcribeViewModel;
     private readonly ILogger<SilenceTimeoutSettingsViewModel> _logger;
 
-    public override string Title => "Silence timeout";
+    public override string Title => Strings.Settings_SilenceTimeout_Title;
     public override SettingsCategory Category => SettingsCategory.Audio;
 
     public WaitTimeDisplayItem[] WaitTimeOptions { get; }
@@ -41,6 +42,18 @@ public partial class SilenceTimeoutSettingsViewModel : SettingsSectionViewModelB
         UpdateWaitTimeSelection(SelectedWaitTime);
 
         _ = InitializeAsync();
+    }
+
+    /// <summary>
+    /// The wait-time labels are resx copy composed in C#, so they need rewriting
+    /// when the interface language changes (ADR-064).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        foreach (var item in WaitTimeOptions)
+            item.RefreshDisplayName();
     }
 
     private async Task InitializeAsync()

@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:settingsViews="using:Parlotype.Desktop.Views.Settings"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              x:Class="Parlotype.Desktop.Views.Settings.LanguageSelectionSettingsView"
              x:DataType="vms:LanguageSelectionSettingsViewModel"
              x:CompileBindings="True">
@@ -87,8 +88,8 @@
     </UserControl.Styles>
 
     <StackPanel Spacing="14">
-        <TextBlock Text="Language" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="One relationship, read left to right: you speak the source, Parlotype types the target. The connector between them turns translation on and off."
+        <TextBlock Text="{loc:Tr Settings_Language_Title}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_Language_Description}"
                    Opacity="0.7" TextWrapping="Wrap" />
 
         <!-- Source | connector | target -->
@@ -96,7 +97,7 @@
 
             <!-- Source card -->
             <StackPanel Grid.Column="0">
-                <TextBlock Classes="fieldCaption" Text="You speak" />
+                <TextBlock Classes="fieldCaption" Text="{loc:Tr Settings_Language_SourceCaption}" />
                 <Button x:Name="SourceField"
                         Classes="pickerField"
                         Classes.open="{Binding SourcePicker.IsOpen}"
@@ -138,7 +139,7 @@
 
             <!-- Target side: form picked by the engine's capabilities (spec §4). -->
             <StackPanel Grid.Column="2">
-                <TextBlock Classes="fieldCaption" Text="Parlotype types" />
+                <TextBlock Classes="fieldCaption" Text="{loc:Tr Settings_Language_TargetCaption}" />
 
                 <!-- Toggle form (Whisper): a labelled switch, never a list. -->
                 <Border Classes="targetCard"
@@ -153,7 +154,7 @@
                                        FontSize="14" />
                             <!-- The switch stays on and operable: the preference is
                                  kept, only its effect is suspended (ADR-061). -->
-                            <TextBlock Text="Paused — this model can't translate"
+                            <TextBlock Text="{loc:Tr Settings_Language_PausedSubLine}"
                                        IsVisible="{Binding Relationship.IsTranslationPaused}"
                                        Foreground="{DynamicResource WarnForegroundBrush}"
                                        FontSize="12" TextWrapping="Wrap" />
@@ -204,8 +205,8 @@
                         </Border>
                         <StackPanel Grid.Column="1" Margin="11,0,0,0"
                                     VerticalAlignment="Center" Spacing="1">
-                            <TextBlock Text="Translation unavailable" FontSize="14" />
-                            <TextBlock Text="Not supported by this model"
+                            <TextBlock Text="{loc:Tr Settings_Language_UnavailableTitle}" FontSize="14" />
+                            <TextBlock Text="{loc:Tr Settings_Language_UnavailableSubtitle}"
                                        FontSize="12" Opacity="0.7" />
                         </StackPanel>
                     </Grid>
@@ -227,7 +228,7 @@
                 <TextBlock Text="{Binding Relationship.TranslationPausedNote}"
                            Foreground="{DynamicResource WarnForegroundBrush}"
                            FontSize="12" TextWrapping="Wrap" />
-                <Button Content="Choose a model that translates"
+                <Button Content="{loc:Tr Language_ChooseTranslatingModel}"
                         Command="{Binding GoToWhisperModelCommand}"
                         HorizontalAlignment="Left"
                         FontSize="12" Padding="10,4" CornerRadius="6" />

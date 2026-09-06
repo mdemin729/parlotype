@@ -1,4 +1,5 @@
 using Parlotype.Core.LlamaServer;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -15,7 +16,7 @@ internal static class LlamaServerBackendFormatter
         LlamaServerBackend.Sycl => "SYCL",
         LlamaServerBackend.Metal => "Metal",
         LlamaServerBackend.KleidiAi => "KleidiAI",
-        LlamaServerBackend.Unknown => "Unknown",
+        LlamaServerBackend.Unknown => Strings.Settings_LlamaCpp_Backend_Unknown,
         null => "—",
         _ => backend.ToString() ?? "—",
     };

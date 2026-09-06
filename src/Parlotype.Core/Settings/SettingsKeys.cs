@@ -5,6 +5,21 @@ public static class SettingsKeys
 {
     public const string SelectedMicrophoneId = "SelectedMicrophoneId";
     public const string SelectedTheme = "SelectedTheme";
+
+    /// <summary>
+    /// The language the interface is drawn in (ADR-064). Either
+    /// <see cref="Localization.SupportedUiLanguages.SystemSettingValue"/> — the
+    /// default when unset — or a culture name from
+    /// <see cref="Localization.SupportedUiLanguages.All"/>.
+    /// </summary>
+    /// <remarks>
+    /// Distinct from every language key around it: this is the language Parlotype
+    /// <em>speaks to the user in</em>, not one it recognises speech in. A user who
+    /// dictates Russian into an English interface, or the reverse, is an ordinary
+    /// case — <see cref="SelectedSourceLanguage"/> and this key never influence
+    /// each other.
+    /// </remarks>
+    public const string UiLanguage = "UiLanguage";
     public const string SelectedWhisperModel = "SelectedWhisperModel";
     /// <summary>
     /// Legacy single-chord hotkey settings (modifiers + key + one global

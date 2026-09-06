@@ -2,6 +2,7 @@ using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Speech;
 using Parlotype.Desktop.Resources;
 using Parlotype.Desktop.ViewModels;
+using Parlotype.Desktop.ViewModels.Settings;
 
 namespace Parlotype.Desktop.Onboarding;
 
@@ -20,7 +21,7 @@ public static class OnboardingStepFactory
         // (HotkeySettingsMigrator keeps an empty stored list) and fall back to
         // pointing at the widget button instead of inventing defaults.
         List<string> hotkeyLines = validBindings.Count > 0
-            ? [.. validBindings.Select(b => $"{b.DisplayString} — {b.ModeLabel}"), Strings.Onboarding_Recording_EscLine]
+            ? [.. validBindings.Select(HotkeyText.Line), Strings.Onboarding_Recording_EscLine]
             : [Strings.Onboarding_Hotkeys_None];
 
         return

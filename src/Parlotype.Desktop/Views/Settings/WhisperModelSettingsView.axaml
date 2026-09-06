@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              xmlns:onb="using:Parlotype.Desktop.Onboarding"
              x:Class="Parlotype.Desktop.Views.Settings.WhisperModelSettingsView"
              x:DataType="vms:WhisperModelSettingsViewModel"
@@ -27,8 +28,8 @@
     </UserControl.Resources>
 
     <StackPanel Spacing="12">
-        <TextBlock Text="Whisper Model" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Larger models are more accurate but use more disk and CPU/GPU."
+        <TextBlock Text="{loc:Tr Settings_WhisperModel_Heading}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_WhisperModel_Description}"
                    Opacity="0.7" />
 
         <ItemsControl ItemsSource="{Binding ModelOptions}"
@@ -63,8 +64,8 @@
                                     CornerRadius="5" BorderThickness="1"
                                     Background="{DynamicResource WarnBackgroundBrush}"
                                     BorderBrush="{DynamicResource WarnForegroundBrush}"
-                                    ToolTip.Tip="Transcription only — translating to English needs a multilingual model">
-                                <TextBlock Text="no translation"
+                                    ToolTip.Tip="{loc:Tr Settings_WhisperModel_NoTranslationTooltip}">
+                                <TextBlock Text="{loc:Tr Settings_WhisperModel_NoTranslationBadge}"
                                            FontSize="11"
                                            Foreground="{DynamicResource WarnForegroundBrush}" />
                             </Border>
@@ -74,7 +75,7 @@
                                        VerticalAlignment="Center"
                                        Margin="24,0,0,0" />
                             <TextBlock Grid.Column="4"
-                                       Text="(not downloaded)"
+                                       Text="{loc:Tr Settings_WhisperModel_NotDownloaded}"
                                        FontSize="12"
                                        Opacity="0.5"
                                        VerticalAlignment="Center"

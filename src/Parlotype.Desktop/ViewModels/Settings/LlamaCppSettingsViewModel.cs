@@ -9,6 +9,7 @@ using Parlotype.Core.Speech;
 using Parlotype.Core.LlamaServer;
 using Parlotype.Platform.LlamaServer;
 using Parlotype.Platform.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -26,14 +27,14 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private readonly ILlamaServerInstaller? _installer;
     private readonly ILogger<LlamaCppSettingsViewModel> _logger;
 
-    public override string Title => "llama.cpp server";
+    public override string Title => Strings.Settings_LlamaCppServer_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
     public override SpeechEngine? RestrictToEngine => SpeechEngine.Gemma4;
 
     // --- Server status (probe results) ---
 
     [ObservableProperty]
-    private string _statusText = "Not probed";
+    private string _statusText = Strings.Settings_LlamaCpp_Status_NotProbed;
 
     [ObservableProperty]
     private string _statusColor = "Gray";
@@ -180,9 +181,9 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         {
             if (!int.TryParse(PortText, out var port) || port is <= 0 or > 65535)
             {
-                StatusText = "Invalid port";
+                StatusText = Strings.Settings_LlamaCpp_Status_InvalidPort;
                 StatusColor = "Red";
-                ErrorMessage = "Port must be a number between 1 and 65535.";
+                ErrorMessage = Strings.Settings_LlamaCpp_PortRangeError;
                 IsConnected = false;
                 HasPortConflict = false;
                 return;
@@ -193,7 +194,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
             switch (info.Status)
             {
                 case LlamaCppServerStatus.Connected:
-                    StatusText = "Connected";
+                    StatusText = Strings.Settings_LlamaCpp_Status_Connected;
                     StatusColor = "Green";
                     IsConnected = true;
                     HasPortConflict = false;
@@ -204,7 +205,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 case LlamaCppServerStatus.Disconnected:
-                    StatusText = "Disconnected";
+                    StatusText = Strings.Settings_LlamaCpp_Status_Disconnected;
                     StatusColor = "Gray";
                     IsConnected = false;
                     HasPortConflict = false;
@@ -212,7 +213,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 case LlamaCppServerStatus.PortConflict:
-                    StatusText = "Port conflict";
+                    StatusText = Strings.Settings_LlamaCpp_Status_PortConflict;
                     StatusColor = "Orange";
                     IsConnected = false;
                     HasPortConflict = true;
@@ -221,7 +222,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 case LlamaCppServerStatus.Loading:
-                    StatusText = "Loading model...";
+                    StatusText = Strings.Settings_LlamaCpp_Status_LoadingModel;
                     StatusColor = "Blue";
                     IsConnected = false;
                     HasPortConflict = false;
@@ -229,7 +230,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 default:
-                    StatusText = "Error";
+                    StatusText = Strings.Settings_LlamaCpp_Status_Error;
                     StatusColor = "Red";
                     IsConnected = false;
                     HasPortConflict = false;
@@ -241,7 +242,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to probe llama-server");
-            StatusText = "Error";
+            StatusText = Strings.Settings_LlamaCpp_Status_Error;
             StatusColor = "Red";
             ErrorMessage = ex.Message;
             IsConnected = false;
@@ -260,7 +261,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     {
         if (!int.TryParse(PortText, out var port) || port is <= 0 or > 65535)
         {
-            ErrorMessage = "Port must be a number between 1 and 65535.";
+            ErrorMessage = Strings.Settings_LlamaCpp_PortRangeError;
             return;
         }
 

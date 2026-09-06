@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 using Parlotype.Desktop.ViewModels.Settings;
 
 namespace Parlotype.Desktop.ViewModels;
@@ -36,6 +37,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public LlamaCppSettingsViewModel LlamaCpp { get; }
     public HotkeySettingsViewModel Hotkey { get; }
     public ThemeSettingsViewModel Theme { get; }
+    public InterfaceLanguageSettingsViewModel InterfaceLanguage { get; }
     public StartupSettingsViewModel Startup { get; }
     public UpdateSettingsViewModel Updates { get; }
     public DataSettingsViewModel Data { get; }
@@ -56,6 +58,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         LlamaCppSettingsViewModel llamaCpp,
         HotkeySettingsViewModel hotkey,
         ThemeSettingsViewModel theme,
+        InterfaceLanguageSettingsViewModel interfaceLanguage,
         StartupSettingsViewModel startup,
         UpdateSettingsViewModel updates,
         DataSettingsViewModel data,
@@ -75,6 +78,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         LlamaCpp = llamaCpp;
         Hotkey = hotkey;
         Theme = theme;
+        InterfaceLanguage = interfaceLanguage;
         Startup = startup;
         Updates = updates;
         Data = data;
@@ -98,6 +102,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             llamaCpp,
             hotkey,
             theme,
+            interfaceLanguage,
             startup,
             updates,
             data,
@@ -111,6 +116,11 @@ public partial class SettingsWindowViewModel : ViewModelBase
         whisperModel.PropertyChanged += OnWhisperModelPropertyChanged;
         language.UpdateForEngine(speechEngine.SelectedEngine);
         language.UpdateTranslationAvailability(whisperModel.SelectedModel);
+
+        // Nav rows are snapshots of section titles and category headers, so a
+        // language switch has to rebuild them — the sections re-raise their own
+        // Title, but nothing is bound to it from here (ADR-064).
+        Localizer.Instance.CultureChanged += (_, _) => RebuildNavItems();
 
         RebuildNavItems();
         SelectedNavItem = NavItems.FirstOrDefault(n => !n.IsHeader);

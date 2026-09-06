@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -45,7 +46,7 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
     /// <summary>Guards persistence writes while <see cref="InitializeAsync"/> is populating fields from storage.</summary>
     private bool _isLoading = true;
 
-    public override string Title => "Cloud providers";
+    public override string Title => Strings.Settings_CloudProviders_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
 
     public override bool IsVisibleFor(SpeechEngine engine) =>
@@ -85,7 +86,9 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
     [ObservableProperty]
     private bool _isOpenAiKeyRevealed;
 
-    public string OpenAiKeyStatus => HasOpenAiKey ? "Key saved" : "No key";
+    public string OpenAiKeyStatus => HasOpenAiKey
+        ? Strings.Settings_CloudProviders_KeyStatus_Saved
+        : Strings.Settings_CloudProviders_KeyStatus_None;
 
     /// <summary>Show the editable entry row: no key yet, or replacing an existing one.</summary>
     public bool ShowOpenAiKeyEntry => !HasOpenAiKey || IsEditingOpenAiKey;
@@ -130,7 +133,9 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
     [ObservableProperty]
     private bool _isXaiKeyRevealed;
 
-    public string XaiKeyStatus => HasXaiKey ? "Key saved" : "No key";
+    public string XaiKeyStatus => HasXaiKey
+        ? Strings.Settings_CloudProviders_KeyStatus_Saved
+        : Strings.Settings_CloudProviders_KeyStatus_None;
 
     /// <summary>Show the editable entry row: no key yet, or replacing an existing one.</summary>
     public bool ShowXaiKeyEntry => !HasXaiKey || IsEditingXaiKey;

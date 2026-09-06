@@ -3,10 +3,11 @@
         xmlns:vm="using:Parlotype.Desktop.ViewModels"
         xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
         xmlns:v="using:Parlotype.Desktop.Views.Settings"
+        xmlns:loc="using:Parlotype.Desktop.Markup"
         x:Class="Parlotype.Desktop.Views.SettingsWindow"
         x:DataType="vm:SettingsWindowViewModel"
         x:CompileBindings="True"
-        Title="Parlotype — Settings"
+        Title="{loc:Tr Settings_WindowTitle}"
         Width="900" Height="770"
         WindowStartupLocation="CenterScreen">
 
@@ -53,6 +54,9 @@
         <DataTemplate DataType="vms:ThemeSettingsViewModel">
             <v:ThemeSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:InterfaceLanguageSettingsViewModel">
+            <v:InterfaceLanguageSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:StartupSettingsViewModel">
             <v:StartupSettingsView />
         </DataTemplate>
@@ -84,7 +88,7 @@
             <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                     Padding="0,16">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Settings"
+                    <TextBlock Text="{loc:Tr Settings_NavHeading}"
                                FontSize="18" FontWeight="SemiBold"
                                Margin="20,0,0,12" />
                     <ListBox ItemsSource="{Binding NavItems}"

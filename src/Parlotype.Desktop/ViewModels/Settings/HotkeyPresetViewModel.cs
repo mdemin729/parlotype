@@ -12,9 +12,10 @@ public sealed class HotkeyPresetViewModel
 {
     public DictationHotkey Hotkey { get; }
 
-    public string DisplayString => Hotkey.DisplayString;
+    /// <summary>Localized (ADR-064) — see <see cref="HotkeyText"/>.</summary>
+    public string DisplayString => HotkeyText.Gesture(Hotkey.Gesture);
 
-    public string ModeLabel => Hotkey.ModeLabel;
+    public string ModeLabel => HotkeyText.Mode(Hotkey.Mode);
 
     public ICommand AddCommand { get; }
 

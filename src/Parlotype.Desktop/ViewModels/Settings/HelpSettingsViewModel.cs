@@ -73,7 +73,7 @@ public sealed partial class HelpSettingsViewModel : SettingsSectionViewModelBase
         }
 
         foreach (var binding in validBindings)
-            HotkeyLines.Add($"{binding.DisplayString} — {binding.ModeLabel}");
+            HotkeyLines.Add(HotkeyText.Line(binding));
         HotkeyLines.Add(Strings.Help_EscCancelLine);
     }
 }

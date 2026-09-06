@@ -1,20 +1,21 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              x:Class="Parlotype.Desktop.Views.Settings.WhisperOutputSettingsView"
              x:DataType="vms:WhisperOutputSettingsViewModel"
              x:CompileBindings="True">
     <StackPanel Spacing="16">
-        <TextBlock Text="Whisper output" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Output-shaping options specific to the Whisper engine."
+        <TextBlock Text="{loc:Tr Settings_WhisperOutput_Title}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_WhisperOutput_Description}"
                    Opacity="0.7" />
 
         <!-- Automatic Punctuation -->
         <StackPanel Spacing="4">
             <ToggleSwitch IsChecked="{Binding AutomaticPunctuationEnabled, Mode=TwoWay}"
-                          OnContent="Punctuation included in output"
-                          OffContent="Punctuation stripped from output" />
-            <TextBlock Text="When enabled, transcription includes commas, periods, and other punctuation."
+                          OnContent="{loc:Tr Settings_WhisperOutput_PunctuationOn}"
+                          OffContent="{loc:Tr Settings_WhisperOutput_PunctuationOff}" />
+            <TextBlock Text="{loc:Tr Settings_WhisperOutput_PunctuationNote}"
                        Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
         </StackPanel>
 
@@ -23,9 +24,9 @@
         <!-- Filter Profanity -->
         <StackPanel Spacing="4">
             <ToggleSwitch IsChecked="{Binding FilterProfanityEnabled, Mode=TwoWay}"
-                          OnContent="Profanity masked with ****"
-                          OffContent="Profanity filter off" />
-            <TextBlock Text="When enabled, recognized profanity is replaced with asterisks."
+                          OnContent="{loc:Tr Settings_WhisperOutput_ProfanityOn}"
+                          OffContent="{loc:Tr Settings_WhisperOutput_ProfanityOff}" />
+            <TextBlock Text="{loc:Tr Settings_WhisperOutput_ProfanityNote}"
                        Opacity="0.6" FontSize="12" Margin="0,0,0,0" />
         </StackPanel>
     </StackPanel>

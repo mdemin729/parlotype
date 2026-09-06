@@ -1,4 +1,5 @@
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -11,6 +12,23 @@ namespace Parlotype.Desktop.ViewModels.Settings;
 /// </summary>
 public abstract class SettingsSectionViewModelBase : ViewModelBase
 {
+    protected SettingsSectionViewModelBase() =>
+        Localizer.Instance.CultureChanged += (_, _) => OnCultureChanged();
+
+    /// <summary>
+    /// Called after the interface language changes (ADR-064). The base
+    /// implementation re-raises <see cref="Title"/>, which is what the navigation
+    /// list shows. Override — calling base — for copy a section builds in C#
+    /// rather than binding through <c>{loc:Tr}</c>: display-item labels, composed
+    /// summary sentences, anything captured into a field.
+    /// </summary>
+    /// <remarks>
+    /// Text that reaches the screen through <c>{loc:Tr}</c> or
+    /// <see cref="Localizer.Entry"/> needs nothing here — the binding already
+    /// updated before this runs. This hook is for the rest.
+    /// </remarks>
+    protected virtual void OnCultureChanged() => OnPropertyChanged(nameof(Title));
+
     public abstract string Title { get; }
 
     public abstract SettingsCategory Category { get; }

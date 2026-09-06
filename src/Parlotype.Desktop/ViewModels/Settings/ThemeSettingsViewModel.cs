@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -11,7 +12,7 @@ public partial class ThemeSettingsViewModel : SettingsSectionViewModelBase
     private readonly ISettingsService _settings;
     private readonly ILogger<ThemeSettingsViewModel> _logger;
 
-    public override string Title => "Theme";
+    public override string Title => Strings.Settings_Theme_Title;
     public override SettingsCategory Category => SettingsCategory.Appearance;
 
     public ThemeDisplayItem[] ThemeOptions { get; }
@@ -30,12 +31,31 @@ public partial class ThemeSettingsViewModel : SettingsSectionViewModelBase
 
         ThemeOptions =
         [
-            new(AppTheme.Default, "Default (system)", SelectThemeCommand),
-            new(AppTheme.Light, "Light", SelectThemeCommand),
-            new(AppTheme.Dark, "Dark", SelectThemeCommand),
+            new(AppTheme.Default, Strings.Settings_Theme_Default, SelectThemeCommand),
+            new(AppTheme.Light, Strings.Settings_Theme_Light, SelectThemeCommand),
+            new(AppTheme.Dark, Strings.Settings_Theme_Dark, SelectThemeCommand),
         ];
 
         _ = InitializeAsync();
+    }
+
+    /// <summary>
+    /// The option labels are built here rather than bound, so the base class's
+    /// Title refresh is not enough — rewrite them too (ADR-064).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        foreach (var option in ThemeOptions)
+        {
+            option.DisplayName = option.Theme switch
+            {
+                AppTheme.Light => Strings.Settings_Theme_Light,
+                AppTheme.Dark => Strings.Settings_Theme_Dark,
+                _ => Strings.Settings_Theme_Default,
+            };
+        }
     }
 
     private async Task InitializeAsync()

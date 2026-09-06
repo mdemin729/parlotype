@@ -25,10 +25,10 @@
                       Command="{Binding TrayIconClickedCommand}">
                 <TrayIcon.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="Open" Command="{Binding OpenCommand}" />
-                        <NativeMenuItem Header="Settings" Command="{Binding OpenSettingsCommand}" />
+                        <NativeMenuItem Header="{Binding TrayOpenLabel}" Command="{Binding OpenCommand}" />
+                        <NativeMenuItem Header="{Binding TraySettingsLabel}" Command="{Binding OpenSettingsCommand}" />
                         <NativeMenuItemSeparator />
-                        <NativeMenuItem Header="Exit" Command="{Binding ExitCommand}" />
+                        <NativeMenuItem Header="{Binding TrayExitLabel}" Command="{Binding ExitCommand}" />
                     </NativeMenu>
                 </TrayIcon.Menu>
             </TrayIcon>

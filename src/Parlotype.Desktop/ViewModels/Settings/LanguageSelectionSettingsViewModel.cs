@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -19,7 +20,7 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
 {
     private readonly ILogger<LanguageSelectionSettingsViewModel> _logger;
 
-    public override string Title => "Language";
+    public override string Title => Strings.Settings_Language_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
 
     /// <summary>

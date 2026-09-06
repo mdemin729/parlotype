@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
+             x:Class="Parlotype.Desktop.Views.Settings.InterfaceLanguageSettingsView"
+             x:DataType="vms:InterfaceLanguageSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="12">
+        <TextBlock Text="{loc:Tr Settings_InterfaceLanguage_Title}"
+                   FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_InterfaceLanguage_Description}"
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <ItemsControl ItemsSource="{Binding LanguageOptions}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:UiLanguageDisplayItem">
+                    <Button HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            Padding="12,8"
+                            Margin="0,2"
+                            Command="{Binding SelectCommand}"
+                            CommandParameter="{Binding SettingValue}">
+                        <Grid ColumnDefinitions="11,*">
+                            <Border Grid.Column="0"
+                                    Width="3" Height="16" CornerRadius="1.5"
+                                    Background="{DynamicResource SystemAccentColor}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding IsSelected}" />
+                            <StackPanel Grid.Column="1" Spacing="2">
+                                <TextBlock Text="{Binding Label}" FontSize="14" />
+                                <TextBlock Text="{Binding Detail}"
+                                           IsVisible="{Binding HasDetail}"
+                                           FontSize="12" Opacity="0.6"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

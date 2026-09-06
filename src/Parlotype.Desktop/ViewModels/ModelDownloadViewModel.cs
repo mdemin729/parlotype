@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels;
 
@@ -11,7 +12,7 @@ namespace Parlotype.Desktop.ViewModels;
 public partial class ModelDownloadViewModel : ViewModelBase
 {
     [ObservableProperty]
-    private string _title = "Download";
+    private string _title = Strings.ModelDownload_DownloadButton;
 
     [ObservableProperty]
     private string _itemName = string.Empty;
@@ -44,7 +45,7 @@ public partial class ModelDownloadViewModel : ViewModelBase
     private bool _isComplete;
 
     [ObservableProperty]
-    private string _downloadButtonText = "Download";
+    private string _downloadButtonText = Strings.ModelDownload_DownloadButton;
 
     /// <summary>Download is offered before it starts and after a failure (retry).</summary>
     public bool ShowDownloadButton => !IsDownloading && !IsComplete;
@@ -65,13 +66,13 @@ public partial class ModelDownloadViewModel : ViewModelBase
         string itemName,
         string itemSize,
         string statusText,
-        string downloadButtonText = "Download")
+        string? downloadButtonText = null)
     {
         _title = title;
         _itemName = itemName;
         _itemSize = itemSize;
         _statusText = statusText;
-        _downloadButtonText = downloadButtonText;
+        _downloadButtonText = downloadButtonText ?? Strings.ModelDownload_DownloadButton;
     }
 
     /// <summary>
@@ -81,10 +82,10 @@ public partial class ModelDownloadViewModel : ViewModelBase
     /// </summary>
     public static ModelDownloadViewModel ForWhisperModel(string modelName, string modelSize) =>
         new(
-            title: "Model Download",
+            title: Strings.ModelDownload_Title,
             itemName: modelName,
             itemSize: modelSize,
-            statusText: $"Download \"{modelName}\" ({modelSize}) from the internet?");
+            statusText: Strings.Format_ModelDownload_ConfirmFormat(modelName, modelSize));
 
     /// <summary>
     /// Adapter for the Gemma 4 download path. Notes the bundled vision
@@ -92,10 +93,10 @@ public partial class ModelDownloadViewModel : ViewModelBase
     /// </summary>
     public static ModelDownloadViewModel ForGemma4Model(string modelName, string modelSize) =>
         new(
-            title: "Model Download",
+            title: Strings.ModelDownload_Title,
             itemName: modelName,
             itemSize: modelSize,
-            statusText: $"Download \"{modelName}\" ({modelSize}, includes vision projector) from the internet?");
+            statusText: Strings.Format_ModelDownload_ConfirmWithProjectorFormat(modelName, modelSize));
 
     /// <summary>
     /// Adapter for the Parakeet download path (encoder + decoder + joiner +
@@ -103,8 +104,8 @@ public partial class ModelDownloadViewModel : ViewModelBase
     /// </summary>
     public static ModelDownloadViewModel ForParakeetModel(string modelName, string modelSize) =>
         new(
-            title: "Model Download",
+            title: Strings.ModelDownload_Title,
             itemName: modelName,
             itemSize: modelSize,
-            statusText: $"Download \"{modelName}\" ({modelSize}) from the internet?");
+            statusText: Strings.Format_ModelDownload_ConfirmFormat(modelName, modelSize));
 }
