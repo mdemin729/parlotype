@@ -61,9 +61,9 @@ yourself."* — distinct from the existing "found a path, no file there" message
 resolver that cannot answer should say so rather than inventing a plausible answer
 for the caller to trip over.
 
-### Two consequences of empty being the default state
+### Three consequences of empty being the default state
 
-Both are cases where "empty" was previously unreachable and is now the norm:
+All are cases where "empty" was previously unreachable and is now the norm:
 
 - **Save no longer rejects an empty folder.** It used to error with "Server folder
   cannot be empty", which after this change would block *every* managed-install
@@ -73,6 +73,20 @@ Both are cases where "empty" was previously unreachable and is now the norm:
   message, instead of activating a manual install the recognizer cannot resolve.
   It checks the *saved* `ManualFolderPath`, not the text box: switching on unsaved
   text would activate a path the recognizer cannot see.
+- **Save and Reset re-read the registry afterwards.** The manual install has no
+  record of its own — `SettingsKeys.LlamaCppServerFolder` *is* its identity, so
+  `GetActiveAsync` returns `null` for a `manual` selector over an empty folder.
+  Clearing the box therefore deactivates the manual install, and a view model that
+  kept its own `IsManualActive` snapshot would leave the Manual badge and radio lit
+  over a configuration that no longer resolves, until some unrelated refresh — with
+  the next recording failing as unconfigured. Both writers now end with
+  `ReloadInstalledAndActiveAsync()`; the registry stays the single source of truth
+  for what is active.
+
+  The stored *selector* is deliberately left saying `manual`. The user emptied a
+  path; they did not ask to leave manual mode. Typing one back in and saving
+  restores the selection on its own, where clearing the selector would demote them
+  to "nothing selected" permanently and make them re-pick Manual.
 
 ### No migration
 

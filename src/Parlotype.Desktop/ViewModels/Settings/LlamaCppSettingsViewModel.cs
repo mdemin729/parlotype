@@ -298,6 +298,18 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
 
         await UnloadRecognizerAsync();
         await RefreshServerInfoAsync();
+
+        // The manual install's identity *is* this setting, so writing it changes what
+        // the registry resolves — clearing the folder makes GetActiveAsync return null
+        // while IsManualActive would otherwise stay true, leaving the Manual radio lit
+        // over a configuration that no longer exists. Editing the path likewise moves
+        // AbsolutePath/IsValid. Re-read rather than patch the flags locally: the
+        // registry is the source of truth for what is active.
+        //
+        // The stored selector is deliberately left alone. It still says "manual", so
+        // typing a folder back in and saving restores the selection on its own,
+        // instead of silently demoting the user to "nothing selected" for good.
+        await ReloadInstalledAndActiveAsync();
     }
 
     [RelayCommand]
@@ -314,6 +326,18 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
 
         await UnloadRecognizerAsync();
         await RefreshServerInfoAsync();
+
+        // The manual install's identity *is* this setting, so writing it changes what
+        // the registry resolves — clearing the folder makes GetActiveAsync return null
+        // while IsManualActive would otherwise stay true, leaving the Manual radio lit
+        // over a configuration that no longer exists. Editing the path likewise moves
+        // AbsolutePath/IsValid. Re-read rather than patch the flags locally: the
+        // registry is the source of truth for what is active.
+        //
+        // The stored selector is deliberately left alone. It still says "manual", so
+        // typing a folder back in and saving restores the selection on its own,
+        // instead of silently demoting the user to "nothing selected" for good.
+        await ReloadInstalledAndActiveAsync();
     }
 
     [RelayCommand]
