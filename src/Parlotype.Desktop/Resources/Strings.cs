@@ -119,6 +119,27 @@ public static class Strings
     /// <summary>Help</summary>
     public static string Help_Title => Localizer.Lookup(nameof(Help_Title));
 
+    /// <summary>{0} to dictate</summary>
+    public static string Hotkey_Hint_DictateFormat => Localizer.Lookup(nameof(Hotkey_Hint_DictateFormat));
+    /// <summary>{0} to dictate</summary>
+    public static string Format_Hotkey_Hint_DictateFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Hotkey_Hint_DictateFormat, arg0);
+
+    /// <summary>No dictation hotkey set</summary>
+    public static string Hotkey_Hint_None => Localizer.Lookup(nameof(Hotkey_Hint_None));
+
+    /// <summary>{0} to talk</summary>
+    public static string Hotkey_Hint_TalkFormat => Localizer.Lookup(nameof(Hotkey_Hint_TalkFormat));
+    /// <summary>{0} to talk</summary>
+    public static string Format_Hotkey_Hint_TalkFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Hotkey_Hint_TalkFormat, arg0);
+
+    /// <summary>{0} · Esc to cancel</summary>
+    public static string Hotkey_Hint_WithCancelFormat => Localizer.Lookup(nameof(Hotkey_Hint_WithCancelFormat));
+    /// <summary>{0} · Esc to cancel</summary>
+    public static string Format_Hotkey_Hint_WithCancelFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Hotkey_Hint_WithCancelFormat, arg0);
+
     /// <summary>Choose a model that translates</summary>
     public static string Language_ChooseTranslatingModel => Localizer.Lookup(nameof(Language_ChooseTranslatingModel));
 

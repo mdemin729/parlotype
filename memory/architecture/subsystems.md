@@ -87,7 +87,9 @@ Users configure a *list* of gestures, not a single chord (ADR-047).
   English the log line writes (ADR-064 amendment).
 - **UI**: `HotkeySettingsView` is a binding list (add via presets or chord
   recorder, remove, per-chord mode); `TranscribeWindow`'s record button tooltip
-  shows the current gesture via `HotkeyHint`.
+  shows the current gesture via `HotkeyText.Hint` — localized (ADR-064
+  amendment); `HotkeyHint.SelectPrimary` (Core) only picks which binding to
+  describe.
 - **Persistence**: `SettingsKeys.HotkeyBindings` — a readable string list encoded
   by `HotkeyBindingCodec` (`hold|Ctrl|Right|PushToTalk`). `HotkeySettingsMigrator`
   converts the legacy `HotkeyModifiers`/`HotkeyKey`/`ActivationMode` triple once.
@@ -400,10 +402,16 @@ without its key, because the key is absent from every language at once and the
 languages still agree. `LocalizationTests` loops each enum and asserts the
 Russian rendering contains Cyrillic.
 
-Still English on purpose: `HotkeyHint`; model catalog names and disk sizes
-(identifiers); a cloud provider's own error text (someone else's wording,
-substituted not translated); and the default prompt body (text sent to an LLM,
-not UI chrome).
+Still English on purpose: model catalog names and disk sizes (identifiers); a
+cloud provider's own error text (someone else's wording, substituted not
+translated); and the default prompt body (text sent to an LLM, not UI chrome).
+`HotkeyHint` was on this list until a user report against a screenshot of the
+widget (2026-09-07) — its `Describe` had never been wired through any of the
+Core-sentence fixes above, because it builds the record-button tooltip, not a
+conflict or error message. Same fix shape: `HotkeyHint.SelectPrimary` (Core)
+now exposes which binding to describe as data, `HotkeyText.Hint` (Desktop)
+words it, and `HotkeyCoordinator` (the tooltip is pushed in, not bound)
+subscribes to `Localizer.CultureChanged` to keep it live.
 
 Every key that substitutes a **language name** was written so the slot needs no
 grammatical case — leading the sentence, or after a colon or dash. That is latent

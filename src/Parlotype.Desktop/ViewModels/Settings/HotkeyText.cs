@@ -53,6 +53,27 @@ public static class HotkeyText
         Strings.Format_Settings_Hotkeys_LineFormat(Gesture(hotkey.Gesture), Mode(hotkey.Mode));
 
     /// <summary>
+    /// The one-line reminder on the recording widget's record button — "Hold
+    /// Right Ctrl to talk · Esc to cancel". Built from
+    /// <see cref="HotkeyHint.SelectPrimary"/> rather than
+    /// <see cref="HotkeyHint.Describe"/>, which stays the invariant form
+    /// (ADR-064 amendment) — the two consumers (<c>HotkeyCoordinator</c>, the
+    /// onboarding recap step) never logged it, only ever showed it.
+    /// </summary>
+    public static string Hint(IReadOnlyList<DictationHotkey>? bindings)
+    {
+        if (HotkeyHint.SelectPrimary(bindings) is not { } primary)
+            return Strings.Hotkey_Hint_None;
+
+        var gesture = Gesture(primary.Gesture);
+        var verb = primary.Mode == ActivationMode.PushToTalk
+            ? Strings.Format_Hotkey_Hint_TalkFormat(gesture)
+            : Strings.Format_Hotkey_Hint_DictateFormat(gesture);
+
+        return Strings.Format_Hotkey_Hint_WithCancelFormat(verb);
+    }
+
+    /// <summary>
     /// The warning a rejected or flagged binding shows in Settings. Built from
     /// <see cref="HotkeyConflict.Reason"/> rather than from the conflict's own
     /// <c>Description</c>, which stays the invariant form the log line writes

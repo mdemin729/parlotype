@@ -47,4 +47,41 @@ public class HotkeyHintTests
 
         Assert.Equal("No dictation hotkey set", HotkeyHint.Describe([invalid]));
     }
+
+    // ---- SelectPrimary: the data half Desktop's HotkeyText.Hint builds its
+    // localized sentence from (ADR-064 amendment) — same selection rules as
+    // Describe above, exposed as data instead of English prose.
+
+    [Fact]
+    public void SelectPrimary_Prefers_The_PushToTalk_Binding()
+    {
+        var primary = HotkeyHint.SelectPrimary(DictationHotkeyDefaults.All);
+
+        Assert.Equal(DictationHotkeyDefaults.PushToTalk, primary);
+    }
+
+    [Fact]
+    public void SelectPrimary_FallsBack_ToTheFirstBinding_WhenNothingIsPushToTalk()
+    {
+        var primary = HotkeyHint.SelectPrimary([DictationHotkeyDefaults.Toggle]);
+
+        Assert.Equal(DictationHotkeyDefaults.Toggle, primary);
+    }
+
+    [Fact]
+    public void SelectPrimary_IsNull_WhenNothingIsBound()
+    {
+        Assert.Null(HotkeyHint.SelectPrimary([]));
+        Assert.Null(HotkeyHint.SelectPrimary(null));
+    }
+
+    [Fact]
+    public void SelectPrimary_IgnoresInvalidBindings()
+    {
+        var invalid = new DictationHotkey(
+            HotkeyGesture.ForHold(ModifierKey.Ctrl, ModifierSide.Right),
+            ActivationMode.Toggle);
+
+        Assert.Null(HotkeyHint.SelectPrimary([invalid]));
+    }
 }

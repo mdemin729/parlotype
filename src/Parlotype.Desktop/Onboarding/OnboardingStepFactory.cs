@@ -105,7 +105,7 @@ public static class OnboardingStepFactory
                 OnboardingTargetWindow.None,
                 SettingsSection: null,
                 TargetIds: [],
-                DetailLines: [HotkeyHint.Describe(validBindings)]),
+                DetailLines: [HotkeyText.Hint(validBindings)]),
         ];
     }
 }

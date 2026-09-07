@@ -467,6 +467,63 @@ public class LocalizationTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void HotkeyHint_IsLocalized_ForEveryGestureKindAndMode()
+    {
+        // The record-button tooltip / onboarding recap line was built entirely
+        // in Core (HotkeyHint.Describe), which has no resources — hardcoded
+        // English regardless of the interface language (reported by the user
+        // against a screenshot of the widget). Core now only picks *which*
+        // binding to describe (HotkeyHint.SelectPrimary); the words are here.
+        Localizer.Instance.SetCulture(English);
+        Assert.Equal(
+            "Hold Right Ctrl to talk · Esc to cancel",
+            HotkeyText.Hint(DictationHotkeyDefaults.All));
+        Assert.Equal(
+            "Double-tap Ctrl to dictate · Esc to cancel",
+            HotkeyText.Hint([DictationHotkeyDefaults.Toggle]));
+        Assert.Equal("No dictation hotkey set", HotkeyText.Hint([]));
+
+        Localizer.Instance.SetCulture(Russian);
+        Assert.Equal(
+            "Удержание правого Ctrl — чтобы говорить · Esc — отменить",
+            HotkeyText.Hint(DictationHotkeyDefaults.All));
+        Assert.Equal(
+            "Двойное нажатие Ctrl — чтобы диктовать · Esc — отменить",
+            HotkeyText.Hint([DictationHotkeyDefaults.Toggle]));
+        Assert.Equal("Горячая клавиша диктовки не задана", HotkeyText.Hint([]));
+
+        Localizer.Instance.SetCulture(English);
+        var chord = DictationHotkey.Chord(
+            new HotkeyBinding(HotkeyModifiers.Ctrl | HotkeyModifiers.Alt, "Space"),
+            ActivationMode.PushToTalk);
+        Assert.Equal(
+            "Ctrl+Alt+Space to talk · Esc to cancel",
+            HotkeyText.Hint([chord]));
+    }
+
+    [AvaloniaFact]
+    public async Task HotkeyCoordinator_RefreshesTheWidgetTooltip_OnCultureChange()
+    {
+        // The tooltip is pushed into TranscribeViewModel.HotkeyHintText by
+        // HotkeyCoordinator, not computed by the view model itself, so it
+        // needed its own Localizer.CultureChanged subscription.
+        Localizer.Instance.SetCulture(English);
+        var hotkey = new MockGlobalHotkeyService();
+        var wm = new MockWindowManager();
+        var vm = new TranscribeViewModel(wm);
+        using var coordinator = new HotkeyCoordinator(
+            wm, vm, NullLogger<HotkeyCoordinator>.Instance, hotkey);
+        await coordinator.StartAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("Hold Right Ctrl to talk · Esc to cancel", vm.HotkeyHintText);
+
+        Localizer.Instance.SetCulture(Russian);
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs(); // drains the Post()ed refresh
+
+        Assert.Equal("Удержание правого Ctrl — чтобы говорить · Esc — отменить", vm.HotkeyHintText);
+    }
+
+    [AvaloniaFact]
     public async Task LanguageSummary_ComposesNestedFormats_InTheChosenLanguage()
     {
         // The summary nests one composite format inside another: the paused

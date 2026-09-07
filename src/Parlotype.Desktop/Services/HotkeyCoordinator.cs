@@ -3,7 +3,9 @@ using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Hotkeys;
+using Parlotype.Desktop.Resources;
 using Parlotype.Desktop.ViewModels;
+using Parlotype.Desktop.ViewModels.Settings;
 
 namespace Parlotype.Desktop.Services;
 
@@ -39,8 +41,16 @@ public sealed class HotkeyCoordinator : IDisposable
             _hotkeyService.DictationCancelRequested += OnCancelRequested;
             _hotkeyService.BindingsChanged += OnBindingsChanged;
             _transcribeViewModel.PropertyChanged += OnTranscribePropertyChanged;
+
+            // The hint is composed here (Desktop), not read from a binding, so a
+            // live interface-language switch needs its own trigger to refresh it
+            // (ADR-064 amendment).
+            Localizer.Instance.CultureChanged += OnCultureChanged;
         }
     }
+
+    private void OnCultureChanged(object? sender, EventArgs e) =>
+        Dispatcher.UIThread.Post(RefreshHotkeyHint);
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
@@ -108,7 +118,7 @@ public sealed class HotkeyCoordinator : IDisposable
         if (_hotkeyService is null)
             return;
 
-        _transcribeViewModel.SetHotkeyHint(HotkeyHint.Describe(_hotkeyService.Bindings));
+        _transcribeViewModel.SetHotkeyHint(HotkeyText.Hint(_hotkeyService.Bindings));
     }
 
     public void Dispose()
@@ -120,6 +130,7 @@ public sealed class HotkeyCoordinator : IDisposable
             _hotkeyService.DictationCancelRequested -= OnCancelRequested;
             _hotkeyService.BindingsChanged -= OnBindingsChanged;
             _transcribeViewModel.PropertyChanged -= OnTranscribePropertyChanged;
+            Localizer.Instance.CultureChanged -= OnCultureChanged;
 
             try { _hotkeyService.StopAsync().GetAwaiter().GetResult(); }
             catch (Exception ex) { _logger.LogError(ex, "Failed to stop hotkey service"); }

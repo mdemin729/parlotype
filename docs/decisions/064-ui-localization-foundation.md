@@ -248,3 +248,32 @@ already-finished, so the constructor's fire-and-forget initializer has, in pract
 already run to completion by the time the constructor returns. See
 [[../../memory/knowledge/culture-changing-tests-need-avaloniafact]] for the general rule
 this is the third occurrence of.
+
+## Amendment (2026-09-07): the tooltip nobody had wired through yet
+
+A user reported the record-button tooltip ("Hold Right Ctrl to talk · Esc to cancel")
+still showing English under a Russian interface, with a screenshot of the widget. The
+previous amendment's sweep of Core-built sentences (hotkey conflicts, cloud errors)
+missed this one because it isn't a conflict or a failure message — `HotkeyHint.Describe`
+(Core) built the whole reminder sentence unconditionally, and both its consumers
+(`HotkeyCoordinator`, feeding the tooltip; `OnboardingStepFactory`'s recap step) had
+always shown it verbatim. `memory/architecture/subsystems.md` had in fact listed
+`HotkeyHint` under "still English on purpose" — a real gap, not an oversight in the
+fix, but one this closes.
+
+Same shape as before: `HotkeyHint.SelectPrimary` (Core) now exposes *which* binding
+the hint should describe as data; `Describe` stays as the invariant English form the
+two `HotkeyHintTests` pin, though nothing reads it for the UI any more. `HotkeyText.Hint`
+(Desktop) builds the localized sentence from `SelectPrimary` plus three new
+`Hotkey_Hint_*` formats, reusing `HotkeyText.Gesture` for the already-localized "Hold
+Right Ctrl" part.
+
+**The tooltip is pushed, not bound** — `HotkeyCoordinator` computes it once per bindings
+change and calls `TranscribeViewModel.SetHotkeyHint`, so unlike a `{loc:Tr}` label it
+needed its own live-switch trigger: `HotkeyCoordinator` now subscribes to
+`Localizer.CultureChanged` (and unsubscribes in `Dispose`, matching its existing symmetry
+with the other event subscriptions there) and recomputes the hint.
+
+Both fixes are regression-tested and each was verified independently to fail against a
+targeted revert of only its own change (wording without the subscription, and the
+subscription without the wording) before being trusted.
