@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels;
 
@@ -74,13 +75,13 @@ public static class LanguageRowFactory
         if (recentRows.Count > 0)
         {
             if (grouped)
-                yield return LanguageDisplayItem.Header("Recent");
+                yield return LanguageDisplayItem.Header(Strings.Language_Picker_RecentGroup);
             foreach (var row in recentRows)
                 yield return row;
         }
 
         if (grouped)
-            yield return LanguageDisplayItem.Header("All languages");
+            yield return LanguageDisplayItem.Header(Strings.Language_Picker_AllLanguagesGroup);
 
         foreach (var info in supported)
         {

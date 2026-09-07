@@ -160,6 +160,14 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         _settings = settings;
         _keyboardLayout = keyboardLayout;
         _logger = logger ?? NullLogger<LanguageRelationshipViewModel>.Instance;
+
+        // Not a settings section, so there is no OnCultureChanged hook to
+        // override — subscribe directly. Shared by two surfaces (the Language
+        // page and the Transcribe flyout), both of which bind these computed
+        // properties, so without this an interface-language switch leaves the
+        // tooltip, summary sentence, and source/target labels in whatever
+        // language they were last rendered in (ADR-064 amendment).
+        Localizer.Instance.CultureChanged += (_, _) => NotifyLocalizedDerived();
     }
 
     // ----- Derived state -------------------------------------------------
@@ -667,6 +675,25 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         OnPropertyChanged(nameof(ToggleSwitchLabel));
         OnPropertyChanged(nameof(UnavailableNote));
         OnPropertyChanged(nameof(TargetDisplayLabel));
+    }
+
+    /// <summary>
+    /// Re-raises every computed property whose text comes from <c>Strings.*</c>,
+    /// so a live language switch refreshes them instead of leaving stale text
+    /// bound wherever they were last rendered (ADR-064 amendment). Engine/model
+    /// names (<see cref="EngineDisplayName"/>, catalog display names) are
+    /// deliberately excluded — those are identifiers, not resx copy.
+    /// </summary>
+    private void NotifyLocalizedDerived()
+    {
+        OnPropertyChanged(nameof(ConnectorTooltip));
+        OnPropertyChanged(nameof(ToggleSwitchLabel));
+        OnPropertyChanged(nameof(UnavailableNote));
+        OnPropertyChanged(nameof(SourceDisplayLabel));
+        OnPropertyChanged(nameof(SourceSubHint));
+        OnPropertyChanged(nameof(TargetDisplayLabel));
+        OnPropertyChanged(nameof(SummaryText));
+        OnPropertyChanged(nameof(TranslationPausedNote));
     }
 
     private static string EngineName(SpeechEngine engine) => engine switch

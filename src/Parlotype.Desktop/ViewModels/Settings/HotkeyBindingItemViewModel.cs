@@ -40,4 +40,16 @@ public sealed partial class HotkeyBindingItemViewModel : ObservableObject
         RemoveCommand = removeCommand;
         ToggleModeCommand = toggleModeCommand;
     }
+
+    /// <summary>
+    /// Re-raises the localized display strings after an interface-language
+    /// switch (ADR-064 amendment). <see cref="DisplayString"/>/<see cref="ModeLabel"/>
+    /// already recompute on every read; nothing tells a bound view to re-read
+    /// them without this.
+    /// </summary>
+    public void RefreshDisplay()
+    {
+        OnPropertyChanged(nameof(DisplayString));
+        OnPropertyChanged(nameof(ModeLabel));
+    }
 }

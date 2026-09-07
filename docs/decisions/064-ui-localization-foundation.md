@@ -174,3 +174,77 @@ work produced has hidden. Reviewing them caught one immediately: Russian
 «... в режиме «Вкл./выкл.».» stacked the badge abbreviation's period against the
 sentence's, so the in-sentence mode names are separate keys from the badge
 labels and spelled out in the genitive.
+
+## Amendment (2026-09-06): the live switch that wasn't, on six surfaces
+
+A code review of the ADR-064 work found that "switching is live" — the ADR's own
+consequence — was true for text reaching the screen through `{loc:Tr}`, but false for
+copy several view models compose in C#. The Language settings page's picker headers,
+group labels and special-row hints were plain hardcoded English strings, never routed
+through `Strings` at all; `LanguageRelationshipViewModel`'s tooltip/summary/label
+properties, the engine and runtime cards' names and descriptions, the Transcribe
+widget's status text and cloud badge, and the hotkey section's recorder prompt,
+warnings and row/preset labels all recomputed correctly on the next read but raised no
+`PropertyChanged` on a culture switch — so a bound view kept showing whatever language
+was current when it first rendered.
+
+**Fix, by shape of surface:**
+
+- **Never localized at all** (`LanguageSelectionSettingsViewModel`, `LanguageRowFactory`):
+  moved to `Strings`, reusing existing keys wherever the same English text was already
+  used elsewhere on the same page or on the Transcribe widget (`Settings_Language_SourceCaption`,
+  `Transcribe_TargetPicker_Header`/`_Off`, `Language_Source_*`) rather than adding
+  near-duplicates — one new key survives only in the genuinely-missing group headers
+  (`Language_Picker_RecentGroup`/`AllLanguagesGroup`) and the target sub-hint
+  (`Language_Target_TranslationHint`). `LanguagePickerViewModel.Header` changed from a
+  snapshot string to a `Func<string>` callback re-read every `Refresh()` — the same
+  callback shape every other input on that class already used.
+- **A shared, non-section view model** (`LanguageRelationshipViewModel`): has no
+  `OnCultureChanged` hook to override, so it subscribes to `Localizer.CultureChanged`
+  directly in its constructor and re-raises every resource-backed computed property.
+- **Display items captured once at construction** (`SpeechEngineDisplayItem.DisplayName`/
+  `Description`, `RuntimeDisplayItem.DisplayName`/`Description`): converted to
+  `[ObservableProperty]` — the same primary-constructor-parameter-feeds-an-observable-field
+  pattern `UiLanguageDisplayItem` already used — and the owning section's
+  `OnCultureChanged` rewrites them from the current culture's `Strings`.
+- **A view model with no settings-section hook** (`TranscribeViewModel`): subscribes to
+  `Localizer.CultureChanged` directly, like `LanguageRelationshipViewModel`.
+  `StatusText` needed more than a re-raise — it is a *stored* string set by many
+  different code paths, some showing a persistent error a naive "recompute from
+  current recording state" would have silently discarded. It now remembers a private
+  `StatusKind` (+ the runtime name, where relevant) alongside the text, and
+  `OnCultureChanged` recomputes the text from that kind rather than guessing.
+- **Rows read fresh on every access but bound by a flyout that recycles containers**
+  (`HotkeyPresetViewModel`): gained `ObservableObject` + a `RefreshDisplay()` the section
+  calls on every preset after a culture switch — without it, the "Add" menu's item
+  containers, built once, never re-query a plain computed property with no change
+  notification at all.
+
+### Consequences
+
+None of this touches Core, a DI registration, or a dependency — it is entirely inside
+Desktop's live-switch implementation, so no further ADR is warranted for this fix, and
+whether a Definition-of-Done ADR trigger fires again for the *next* one comes down to
+whether it introduces a new Core surface, not whether it touches localization.
+
+**Regression tests can't just check the final read.** A property that recomputes
+correctly on every access will pass a test that reads it after the fact, whether or not
+`PropertyChanged` actually fired — the bug only shows up in what a *bound* control sees.
+Every regression test added here therefore either asserts on `PropertyChanged`
+notifications directly, or drives the real bound control (`LanguagePickerViewModel.Items`,
+which `LanguageRowFactory` genuinely rebuilds on `Refresh()`) rather than reading the
+view model's raw properties.
+
+**A `Task.Delay`-based regression test destabilized the whole `CultureBoundTests`
+collection.** One new test copied the `await Task.Delay(50); Dispatcher.UIThread.RunJobs();`
+idiom used elsewhere to wait out a fire-and-forget initializer. `Task.Delay`'s
+continuation resumes on a thread-pool thread, not the Avalonia dispatcher — from there,
+`Localizer.Instance.SetCulture` takes the cross-thread `Dispatcher.UIThread.Invoke`
+branch and can interleave with whatever other `[AvaloniaFact]` test is mid-flight on the
+one shared headless dispatcher, corrupting *unrelated* tests' culture reads. Deterministic
+across repeated full-project runs, invisible when the test (or its class) ran alone.
+Fixed by removing the delay — `MockSettingsService` completes every `Task`
+already-finished, so the constructor's fire-and-forget initializer has, in practice,
+already run to completion by the time the constructor returns. See
+[[../../memory/knowledge/culture-changing-tests-need-avaloniafact]] for the general rule
+this is the third occurrence of.

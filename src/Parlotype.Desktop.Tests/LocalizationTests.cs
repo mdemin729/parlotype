@@ -300,6 +300,172 @@ public class LocalizationTests : IDisposable
         Assert.DoesNotContain("{0}", note);
     }
 
+    // ---- code review: several C#-composed surfaces did not update on a live
+    // language switch, and one page's picker copy was never localized at all
+    // (ADR-064 amendment) --------------------------------------------------
+
+    [AvaloniaFact]
+    public async Task LanguagePicker_HeadersAndSpecials_RefreshOnCultureChange()
+    {
+        // These were hardcoded English C# strings in
+        // LanguageSelectionSettingsViewModel/LanguageRowFactory, never routed
+        // through Strings at all — so simply switching culture proves both
+        // that they're localized now and that the picker's Items/Header
+        // rebuild rather than staying snapshotted from construction.
+        Localizer.Instance.SetCulture(English);
+
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechEngine, SpeechEngine.Whisper.ToString(), TestContext.Current.CancellationToken);
+        var relationship = new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService());
+        await relationship.InitializeAsync(TestContext.Current.CancellationToken);
+        var vm = new LanguageSelectionSettingsViewModel(relationship);
+
+        relationship.SelectSource("fr"); // seeds the Recent cluster
+        relationship.ToggleTranslation();
+        vm.OpenSourcePickerCommand.Execute(null);
+
+        Assert.Equal("You speak", vm.SourcePicker.Header);
+        Assert.Contains(vm.SourcePicker.Items, i => i.IsHeader && i.DisplayName == "Recent");
+        Assert.Contains(vm.SourcePicker.Items, i => i.IsHeader && i.DisplayName == "All languages");
+        Assert.Contains(vm.SourcePicker.Items,
+            i => i.Code == LanguageCatalog.KeyboardLayoutCode && i.DisplayName == "System keyboard layout");
+        Assert.Equal("Translation target", vm.TargetSubHint);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("Вы говорите", vm.SourcePicker.Header);
+        Assert.Contains(vm.SourcePicker.Items, i => i.IsHeader && i.DisplayName == "Недавние");
+        Assert.Contains(vm.SourcePicker.Items, i => i.IsHeader && i.DisplayName == "Все языки");
+        Assert.Contains(vm.SourcePicker.Items,
+            i => i.Code == LanguageCatalog.KeyboardLayoutCode && i.DisplayName == "Раскладка клавиатуры");
+        Assert.Equal("Язык перевода", vm.TargetSubHint);
+    }
+
+    [AvaloniaFact]
+    public async Task LanguageRelationship_LocalizedDerivedProperties_RefreshOnCultureChange()
+    {
+        // LanguageRelationshipViewModel is shared by two surfaces but is not a
+        // settings section, so it has no OnCultureChanged hook — it needed its
+        // own subscription. Checking that PropertyChanged actually fires (not
+        // just that a fresh read returns the right text) is what distinguishes
+        // this from a no-op: every property here recomputes correctly on its
+        // own, the bug was that nothing told a bound view to re-read it.
+        Localizer.Instance.SetCulture(English);
+
+        var settings = new MockSettingsService();
+        var vm = new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService());
+        await vm.InitializeAsync(TestContext.Current.CancellationToken);
+
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Contains(nameof(LanguageRelationshipViewModel.SourceDisplayLabel), raised);
+        Assert.Contains(nameof(LanguageRelationshipViewModel.SourceSubHint), raised);
+        Assert.Contains(nameof(LanguageRelationshipViewModel.SummaryText), raised);
+        Assert.Contains(nameof(LanguageRelationshipViewModel.ConnectorTooltip), raised);
+    }
+
+    [AvaloniaFact]
+    public void SpeechEngineCards_RefreshDisplayText_OnCultureChange()
+    {
+        // Every card's DisplayName/Description was captured once, into an
+        // immutable property, at construction.
+        Localizer.Instance.SetCulture(English);
+        var vm = new SpeechEngineSettingsViewModel(new MockSettingsService());
+        var whisperCard = vm.EngineOptions.Single(o => o.Type == SpeechEngine.Whisper);
+        var englishDescription = whisperCard.Description;
+
+        Localizer.Instance.SetCulture(Russian);
+
+        // "Whisper" itself is an engine identifier and stays untranslated in
+        // every language (CLAUDE.md) — the description is ordinary prose.
+        Assert.NotEqual(englishDescription, whisperCard.Description);
+        Assert.Equal(Strings.Settings_Engine_Whisper_Name, whisperCard.DisplayName);
+        Assert.Equal(Strings.Settings_Engine_Whisper_Description, whisperCard.Description);
+    }
+
+    [AvaloniaFact]
+    public void RuntimeCards_AndRestartNote_RefreshOnCultureChange()
+    {
+        Localizer.Instance.SetCulture(English);
+        var vm = new RuntimeSettingsViewModel(new MockSettingsService(), new MockVulkanEnvironmentProvider())
+        {
+            LoadedRuntimeName = "Vulkan",
+            SelectedRuntime = RuntimePreference.Cpu,
+        };
+        var autoCard = vm.RuntimeOptions.Single(o => o.Type == RuntimePreference.Auto);
+
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal(Strings.Settings_Runtime_Auto_Name, autoCard.DisplayName);
+        Assert.Equal(Strings.Settings_Runtime_Auto_Description, autoCard.Description);
+        Assert.Contains(nameof(RuntimeSettingsViewModel.RestartRequiredNote), raised);
+    }
+
+    [AvaloniaFact]
+    public async Task TranscribeWidget_StatusAndCloudBadge_RefreshOnCultureChange()
+    {
+        // StatusText is a plain stored string, not a computed property — it
+        // has to remember *what it's currently saying* (StatusKind) to
+        // recompute correctly rather than defaulting back to "Ready" and
+        // silently discarding whatever state was actually being shown.
+        Localizer.Instance.SetCulture(English);
+        var pipeline = new MockAudioPipeline();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+        await vm.StartRecordingAsync();
+
+        Assert.Equal("Recording...", vm.StatusText);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("Запись...", vm.StatusText);
+    }
+
+    [AvaloniaFact]
+    public void HotkeySection_RefreshesRowsAndWarnings_OnCultureChange()
+    {
+        // Synchronous on purpose, unlike HotkeySettingsViewModelTests' usual
+        // await Task.Delay(50) + RunJobs() dance: that real-time delay lets the
+        // continuation resume off the Avalonia dispatcher thread, and this test
+        // calls Localizer.Instance.SetCulture from there — racing whatever
+        // other [AvaloniaFact] test happens to be mid-flight on the shared
+        // headless dispatcher at that moment (culture-changing-tests-need-
+        // avaloniafact.md). MockSettingsService completes every Task
+        // synchronously, so the constructor's fire-and-forget InitializeAsync
+        // has already populated Bindings by the time the constructor returns —
+        // no delay needed.
+        Localizer.Instance.SetCulture(English);
+        var vm = new HotkeySettingsViewModel(hotkeyService: null, new MockSettingsService());
+
+        vm.ApplyRecordedChord(new HotkeyBinding(HotkeyModifiers.Meta, "L")); // reserved chord
+        Assert.NotNull(vm.BlockingWarning);
+        var englishWarning = vm.BlockingWarning;
+
+        var preset = vm.Presets[0];
+        var presetRaised = new List<string?>();
+        preset.PropertyChanged += (_, e) => presetRaised.Add(e.PropertyName);
+
+        Assert.NotEmpty(vm.Bindings);
+        var binding = vm.Bindings[0];
+        var bindingRaised = new List<string?>();
+        binding.PropertyChanged += (_, e) => bindingRaised.Add(e.PropertyName);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        // Rows compute their display strings fresh on every read regardless of
+        // this fix, so the read alone would pass either way — the actual bug
+        // was that nothing told a bound view to re-read them.
+        Assert.Contains(nameof(HotkeyPresetViewModel.DisplayString), presetRaised);
+        Assert.Contains(nameof(HotkeyBindingItemViewModel.DisplayString), bindingRaised);
+        Assert.NotEqual(englishWarning, vm.BlockingWarning);
+        Assert.Equal(Strings.Settings_Hotkeys_Recorder_Idle, vm.RecorderText);
+    }
+
     [AvaloniaFact]
     public async Task LanguageSummary_ComposesNestedFormats_InTheChosenLanguage()
     {
@@ -354,7 +520,7 @@ public class LocalizationTests : IDisposable
         Localizer.Instance.SetCulture(Russian);
 
         var picker = new LanguagePickerViewModel(
-            header: "x",
+            getHeader: () => "x",
             getSupported: () => [],
             getRecents: () => [],
             getSelectedCode: () => null,

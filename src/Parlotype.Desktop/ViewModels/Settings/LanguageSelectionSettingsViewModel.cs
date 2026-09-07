@@ -45,7 +45,7 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
         _logger = logger ?? NullLogger<LanguageSelectionSettingsViewModel>.Instance;
 
         SourcePicker = new LanguagePickerViewModel(
-            header: "You speak",
+            getHeader: () => Strings.Settings_Language_SourceCaption,
             getSupported: () => Relationship.Capabilities.EffectiveSourceLanguages,
             getRecents: () => Relationship.SourceRecent,
             getSelectedCode: () => Relationship.SourceCode,
@@ -53,7 +53,7 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
             getSpecials: BuildSourceSpecials);
 
         TargetPicker = new LanguagePickerViewModel(
-            header: "Translate to",
+            getHeader: () => Strings.Transcribe_TargetPicker_Header,
             getSupported: () => Relationship.TargetLanguages,
             getRecents: () => Relationship.TargetRecent,
             getSelectedCode: () => Relationship.TranslationEnabled
@@ -62,7 +62,7 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
             onSelect: SelectTarget,
             getSpecials: () =>
                 [new LanguageSpecialRow(
-                    LanguageCatalog.NoTranslationCode, "Off — no translation",
+                    LanguageCatalog.NoTranslationCode, Strings.Transcribe_TargetPicker_Off,
                     SubHint: null, LanguageRowIcon.Off)]);
 
         Relationship.PropertyChanged += OnRelationshipPropertyChanged;
@@ -81,7 +81,9 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
 
     /// <summary>Sub-hint under the full-form target field.</summary>
     public string TargetSubHint =>
-        Relationship.TranslationEnabled ? "Translation target" : "Off — no translation";
+        Relationship.TranslationEnabled
+            ? Strings.Language_Target_TranslationHint
+            : Strings.Transcribe_TargetPicker_Off;
 
     /// <summary>Tile glyph for the source field (mirrors the picker rows).</summary>
     public string SourceTileText =>
@@ -189,13 +191,16 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
 
     private IReadOnlyList<LanguageSpecialRow> BuildSourceSpecials()
     {
+        // Same wording as the resting source card's label/sub-hint
+        // (LanguageRelationshipViewModel.SourceDisplayLabel/SourceSubHint) — one
+        // key per concept rather than a near-duplicate for the picker row.
         var specials = new List<LanguageSpecialRow>
         {
             new(LanguageCatalog.KeyboardLayoutCode,
-                "System keyboard layout",
+                Strings.Language_Source_KeyboardLayout,
                 Relationship.DetectedKeyboardLayout is { } layout
-                    ? $"Detected: {layout.FriendlyName}"
-                    : "Layout detection unavailable",
+                    ? Strings.Format_Language_Source_DetectedFormat(layout.FriendlyName)
+                    : Strings.Language_Source_LayoutUnavailable,
                 LanguageRowIcon.Keyboard),
         };
 
@@ -203,12 +208,29 @@ public partial class LanguageSelectionSettingsViewModel : SettingsSectionViewMod
         {
             specials.Add(new LanguageSpecialRow(
                 LanguageCatalog.AutoDetectCode,
-                "Auto-detect",
-                "Let the model identify the language",
+                Strings.Language_Source_AutoDetect,
+                Strings.Language_Source_AutoDetectHint,
                 LanguageRowIcon.Sparkle));
         }
 
         return specials;
+    }
+
+    /// <summary>
+    /// The specials/headers baked into <see cref="SourcePicker"/> and
+    /// <see cref="TargetPicker"/>'s <c>Items</c> are snapshots taken the last
+    /// time <see cref="LanguagePickerViewModel.Refresh"/> ran, so an interface-
+    /// language switch has to force that rebuild — the header labels
+    /// ("You speak", "Recent", "Layout detection unavailable", …) are C# strings,
+    /// not `{loc:Tr}` bindings (ADR-064 amendment).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        OnPropertyChanged(nameof(TargetSubHint));
+        SourcePicker.Refresh();
+        TargetPicker.Refresh();
     }
 
     private void OnRelationshipPropertyChanged(object? sender, PropertyChangedEventArgs e)

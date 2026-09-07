@@ -431,6 +431,21 @@ command synchronous, fire-and-forget the async apply — see
 rows sharing one command is worth checking first when the symptom is "the list
 flickers."
 
+**A code review (2026-09-06, ADR-064 amendment) found six surfaces where "switching
+is live" was false**: text that recomputes correctly on every read but was never told
+to — the Language page's picker headers/specials (never localized at all), the shared
+`LanguageRelationshipViewModel`'s tooltip/summary/labels, the engine and runtime
+cards' names/descriptions, the Transcribe widget's status text and cloud badge, and
+the hotkey section's recorder prompt/warnings/rows/presets. Each fix follows the
+existing `OnCultureChanged` hook where the view model has one
+(`SettingsSectionViewModelBase`), or subscribes to `Localizer.CultureChanged` directly
+where it doesn't (`LanguageRelationshipViewModel`, `TranscribeViewModel`). Display
+items captured once at construction (`SpeechEngineDisplayItem`, `RuntimeDisplayItem`)
+became `[ObservableProperty]`, matching `UiLanguageDisplayItem`'s existing pattern.
+`TranscribeViewModel.StatusText` needed a private `StatusKind` remembered alongside
+the stored string, since it is set from many call sites and a naive recompute would
+have discarded a persistent error. Full detail in the ADR-064 amendment.
+
 ## Single Instance & Activation
 
 See [[decisions/_index|ADR-055]]. Desktop-only — no Core or Platform involvement.

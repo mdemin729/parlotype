@@ -100,6 +100,35 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     /// <summary>Parameterless constructor for designer support only.</summary>
     public SpeechEngineSettingsViewModel() : this(new DesignSettingsService()) { }
 
+    /// <summary>
+    /// The engine cards capture their localized name/description once, at
+    /// construction, into <see cref="SpeechEngineDisplayItem"/> fields rather
+    /// than binding <c>{loc:Tr}</c> directly — so a live language switch has to
+    /// rewrite them here rather than update on its own (ADR-064 amendment).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        foreach (var item in EngineOptions)
+        {
+            (item.DisplayName, item.Description) = item.Type switch
+            {
+                SpeechEngine.Parakeet =>
+                    (Strings.Settings_Engine_Parakeet_Name, Strings.Settings_Engine_Parakeet_Description),
+                SpeechEngine.Whisper =>
+                    (Strings.Settings_Engine_Whisper_Name, Strings.Settings_Engine_Whisper_Description),
+                SpeechEngine.Gemma4 =>
+                    (Strings.Settings_Engine_Gemma4_Name, Strings.Settings_Engine_Gemma4_Description),
+                SpeechEngine.OpenAiCompatible =>
+                    (Strings.Settings_Engine_OpenAiCompatible_Name, Strings.Settings_Engine_OpenAiCompatible_Description),
+                SpeechEngine.XaiGrok =>
+                    (Strings.Settings_Engine_XaiGrok_Name, Strings.Settings_Engine_XaiGrok_Description),
+                _ => (item.DisplayName, item.Description),
+            };
+        }
+    }
+
     private async Task InitializeAsync()
     {
         var saved = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);

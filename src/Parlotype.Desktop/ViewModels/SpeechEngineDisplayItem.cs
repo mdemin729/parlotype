@@ -13,8 +13,15 @@ public sealed partial class SpeechEngineDisplayItem(
     : ObservableObject
 {
     public SpeechEngine Type { get; } = type;
-    public string DisplayName { get; } = displayName;
-    public string Description { get; } = description;
+
+    /// <summary>Localized (ADR-064) — <see cref="Settings.SpeechEngineSettingsViewModel.OnCultureChanged"/> refreshes it.</summary>
+    [ObservableProperty]
+    private string _displayName = displayName;
+
+    /// <summary>Localized (ADR-064) — see <see cref="DisplayName"/>.</summary>
+    [ObservableProperty]
+    private string _description = description;
+
     public ICommand SelectCommand { get; } = selectCommand;
 
     /// <summary>Onboarding highlight id for this card (ADR-056).</summary>

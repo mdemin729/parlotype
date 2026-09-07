@@ -134,11 +134,17 @@ public static class Strings
     /// <summary>Turn translation on</summary>
     public static string Language_Connector_TurnOnTooltip => Localizer.Lookup(nameof(Language_Connector_TurnOnTooltip));
 
+    /// <summary>All languages</summary>
+    public static string Language_Picker_AllLanguagesGroup => Localizer.Lookup(nameof(Language_Picker_AllLanguagesGroup));
+
     /// <summary>No languages match "{0}".</summary>
     public static string Language_Picker_NoResultsFormat => Localizer.Lookup(nameof(Language_Picker_NoResultsFormat));
     /// <summary>No languages match "{0}".</summary>
     public static string Format_Language_Picker_NoResultsFormat(object? arg0) =>
         string.Format(System.Globalization.CultureInfo.CurrentCulture, Language_Picker_NoResultsFormat, arg0);
+
+    /// <summary>Recent</summary>
+    public static string Language_Picker_RecentGroup => Localizer.Lookup(nameof(Language_Picker_RecentGroup));
 
     /// <summary>Search languages…</summary>
     public static string Language_Picker_SearchPlaceholder => Localizer.Lookup(nameof(Language_Picker_SearchPlaceholder));
@@ -190,6 +196,9 @@ public static class Strings
 
     /// <summary>Same as source</summary>
     public static string Language_Target_SameAsSource => Localizer.Lookup(nameof(Language_Target_SameAsSource));
+
+    /// <summary>Translation target</summary>
+    public static string Language_Target_TranslationHint => Localizer.Lookup(nameof(Language_Target_TranslationHint));
 
     /// <summary>{0} can't translate — output now matches your spoken language.</summary>
     public static string Language_Toast_EngineCannotTranslateFormat => Localizer.Lookup(nameof(Language_Toast_EngineCannotTranslateFormat));

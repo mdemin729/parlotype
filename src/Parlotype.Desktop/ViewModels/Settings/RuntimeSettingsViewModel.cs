@@ -165,4 +165,37 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
         _logger.LogInformation("Opening Vulkan SDK page: {Url}", VulkanSdkUrl);
         Process.Start(new ProcessStartInfo(VulkanSdkUrl) { UseShellExecute = true });
     }
+
+    /// <summary>
+    /// The runtime cards capture their localized name/description once, at
+    /// construction, into <see cref="RuntimeDisplayItem"/> fields rather than
+    /// binding <c>{loc:Tr}</c> directly, and <see cref="RestartRequiredNote"/>
+    /// is only re-raised on <see cref="LoadedRuntimeName"/> changing — so a live
+    /// language switch has to rewrite all of it here (ADR-064 amendment).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        foreach (var item in RuntimeOptions)
+        {
+            (item.DisplayName, item.Description) = item.Type switch
+            {
+                RuntimePreference.Auto =>
+                    (Strings.Settings_Runtime_Auto_Name, Strings.Settings_Runtime_Auto_Description),
+                RuntimePreference.Vulkan =>
+                    (Strings.Settings_Runtime_Vulkan_Name, Strings.Settings_Runtime_Vulkan_Description),
+                RuntimePreference.Cpu =>
+                    (Strings.Settings_Runtime_Cpu_Name, Strings.Settings_Runtime_Cpu_Description),
+                _ => (item.DisplayName, item.Description),
+            };
+
+            // Only Vulkan currently has an unavailable reason to restate (see
+            // RefreshAvailabilityAsync); everything else stays null.
+            if (item.Type == RuntimePreference.Vulkan && !item.IsAvailable)
+                item.UnavailableReason = Strings.Settings_Runtime_VulkanUnavailableReason;
+        }
+
+        OnPropertyChanged(nameof(RestartRequiredNote));
+    }
 }
