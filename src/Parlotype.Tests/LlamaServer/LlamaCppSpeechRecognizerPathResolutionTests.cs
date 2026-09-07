@@ -10,8 +10,9 @@ namespace Parlotype.Tests.LlamaServer;
 /// <summary>
 /// Covers the active-install path-resolution rules in
 /// <see cref="LlamaCppSpeechRecognizer.GetServerPathAsync"/>: managed wins,
-/// manual falls through to the legacy folder setting, and a stale managed
-/// selector falls back gracefully without throwing.
+/// manual falls through to the folder setting, a stale managed selector falls
+/// back gracefully without throwing, and an unconfigured app resolves to
+/// <c>null</c> rather than to a default folder nothing creates (ADR-066).
 /// </summary>
 public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
 {
@@ -91,15 +92,14 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
     }
 
     [Fact]
-    public async Task NoActiveSelector_NoFolderSetting_UsesDefaultLegacyFolder()
+    public async Task NoActiveSelector_NoFolderSetting_ResolvesToNull()
     {
         var recognizer = NewRecognizer();
-        var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
-        // Resolved through IAppPaths, not spelled out here: the data root moved
-        // once already (ADR-053) and a hardcoded copy would silently rot.
-        var defaultFolder = AppPaths.Default.LlamaServerDirectory;
-        Assert.Equal(Path.Combine(defaultFolder, "llama-server.exe"), path);
+        // Nothing installed and nothing chosen is "unconfigured", not "missing at
+        // <a path the user never picked>" — the caller turns null into a message
+        // that says which of the two it is (ADR-066).
+        Assert.Null(await recognizer.GetServerPathAsync(CancellationToken.None));
     }
 
     [Fact]
@@ -119,17 +119,13 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
     }
 
     [Fact]
-    public async Task ManualActive_NoFolderSetting_UsesDefaultLegacyFolder()
+    public async Task ManualActive_NoFolderSetting_ResolvesToNull()
     {
         await _registry.SetActiveAsync(installId: null, LlamaServerSource.Manual);
 
         var recognizer = NewRecognizer();
-        var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
-        // Resolved through IAppPaths, not spelled out here: the data root moved
-        // once already (ADR-053) and a hardcoded copy would silently rot.
-        var defaultFolder = AppPaths.Default.LlamaServerDirectory;
-        Assert.Equal(Path.Combine(defaultFolder, "llama-server.exe"), path);
+        Assert.Null(await recognizer.GetServerPathAsync(CancellationToken.None));
     }
 
     [Fact]

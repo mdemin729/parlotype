@@ -172,6 +172,28 @@ public sealed class LlamaCppSettingsViewModelManagedTests : IDisposable
     }
 
     [AvaloniaFact]
+    public async Task SetActiveManual_WithNoSavedFolder_RefusesAndExplains()
+    {
+        // The manual folder box now starts empty (ADR-066), so "manual active with
+        // nowhere to look" is reachable by default rather than by deliberately
+        // clearing it. Refuse at the click instead of failing at the next recording.
+        var variant = SampleVariant();
+        _catalog.SetGroups(new LlamaServerReleaseGroup("b9198", new[] { variant }));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count > 0);
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available.Single());
+        await vm.SetActiveManagedCommand.ExecuteAsync(vm.Installed.Single());
+        Assert.True(vm.IsManagedActive);
+
+        await vm.SetActiveManualCommand.ExecuteAsync(null);
+
+        Assert.False(vm.IsManualActive);
+        Assert.True(vm.IsManagedActive);
+        Assert.NotNull(vm.ErrorMessage);
+        Assert.Contains("Save", vm.ErrorMessage!, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
     public async Task CheckForUpdates_SetsBannerWhenLatestBuildExceedsActiveBuild()
     {
         var older = SampleVariant(build: "b9000");

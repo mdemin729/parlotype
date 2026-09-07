@@ -157,6 +157,20 @@ public class LocalizedLayoutReviewTests
             XaiBaseUrl = "http://api.example.com/v1",
         };
         yield return ("cloud-providers-bad-url", new CloudProviderSettingsView(), badUrl);
+
+        // The pack-folder warning (ADR-065): three sentences plus a path, only
+        // reachable once the folder box holds something under %LOCALAPPDATA%\Parlotype.
+        // Windows-only, since VelopackPackFolder.Root is null elsewhere.
+        if (OperatingSystem.IsWindows())
+        {
+            var packFolder = new LlamaCppSettingsViewModel(new MockSettingsService())
+            {
+                ServerFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "parlotype", "llama-server"),
+            };
+            yield return ("llamacpp-pack-folder-warning", new LlamaCppSettingsView(), packFolder);
+        }
     }
 
     private static HotkeySettingsViewModel NewHotkeySection() =>

@@ -221,6 +221,21 @@ Because Windows paths are case-insensitive, the old data root
 - `AppPathsTests` fails the suite if any path lands inside the pack folder.
 - **No automatic migration** — existing installs are moved by hand
   (`docs/RELEASING.md`).
+- Only **one** llama-server path exists: `LlamaServerInstallsDirectory`
+  (`…\parlotype-data\llama-servers\<installId>\`). ADR-066 removed the singular
+  `LlamaServerDirectory`, a pre-managed-installs vestige that nothing ever created
+  yet served as both the manual box's pre-filled default and the recognizer's
+  last-resort fallback — so "unconfigured" was reported as "missing at a path you
+  never chose". `GetServerPathAsync` now returns `string?`, and the manual box
+  starts empty.
+- **`VelopackPackFolder`** (Core, ADR-065) covers the other direction: paths the
+  *user* supplies, which `IAppPaths` cannot constrain. `PackId` / `Root` (null off
+  Windows) / `Contains(path)` — case-insensitive, separator included in the prefix
+  so the sibling `parlotype-data` root does not match. Its one consumer today is
+  the manual `llama-server` folder (`SettingsKeys.LlamaCppServerFolder`), whose
+  `LlamaCppSettingsViewModel.IsServerFolderInsidePackFolder` drives an amber
+  warning panel. Such a path is **warned about, never rewritten or moved** — same
+  reasoning as the no-automatic-migration rule above.
 
 ### Entry point
 

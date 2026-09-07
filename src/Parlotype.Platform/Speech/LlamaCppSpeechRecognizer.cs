@@ -106,6 +106,12 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
 
             // Port is free — spawn a new server
             var serverPath = await GetServerPathAsync(cancellationToken);
+            if (serverPath is null)
+                throw new InvalidOperationException(
+                    "No llama-server is configured. Install one from " +
+                    "Settings → Speech engine → llama.cpp, or point the manual folder " +
+                    "at a build you downloaded yourself.");
+
             if (!File.Exists(serverPath))
                 throw new InvalidOperationException(
                     $"llama-server not found at '{serverPath}'. " +
@@ -337,26 +343,27 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
     private const string ServerExeName = "llama-server.exe";
 
     /// <summary>
-    /// Resolves the absolute path to <c>llama-server.exe</c>. Consults the
-    /// active-install selector first: a managed install wins; manual mode (or
-    /// a missing managed selector) falls through to the legacy
-    /// <see cref="SettingsKeys.LlamaCppServerFolder"/> setting, which itself
-    /// defaults to <c>%LOCALAPPDATA%/parlotype/llama-server</c> when unset.
+    /// Resolves the absolute path to <c>llama-server.exe</c>, or <c>null</c> when
+    /// no server is configured at all. Consults the active-install selector first:
+    /// a managed install wins; manual mode (or a missing managed selector) falls
+    /// through to the <see cref="SettingsKeys.LlamaCppServerFolder"/> setting.
+    ///
+    /// <para>There is deliberately no default folder to fall back on (ADR-066).
+    /// The old one pointed at a directory nothing ever created, so an unconfigured
+    /// app reported a missing file at a path the user had never chosen. <c>null</c>
+    /// lets the caller say what is actually wrong.</para>
     /// </summary>
-    internal async Task<string> GetServerPathAsync(CancellationToken cancellationToken)
+    internal async Task<string?> GetServerPathAsync(CancellationToken cancellationToken)
     {
         var active = await _registry.GetActiveAsync(cancellationToken);
         if (active is { Source: LlamaServerSource.Managed })
             return Path.Combine(active.AbsolutePath, ServerExeName);
 
         var folder = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerFolder);
-        if (!string.IsNullOrWhiteSpace(folder))
-            return Path.Combine(folder, ServerExeName);
-
-        return Path.Combine(GetDefaultServerFolder(), ServerExeName);
+        return string.IsNullOrWhiteSpace(folder)
+            ? null
+            : Path.Combine(folder.Trim(), ServerExeName);
     }
-
-    private static string GetDefaultServerFolder() => AppPaths.Default.LlamaServerDirectory;
 
     private async Task<int> GetConfiguredPortAsync(CancellationToken cancellationToken)
     {

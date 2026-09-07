@@ -18,8 +18,6 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private const int DefaultPort = 8321;
     private const string DefaultHost = "127.0.0.1";
 
-    private static string DefaultServerFolder => AppPaths.Default.LlamaServerDirectory;
-
     private readonly ISettingsService _settings;
     private readonly ISpeechRecognizer? _recognizer;
     private readonly ILlamaServerRegistry? _registry;
@@ -69,6 +67,24 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
 
     [ObservableProperty]
     private string _serverFolder = "";
+
+    /// <summary>
+    /// True when <see cref="ServerFolder"/> points inside the Velopack pack folder,
+    /// which Velopack deletes on uninstall and on a re-run of Setup.exe (ADR-053).
+    /// Surfaces a warning; the value is never rewritten for the user (ADR-065).
+    /// </summary>
+    [ObservableProperty]
+    private bool _isServerFolderInsidePackFolder;
+
+    /// <summary>
+    /// The folder that warning is about, shown as a value beside a translated label.
+    /// A path is data, not copy — keeping it out of the sentence spares every locale a
+    /// mid-sentence substitution that Russian would have to inflect (ADR-064 skill rule).
+    /// </summary>
+    public string? PackFolderRoot => VelopackPackFolder.Root;
+
+    partial void OnServerFolderChanged(string value) =>
+        IsServerFolderInsidePackFolder = VelopackPackFolder.Contains(value);
 
     [ObservableProperty]
     private bool _isRefreshing;
@@ -160,8 +176,11 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         if (int.TryParse(portStr, out var port) && port is > 0 and <= 65535)
             PortText = port.ToString();
 
+        // Empty means "no manual build chosen", which is the normal state for
+        // anyone using a managed install. There is no default folder to pre-fill
+        // with — the old one named a directory nothing ever created (ADR-066).
         var folder = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerFolder);
-        ServerFolder = folder ?? DefaultServerFolder;
+        ServerFolder = folder ?? "";
         ManualFolderPath = folder;
 
         if (HasManagedFeatures)
@@ -265,12 +284,11 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
             return;
         }
 
-        var folder = ServerFolder?.Trim();
-        if (string.IsNullOrEmpty(folder))
-        {
-            ErrorMessage = "Server folder cannot be empty.";
-            return;
-        }
+        // Empty is allowed and meaningful: it clears the manual build. Blocking it
+        // would also block saving a port change for every user on a managed install,
+        // since the box now starts empty (ADR-066). Manual mode guards itself in
+        // SetActiveManualAsync.
+        var folder = ServerFolder?.Trim() ?? "";
 
         await _settings.SetAsync(SettingsKeys.LlamaCppPort, port.ToString());
         await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, folder);
@@ -286,13 +304,13 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private async Task ResetDefaultsAsync()
     {
         PortText = DefaultPort.ToString();
-        ServerFolder = DefaultServerFolder;
+        ServerFolder = "";
 
         await _settings.SetAsync(SettingsKeys.LlamaCppPort, DefaultPort.ToString());
-        await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, DefaultServerFolder);
+        await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, "");
         _logger.LogInformation("llama.cpp settings reset to defaults");
         ErrorMessage = null;
-        ManualFolderPath = DefaultServerFolder;
+        ManualFolderPath = "";
 
         await UnloadRecognizerAsync();
         await RefreshServerInfoAsync();
@@ -312,7 +330,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         var result = await topLevel.StorageProvider.OpenFolderPickerAsync(
             new Avalonia.Platform.Storage.FolderPickerOpenOptions
             {
-                Title = "Select llama-server folder",
+                Title = Strings.Settings_LlamaCpp_FolderPickerTitle,
                 AllowMultiple = false,
             });
 
@@ -431,6 +449,17 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private async Task SetActiveManualAsync()
     {
         if (_registry is null) return;
+
+        // Checked against the *saved* folder, not the box: switching on unsaved
+        // text would activate a manual install the recognizer cannot see.
+        if (string.IsNullOrWhiteSpace(ManualFolderPath))
+        {
+            ErrorMessage = Strings.Settings_LlamaCpp_ManualFolderRequiredError;
+            await ReloadInstalledAndActiveAsync();
+            return;
+        }
+
+        ErrorMessage = null;
         await _registry.SetActiveAsync(installId: null, LlamaServerSource.Manual);
         await UnloadRecognizerAsync();
         await ReloadInstalledAndActiveAsync();

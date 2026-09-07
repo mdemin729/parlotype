@@ -1303,4 +1303,22 @@ Tus ajustes y claves de API se conservan. Los modelos se descargan de nuevo auto
     <comment>{0} is the result of Hotkey_Hint_TalkFormat/DictateFormat. "Esc" is a key name — use whatever that key is called on a keyboard in this language, usually "Esc".</comment>
     <value>{0} · Esc: cancelar</value>
   </data>
+  <data name="Settings_LlamaCpp_ManualFolderPlaceholder" xml:space="preserve">
+    <value>Ninguna carpeta seleccionada: indica la carpeta que contiene llama-server.exe</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualFolderRequiredError" xml:space="preserve">
+    <value>Indica la carpeta que contiene llama-server.exe y pulsa «Guardar» antes de cambiar a la instalación manual.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningHeading" xml:space="preserve">
+    <value>⚠ Esta carpeta se borra al desinstalar Parlotype</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningBody" xml:space="preserve">
+    <value>Desinstalar Parlotype — o volver a ejecutar su instalador — borra su carpeta de instalación y todo lo que contiene, incluida esta compilación de llama-server. Mueve la compilación a otro sitio e indica aquí la nueva ruta.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningPathLabel" xml:space="preserve">
+    <value>Carpeta de instalación:</value>
+  </data>
+  <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
+    <value>Seleccionar la carpeta de llama-server</value>
+  </data>
 </root>

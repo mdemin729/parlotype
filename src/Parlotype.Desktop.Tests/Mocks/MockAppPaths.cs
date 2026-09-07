@@ -14,7 +14,6 @@ public sealed class MockAppPaths : IAppPaths, IDisposable
         SettingsDirectory = DataDirectory;
         ModelsDirectory = Path.Combine(DataDirectory, "models");
         LogsDirectory = Path.Combine(DataDirectory, "logs");
-        LlamaServerDirectory = Path.Combine(DataDirectory, "llama-server");
         LlamaServerInstallsDirectory = Path.Combine(DataDirectory, "llama-servers");
         SettingsFilePath = Path.Combine(SettingsDirectory, "settings.json");
         SecretsFilePath = Path.Combine(SettingsDirectory, "secrets.json");
@@ -25,7 +24,6 @@ public sealed class MockAppPaths : IAppPaths, IDisposable
     public string SettingsDirectory { get; }
     public string ModelsDirectory { get; }
     public string LogsDirectory { get; }
-    public string LlamaServerDirectory { get; }
     public string LlamaServerInstallsDirectory { get; }
     public string SettingsFilePath { get; }
     public string SecretsFilePath { get; }

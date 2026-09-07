@@ -38,10 +38,14 @@ public interface IAppPaths
     /// <summary>Rolling log files.</summary>
     string LogsDirectory { get; }
 
-    /// <summary>Default install location for the managed <c>llama-server</c> sidecar.</summary>
-    string LlamaServerDirectory { get; }
-
-    /// <summary>Root holding all managed <c>llama-server</c> installs and their manifest.</summary>
+    /// <summary>
+    /// Root holding all managed <c>llama-server</c> installs and their manifest.
+    /// Each install is a subfolder named by its install id (e.g.
+    /// <c>b9198-win-vulkan-x64</c>) holding <c>llama-server.exe</c>. This is the
+    /// <em>only</em> llama-server location Parlotype writes; a manually downloaded
+    /// build lives wherever the user put it, recorded in
+    /// <see cref="SettingsKeys.LlamaCppServerFolder"/> (ADR-066).
+    /// </summary>
     string LlamaServerInstallsDirectory { get; }
 
     /// <summary><c>settings.json</c> — long-lived user settings.</summary>

@@ -764,6 +764,9 @@ public static class Strings
     /// <summary>Browse, install, and manage llama-server builds. The active install powers Gemma 4 transcription.</summary>
     public static string Settings_LlamaCpp_Description => Localizer.Lookup(nameof(Settings_LlamaCpp_Description));
 
+    /// <summary>Select llama-server folder</summary>
+    public static string Settings_LlamaCpp_FolderPickerTitle => Localizer.Lookup(nameof(Settings_LlamaCpp_FolderPickerTitle));
+
     /// <summary>llama.cpp</summary>
     public static string Settings_LlamaCpp_Heading => Localizer.Lookup(nameof(Settings_LlamaCpp_Heading));
 
@@ -785,6 +788,12 @@ public static class Strings
     /// <summary>Manual</summary>
     public static string Settings_LlamaCpp_ManualBadge => Localizer.Lookup(nameof(Settings_LlamaCpp_ManualBadge));
 
+    /// <summary>No folder chosen — select the folder containing llama-server.exe</summary>
+    public static string Settings_LlamaCpp_ManualFolderPlaceholder => Localizer.Lookup(nameof(Settings_LlamaCpp_ManualFolderPlaceholder));
+
+    /// <summary>Choose the folder containing llama-server.exe and click Save before switching to the manual install.</summary>
+    public static string Settings_LlamaCpp_ManualFolderRequiredError => Localizer.Lookup(nameof(Settings_LlamaCpp_ManualFolderRequiredError));
+
     /// <summary>Point at a folder containing llama-server.exe that you downloaded yourself.</summary>
     public static string Settings_LlamaCpp_ManualHint => Localizer.Lookup(nameof(Settings_LlamaCpp_ManualHint));
 
@@ -805,6 +814,15 @@ public static class Strings
 
     /// <summary>Not managed by Parlotype</summary>
     public static string Settings_LlamaCpp_NotManagedBadge => Localizer.Lookup(nameof(Settings_LlamaCpp_NotManagedBadge));
+
+    /// <summary>Uninstalling Parlotype — or re-running its installer — deletes its install folder and everything under it, including ...</summary>
+    public static string Settings_LlamaCpp_PackFolderWarningBody => Localizer.Lookup(nameof(Settings_LlamaCpp_PackFolderWarningBody));
+
+    /// <summary>⚠ This folder is erased when Parlotype is uninstalled</summary>
+    public static string Settings_LlamaCpp_PackFolderWarningHeading => Localizer.Lookup(nameof(Settings_LlamaCpp_PackFolderWarningHeading));
+
+    /// <summary>Install folder:</summary>
+    public static string Settings_LlamaCpp_PackFolderWarningPathLabel => Localizer.Lookup(nameof(Settings_LlamaCpp_PackFolderWarningPathLabel));
 
     /// <summary>Path:</summary>
     public static string Settings_LlamaCpp_PathLabel => Localizer.Lookup(nameof(Settings_LlamaCpp_PathLabel));

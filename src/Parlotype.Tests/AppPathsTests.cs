@@ -37,7 +37,6 @@ public class AppPathsTests
     [InlineData(nameof(IAppPaths.SettingsDirectory))]
     [InlineData(nameof(IAppPaths.ModelsDirectory))]
     [InlineData(nameof(IAppPaths.LogsDirectory))]
-    [InlineData(nameof(IAppPaths.LlamaServerDirectory))]
     [InlineData(nameof(IAppPaths.LlamaServerInstallsDirectory))]
     public void Directories_AreNotNestedInsideTheVelopackPackFolder(string propertyName)
     {

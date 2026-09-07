@@ -146,8 +146,9 @@ public sealed class LlamaCppConfig
     public int Port { get; init; } = 8321;
 
     /// <summary>Optional path override to the folder containing llama-server.exe.
-    /// When null, falls back to the llama-server registry or
-    /// <c>%LOCALAPPDATA%/parlotype/llama-server</c>.</summary>
+    /// When null, the active managed install from the llama-server registry is used;
+    /// if there is none, the run fails with "No llama-server is configured" rather
+    /// than probing a default folder (ADR-066).</summary>
     [JsonPropertyName("serverFolder")]
     public string? ServerFolder { get; init; }
 }

@@ -1,7 +1,6 @@
 {
   "$comment": "Hardcoded UI copy still awaiting extraction (ADR-064, localization plan phase 3). Counts may shrink, never grow. Regenerate with: pwsh scripts/check-localization.ps1 -UpdateBaseline",
   "allowedValues": [
-    "%LOCALAPPDATA%\\parlotype\\llama-server",
     "Parlotype",
     "sk-…",
     "xai-…"
