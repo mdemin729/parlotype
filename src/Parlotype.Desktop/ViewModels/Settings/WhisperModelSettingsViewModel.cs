@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Desktop.ViewModels;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -16,7 +17,7 @@ public partial class WhisperModelSettingsViewModel : SettingsSectionViewModelBas
     private readonly ISpeechRecognizer? _recognizer;
     private readonly ILogger<WhisperModelSettingsViewModel> _logger;
 
-    public override string Title => "Whisper model";
+    public override string Title => Strings.Settings_WhisperModel_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
     public override SpeechEngine? RestrictToEngine => SpeechEngine.Whisper;
 

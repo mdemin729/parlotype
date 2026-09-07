@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Parlotype.Desktop.Markup"
         xmlns:vm="using:Parlotype.Desktop.ViewModels"
         x:Class="Parlotype.Desktop.Views.ModelDownloadDialog"
         x:DataType="vm:ModelDownloadViewModel"
@@ -54,14 +55,14 @@
 
                 <!-- Cancel button (visible until download completes) -->
                 <Button Name="CancelButton"
-                        Content="Cancel"
+                        Content="{loc:Tr Common_Cancel}"
                         IsVisible="{Binding ShowCancelButton}"
                         MinWidth="90"
                         HorizontalContentAlignment="Center" />
 
                 <!-- Close button (visible only after successful completion) -->
                 <Button Name="CloseButton"
-                        Content="Close"
+                        Content="{loc:Tr Common_Close}"
                         IsVisible="{Binding ShowCloseButton}"
                         Classes="accent"
                         MinWidth="90"

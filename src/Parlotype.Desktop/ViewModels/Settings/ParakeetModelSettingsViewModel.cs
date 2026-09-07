@@ -6,6 +6,7 @@ using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Desktop.Services;
 using Parlotype.Platform.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -18,7 +19,7 @@ public partial class ParakeetModelSettingsViewModel : SettingsSectionViewModelBa
     private readonly ISpeechRecognizer? _recognizer;
     private readonly ILogger<ParakeetModelSettingsViewModel> _logger;
 
-    public override string Title => "Parakeet model";
+    public override string Title => Strings.Settings_ParakeetModel_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
     public override SpeechEngine? RestrictToEngine => SpeechEngine.Parakeet;
 

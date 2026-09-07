@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Settings;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -16,7 +17,7 @@ public partial class MicrophoneSettingsViewModel : SettingsSectionViewModelBase,
     private readonly ILogger<MicrophoneSettingsViewModel> _logger;
     private bool _initialized;
 
-    public override string Title => "Microphone";
+    public override string Title => Strings.Settings_Microphone_Title;
     public override SettingsCategory Category => SettingsCategory.Audio;
 
     public ObservableCollection<MicrophoneDisplayItem> AvailableMicrophones { get; } = [];

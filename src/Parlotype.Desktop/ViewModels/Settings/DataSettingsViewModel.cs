@@ -6,6 +6,7 @@ using Parlotype.Core.LlamaServer;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Desktop.Services;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -32,7 +33,7 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
     /// <summary>Guards against the initial settings load echoing back as a user edit.</summary>
     private bool _loading = true;
 
-    public override string Title => "Data";
+    public override string Title => Strings.Settings_Data_Title;
     public override SettingsCategory Category => SettingsCategory.Application;
 
     [ObservableProperty]
@@ -133,9 +134,8 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
 
             RevertTo(!value);
             StatusMessage = value
-                ? "Could not save that preference. Uninstalling will still keep your data."
-                : "Could not save that preference — uninstalling will still delete your "
-                  + "downloaded models, settings and API keys. Please try again.";
+                ? Strings.Settings_Data_SaveFailed_Keep
+                : Strings.Settings_Data_SaveFailed_Delete;
         }
         finally
         {
@@ -165,8 +165,8 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
             return;
 
         PathActionMessage = await _shell.CopyTextAsync(_paths.DataDirectory)
-            ? "Path copied to the clipboard."
-            : "Could not copy the path.";
+            ? Strings.Settings_Data_PathCopied
+            : Strings.Settings_Data_PathCopyFailed;
     }
 
     [RelayCommand]
@@ -177,7 +177,7 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
 
         PathActionMessage = await _shell.OpenDirectoryAsync(_paths.DataDirectory)
             ? null
-            : "Could not open the folder.";
+            : Strings.Settings_Data_OpenFolderFailed;
     }
 
     /// <summary>
@@ -191,12 +191,10 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
             return;
 
         var confirmed = await _dialogs.ShowConfirmationAsync(
-            "Delete downloaded models?",
-            $"This removes {ModelsSizeText} from {_paths.ModelsDirectory}.\n\n"
-            + "Your settings and API keys are kept. Models download again automatically "
-            + "the next time you dictate.",
-            "Delete models",
-            "Cancel");
+            Strings.Settings_Data_DeleteDialog_Title,
+            Strings.Format_Settings_Data_DeleteDialog_BodyFormat(ModelsSizeText, _paths.ModelsDirectory),
+            Strings.Settings_Data_DeleteDialog_Confirm,
+            Strings.Common_Cancel);
 
         if (!confirmed)
             return;
@@ -218,13 +216,12 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
                 await Task.Run(() => Directory.Delete(_paths.ModelsDirectory, recursive: true));
 
             _logger.LogInformation("Deleted downloaded models from {Directory}", _paths.ModelsDirectory);
-            StatusMessage = "Downloaded models deleted.";
+            StatusMessage = Strings.Settings_Data_ModelsDeleted;
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to delete downloaded models");
-            StatusMessage = "Could not delete every file — something is still using it. "
-                + "Restart Parlotype and try again.";
+            StatusMessage = Strings.Settings_Data_DeleteFailed;
         }
         finally
         {
@@ -251,7 +248,7 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
 
     private static string Describe(long bytes) => bytes switch
     {
-        <= 0 => "Nothing downloaded",
+        <= 0 => Strings.Settings_Data_NothingDownloaded,
         < 1024L * 1024 => $"{bytes / 1024d:F0} KB",
         < 1024L * 1024 * 1024 => $"{bytes / 1024d / 1024d:F0} MB",
         _ => $"{bytes / 1024d / 1024d / 1024d:F1} GB",

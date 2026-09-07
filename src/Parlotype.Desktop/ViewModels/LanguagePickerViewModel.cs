@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels;
 
@@ -17,13 +18,20 @@ namespace Parlotype.Desktop.ViewModels;
 /// </summary>
 public sealed partial class LanguagePickerViewModel : ObservableObject
 {
+    private readonly Func<string> _getHeader;
     private readonly Func<IReadOnlyList<LanguageInfo>> _getSupported;
     private readonly Func<IReadOnlyList<string>> _getRecents;
     private readonly Func<string?> _getSelectedCode;
     private readonly Action<string> _onSelect;
     private readonly Func<IReadOnlyList<LanguageSpecialRow>> _getSpecials;
 
-    public string Header { get; }
+    /// <summary>
+    /// The popover's title ("You speak" / "Translate to"). A callback, not a
+    /// snapshot — like every other input here — so <see cref="Refresh"/> can
+    /// re-read it after an interface-language switch (ADR-064 amendment).
+    /// </summary>
+    [ObservableProperty]
+    private string _header;
 
     public ObservableCollection<LanguageDisplayItem> Items { get; } = [];
 
@@ -44,7 +52,7 @@ public sealed partial class LanguagePickerViewModel : ObservableObject
     private bool _showSearch;
 
     /// <summary>Empty-state line naming the query (spec §6).</summary>
-    public string NoResultsText => $"No languages match \"{Filter.Trim()}\".";
+    public string NoResultsText => Strings.Format_Language_Picker_NoResultsFormat(Filter.Trim());
 
     /// <summary>
     /// Drives the popover's open state. Owned by the parent section, set when it
@@ -57,14 +65,15 @@ public sealed partial class LanguagePickerViewModel : ObservableObject
     partial void OnFilterChanged(string value) => Refresh();
 
     public LanguagePickerViewModel(
-        string header,
+        Func<string> getHeader,
         Func<IReadOnlyList<LanguageInfo>> getSupported,
         Func<IReadOnlyList<string>> getRecents,
         Func<string?> getSelectedCode,
         Action<string> onSelect,
         Func<IReadOnlyList<LanguageSpecialRow>>? getSpecials = null)
     {
-        Header = header;
+        _getHeader = getHeader;
+        _header = getHeader();
         _getSupported = getSupported;
         _getRecents = getRecents;
         _getSelectedCode = getSelectedCode;
@@ -80,6 +89,8 @@ public sealed partial class LanguagePickerViewModel : ObservableObject
     /// </summary>
     public void Refresh()
     {
+        Header = _getHeader();
+
         var supported = _getSupported();
         var selectedCode = _getSelectedCode() ?? "";
 

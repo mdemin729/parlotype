@@ -10,14 +10,10 @@ public enum WaitTimeOption
 
 public static class WaitTimeOptionExtensions
 {
-    public static string GetDisplayName(this WaitTimeOption option) => option switch
-    {
-        WaitTimeOption.Medium => "Medium",
-        WaitTimeOption.Long => "Long",
-        WaitTimeOption.Extended => "Extended",
-        WaitTimeOption.VeryLong => "Very Long",
-        _ => option.ToString()
-    };
+    // GetDisplayName moved to Parlotype.Desktop (WaitTimeDisplayItem) in ADR-064.
+    // "Medium", "Long", "Very Long" are prose shown to the user and have to be
+    // translated; Core has no resources and no business holding UI copy. What
+    // stays here is the part the pipeline actually runs on.
 
     public static double GetSeconds(this WaitTimeOption option) => option switch
     {

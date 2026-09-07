@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -17,7 +18,7 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
     private readonly IWhisperRuntimeStatus? _runtimeStatus;
     private readonly ILogger<RuntimeSettingsViewModel> _logger;
 
-    public override string Title => "Whisper runtime";
+    public override string Title => Strings.Settings_WhisperRuntime_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
     public override SpeechEngine? RestrictToEngine => SpeechEngine.Whisper;
 
@@ -39,7 +40,20 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
 
     /// <summary>Name of the runtime currently loaded in this process, if any.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RestartRequiredNote))]
     private string? _loadedRuntimeName;
+
+    /// <summary>
+    /// The full "restart to switch runtime" sentence.
+    /// </summary>
+    /// <remarks>
+    /// Composed here rather than in markup: it used to be five <c>&lt;Run&gt;</c>
+    /// elements with the two runtime names interleaved, which is a sentence no
+    /// translator can reorder (ADR-064). One composite format costs the bold on
+    /// the two names and buys a string that works in any language.
+    /// </remarks>
+    public string RestartRequiredNote =>
+        Strings.Format_Settings_Runtime_RestartNoteFormat(LoadedRuntimeName, SelectedRuntime);
 
     public RuntimeSettingsViewModel(
         ISettingsService settings,
@@ -55,14 +69,14 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
 
         RuntimeOptions =
         [
-            new(RuntimePreference.Auto, "Auto",
-                "Try Vulkan, then fall back to CPU. Recommended.",
+            new(RuntimePreference.Auto, Strings.Settings_Runtime_Auto_Name,
+                Strings.Settings_Runtime_Auto_Description,
                 SelectRuntimeCommand),
-            new(RuntimePreference.Vulkan, "Vulkan",
-                "Any GPU via Vulkan (AMD, Intel, NVIDIA). Requires GPU drivers with Vulkan support.",
+            new(RuntimePreference.Vulkan, Strings.Settings_Runtime_Vulkan_Name,
+                Strings.Settings_Runtime_Vulkan_Description,
                 SelectRuntimeCommand),
-            new(RuntimePreference.Cpu, "CPU",
-                "Force CPU-only inference. Always works but slower for larger models.",
+            new(RuntimePreference.Cpu, Strings.Settings_Runtime_Cpu_Name,
+                Strings.Settings_Runtime_Cpu_Description,
                 SelectRuntimeCommand),
         ];
 
@@ -113,7 +127,7 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
                     item.IsAvailable = vulkan.HasVulkanLoader;
                     item.UnavailableReason = vulkan.HasVulkanLoader
                         ? null
-                        : "Vulkan loader (vulkan-1.dll) not detected. Install GPU drivers or the Vulkan SDK.";
+                        : Strings.Settings_Runtime_VulkanUnavailableReason;
                     break;
                 default:
                     item.IsAvailable = true;
@@ -150,5 +164,38 @@ public partial class RuntimeSettingsViewModel : SettingsSectionViewModelBase
     {
         _logger.LogInformation("Opening Vulkan SDK page: {Url}", VulkanSdkUrl);
         Process.Start(new ProcessStartInfo(VulkanSdkUrl) { UseShellExecute = true });
+    }
+
+    /// <summary>
+    /// The runtime cards capture their localized name/description once, at
+    /// construction, into <see cref="RuntimeDisplayItem"/> fields rather than
+    /// binding <c>{loc:Tr}</c> directly, and <see cref="RestartRequiredNote"/>
+    /// is only re-raised on <see cref="LoadedRuntimeName"/> changing — so a live
+    /// language switch has to rewrite all of it here (ADR-064 amendment).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        foreach (var item in RuntimeOptions)
+        {
+            (item.DisplayName, item.Description) = item.Type switch
+            {
+                RuntimePreference.Auto =>
+                    (Strings.Settings_Runtime_Auto_Name, Strings.Settings_Runtime_Auto_Description),
+                RuntimePreference.Vulkan =>
+                    (Strings.Settings_Runtime_Vulkan_Name, Strings.Settings_Runtime_Vulkan_Description),
+                RuntimePreference.Cpu =>
+                    (Strings.Settings_Runtime_Cpu_Name, Strings.Settings_Runtime_Cpu_Description),
+                _ => (item.DisplayName, item.Description),
+            };
+
+            // Only Vulkan currently has an unavailable reason to restate (see
+            // RefreshAvailabilityAsync); everything else stays null.
+            if (item.Type == RuntimePreference.Vulkan && !item.IsAvailable)
+                item.UnavailableReason = Strings.Settings_Runtime_VulkanUnavailableReason;
+        }
+
+        OnPropertyChanged(nameof(RestartRequiredNote));
     }
 }

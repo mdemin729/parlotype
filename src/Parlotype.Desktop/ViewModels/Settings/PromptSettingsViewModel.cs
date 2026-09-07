@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -18,7 +19,7 @@ public partial class PromptSettingsViewModel : SettingsSectionViewModelBase
     private readonly IPromptTemplateRegistry _registry;
     private readonly ILogger<PromptSettingsViewModel> _logger;
 
-    public override string Title => "Prompts";
+    public override string Title => Strings.Settings_Prompts_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
     public override SpeechEngine? RestrictToEngine => SpeechEngine.Gemma4;
 
@@ -121,7 +122,7 @@ public partial class PromptSettingsViewModel : SettingsSectionViewModelBase
 
         var copy = new PromptTemplate(
             Id: Guid.NewGuid().ToString("n"),
-            Name: $"{source.Name} (copy)",
+            Name: Strings.Format_Settings_Prompts_CopySuffixFormat(source.Name),
             Text: source.Text);
 
         await _registry.AddOrUpdateAsync(copy);

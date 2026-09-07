@@ -60,6 +60,22 @@ public class App : Application
 
         _services = BuildServiceProvider();
 
+        // Before any view model is resolved (ADR-064): sections compose labels
+        // from resources in their constructors, so the culture has to be settled
+        // first or the first frame is drawn in the wrong language. Blocking is
+        // deliberate and cheap — one settings read, and there is nothing sensible
+        // to paint until it answers.
+        //
+        // Split in two on purpose. The settings read goes through Task.Run
+        // because JsonFileStore awaits without ConfigureAwait(false): its
+        // continuations would post back to the Avalonia synchronisation context
+        // installed on this thread, which is the thread GetResult() is blocking —
+        // a deadlock before the first window. The culture is then applied here,
+        // on the UI thread, because that is the thread that reads resources.
+        var uiLanguage = _services.GetRequiredService<UiLanguageService>();
+        var storedLanguage = Task.Run(() => uiLanguage.ReadStoredLanguageAsync()).GetAwaiter().GetResult();
+        uiLanguage.ApplyLanguage(storedLanguage);
+
         DataContext = _services.GetRequiredService<AppViewModel>();
 
         var themeVm = _services.GetRequiredService<ThemeSettingsViewModel>();
@@ -374,6 +390,7 @@ public class App : Application
         services.AddSingleton<LlamaCppSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();
+        services.AddSingleton<InterfaceLanguageSettingsViewModel>();
         services.AddSingleton<StartupSettingsViewModel>();
         services.AddSingleton<UpdateSettingsViewModel>();
         services.AddSingleton<DataSettingsViewModel>();
@@ -386,6 +403,7 @@ public class App : Application
         services.AddSingleton<IWindowManager, WindowManager>();
         services.AddSingleton<IUserDialogService, UserDialogService>();
         services.AddSingleton<IShellService, ShellService>();
+        services.AddSingleton<UiLanguageService>();
         services.AddSingleton<HotkeyCoordinator>();
         services.AddSingleton<ParentProcessExitWatcher>();
         services.AddSingleton<OnboardingHighlightService>();

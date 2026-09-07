@@ -2,12 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              x:Class="Parlotype.Desktop.Views.Settings.RuntimeSettingsView"
              x:DataType="vms:RuntimeSettingsViewModel"
              x:CompileBindings="True">
     <StackPanel Spacing="12">
-        <TextBlock Text="Runtime" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Text="Choose which Whisper.net backend runs the speech model. Changes take effect after restart."
+        <TextBlock Text="{loc:Tr Settings_WhisperRuntime_Title}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_Runtime_Description}"
                    Opacity="0.7"
                    TextWrapping="Wrap" />
 
@@ -56,22 +57,17 @@
         <Border Background="#33808080" CornerRadius="6" Padding="12"
                 IsVisible="{Binding RestartRequired}">
             <StackPanel Spacing="4">
-                <TextBlock Text="Restart required" FontWeight="SemiBold" FontSize="14" />
-                <TextBlock TextWrapping="Wrap" Opacity="0.7">
-                    <Run Text="This session is already running the" />
-                    <Run Text="{Binding LoadedRuntimeName}" FontWeight="SemiBold" />
-                    <Run Text="runtime. Whisper picks its runtime once per launch, so restart Parlotype to switch to" />
-                    <Run Text="{Binding SelectedRuntime}" FontWeight="SemiBold" />
-                    <Run Text="— until then, recording will not start." />
-                </TextBlock>
+                <TextBlock Text="{loc:Tr Settings_Runtime_RestartHeading}" FontWeight="SemiBold" FontSize="14" />
+                <TextBlock TextWrapping="Wrap" Opacity="0.7"
+                           Text="{Binding RestartRequiredNote}" />
             </StackPanel>
         </Border>
 
         <!-- Vulkan loader missing -->
         <StackPanel Spacing="4" IsVisible="{Binding VulkanLoaderMissing}" Margin="0,8,0,0">
-            <TextBlock Text="Vulkan loader (vulkan-1.dll) was not detected on this system."
+            <TextBlock Text="{loc:Tr Settings_Runtime_VulkanMissing}"
                        Opacity="0.7" TextWrapping="Wrap" />
-            <Button Content="Download Vulkan SDK →"
+            <Button Content="{loc:Tr Settings_Runtime_DownloadVulkanSdkButton}"
                     Command="{Binding OpenVulkanSdkLinkCommand}"
                     Padding="12,6"
                     Margin="0,4,0,0"

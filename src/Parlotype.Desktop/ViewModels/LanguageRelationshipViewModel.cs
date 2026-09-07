@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels;
 
@@ -159,6 +160,14 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         _settings = settings;
         _keyboardLayout = keyboardLayout;
         _logger = logger ?? NullLogger<LanguageRelationshipViewModel>.Instance;
+
+        // Not a settings section, so there is no OnCultureChanged hook to
+        // override — subscribe directly. Shared by two surfaces (the Language
+        // page and the Transcribe flyout), both of which bind these computed
+        // properties, so without this an interface-language switch leaves the
+        // tooltip, summary sentence, and source/target labels in whatever
+        // language they were last rendered in (ADR-064 amendment).
+        Localizer.Instance.CultureChanged += (_, _) => NotifyLocalizedDerived();
     }
 
     // ----- Derived state -------------------------------------------------
@@ -192,9 +201,9 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     {
         ConnectorState.Locked => UnavailableNote,
         ConnectorState.Paused =>
-            $"Translation paused — \"{WhisperModelDisplayName}\" can't translate",
-        ConnectorState.On => "Turn translation off",
-        _ => "Turn translation on",
+            Strings.Format_Language_Connector_PausedTooltipFormat(WhisperModelDisplayName),
+        ConnectorState.On => Strings.Language_Connector_TurnOffTooltip,
+        _ => Strings.Language_Connector_TurnOnTooltip,
     };
 
     // Boolean projections of TargetForm / Connector for Classes.* and IsVisible
@@ -225,28 +234,29 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     /// <summary>Label for the toggle-form switch (e.g. "Translate to English").</summary>
     public string ToggleSwitchLabel =>
         Capabilities.FixedTranslationTargets.Count > 0
-            ? $"Translate to {LanguageCatalog.GetEnglishName(Capabilities.FixedTranslationTargets[0].Code)}"
-            : "Translate";
+            ? Strings.Format_Language_ToggleSwitch_TranslateToFormat(
+                LanguageCatalog.GetEnglishName(Capabilities.FixedTranslationTargets[0].Code))
+            : Strings.Language_ToggleSwitch_Translate;
 
     /// <summary>Amber inline note for the none form, naming the model (spec §4).</summary>
     public string UnavailableNote =>
-        $"{EngineDisplayName} can't translate — Parlotype types exactly what you say.";
+        Strings.Format_Language_UnavailableNoteFormat(EngineDisplayName);
 
     /// <summary>Resting label for the source card.</summary>
     public string SourceDisplayLabel =>
-        LanguageCatalog.IsKeyboardLayout(SourceCode) ? "System keyboard layout"
-        : LanguageCatalog.IsAutoDetect(SourceCode) ? "Auto-detect"
+        LanguageCatalog.IsKeyboardLayout(SourceCode) ? Strings.Language_Source_KeyboardLayout
+        : LanguageCatalog.IsAutoDetect(SourceCode) ? Strings.Language_Source_AutoDetect
         : LanguageCatalog.GetDisplayLabel(SourceCode);
 
     /// <summary>Sub-hint under the source label (spec §3).</summary>
     public string SourceSubHint =>
         LanguageCatalog.IsKeyboardLayout(SourceCode)
             ? DetectedKeyboardLayout is { } layout
-                ? $"Detected: {layout.FriendlyName}"
-                : "Layout detection unavailable — auto-detecting instead"
+                ? Strings.Format_Language_Source_DetectedFormat(layout.FriendlyName)
+                : Strings.Language_Source_LayoutUnavailable
         : LanguageCatalog.IsAutoDetect(SourceCode)
-            ? "Let the model identify the language"
-            : "Spoken language";
+            ? Strings.Language_Source_AutoDetectHint
+            : Strings.Language_Source_SpokenLanguageHint;
 
     /// <summary>
     /// Resting label for the target card. While translation is off the output
@@ -256,7 +266,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     public string TargetDisplayLabel =>
         TranslationEnabled && !LanguageCatalog.IsNoTranslation(TargetCode)
             ? LanguageCatalog.GetDisplayLabel(TargetCode)
-            : "Same as source";
+            : Strings.Language_Target_SameAsSource;
 
     /// <summary>Plain-language restatement of the relationship (spec §7).</summary>
     public string SummaryText
@@ -267,9 +277,9 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
                 LanguageCatalog.IsKeyboardLayout(SourceCode)
                     ? DetectedKeyboardLayout is { } layout
                         ? LanguageCatalog.GetEnglishName(layout.LanguageCode)
-                        : "your keyboard language"
+                        : Strings.Language_Summary_YourKeyboardLanguage
                 : LanguageCatalog.IsAutoDetect(SourceCode)
-                    ? "any language"
+                    ? Strings.Language_Summary_AnyLanguage
                     : LanguageCatalog.GetEnglishName(SourceCode);
 
             var translating = TranslationEnabled
@@ -278,10 +288,10 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
             var typed = translating
                 ? LanguageCatalog.GetEnglishName(TargetCode)
                 : IsTranslationPaused
-                    ? $"{spoken} (translation paused)"
-                    : $"{spoken} (no translation)";
+                    ? Strings.Format_Language_Summary_TranslationPausedFormat(spoken)
+                    : Strings.Format_Language_Summary_NoTranslationFormat(spoken);
 
-            return $"You speak {spoken} → Parlotype types {typed}.";
+            return Strings.Format_Language_Summary_Format(spoken, typed);
         }
     }
 
@@ -305,8 +315,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
     /// offending model and the way out.
     /// </summary>
     public string TranslationPausedNote =>
-        $"Translation is paused — \"{WhisperModelDisplayName}\" is transcription-only. " +
-        "Pick Medium or Large v1/v2/v3 to resume.";
+        Strings.Format_Language_TranslationPausedNoteFormat(WhisperModelDisplayName);
 
     /// <summary>Per-role MRU for the source picker's Recent cluster.</summary>
     public IReadOnlyList<string> SourceRecent => _sourceRecent;
@@ -489,7 +498,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         {
             var previous = LanguageCatalog.GetEnglishName(SourceCode);
             SourceCode = LanguageCatalog.KeyboardLayoutCode;
-            ShowToast($"{previous} isn't a source in {engineName}. Using your keyboard layout.");
+            ShowToast(Strings.Format_Language_Toast_SourceUnsupportedFormat(previous, engineName));
             _ = PersistAsync(SettingsKeys.SelectedSourceLanguage, SourceCode);
         }
 
@@ -497,7 +506,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         {
             case TranslationForm.None when TranslationEnabled:
                 TranslationEnabled = false;
-                ShowToast($"{engineName} can't translate — output now matches your spoken language.");
+                ShowToast(Strings.Format_Language_Toast_EngineCannotTranslateFormat(engineName));
                 _ = PersistTranslationStateAsync();
                 break;
 
@@ -511,8 +520,8 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
                     // Only explain when the change is user-visible right now; a
                     // resting target behind a disabled connector resets silently.
                     if (TranslationEnabled)
-                        ShowToast($"{previous} isn't available in {engineName}. " +
-                                  $"Translation set to {LanguageCatalog.GetEnglishName(only)}.");
+                        ShowToast(Strings.Format_Language_Toast_TargetUnsupportedFormat(
+                            previous, engineName, LanguageCatalog.GetEnglishName(only)));
                     _ = PersistTranslationStateAsync();
                 }
                 break;
@@ -523,7 +532,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
                 {
                     TargetCode = DefaultTargetCode();
                     if (TranslationEnabled)
-                        ShowToast($"Previous target reset — not supported by {engineName}.");
+                        ShowToast(Strings.Format_Language_Toast_TargetResetFormat(engineName));
                     _ = PersistTranslationStateAsync();
                 }
                 break;
@@ -544,8 +553,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
 
         if (IsTranslationPaused && !wasPaused)
         {
-            ShowToast($"\"{WhisperModelDisplayName}\" can't translate — translation is " +
-                      "paused until you pick a multilingual model.");
+            ShowToast(Strings.Format_Language_Toast_ModelPausedFormat(WhisperModelDisplayName));
         }
     }
 
@@ -667,6 +675,25 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         OnPropertyChanged(nameof(ToggleSwitchLabel));
         OnPropertyChanged(nameof(UnavailableNote));
         OnPropertyChanged(nameof(TargetDisplayLabel));
+    }
+
+    /// <summary>
+    /// Re-raises every computed property whose text comes from <c>Strings.*</c>,
+    /// so a live language switch refreshes them instead of leaving stale text
+    /// bound wherever they were last rendered (ADR-064 amendment). Engine/model
+    /// names (<see cref="EngineDisplayName"/>, catalog display names) are
+    /// deliberately excluded — those are identifiers, not resx copy.
+    /// </summary>
+    private void NotifyLocalizedDerived()
+    {
+        OnPropertyChanged(nameof(ConnectorTooltip));
+        OnPropertyChanged(nameof(ToggleSwitchLabel));
+        OnPropertyChanged(nameof(UnavailableNote));
+        OnPropertyChanged(nameof(SourceDisplayLabel));
+        OnPropertyChanged(nameof(SourceSubHint));
+        OnPropertyChanged(nameof(TargetDisplayLabel));
+        OnPropertyChanged(nameof(SummaryText));
+        OnPropertyChanged(nameof(TranslationPausedNote));
     }
 
     private static string EngineName(SpeechEngine engine) => engine switch

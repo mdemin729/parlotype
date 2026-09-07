@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              x:Class="Parlotype.Desktop.Views.ApiKeyBox"
              x:Name="Root"
              x:CompileBindings="True">
@@ -102,7 +103,7 @@
                           HorizontalContentAlignment="Center"
                           VerticalContentAlignment="Center"
                           Focusable="False"
-                          ToolTip.Tip="Show / hide key">
+                          ToolTip.Tip="{loc:Tr ApiKeyBox_ShowHideTooltip}">
                 <Panel>
                     <PathIcon Name="EyeShow" Data="{StaticResource EyeShowGeometry}" Width="14" Height="14" />
                     <PathIcon Name="EyeHide" Data="{StaticResource EyeHideGeometry}" Width="14" Height="14" />

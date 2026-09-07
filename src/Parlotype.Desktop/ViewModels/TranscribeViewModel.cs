@@ -7,6 +7,7 @@ using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Core.TextInjection;
 using Parlotype.Desktop.Services;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels;
 
@@ -17,6 +18,35 @@ namespace Parlotype.Desktop.ViewModels;
 /// </summary>
 public partial class TranscribeViewModel : ViewModelBase
 {
+    /// <summary>
+    /// What <see cref="StatusText"/> currently says, independent of language —
+    /// tracked so an interface-language switch can recompute the visible text
+    /// instead of leaving whatever was rendered in the previous language
+    /// (ADR-064 amendment). <see cref="StatusText"/> itself stays a plain
+    /// stored string because most of the app only ever needs to display it,
+    /// never re-derive it.
+    /// </summary>
+    private enum StatusKind
+    {
+        Ready,
+        LoadingModel,
+        Recording,
+        Cancelled,
+        RuntimeRestartRequired,
+        RuntimeUnavailable,
+        CloudNotConfigured,
+        CloudKeyRejected,
+        CloudQuotaExceeded,
+        CloudRateLimited,
+        CloudProviderUnavailable,
+        CloudFailed,
+    }
+
+    private StatusKind _statusKind = StatusKind.Ready;
+
+    /// <summary>The runtime name substituted into the two Runtime* kinds; unused otherwise.</summary>
+    private object? _statusParam;
+
     private readonly IAudioPipeline? _pipeline;
     private readonly ITextInjectionService? _textInjectionService;
     private readonly IAudioLevelProvider? _audioLevelProvider;
@@ -63,7 +93,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private const float RmsDecay = 0.05f;
 
     [ObservableProperty]
-    private string _statusText = "Ready";
+    private string _statusText = Strings.Transcribe_Status_Ready;
 
     [ObservableProperty]
     private bool _isRecording;
@@ -121,8 +151,8 @@ public partial class TranscribeViewModel : ViewModelBase
     /// <summary>Persistent transparency badge text naming the active cloud provider (ADR-032), or null when local.</summary>
     public string? CloudProviderLabel => ActiveEngine switch
     {
-        SpeechEngine.OpenAiCompatible => "Cloud: OpenAI-compatible",
-        SpeechEngine.XaiGrok => "Cloud: xAI Grok",
+        SpeechEngine.OpenAiCompatible => Strings.Transcribe_CloudProvider_OpenAiCompatible,
+        SpeechEngine.XaiGrok => Strings.Transcribe_CloudProvider_XaiGrok,
         _ => null,
     };
 
@@ -168,6 +198,49 @@ public partial class TranscribeViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Sets <see cref="StatusText"/> and remembers how to recompute it, so
+    /// <see cref="OnCultureChanged"/> can re-render it in the new language
+    /// instead of leaving stale text on screen.
+    /// </summary>
+    private void SetStatus(StatusKind kind, object? param = null)
+    {
+        _statusKind = kind;
+        _statusParam = param;
+        StatusText = ComputeStatusText(kind, param);
+    }
+
+    private static string ComputeStatusText(StatusKind kind, object? param) => kind switch
+    {
+        StatusKind.LoadingModel => Strings.Transcribe_Status_LoadingModel,
+        StatusKind.Recording => Strings.Transcribe_Status_Recording,
+        StatusKind.Cancelled => Strings.Transcribe_Status_Cancelled,
+        StatusKind.RuntimeRestartRequired => Strings.Format_Transcribe_Status_RuntimeRestartRequiredFormat(param),
+        StatusKind.RuntimeUnavailable => Strings.Format_Transcribe_Status_RuntimeUnavailableFormat(param),
+        StatusKind.CloudNotConfigured => Strings.Transcribe_Status_CloudNotConfigured,
+        StatusKind.CloudKeyRejected => Strings.Transcribe_Status_CloudKeyRejected,
+        StatusKind.CloudQuotaExceeded => Strings.Transcribe_Status_CloudQuotaExceeded,
+        StatusKind.CloudRateLimited => Strings.Transcribe_Status_CloudRateLimited,
+        StatusKind.CloudProviderUnavailable => Strings.Transcribe_Status_CloudProviderUnavailable,
+        StatusKind.CloudFailed => Strings.Transcribe_Status_CloudFailed,
+        _ => Strings.Transcribe_Status_Ready,
+    };
+
+    /// <summary>
+    /// Re-renders everything this VM composes in C# after an interface-language
+    /// switch (ADR-064 amendment). Text reaching the screen through
+    /// <c>{loc:Tr}</c> updates itself; this is for the rest — see the
+    /// localization skill.
+    /// </summary>
+    private void OnCultureChanged()
+    {
+        StatusText = ComputeStatusText(_statusKind, _statusParam);
+        OnPropertyChanged(nameof(CloudProviderLabel));
+        OnPropertyChanged(nameof(SourceShort));
+        OnPropertyChanged(nameof(TargetShort));
+        TargetPicker?.Refresh();
+    }
+
     partial void OnRecordingStateChanged(RecordingState value)
     {
         IsLoading = value == RecordingState.Loading;
@@ -202,6 +275,12 @@ public partial class TranscribeViewModel : ViewModelBase
         _dialogService = dialogService;
         _logger = logger ?? NullLogger<TranscribeViewModel>.Instance;
 
+        // This VM is not a settings section, so it has no OnCultureChanged hook
+        // to override — subscribe directly, matching TranscribeViewModel's
+        // status/badge/chip text being composed in C# rather than {loc:Tr}
+        // (ADR-064 amendment).
+        Localizer.Instance.CultureChanged += (_, _) => OnCultureChanged();
+
         // Self-sufficient badge state at startup: the Transcribe window is
         // created before (and independently of) the Settings window, so waiting
         // for SpeechEngineSettingsViewModel's push would leave a cloud engine
@@ -215,7 +294,7 @@ public partial class TranscribeViewModel : ViewModelBase
         if (_relationship is not null)
         {
             TargetPicker = new LanguagePickerViewModel(
-                header: "Translate to",
+                getHeader: () => Strings.Transcribe_TargetPicker_Header,
                 getSupported: () => _relationship.TargetLanguages,
                 getRecents: () => _relationship.TargetRecent,
                 getSelectedCode: () => _relationship.TranslationEnabled
@@ -224,7 +303,7 @@ public partial class TranscribeViewModel : ViewModelBase
                 onSelect: SelectTargetFromFlyout,
                 getSpecials: () =>
                     [new LanguageSpecialRow(
-                        LanguageCatalog.NoTranslationCode, "Off — no translation",
+                        LanguageCatalog.NoTranslationCode, Strings.Transcribe_TargetPicker_Off,
                         SubHint: null, LanguageRowIcon.Off)]);
 
             _relationship.PropertyChanged += OnRelationshipPropertyChanged;
@@ -282,9 +361,9 @@ public partial class TranscribeViewModel : ViewModelBase
             {
                 return _relationship.DetectedKeyboardLayout is { } layout
                     ? LanguageCatalog.GetEnglishName(layout.LanguageCode)
-                    : "Keyboard";
+                    : Strings.Transcribe_Source_Keyboard;
             }
-            return LanguageCatalog.IsAutoDetect(code) ? "Auto" : LanguageCatalog.GetEnglishName(code);
+            return LanguageCatalog.IsAutoDetect(code) ? Strings.Transcribe_Source_Auto : LanguageCatalog.GetEnglishName(code);
         }
     }
 
@@ -453,7 +532,7 @@ public partial class TranscribeViewModel : ViewModelBase
                 && !_cancelRequested)
             {
                 RecordingState = RecordingState.Loading;
-                StatusText = "Loading model...";
+                SetStatus(StatusKind.LoadingModel);
             }
 
             await startTask;
@@ -470,7 +549,7 @@ public partial class TranscribeViewModel : ViewModelBase
 
             IsRecording = true;
             RecordingState = RecordingState.Idle;
-            StatusText = "Recording...";
+            SetStatus(StatusKind.Recording);
         }
         catch (RuntimeUnavailableException ex)
         {
@@ -483,9 +562,9 @@ public partial class TranscribeViewModel : ViewModelBase
             RecordingState = RecordingState.Disabled;
             // A latched runtime is not a broken machine — the fix is a restart, not
             // a different setting, so say so instead of sending the user to Settings.
-            StatusText = ex.RequiresRestart
-                ? $"Restart Parlotype to use the {ex.Requested} runtime"
-                : $"{ex.Requested} runtime not available — change in Settings";
+            SetStatus(
+                ex.RequiresRestart ? StatusKind.RuntimeRestartRequired : StatusKind.RuntimeUnavailable,
+                ex.Requested);
         }
         catch (CloudProviderNotConfiguredException ex)
         {
@@ -500,7 +579,7 @@ public partial class TranscribeViewModel : ViewModelBase
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
             RecordingState = RecordingState.Disabled;
-            StatusText = "Cloud provider not configured";
+            SetStatus(StatusKind.CloudNotConfigured);
 
             // Fire-and-forget on purpose: StopRecordingAsync awaits _startTask
             // (ADR-039), so awaiting a modal dialog here would make a
@@ -516,7 +595,7 @@ public partial class TranscribeViewModel : ViewModelBase
                 _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
             IsRecording = false;
             RecordingState = RecordingState.Disabled;
-            StatusText = "Ready";
+            SetStatus(StatusKind.Ready);
         }
     }
 
@@ -534,10 +613,10 @@ public partial class TranscribeViewModel : ViewModelBase
         try
         {
             var openSettings = await _dialogService.ShowConfirmationAsync(
-                "Cloud provider not configured",
-                ex.Message,
-                confirmText: "Open settings",
-                cancelText: "Cancel");
+                Strings.Dialog_CloudNotConfigured_Title,
+                CloudErrorText.NotConfigured(ex),
+                confirmText: Strings.Common_OpenSettings,
+                cancelText: Strings.Common_Cancel);
 
             if (openSettings)
                 _windowManager.ShowSettings(SettingsSection.CloudProviders);
@@ -599,7 +678,7 @@ public partial class TranscribeViewModel : ViewModelBase
             _cancelRequested = true;
             DetachPipelineHandlers();
             ResetRecordingState();
-            StatusText = "Cancelled";
+            SetStatus(StatusKind.Cancelled);
             return;
         }
 
@@ -619,7 +698,7 @@ public partial class TranscribeViewModel : ViewModelBase
         finally
         {
             ResetRecordingState();
-            StatusText = "Cancelled";
+            SetStatus(StatusKind.Cancelled);
         }
     }
 
@@ -660,7 +739,7 @@ public partial class TranscribeViewModel : ViewModelBase
         RecordingState = RecordingState.Disabled;
         AudioLevel = 0f;
         _smoothedRms = 0f;
-        StatusText = "Ready";
+        SetStatus(StatusKind.Ready);
     }
 
     private async void OnTranscriptionAvailable(object? sender, TranscriptionEventArgs e)
@@ -698,14 +777,14 @@ public partial class TranscribeViewModel : ViewModelBase
 
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            StatusText = cloudEx.Kind switch
+            SetStatus(cloudEx.Kind switch
             {
-                CloudSpeechErrorKind.KeyRejected => "Cloud API key rejected — check Settings",
-                CloudSpeechErrorKind.QuotaExceeded => "Cloud quota exceeded — check plan & billing",
-                CloudSpeechErrorKind.RateLimited => "Cloud rate limit reached — try again shortly",
-                CloudSpeechErrorKind.ProviderUnavailable => "Cloud provider unavailable — try again shortly",
-                _ => "Cloud transcription failed",
-            };
+                CloudSpeechErrorKind.KeyRejected => StatusKind.CloudKeyRejected,
+                CloudSpeechErrorKind.QuotaExceeded => StatusKind.CloudQuotaExceeded,
+                CloudSpeechErrorKind.RateLimited => StatusKind.CloudRateLimited,
+                CloudSpeechErrorKind.ProviderUnavailable => StatusKind.CloudProviderUnavailable,
+                _ => StatusKind.CloudFailed,
+            });
 
             if (_isCloudErrorDialogOpen)
                 return;
@@ -730,17 +809,20 @@ public partial class TranscribeViewModel : ViewModelBase
             if (ex.Kind == CloudSpeechErrorKind.KeyRejected)
             {
                 var openSettings = await _dialogService.ShowConfirmationAsync(
-                    "Cloud transcription failed",
-                    ex.Message,
-                    confirmText: "Open settings",
-                    cancelText: "Cancel");
+                    Strings.Dialog_CloudTranscriptionFailed_Title,
+                    CloudErrorText.Transcription(ex),
+                    confirmText: Strings.Common_OpenSettings,
+                    cancelText: Strings.Common_Cancel);
 
                 if (openSettings)
                     _windowManager.ShowSettings(SettingsSection.CloudProviders);
             }
             else
             {
-                await _dialogService.ShowMessageAsync("Cloud transcription failed", ex.Message, "OK");
+                await _dialogService.ShowMessageAsync(
+                    Strings.Dialog_CloudTranscriptionFailed_Title,
+                    CloudErrorText.Transcription(ex),
+                    Strings.Common_Ok);
             }
         }
         catch (Exception dialogEx)

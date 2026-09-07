@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              x:Class="Parlotype.Desktop.Views.Settings.LanguagePickerView"
              x:DataType="vm:LanguagePickerViewModel"
              x:CompileBindings="True">
@@ -36,7 +37,7 @@
             <!-- Search appears only for long lists (> 8 entries). -->
             <TextBox x:Name="SearchBox"
                      Text="{Binding Filter, Mode=TwoWay}"
-                     PlaceholderText="Search languages…"
+                     PlaceholderText="{loc:Tr Language_Picker_SearchPlaceholder}"
                      IsVisible="{Binding ShowSearch}" />
 
             <!-- Empty state: centred icon at 50% + the query named. -->

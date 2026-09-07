@@ -134,7 +134,9 @@ public class LanguageSelectionSettingsViewModelTests
 
         vm.OpenSourcePickerCommand.Execute(null);
 
-        Assert.Equal("Layout detection unavailable", vm.SourcePicker.Items[0].SecondaryText);
+        // Same key as the resting source card's sub-hint (Language_Source_LayoutUnavailable) —
+        // ADR-064 amendment reused it here rather than a near-duplicate string.
+        Assert.Equal("Layout detection unavailable — auto-detecting instead", vm.SourcePicker.Items[0].SecondaryText);
     }
 
     [Fact]
@@ -380,7 +382,7 @@ public class LanguagePickerViewModelShortListTests
 
     private static LanguagePickerViewModel CreatePicker(IReadOnlyList<LanguageInfo> supported) =>
         new(
-            header: "Test",
+            getHeader: () => "Test",
             getSupported: () => supported,
             getRecents: () => ["fr"],
             getSelectedCode: () => "en",

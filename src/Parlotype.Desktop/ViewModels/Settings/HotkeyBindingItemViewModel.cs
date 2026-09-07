@@ -12,9 +12,13 @@ public sealed partial class HotkeyBindingItemViewModel : ObservableObject
 {
     public DictationHotkey Hotkey { get; }
 
-    public string DisplayString => Hotkey.DisplayString;
+    /// <summary>
+    /// Localized (ADR-064). Core's <c>Hotkey.DisplayString</c> is the invariant
+    /// form the logs use; this is the one the window shows.
+    /// </summary>
+    public string DisplayString => HotkeyText.Gesture(Hotkey.Gesture);
 
-    public string ModeLabel => Hotkey.ModeLabel;
+    public string ModeLabel => HotkeyText.Mode(Hotkey.Mode);
 
     /// <summary>
     /// Only chords work in both modes. A hold has to be push-to-talk and a
@@ -35,5 +39,17 @@ public sealed partial class HotkeyBindingItemViewModel : ObservableObject
         Hotkey = hotkey;
         RemoveCommand = removeCommand;
         ToggleModeCommand = toggleModeCommand;
+    }
+
+    /// <summary>
+    /// Re-raises the localized display strings after an interface-language
+    /// switch (ADR-064 amendment). <see cref="DisplayString"/>/<see cref="ModeLabel"/>
+    /// already recompute on every read; nothing tells a bound view to re-read
+    /// them without this.
+    /// </summary>
+    public void RefreshDisplay()
+    {
+        OnPropertyChanged(nameof(DisplayString));
+        OnPropertyChanged(nameof(ModeLabel));
     }
 }

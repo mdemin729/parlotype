@@ -17,8 +17,8 @@ public sealed class CloudBaseUrlValidatorTests
     [InlineData("  https://api.x.ai/v1  ")]
     public void TryValidate_Accepts(string? baseUrl)
     {
-        Assert.True(CloudBaseUrlValidator.TryValidate(baseUrl, out var error));
-        Assert.Null(error);
+        Assert.True(CloudBaseUrlValidator.TryValidate(baseUrl, out var failure));
+        Assert.Null(failure);
     }
 
     [Theory]
@@ -30,14 +30,26 @@ public sealed class CloudBaseUrlValidatorTests
     [InlineData("api.openai.com/v1")]              // relative / schemeless
     public void TryValidate_Rejects(string baseUrl)
     {
-        Assert.False(CloudBaseUrlValidator.TryValidate(baseUrl, out var error));
-        Assert.False(string.IsNullOrWhiteSpace(error));
+        Assert.False(CloudBaseUrlValidator.TryValidate(baseUrl, out var failure));
+        Assert.NotNull(failure);
+        Assert.False(string.IsNullOrWhiteSpace(failure.Value.Description));
+    }
+
+    [Fact]
+    public void TryValidate_RejectsUnsupportedScheme_CarriesTheScheme()
+    {
+        // The scheme is data on the failure, not a substring of a sentence, so
+        // the UI can put it wherever its language wants it (ADR-064 amendment).
+        Assert.False(CloudBaseUrlValidator.TryValidate("ftp://example.com/v1", out var failure));
+        Assert.Equal(CloudBaseUrlError.UnsupportedScheme, failure!.Value.Error);
+        Assert.Equal("ftp", failure.Value.Scheme);
     }
 
     [Fact]
     public void TryValidate_RejectsRemoteHttp_WithActionableReason()
     {
-        Assert.False(CloudBaseUrlValidator.TryValidate("http://api.example.com/v1", out var error));
-        Assert.Contains("localhost", error);
+        Assert.False(CloudBaseUrlValidator.TryValidate("http://api.example.com/v1", out var failure));
+        Assert.Equal(CloudBaseUrlError.PlainHttpNotLoopback, failure!.Value.Error);
+        Assert.Contains("localhost", failure.Value.Description);
     }
 }

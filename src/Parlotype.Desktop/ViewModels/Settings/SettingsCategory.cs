@@ -1,3 +1,5 @@
+using Parlotype.Desktop.Resources;
+
 namespace Parlotype.Desktop.ViewModels.Settings;
 
 /// <summary>
@@ -17,11 +19,11 @@ public static class SettingsCategoryExtensions
 {
     public static string GetDisplayName(this SettingsCategory category) => category switch
     {
-        SettingsCategory.Audio => "Audio",
-        SettingsCategory.SpeechEngine => "Speech engine",
-        SettingsCategory.Input => "Input",
-        SettingsCategory.Appearance => "Appearance",
-        SettingsCategory.Application => "Application",
+        SettingsCategory.Audio => Strings.Settings_Category_Audio,
+        SettingsCategory.SpeechEngine => Strings.Settings_Category_SpeechEngine,
+        SettingsCategory.Input => Strings.Settings_Category_Input,
+        SettingsCategory.Appearance => Strings.Settings_Category_Appearance,
+        SettingsCategory.Application => Strings.Settings_Category_Application,
         _ => category.ToString(),
     };
 }

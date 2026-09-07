@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -14,7 +15,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private readonly ISettingsService _settings;
     private readonly ILogger<HotkeySettingsViewModel> _logger;
 
-    public override string Title => "Hotkeys";
+    public override string Title => Strings.Settings_Hotkeys_Title;
     public override SettingsCategory Category => SettingsCategory.Input;
 
     /// <summary>The configured gestures, in list order.</summary>
@@ -31,7 +32,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private bool _isRecording;
 
     [ObservableProperty]
-    private string _recorderText = "Record a chord…";
+    private string _recorderText = Strings.Settings_Hotkeys_Recorder_Idle;
 
     /// <summary>Reserved-shortcut or duplicate message; the offending binding was rejected.</summary>
     [ObservableProperty]
@@ -40,6 +41,15 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     /// <summary>Advisory note about a binding that was accepted anyway.</summary>
     [ObservableProperty]
     private string? _advisoryWarning;
+
+    /// <summary>
+    /// The candidate + conflict behind whichever of <see cref="BlockingWarning"/>
+    /// / <see cref="AdvisoryWarning"/> is currently set, so
+    /// <see cref="OnCultureChanged"/> can re-render the message instead of
+    /// leaving it in the language it was first shown in (ADR-064 amendment).
+    /// Null whenever both warnings are clear.
+    /// </summary>
+    private (DictationHotkey Candidate, HotkeyConflict Conflict)? _lastWarning;
 
     public bool HasBindings => Bindings.Count > 0;
 
@@ -103,7 +113,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private void StartRecording()
     {
         IsRecording = true;
-        RecorderText = "Press a key combination…";
+        RecorderText = Strings.Settings_Hotkeys_Recorder_Listening;
         ClearWarnings();
     }
 
@@ -111,7 +121,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     private void StopRecording()
     {
         IsRecording = false;
-        RecorderText = "Record a chord…";
+        RecorderText = Strings.Settings_Hotkeys_Recorder_Idle;
     }
 
     [RelayCommand]
@@ -168,16 +178,22 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
         var existing = Bindings.Select(b => b.Hotkey).ToList();
         var conflict = HotkeyConflictDetector.Check(candidate, existing);
 
+        // The warning the user reads is built here from the conflict's reason;
+        // conflict.Description is the invariant form, which is what the log wants.
         if (conflict.IsBlocking)
         {
-            BlockingWarning = conflict.Description;
+            _lastWarning = (candidate, conflict);
+            BlockingWarning = HotkeyText.Conflict(candidate, conflict);
             _logger.LogInformation("Rejected hotkey {Binding}: {Reason}",
                 candidate.DisplayString, conflict.Description);
             return;
         }
 
         if (conflict.HasMessage)
-            AdvisoryWarning = conflict.Description;
+        {
+            _lastWarning = (candidate, conflict);
+            AdvisoryWarning = HotkeyText.Conflict(candidate, conflict);
+        }
 
         Bindings.Add(CreateItem(candidate));
         Commit();
@@ -187,6 +203,39 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
     {
         BlockingWarning = null;
         AdvisoryWarning = null;
+        _lastWarning = null;
+    }
+
+    /// <summary>
+    /// Existing rows compute <c>DisplayString</c>/<c>ModeLabel</c> fresh on every
+    /// read but raise nothing on their own, the recorder prompt and any warning
+    /// are stored strings rather than <c>{loc:Tr}</c> bindings, and the "Add"
+    /// menu's preset rows are bound once by a flyout that reuses its item
+    /// containers — so a live language switch has to touch all three
+    /// (ADR-064 amendment).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        RecorderText = IsRecording
+            ? Strings.Settings_Hotkeys_Recorder_Listening
+            : Strings.Settings_Hotkeys_Recorder_Idle;
+
+        if (_lastWarning is { } warning)
+        {
+            var message = HotkeyText.Conflict(warning.Candidate, warning.Conflict);
+            if (warning.Conflict.IsBlocking)
+                BlockingWarning = message;
+            else
+                AdvisoryWarning = message;
+        }
+
+        foreach (var binding in Bindings)
+            binding.RefreshDisplay();
+
+        foreach (var preset in Presets)
+            preset.RefreshDisplay();
     }
 
     private void Commit()

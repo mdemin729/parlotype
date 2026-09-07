@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Parlotype.Core.Settings;
 using Parlotype.Platform.Startup;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -25,7 +26,7 @@ public partial class StartupSettingsViewModel : SettingsSectionViewModelBase
     /// </summary>
     private bool _suppressWrite = true;
 
-    public override string Title => "Startup";
+    public override string Title => Strings.Settings_Startup_Title;
     public override SettingsCategory Category => SettingsCategory.Application;
 
     [ObservableProperty]
@@ -121,11 +122,11 @@ public partial class StartupSettingsViewModel : SettingsSectionViewModelBase
         }
 
         StatusText = !IsSupported
-            ? "This build cannot start itself at sign-in — it was not installed from Setup.exe."
+            ? Strings.Settings_Startup_State_NotInstalled
             : IsBlockedByWindows
-                ? "Windows has Parlotype switched off in Task Manager → Startup apps. Re-enable it there to let this setting take effect."
+                ? Strings.Settings_Startup_State_BlockedByWindows
                 : effective
-                    ? "Parlotype starts with Windows and waits in the tray — no window opens."
-                    : "Parlotype only runs when you start it yourself.";
+                    ? Strings.Settings_Startup_State_Enabled
+                    : Strings.Settings_Startup_State_Disabled;
     }
 }

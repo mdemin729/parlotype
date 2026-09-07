@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Desktop.ViewModels;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -15,7 +16,7 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     private readonly ISpeechRecognizer? _recognizer;
     private readonly ILogger<SpeechEngineSettingsViewModel> _logger;
 
-    public override string Title => "Engine";
+    public override string Title => Strings.Settings_Engine_Title;
     public override SettingsCategory Category => SettingsCategory.SpeechEngine;
 
     public SpeechEngineDisplayItem[] EngineOptions { get; }
@@ -76,20 +77,20 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
 
         EngineOptions =
         [
-            new(SpeechEngine.Parakeet, "Parakeet v3 (Recommended)",
-                "NVIDIA Parakeet via ONNX. ~670 MB download. 25 European languages, auto-detected. Fastest engine — runs on any CPU, no GPU needed. No translation.",
+            new(SpeechEngine.Parakeet, Strings.Settings_Engine_Parakeet_Name,
+                Strings.Settings_Engine_Parakeet_Description,
                 SelectEngineCommand),
-            new(SpeechEngine.Whisper, "Whisper",
-                "Local speech recognition via Whisper.net. Well-tested, ~99 languages, source selection and translation to English.",
+            new(SpeechEngine.Whisper, Strings.Settings_Engine_Whisper_Name,
+                Strings.Settings_Engine_Whisper_Description,
                 SelectEngineCommand),
-            new(SpeechEngine.Gemma4, "Gemma 4 (Experimental)",
-                "Google Gemma 4 E4B via llama.cpp. Requires ~10 GB download. English only. Best on clean speech.",
+            new(SpeechEngine.Gemma4, Strings.Settings_Engine_Gemma4_Name,
+                Strings.Settings_Engine_Gemma4_Description,
                 SelectEngineCommand),
-            new(SpeechEngine.OpenAiCompatible, "OpenAI-compatible (Cloud)",
-                "Cloud transcription via your own OpenAI, Groq, or compatible API key. Audio is sent to the configured provider — nothing runs locally. Fast even on weak hardware. Opt-in; configure your key under Cloud providers below.",
+            new(SpeechEngine.OpenAiCompatible, Strings.Settings_Engine_OpenAiCompatible_Name,
+                Strings.Settings_Engine_OpenAiCompatible_Description,
                 SelectEngineCommand),
-            new(SpeechEngine.XaiGrok, "xAI Grok (Cloud)",
-                "xAI Grok Speech-to-Text via your own xAI API key. Audio is sent to xAI — nothing runs locally. Fast even on weak hardware. Opt-in; configure your key under Cloud providers below.",
+            new(SpeechEngine.XaiGrok, Strings.Settings_Engine_XaiGrok_Name,
+                Strings.Settings_Engine_XaiGrok_Description,
                 SelectEngineCommand),
         ];
 
@@ -98,6 +99,35 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
 
     /// <summary>Parameterless constructor for designer support only.</summary>
     public SpeechEngineSettingsViewModel() : this(new DesignSettingsService()) { }
+
+    /// <summary>
+    /// The engine cards capture their localized name/description once, at
+    /// construction, into <see cref="SpeechEngineDisplayItem"/> fields rather
+    /// than binding <c>{loc:Tr}</c> directly — so a live language switch has to
+    /// rewrite them here rather than update on its own (ADR-064 amendment).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        foreach (var item in EngineOptions)
+        {
+            (item.DisplayName, item.Description) = item.Type switch
+            {
+                SpeechEngine.Parakeet =>
+                    (Strings.Settings_Engine_Parakeet_Name, Strings.Settings_Engine_Parakeet_Description),
+                SpeechEngine.Whisper =>
+                    (Strings.Settings_Engine_Whisper_Name, Strings.Settings_Engine_Whisper_Description),
+                SpeechEngine.Gemma4 =>
+                    (Strings.Settings_Engine_Gemma4_Name, Strings.Settings_Engine_Gemma4_Description),
+                SpeechEngine.OpenAiCompatible =>
+                    (Strings.Settings_Engine_OpenAiCompatible_Name, Strings.Settings_Engine_OpenAiCompatible_Description),
+                SpeechEngine.XaiGrok =>
+                    (Strings.Settings_Engine_XaiGrok_Name, Strings.Settings_Engine_XaiGrok_Description),
+                _ => (item.DisplayName, item.Description),
+            };
+        }
+    }
 
     private async Task InitializeAsync()
     {

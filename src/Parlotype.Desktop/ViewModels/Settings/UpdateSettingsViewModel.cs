@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Updates;
+using Parlotype.Desktop.Resources;
 
 namespace Parlotype.Desktop.ViewModels.Settings;
 
@@ -25,20 +26,20 @@ public partial class UpdateSettingsViewModel : SettingsSectionViewModelBase
     /// <summary>Guards against the initial settings load echoing back as a user edit.</summary>
     private bool _loading = true;
 
-    public override string Title => "Updates";
+    public override string Title => Strings.Settings_Updates_Title;
     public override SettingsCategory Category => SettingsCategory.Application;
 
     [ObservableProperty]
     private bool _checkAutomatically = true;
 
     [ObservableProperty]
-    private string _statusText = "Not checked yet.";
+    private string _statusText = Strings.Settings_Updates_Status_NotChecked;
 
     [ObservableProperty]
-    private string _lastCheckedText = "Never";
+    private string _lastCheckedText = Strings.Settings_Updates_Never;
 
     [ObservableProperty]
-    private string _currentVersionText = "development build";
+    private string _currentVersionText = Strings.Settings_Updates_DevelopmentBuild;
 
     /// <summary>True once an update is downloaded and only a restart is missing.</summary>
     [ObservableProperty]
@@ -77,7 +78,7 @@ public partial class UpdateSettingsViewModel : SettingsSectionViewModelBase
         CheckAutomatically = !bool.TryParse(saved, out var enabled) || enabled;
         _loading = false;
 
-        CurrentVersionText = _updates.CurrentVersion ?? "development build";
+        CurrentVersionText = _updates.CurrentVersion ?? Strings.Settings_Updates_DevelopmentBuild;
     }
 
     partial void OnCheckAutomaticallyChanged(bool value)
@@ -129,25 +130,25 @@ public partial class UpdateSettingsViewModel : SettingsSectionViewModelBase
 
         StatusText = status.State switch
         {
-            UpdateState.Idle => "Not checked yet.",
-            UpdateState.NotInstalled =>
-                "This build cannot update itself — it was not installed from Setup.exe.",
-            UpdateState.Checking => "Checking for updates…",
-            UpdateState.UpToDate => "Parlotype is up to date.",
+            UpdateState.Idle => Strings.Settings_Updates_Status_NotChecked,
+            UpdateState.NotInstalled => Strings.Settings_Updates_Status_NotInstalled,
+            UpdateState.Checking => Strings.Settings_Updates_Status_Checking,
+            UpdateState.UpToDate => Strings.Settings_Updates_Status_UpToDate,
             UpdateState.UpdateAvailable => status.Message
-                ?? $"Version {status.AvailableVersion} is available.",
-            UpdateState.Downloading => $"Downloading version {status.AvailableVersion}…",
+                ?? Strings.Format_Settings_Updates_Status_AvailableFormat(status.AvailableVersion),
+            UpdateState.Downloading =>
+                Strings.Format_Settings_Updates_Status_DownloadingFormat(status.AvailableVersion),
             // Staged, not installed. It applies as Parlotype closes; the button
             // just brings that forward. Saying "restart" alone would be a promise
             // an ordinary quit-and-relaunch does not keep (ADR-053).
             UpdateState.ReadyToApply =>
-                $"Version {status.AvailableVersion} is downloaded. It installs when you quit Parlotype.",
-            UpdateState.Failed => status.Message ?? "The update check failed.",
+                Strings.Format_Settings_Updates_Status_ReadyFormat(status.AvailableVersion),
+            UpdateState.Failed => status.Message ?? Strings.Settings_Updates_Status_Failed,
             _ => string.Empty,
         };
 
         LastCheckedText = status.LastCheckedUtc is { } checkedAt
             ? checkedAt.ToLocalTime().ToString("f")
-            : "Never";
+            : Strings.Settings_Updates_Never;
     }
 }
