@@ -1,3 +1,4 @@
+using Parlotype.Core.Settings;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels.Settings;
 using Xunit;
@@ -81,8 +82,88 @@ public class LlamaCppSettingsViewModelTests
         await Task.Delay(200, TestContext.Current.CancellationToken);
 
         Assert.Equal("8321", vm.PortText);
-        Assert.Contains("parlotype", vm.ServerFolder);
-        Assert.Contains("llama-server", vm.ServerFolder);
+        Assert.Equal("", vm.ServerFolder);
+        Assert.Equal("", await settings.GetAsync<string>(
+            SettingsKeys.LlamaCppServerFolder, TestContext.Current.CancellationToken));
+    }
+
+
+    [Fact]
+    public async Task StoredPackFolderPath_IsFlaggedButLeftAlone()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        // Exactly what a real settings.json in the wild carries, left behind by the
+        // old placeholder.
+        var legacy = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "parlotype", "llama-server");
+
+        var settings = new MockSettingsService();
+        await settings.SetAsync(
+            SettingsKeys.LlamaCppServerFolder, legacy, TestContext.Current.CancellationToken);
+
+        var vm = new LlamaCppSettingsViewModel(settings);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
+
+        Assert.True(vm.IsServerFolderInsidePackFolder);
+
+        // Not migrated: repointing at parlotype-data would break a manual install
+        // whose binaries really are at the old path (ADR-065).
+        Assert.Equal(legacy, vm.ServerFolder);
+        Assert.Equal(legacy, await settings.GetAsync<string>(
+            SettingsKeys.LlamaCppServerFolder, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task UnconfiguredManualFolder_StaysEmpty()
+    {
+        var settings = new MockSettingsService();
+        var vm = new LlamaCppSettingsViewModel(settings);
+
+        await Task.Delay(200, TestContext.Current.CancellationToken);
+
+        // No default to pre-fill with (ADR-066): an empty box is the honest
+        // rendering of "you have not chosen a manual build".
+        Assert.Equal("", vm.ServerFolder);
+        Assert.False(vm.IsServerFolderInsidePackFolder);
+    }
+
+    [Fact]
+    public async Task SaveSettings_EmptyFolder_SavesPortWithoutError()
+    {
+        var settings = new MockSettingsService();
+        var vm = new LlamaCppSettingsViewModel(settings);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
+
+        // The regression this guards: with the box empty by default, rejecting an
+        // empty folder would block every managed-install user from saving a port.
+        vm.PortText = "9100";
+        vm.ServerFolder = "";
+        vm.SaveSettingsCommand.Execute(null);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
+
+        Assert.Null(vm.ErrorMessage);
+        Assert.Equal("9100", await settings.GetAsync<string>(
+            SettingsKeys.LlamaCppPort, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void EditingTheFolderBox_UpdatesTheWarningLive()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var vm = new LlamaCppSettingsViewModel(new MockSettingsService());
+
+        vm.ServerFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Parlotype", "current");
+        Assert.True(vm.IsServerFolderInsidePackFolder);
+
+        vm.ServerFolder = @"C:\tools\llama";
+        Assert.False(vm.IsServerFolderInsidePackFolder);
     }
 
     [Fact]

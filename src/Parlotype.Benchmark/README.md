@@ -190,7 +190,7 @@ server. The two blocks are mutually exclusive — provide one or the other.
 |-------|---------|-------------|
 | `modelId` | `gemma-4-E4B-it-Q4_K_M` | Gemma 4 GGUF catalog ID. Valid IDs: `gemma-4-E2B-it-Q8_0`, `gemma-4-E2B-it-BF16`, `gemma-4-E4B-it-Q4_K_M`, `gemma-4-E4B-it-Q8_0`, `gemma-4-E4B-it-BF16` |
 | `port` | `8321` | Localhost port for the llama-server process |
-| `serverFolder` | auto | Optional path to the folder containing `llama-server.exe`. When omitted, falls back to the llama-server registry or `%LOCALAPPDATA%/parlotype/llama-server` |
+| `serverFolder` | auto | Optional path to the folder containing `llama-server.exe`. When omitted, the active managed install from the llama-server registry is used; with no managed install and no `serverFolder`, the run fails with "No llama-server is configured" |
 
 **Prerequisites:**
 1. llama-server installed via **Settings → llama.cpp** in the Parlotype Desktop app

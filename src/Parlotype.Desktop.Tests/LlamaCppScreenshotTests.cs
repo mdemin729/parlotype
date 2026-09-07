@@ -66,7 +66,7 @@ public class LlamaCppScreenshotTests : IClassFixture<LlamaCppScreenshotReportFix
         var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
         steps.Add(new ScenarioStep(
             "Initial state: No llama-server running. Status shows \"Not probed\". " +
-            "Port defaults to 8321. Server binary path is shown. " +
+            "Port defaults to 8321. The manual folder box is empty until a build is chosen. " +
             "User can click Refresh to probe the server, or change the port/path.",
             screenshot));
 
@@ -170,6 +170,53 @@ public class LlamaCppScreenshotTests : IClassFixture<LlamaCppScreenshotReportFix
         _report.AddScenario(new Scenario(
             "Connected — Server Properties Displayed",
             "llama-server is running and healthy. All server properties are shown in a clean form layout.",
+            steps));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_ManualFolderInsideThePackFolder()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var settings = new MockSettingsService();
+        var vm = new LlamaCppSettingsViewModel(settings);
+        await SettleAsync();
+
+        var steps = new List<ScenarioStep>();
+
+        // Step 1: unconfigured — empty box, placeholder showing, no warning.
+        var view1 = new LlamaCppSettingsView();
+        var screenshot1 = await ScreenshotHelper.CaptureBase64Async(view1, vm);
+        Assert.Equal("", vm.ServerFolder);
+        Assert.False(vm.IsServerFolderInsidePackFolder);
+        steps.Add(new ScenarioStep(
+            "No manual build chosen — the normal state for anyone on a managed install. "
+            + "The box is empty and shows its placeholder rather than pre-filling a path "
+            + "nothing ever created (ADR-066).",
+            screenshot1));
+
+        // Step 2: the value a real settings.json in the wild carries, left behind by the
+        // old placeholder that pointed at the Velopack pack folder.
+        vm.ServerFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "parlotype", "llama-server");
+        await SettleAsync();
+
+        var view2 = new LlamaCppSettingsView();
+        var screenshot2 = await ScreenshotHelper.CaptureBase64Async(view2, vm);
+        Assert.True(vm.IsServerFolderInsidePackFolder);
+        steps.Add(new ScenarioStep(
+            "The folder is inside %LOCALAPPDATA%\\Parlotype — the Velopack pack folder, which "
+            + "uninstalling or re-running Setup.exe erases. An amber panel says so and names "
+            + "the folder. The path is left exactly as stored: Parlotype does not repoint or "
+            + "move a build the user downloaded themselves (ADR-065).",
+            screenshot2));
+
+        _report.AddScenario(new Scenario(
+            "Manual Install Inside the Pack Folder",
+            "A manually downloaded llama-server build is configured under the folder Velopack "
+            + "deletes on uninstall — the situation the pre-ADR-065 placeholder steered users into.",
             steps));
     }
 

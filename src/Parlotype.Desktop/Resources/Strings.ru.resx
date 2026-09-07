@@ -1303,4 +1303,22 @@
     <comment>{0} is the result of Hotkey_Hint_TalkFormat/DictateFormat. "Esc" is a key name — use whatever that key is called on a keyboard in this language, usually "Esc".</comment>
     <value>{0} · Esc — отменить</value>
   </data>
+  <data name="Settings_LlamaCpp_ManualFolderPlaceholder" xml:space="preserve">
+    <value>Папка не выбрана — укажите папку с llama-server.exe</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualFolderRequiredError" xml:space="preserve">
+    <value>Укажите папку с llama-server.exe и нажмите «Сохранить», прежде чем переключаться на установку вручную.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningHeading" xml:space="preserve">
+    <value>⚠ Эта папка удаляется вместе с Parlotype</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningBody" xml:space="preserve">
+    <value>Удаление Parlotype — как и повторный запуск установщика — стирает папку установки со всем её содержимым, включая эту сборку llama-server. Перенесите сборку в другое место и укажите здесь новый путь.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningPathLabel" xml:space="preserve">
+    <value>Папка установки:</value>
+  </data>
+  <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
+    <value>Выберите папку llama-server</value>
+  </data>
 </root>

@@ -239,12 +239,35 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBox Grid.Column="0"
                              Text="{Binding ServerFolder, Mode=TwoWay}"
-                             PlaceholderText="%LOCALAPPDATA%\parlotype\llama-server"
+                             PlaceholderText="{loc:Tr Settings_LlamaCpp_ManualFolderPlaceholder}"
                              Margin="0,0,8,0" />
                     <Button Grid.Column="1" Content="{loc:Tr Settings_LlamaCpp_BrowseButton}"
                             Command="{Binding BrowseServerFolderCommand}"
                             Padding="12,6" />
                 </Grid>
+
+                <!-- The folder the user chose sits inside the Velopack pack folder,
+                     which the uninstaller and a re-run of Setup.exe both wipe.
+                     Warn only — the build is theirs to move (ADR-065). -->
+                <Border IsVisible="{Binding IsServerFolderInsidePackFolder}"
+                        Background="#33FF8C00" CornerRadius="4" Padding="10">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{loc:Tr Settings_LlamaCpp_PackFolderWarningHeading}"
+                                   FontWeight="SemiBold" FontSize="12" />
+                        <TextBlock Text="{loc:Tr Settings_LlamaCpp_PackFolderWarningBody}"
+                                   TextWrapping="Wrap" Opacity="0.8" FontSize="12" />
+                        <!-- The path is a value, not part of the sentence: a mid-sentence
+                             substitution would need a grammatical case Russian marks and
+                             English does not. -->
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,2,0,0">
+                            <TextBlock Text="{loc:Tr Settings_LlamaCpp_PackFolderWarningPathLabel}"
+                                       FontWeight="SemiBold" FontSize="12" Opacity="0.8" />
+                            <TextBlock Text="{Binding PackFolderRoot}" FontSize="12" Opacity="0.8"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip.Tip="{Binding PackFolderRoot}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Border>
 

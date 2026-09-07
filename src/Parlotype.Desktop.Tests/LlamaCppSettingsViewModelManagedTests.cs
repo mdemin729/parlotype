@@ -172,6 +172,92 @@ public sealed class LlamaCppSettingsViewModelManagedTests : IDisposable
     }
 
     [AvaloniaFact]
+    public async Task SaveSettings_ClearingTheFolderWhileManualIsActive_DropsTheManualSelection()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await _settings.SetAsync(SettingsKeys.LlamaCppActiveInstall, "manual", ct);
+        await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, @"C:\my-llama", ct);
+
+        var vm = NewVm();
+        await WaitForAsync(() => vm.IsManualActive);
+
+        vm.ServerFolder = "";
+        await vm.SaveSettingsCommand.ExecuteAsync(null);
+
+        // A manual selector over an empty folder resolves to nothing, so the badge
+        // and radio must not keep claiming Manual is active — a recording started
+        // from that state fails as unconfigured.
+        Assert.Null(await _registry.GetActiveAsync(ct));
+        Assert.False(vm.IsManualActive);
+        Assert.False(vm.IsManagedActive);
+    }
+
+    [AvaloniaFact]
+    public async Task SaveSettings_RestoringTheFolder_ReselectsManualOnItsOwn()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await _settings.SetAsync(SettingsKeys.LlamaCppActiveInstall, "manual", ct);
+        await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, @"C:\my-llama", ct);
+
+        var vm = NewVm();
+        await WaitForAsync(() => vm.IsManualActive);
+
+        vm.ServerFolder = "";
+        await vm.SaveSettingsCommand.ExecuteAsync(null);
+        Assert.False(vm.IsManualActive);
+
+        // Why clearing the folder does not also clear the stored selector: the user
+        // emptied a path, they did not ask to leave manual mode. Putting one back
+        // resumes where they were instead of making them pick Manual again.
+        vm.ServerFolder = @"C:\my-llama-again";
+        await vm.SaveSettingsCommand.ExecuteAsync(null);
+
+        Assert.True(vm.IsManualActive);
+        var active = await _registry.GetActiveAsync(ct);
+        Assert.Equal(LlamaServerSource.Manual, active?.Source);
+        Assert.Equal(@"C:\my-llama-again", active?.AbsolutePath);
+    }
+
+    [AvaloniaFact]
+    public async Task ResetDefaults_WhileManualIsActive_DropsTheManualSelection()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await _settings.SetAsync(SettingsKeys.LlamaCppActiveInstall, "manual", ct);
+        await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, @"C:\my-llama", ct);
+
+        var vm = NewVm();
+        await WaitForAsync(() => vm.IsManualActive);
+
+        // Reset clears the folder too, so it had the same stale-badge hole as Save.
+        await vm.ResetDefaultsCommand.ExecuteAsync(null);
+
+        Assert.Null(await _registry.GetActiveAsync(ct));
+        Assert.False(vm.IsManualActive);
+    }
+
+    [AvaloniaFact]
+    public async Task SetActiveManual_WithNoSavedFolder_RefusesAndExplains()
+    {
+        // The manual folder box now starts empty (ADR-066), so "manual active with
+        // nowhere to look" is reachable by default rather than by deliberately
+        // clearing it. Refuse at the click instead of failing at the next recording.
+        var variant = SampleVariant();
+        _catalog.SetGroups(new LlamaServerReleaseGroup("b9198", new[] { variant }));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count > 0);
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available.Single());
+        await vm.SetActiveManagedCommand.ExecuteAsync(vm.Installed.Single());
+        Assert.True(vm.IsManagedActive);
+
+        await vm.SetActiveManualCommand.ExecuteAsync(null);
+
+        Assert.False(vm.IsManualActive);
+        Assert.True(vm.IsManagedActive);
+        Assert.NotNull(vm.ErrorMessage);
+        Assert.Contains("Save", vm.ErrorMessage!, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
     public async Task CheckForUpdates_SetsBannerWhenLatestBuildExceedsActiveBuild()
     {
         var older = SampleVariant(build: "b9000");
