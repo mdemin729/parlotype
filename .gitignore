@@ -97,3 +97,11 @@ azure-trusted-signing.json
 datasets/long-audio-ladder/samples/
 datasets/long-audio-probe/samples/
 datasets/__pycache__/
+
+# Per-machine Claude Code state. The shared project config — `settings.json`
+# with its hooks, plus `agents/` and `skills/` — stays tracked.
+.claude/settings.local.json
+# Isolated checkouts the desktop app creates per session. Claude Code also adds
+# this to .git/info/exclude, which is per-clone and never pushed; here it covers
+# a fresh clone too.
+.claude/worktrees/
