@@ -2,7 +2,7 @@
 title: Parlotype Memory Vault
 type: router
 status: active
-last_updated: 2026-04-28
+last_updated: 2026-09-07
 summary: Root router for AI agent orientation in the Parlotype voice-to-text project
 ---
 
@@ -30,6 +30,7 @@ dotnet run --project src/Parlotype.Desktop      # Launch app
 | Coding conventions | [[conventions/_index]] |
 | Past design decisions | [[decisions/_index]] |
 | Session handoffs | [[sessions/_template]] |
+| Older session notes | `sessions/archive/` (>30 days, pruned from the working set) |
 | Learned knowledge | [[knowledge/_index]] |
 | Agent skills | `.claude/skills/` |
 

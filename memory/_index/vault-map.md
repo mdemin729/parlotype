@@ -38,7 +38,9 @@ memory/
 │   └── _index.md             # Links to ADRs in docs/decisions/ (29 ADRs)
 ├── sessions/                 # Episodic memory (handoff notes)
 │   ├── _template.md          # Session handoff template
-│   └── YYYY-MM-DD-HHMM-<slug>.md   # Per-session notes
+│   ├── YYYY-MM-DD-HHMM-<slug>.md   # Per-session notes (working set)
+│   └── archive/              # Notes pruned from the working set (>30 days)
+│       └── YYYY-MM-DD-HHMM-<slug>.md
 ├── knowledge/                # Semantic memory — learned facts
 │   ├── _index.md
 │   ├── agent-skills.md
@@ -75,5 +77,6 @@ memory/
 
 - Every note in `_index/`, `architecture/`, `services/`, `conventions/`, `decisions/`, and `knowledge/` carries a `last_updated: YYYY-MM-DD` field in its YAML frontmatter.
 - `sessions/` notes are **episodic** and dated by filename; they intentionally do not carry `last_updated`, and `scripts/check-staleness.sh` skips that directory.
+- `sessions/` is pruned rather than trimmed: completed notes older than **30 days** are moved to `sessions/archive/` (never deleted), keeping the working set small enough that the session-start protocol reads a short list. Notes still marked `status: active` and the five most recent are always kept. `generate-index.sh` skips everything under `sessions/`, archive included, so archived notes never register as orphans.
 - The default staleness threshold is **90 days**.
 
