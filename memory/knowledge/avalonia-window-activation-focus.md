@@ -3,7 +3,7 @@ title: Activating a window is not focusing anything in it
 type: knowledge
 tags: [avalonia, window, focus, activation, dispatcher, multi-window]
 created: 2026-08-02
-last_updated: 2026-08-02
+last_updated: 2026-09-07
 summary: Window.Activate() focuses no control inside the window, and a window shown from a queued Dispatcher.Post activates after a caller that did not yield — both bite any multi-window flow
 ---
 
@@ -62,3 +62,17 @@ ignored.
 
 Related: [[avalonia-click-event-vs-command]] for the test-harness equivalent,
 [[avalonia12-frameless-window]] for frameless-window behaviour.
+
+## 3. Topmost is not inherited by a dialog from its owner
+
+`ShowDialog(owner)` does **not** reliably make the dialog topmost just because
+the owner is. In an app whose main surface is already `Topmost="True"` — the
+Transcribe widget is — a dialog that does not set the property for itself can be
+painted *behind* its own owner on some platforms, which reads as the app hanging:
+the dialog is modal, so the owner ignores input, but the thing asking for input
+is not visible.
+
+Set `Topmost` explicitly on both. Every dialog in this codebase does:
+`ConfirmationDialog.axaml`, `ModelDownloadDialog.axaml` and
+`OnboardingWindow.axaml` each carry their own `Topmost="True"` rather than
+relying on the owner's.

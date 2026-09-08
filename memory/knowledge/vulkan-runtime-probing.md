@@ -3,7 +3,7 @@ title: Vulkan Runtime Probing on Windows
 type: knowledge
 tags: [vulkan, whisper, runtime, pinvoke, windows]
 created: 2026-05-06
-last_updated: 2026-05-06
+last_updated: 2026-09-07
 summary:Non-derivable facts about probing the Vulkan loader from .NET on Windows — version packing, VkPhysicalDeviceProperties layout, and Whisper.net's LoadedLibrary semantics.
 ---
 
@@ -53,3 +53,17 @@ Implications:
 - Pre-load checks (env-provider probes) are still needed because the factory itself may throw obscure native errors when the requested runtime can't load — wrapping those in `RuntimeUnavailableException` gives the user an actionable message.
 
 **Verification**: `Whisper.net.LibraryLoader.RuntimeOptions` and `NativeLibraryLoader.LoadNativeLibrary` in the decompiled NuGet assembly (or upstream `github.com/sandrohanea/whisper.net` at the matching tag).
+
+## 4. Shipping Vulkan needs the loader only — the SDK is a build-time tool
+
+The LunarG **Vulkan SDK is a development tool**. A runtime application needs only
+the **Vulkan loader**, `vulkan-1.dll`, which ships as part of the GPU driver on
+any machine with a Vulkan-capable card. Nothing has to be installed, detected or
+redistributed for `Whisper.net.Runtime.Vulkan` to work on a user's machine.
+
+This is the opposite of the CUDA situation and is easy to assume symmetric:
+`Whisper.net.Runtime.Cuda` bundled no cudart/cublas, so a CUDA build still
+required the **user** to have the CUDA toolkit — see
+[[whisper-cuda-runtime-packaging]]. That asymmetry is a large part of why Vulkan
+became the single shipped GPU runtime in [[decisions/_index|ADR-049]]: one ~30 MB
+package that works on AMD, Intel and NVIDIA with no user-side prerequisite.
