@@ -71,6 +71,27 @@
         </DataTemplate>
     </Window.DataTemplates>
 
+    <Window.Resources>
+        <!-- Opacity masks for the nav list's edge fades. Applied to the whole
+             list (viewport-sized, so the gradient stays put while the rows
+             scroll under it) by the code-behind, which picks the variant that
+             matches the directions still holding hidden rows. -->
+        <LinearGradientBrush x:Key="NavFadeTopMask" StartPoint="0%,0%" EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#00000000" />
+            <GradientStop Offset="0.04" Color="#FF000000" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="NavFadeBottomMask" StartPoint="0%,0%" EndPoint="0%,100%">
+            <GradientStop Offset="0.96" Color="#FF000000" />
+            <GradientStop Offset="1" Color="#00000000" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="NavFadeBothMask" StartPoint="0%,0%" EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#00000000" />
+            <GradientStop Offset="0.04" Color="#FF000000" />
+            <GradientStop Offset="0.96" Color="#FF000000" />
+            <GradientStop Offset="1" Color="#00000000" />
+        </LinearGradientBrush>
+    </Window.Resources>
+
     <Window.Styles>
         <!-- Header rows can't be selected or focused. -->
         <Style Selector="ListBoxItem.navHeader">
@@ -85,16 +106,41 @@
                DisplayMode="Inline"
                OpenPaneLength="200">
         <SplitView.Pane>
-            <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
-                    Padding="0,16">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{loc:Tr Settings_NavHeading}"
+            <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+                <!-- DockPanel, not StackPanel: a stacked list is measured with
+                     infinite height, so it never scrolls - it just grew past the
+                     bottom of the pane and hid its last rows. Docking the
+                     heading and letting the list fill what's left gives the list
+                     a real viewport to scroll inside. -->
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="{loc:Tr Settings_NavHeading}"
                                FontSize="18" FontWeight="SemiBold"
-                               Margin="20,0,0,12" />
-                    <ListBox ItemsSource="{Binding NavItems}"
+                               Margin="20,16,0,12" />
+                    <ListBox x:Name="NavList"
+                             ItemsSource="{Binding NavItems}"
                              SelectedItem="{Binding SelectedNavItem, Mode=TwoWay}"
                              Background="Transparent"
-                             BorderThickness="0">
+                             BorderThickness="0"
+                             Padding="0,0,0,16"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <!-- Stock Fluent scrollbar, deliberately: at rest it is
+                             already a visible thin line whenever the content
+                             overflows - the same one the section pane shows - so
+                             the pane needed a viewport, not a new bar. Do not
+                             pin it with ScrollViewer.AllowAutoHide="False": that
+                             snaps Fluent to its wide expanded bar with stepper
+                             arrows, which no other list in the app wears. -->
+                        <!-- Plain stack, not the virtualizing default: two dozen
+                             short rows never need recycling, and a non-estimated
+                             extent means smooth pixel scrolling and a scrollbar
+                             thumb that doesn't resize itself as it travels. -->
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
                         <ListBox.Styles>
                             <Style Selector="ListBoxItem" x:DataType="vms:SettingsNavItem">
                                 <Setter Property="Classes.navHeader" Value="{Binding IsHeader}" />
@@ -125,7 +171,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </StackPanel>
+                </DockPanel>
             </Border>
         </SplitView.Pane>
 
