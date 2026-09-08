@@ -7,7 +7,9 @@
       "Bash(git push *)",
       "Bash(dotnet test *)",
       "Bash(git stash *)",
-      "Bash(dotnet clean *)"
+      "Bash(dotnet clean *)",
+      "Read(//c/Users/Maksim/.nuget/packages/avalonia/12.0.2/lib/**)",
+      "Read(//c/Users/Maksim/.nuget/packages/avalonia.themes.fluent/12.0.2/lib/**)"
     ]
   }
 }
