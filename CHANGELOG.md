@@ -12,6 +12,83 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-09-08
+
+### Highlights
+
+- **Parlotype's interface now speaks Russian and Spanish.** Choose the language at
+  **Settings → Interface language**, or leave it on *System default* to follow
+  Windows. The change is instant — no restart — and dates and numbers keep
+  following your Windows regional settings whatever you pick.
+- **A translation that can't happen is now labelled, not faked.** Turning on
+  translate-to-English with a Whisper model that doesn't support it (the
+  English-only models and Large v3 Turbo) used to leave the language page and the
+  dictation widget showing a normal translation that then silently didn't occur.
+  Every surface now shows an amber **translation paused** instead, points at the
+  model as the reason, and leaves the toggle on — pick a multilingual model and
+  translation resumes on its own.
+- **The settings menu scrolls.** With Whisper selected the settings list is long
+  enough that **Data** and **Help** dropped off the bottom of the window, with
+  nothing on screen to suggest they were there. The list now scrolls like any
+  other.
+
+### Added
+
+- **Settings → Interface language.** *System default*, English, Русский or
+  Español. The settings pages, the dictation widget, dialogs and menus all follow
+  the choice, live.
+
+### Changed
+
+- **The llama.cpp manual-server folder box no longer steers you into a folder that
+  gets wiped.** For a hand-downloaded llama-server build (Gemma 4 → Manual
+  install), the box used to suggest `%LOCALAPPDATA%\parlotype\llama-server` —
+  which a re-run of the installer, and uninstalling, both erase. It now starts
+  empty with instructions, and warns you in amber if the folder you point it at
+  sits inside Parlotype's install area. A folder you already saved is flagged,
+  never silently rewritten.
+
+### Fixed
+
+- **Every settings page is reachable again.** The settings navigation list didn't
+  scroll, so on taller layouts — Whisper selected, at the default window size —
+  the last entries were clipped off the bottom with no scrollbar and no wheel
+  response.
+- **The language page and dictation widget no longer promise a translation the
+  engine won't perform** when the chosen Whisper model can't translate. The
+  connector, the summary sentence and the widget strip now all read "paused", in
+  amber rather than the blue of a live translation, and the toggle stays operable
+  so switching back to a capable model just works.
+
+<details>
+<summary>Under the hood</summary>
+
+Full rationale for each item is in the linked decision record.
+
+- The interface-language foundation: externalised string resources, a
+  live-switching compiled-binding layer, typed format helpers, and a parity check
+  wired into both `dotnet test` and the release gate, shipping with Russian and
+  Spanish resource files
+  ([ADR-064](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/064-ui-localization-foundation.md)).
+- Model-blocked translation is modelled as a distinct, reversible "paused" state
+  derived from a single predicate and rendered on every surface, instead of a
+  forced-off preference
+  ([ADR-061](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/061-translation-paused-state.md)).
+- Non-installed builds now bind their lifetime to the process that launched them,
+  so a killed `dotnet run`, an IDE stop, or a XAML-previewer refresh can't leave a
+  headless copy running that still answers the dictation hotkey
+  ([ADR-062](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/062-dev-parent-process-watchdog.md),
+  [ADR-063](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/063-xaml-previewer-must-not-start-the-app.md)).
+- Pack-folder detection for user-supplied paths, plus removal of the vestigial
+  `LlamaServerDirectory` that named a folder nothing ever created
+  ([ADR-065](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/065-manual-llama-server-pack-folder-warning.md),
+  [ADR-066](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/066-drop-the-vestigial-llama-server-directory.md)).
+- The settings nav list gets a real viewport from a `DockPanel`, with edge fades
+  and deep-link scroll-into-view for a reused window
+  ([ADR-067](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/067-settings-nav-pane-scrolling.md)).
+
+</details>
+
 ## [0.4.4] — 2026-08-25
 
 ### Highlights
@@ -393,7 +470,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.4.4...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.0
 [0.4.4]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.4
 [0.4.3]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.3
 [0.4.2]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.2
