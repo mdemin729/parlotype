@@ -12,6 +12,23 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-09-12
+
+### Fixed
+
+- **Picking a microphone in Settings now actually changes which one Parlotype
+  records from.** Every recording used the Windows default input device
+  regardless of what was selected under **Settings → Microphone** — the choice
+  was saved but never handed to the recorder. If you'd set a specific
+  microphone, this release makes it take effect; if the saved device is no
+  longer plugged in, Parlotype falls back to the Windows default as before.
+
+### Changed
+
+- **The recording waveform reads more clearly.** The record button and
+  waveform are slightly taller and wider to match the tapered-bar animation
+  introduced in v0.5.0.
+
 ## [0.5.0] — 2026-09-08
 
 ### Highlights
@@ -470,7 +487,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.1
 [0.5.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.0
 [0.4.4]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.4
 [0.4.3]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.3
