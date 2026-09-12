@@ -33,6 +33,21 @@ public class AudioPipelineSingleUtteranceTests
         public KeyboardLayoutInfo? Detect() => null;
     }
 
+    private sealed class FakeMicrophoneEnumerator : IMicrophoneEnumerator
+    {
+        // This double never raises device-change notifications, required by
+        // IMicrophoneEnumerator regardless.
+#pragma warning disable CS0067
+        public event EventHandler? DevicesChanged;
+#pragma warning restore CS0067
+
+        public IReadOnlyList<MicrophoneInfo> GetAvailableMicrophones() => [];
+
+        public MicrophoneInfo? GetDefaultMicrophone() => null;
+
+        public void Dispose() { }
+    }
+
     /// <summary>Reports all non-zero audio as one span, like the shipped batch-mode fake.</summary>
     private sealed class SpanVadService : IVadService
     {
@@ -140,7 +155,7 @@ public class AudioPipelineSingleUtteranceTests
         ISpeechRecognizer recognizer,
         ISettingsService settings)
         => new(capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
     /// <summary>

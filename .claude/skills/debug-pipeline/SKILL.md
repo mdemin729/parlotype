@@ -16,6 +16,7 @@ description: Use when debugging audio capture, VAD, Whisper transcription, text 
 ### 1. Audio Capture Issues
 - Check `IAudioCaptureService` / `WasapiAudioCaptureService`
 - Verify microphone is selected and accessible
+- **Wrong device used despite a Settings selection**: don't stop at "is `SettingsKeys.SelectedMicrophoneId` persisted?" — trace whether the value is actually *read back* and passed to `_capture.StartAsync(device, ct)` before assuming the enumerator or WASAPI device ID is at fault. A settings value that's written but never consumed downstream looks identical to a device-matching bug from the UI side (see `AudioPipelineService.CacheSettingsAsync` resolving it via `IMicrophoneEnumerator`, fixed 2026-09-12).
 - Check sample rate conversion to 16kHz mono float
 - Look for NAudio exceptions in `%LOCALAPPDATA%/parlotype-data/logs/`
 
