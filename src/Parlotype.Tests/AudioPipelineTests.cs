@@ -56,6 +56,27 @@ public class AudioPipelineTests
     }
 
     /// <summary>
+    /// Microphone enumerator fake: returns a settable device list, empty by
+    /// default so the "selected device no longer available" fallback path is
+    /// the default behaviour unless a test opts a device in.
+    /// </summary>
+    private sealed class FakeMicrophoneEnumerator : IMicrophoneEnumerator
+    {
+        public List<MicrophoneInfo> Microphones { get; } = [];
+
+        public event EventHandler? DevicesChanged;
+
+        public IReadOnlyList<MicrophoneInfo> GetAvailableMicrophones() => Microphones;
+
+        public MicrophoneInfo? GetDefaultMicrophone() => Microphones.FirstOrDefault(m => m.IsDefault);
+
+        /// <summary>Unused by these tests but exposed so a future test can simulate a device change.</summary>
+        public void RaiseDevicesChanged() => DevicesChanged?.Invoke(this, EventArgs.Empty);
+
+        public void Dispose() { }
+    }
+
+    /// <summary>
     /// Lightweight VAD fake: reports speech covering all non-zero samples.
     /// Returns a single segment [0..N) where N is the last non-zero sample index + 1.
     /// </summary>
@@ -184,7 +205,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         var flushed = new TaskCompletionSource<bool>();
@@ -231,7 +252,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act 1: First start — should initialize with default options (translate=false)
@@ -266,7 +287,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act
@@ -293,7 +314,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act
@@ -322,7 +343,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -346,7 +367,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -370,7 +391,7 @@ public class AudioPipelineTests
         };
 
         await using var pipeline = new AudioPipelineService(
-            capture, vad, recognizer, settings, keyboard,
+            capture, vad, recognizer, settings, keyboard, new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -391,7 +412,7 @@ public class AudioPipelineTests
         var keyboard = new FakeKeyboardLayoutService { Result = null };
 
         await using var pipeline = new AudioPipelineService(
-            capture, vad, recognizer, settings, keyboard,
+            capture, vad, recognizer, settings, keyboard, new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -417,7 +438,7 @@ public class AudioPipelineTests
         };
 
         await using var pipeline = new AudioPipelineService(
-            capture, vad, recognizer, settings, keyboard,
+            capture, vad, recognizer, settings, keyboard, new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -442,7 +463,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -467,7 +488,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         // Act: Start twice with no settings change
@@ -478,6 +499,84 @@ public class AudioPipelineTests
 
         // Assert: only initialized once (second call short-circuits)
         Assert.Single(recognizer.InitCalls);
+    }
+
+    /// <summary>
+    /// Regression: the pipeline must resolve <see cref="SettingsKeys.SelectedMicrophoneId"/>
+    /// through the enumerator and hand that exact device to the capture service, instead of
+    /// always starting capture with a null device (which silently falls back to the OS
+    /// default endpoint regardless of what the user picked in Settings).
+    /// </summary>
+    [Fact]
+    public async Task StartAsync_PassesSelectedMicrophone_ToCaptureService()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        var selected = new MicrophoneInfo("mic-anker", "Microphone (AnkerWork C310 Webcam)", IsDefault: false);
+        var microphones = new FakeMicrophoneEnumerator();
+        microphones.Microphones.Add(new MicrophoneInfo("mic-plantronics", "Headset Microphone (Plantronics Blackwire 3225 Series)", IsDefault: true));
+        microphones.Microphones.Add(selected);
+        await settings.SetAsync(SettingsKeys.SelectedMicrophoneId, selected.Id);
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(), microphones,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Equal(selected, capture.LastRequestedDevice);
+    }
+
+    /// <summary>
+    /// A saved device ID that no longer resolves (e.g. unplugged since it was selected)
+    /// must fall back to null rather than throw or wedge on a stale device — WasapiAudioCaptureService
+    /// treats null as "use the OS default capture endpoint".
+    /// </summary>
+    [Fact]
+    public async Task StartAsync_FallsBackToDefaultDevice_WhenSelectedMicrophoneIsUnavailable()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        var microphones = new FakeMicrophoneEnumerator(); // empty: saved device is not present
+        await settings.SetAsync(SettingsKeys.SelectedMicrophoneId, "mic-unplugged");
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(), microphones,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Null(capture.LastRequestedDevice);
+    }
+
+    /// <summary>No saved selection (fresh install) must also fall back to the default device.</summary>
+    [Fact]
+    public async Task StartAsync_PassesNullDevice_WhenNoMicrophoneSelected()
+    {
+        var capture = new TestAudioCaptureService();
+        await using var vad = new FakeVadService();
+        await using var recognizer = new FakeSpeechRecognizer();
+        var settings = new FakeSettingsService();
+        var microphones = new FakeMicrophoneEnumerator();
+        microphones.Microphones.Add(new MicrophoneInfo("mic-plantronics", "Headset Microphone", IsDefault: true));
+
+        await using var pipeline = new AudioPipelineService(
+            capture, vad, recognizer, settings,
+            new FakeKeyboardLayoutService(), microphones,
+            NullLogger<AudioPipelineService>.Instance);
+
+        await pipeline.StartAsync(PipelineMode.Batch);
+        await pipeline.StopAsync();
+
+        Assert.Null(capture.LastRequestedDevice);
     }
 
     [Fact]
@@ -540,7 +639,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(), logger);
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(), logger);
 
         var flushed = new TaskCompletionSource<bool>();
         pipeline.TranscriptionAvailable += (_, _) => flushed.TrySetResult(true);
@@ -589,7 +688,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         var transcriptions = 0;
@@ -618,7 +717,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         var received = new List<string>();
@@ -674,7 +773,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         var flushed = new TaskCompletionSource<bool>();
@@ -740,7 +839,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         var transcriptions = 0;
@@ -769,7 +868,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         var failures = 0;
@@ -847,7 +946,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         var received = new List<string>();
@@ -934,7 +1033,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         await pipeline.StartAsync(PipelineMode.Batch);
@@ -988,7 +1087,7 @@ public class AudioPipelineTests
 
         await using var pipeline = new AudioPipelineService(
             capture, vad, recognizer, settings,
-            new FakeKeyboardLayoutService(),
+            new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(),
             NullLogger<AudioPipelineService>.Instance);
 
         TranscriptionResult? transcription = null;
@@ -1032,10 +1131,14 @@ internal sealed class TestAudioCaptureService : IAudioCaptureService
 {
     public bool IsCapturing { get; private set; }
 
+    /// <summary>The device passed to the most recent <see cref="StartAsync"/> call.</summary>
+    public MicrophoneInfo? LastRequestedDevice { get; private set; }
+
     public event EventHandler<AudioDataEventArgs>? DataAvailable;
 
     public Task StartAsync(MicrophoneInfo? device = null, CancellationToken cancellationToken = default)
     {
+        LastRequestedDevice = device;
         IsCapturing = true;
         return Task.CompletedTask;
     }

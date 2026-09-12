@@ -36,6 +36,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     private readonly ISpeechRecognizer _recognizer;
     private readonly ISettingsService _settings;
     private readonly IKeyboardLayoutService _keyboardLayout;
+    private readonly IMicrophoneEnumerator _microphoneEnumerator;
     private readonly ILogger<AudioPipelineService> _logger;
 
     private PipelineMode _mode;
@@ -126,6 +127,14 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     /// <summary>Whisper options built from settings, cached at pipeline start.</summary>
     private WhisperOptions? _whisperOptions;
 
+    /// <summary>
+    /// Capture device resolved from <see cref="SettingsKeys.SelectedMicrophoneId"/> at
+    /// pipeline start. Null means "let the capture service pick" — either because no
+    /// microphone has been selected yet, or the saved device is no longer available
+    /// (unplugged) — which falls back to the OS default capture endpoint.
+    /// </summary>
+    private MicrophoneInfo? _selectedMicrophone;
+
     public bool IsRunning { get; private set; }
 
     public event EventHandler<TranscriptionEventArgs>? TranscriptionAvailable;
@@ -143,6 +152,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         ISpeechRecognizer recognizer,
         ISettingsService settings,
         IKeyboardLayoutService keyboardLayout,
+        IMicrophoneEnumerator microphoneEnumerator,
         ILogger<AudioPipelineService> logger)
     {
         _capture = capture;
@@ -150,6 +160,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         _recognizer = recognizer;
         _settings = settings;
         _keyboardLayout = keyboardLayout;
+        _microphoneEnumerator = microphoneEnumerator;
         _logger = logger;
     }
 
@@ -201,7 +212,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
             _transcriptionTask = Task.Run(() => TranscribeLoopAsync(_utteranceChannel.Reader, transcribeToken));
 
             _capture.DataAvailable += OnAudioDataAvailable;
-            await _capture.StartAsync(null, cancellationToken);
+            await _capture.StartAsync(_selectedMicrophone, cancellationToken);
             IsRunning = true;
             _logger.LogInformation("Pipeline starting in {Mode} mode", _mode);
         }
@@ -808,6 +819,13 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         // flag, shared RecentLanguages MRU) to TranslationEnabled + per-role MRUs.
         // Idempotent — returns early once migration has run.
         await LanguageSettingsMigrator.MigrateAsync(_settings, ct);
+
+        var micId = await _settings.GetAsync<string>(SettingsKeys.SelectedMicrophoneId, ct);
+        _selectedMicrophone = string.IsNullOrEmpty(micId)
+            ? null
+            : _microphoneEnumerator.GetAvailableMicrophones().FirstOrDefault(m => m.Id == micId);
+        if (!string.IsNullOrEmpty(micId) && _selectedMicrophone is null)
+            _logger.LogWarning("Selected microphone {DeviceId} is no longer available; falling back to system default", micId);
 
         var savedWaitTime = await _settings.GetAsync<string>(SettingsKeys.WaitTime, ct);
         var waitTime = Enum.TryParse<WaitTimeOption>(savedWaitTime, out var wt) ? wt : WaitTimeOption.Medium;
