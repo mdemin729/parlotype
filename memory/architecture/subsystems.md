@@ -187,13 +187,29 @@ Real-time visual feedback showing whether the user is speaking. See [[decisions/
 - **Desktop**: `WaveformView` custom `Control` with `DrawingContext` rendering:
   - **Disabled**: microphone icon via `StreamGeometry`
   - **Loading**: rotating 270° arc spinner (shared `_phase`) while the model loads
-  - **Idle**: 13 white bars with gentle sine-wave breathing animation
-  - **Active**: 13 white bars with decorative multi-frequency wave animation (amplitude 0.6 default)
+  - **Idle/Active**: 15 fine rounded bars, tapered to a softer silhouette at the
+    edges, driven by `WaveformAnimation` (below) — silence settles into
+    stationary dots with no breathing animation
   - 60 fps `DispatcherTimer`, attached/detached with visual tree
+- **`WaveformAnimation`** (internal, `Views/WaveformAnimation.cs`) — time-based envelope
+  and bar heights, decoupled from rendering so it's unit-testable (see amendment,
+  [[decisions/_index|ADR-023]]):
+  - Maps RMS through a continuous logarithmic response — no fallback amplitude, no
+    discontinuity at the silence threshold
+  - 65ms attack / 85ms release exponential envelope, 45ms per-bar smoothing,
+    integrated in small time steps (`Advance(seconds, amplitude)`) so the response
+    is independent of frame rate or dropped frames
+  - Positive sine lobes (not `Abs(sin)`) avoid sharp cusps; drops to exact rest
+    below a small threshold instead of asymptoting forever
 - **State machine** in `TranscribeViewModel`:
   - `RecordingState.Loading` + `IsLoading` set while `StartAsync` awaits a cold model load; `PrewarmAsync` warms it silently in the background (kicked off from `App`)
-  - EMA-smoothed RMS (attack 0.4, decay 0.05) compared against threshold 0.005
-  - 1200ms hold-off keeps Active state through natural speech pauses
+  - Raw-RMS hysteresis (0.005 to enter Active, 0.0035 to sustain) — no EMA smoothing
+    in the view model; all smoothing now lives in `WaveformAnimation`
+  - 180ms hold measured from the last above-threshold sample bridges short pauses;
+    a 40ms timer expires the hold even if capture stops delivering callbacks
+  - Below-threshold input immediately targets zero visual amplitude once the hold
+    lapses; queued levels from a stopped/previous recording are ignored, and
+    stopping/loading resets the animation envelope
   - Button turns blue `#378ADD` when recording (Idle or Active) or loading
 
 ## Packaging, App Paths & Updates

@@ -166,7 +166,7 @@
                         ToolTip.Tip="{Binding HotkeyHintText}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        CornerRadius="22"
+                        CornerRadius="24"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         Padding="0">
@@ -177,7 +177,7 @@
                             </Transitions>
                         </Border.Transitions>
                         <views:WaveformView
-                            Width="64" Height="32"
+                            Width="64" Height="48"
                             State="{Binding RecordingState}"
                             AudioAmplitude="{Binding AudioLevel}"
                             ClipToBounds="False" />
