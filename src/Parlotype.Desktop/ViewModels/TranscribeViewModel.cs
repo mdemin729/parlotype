@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -62,10 +64,12 @@ public partial class TranscribeViewModel : ViewModelBase
     private const float SpeechThreshold = 0.005f;
 
     /// <summary>How long Active state persists after speech drops below threshold.</summary>
-    private static readonly TimeSpan SpeechHoldOff = TimeSpan.FromMilliseconds(1200);
+    private static readonly TimeSpan SpeechHoldOff = TimeSpan.FromMilliseconds(180);
 
     /// <summary>Timestamp of the last above-threshold audio level sample.</summary>
-    private DateTime _lastSpeechTime;
+    private long _lastSpeechTime;
+    private long _recordingStartedAt;
+    private DispatcherTimer? _speechSilenceTimer;
 
     /// <summary>
     /// In-flight <see cref="StartRecordingAsync"/>, if any. Lets a stop request
@@ -82,15 +86,6 @@ public partial class TranscribeViewModel : ViewModelBase
     /// All access happens on the UI thread.
     /// </summary>
     private bool _cancelRequested;
-
-    /// <summary>Smoothed RMS level for stable state transitions (EMA).</summary>
-    private float _smoothedRms;
-
-    /// <summary>EMA factor for rising level (fast attack).</summary>
-    private const float RmsAttack = 0.4f;
-
-    /// <summary>EMA factor for falling level (slow decay).</summary>
-    private const float RmsDecay = 0.05f;
 
     [ObservableProperty]
     private string _statusText = Strings.Transcribe_Status_Ready;
@@ -246,6 +241,8 @@ public partial class TranscribeViewModel : ViewModelBase
         IsLoading = value == RecordingState.Loading;
         IsIdle = value == RecordingState.Idle;
         IsActive = value == RecordingState.Active;
+        if (value != RecordingState.Active)
+            StopSpeechSilenceTimer();
     }
 
     /// <summary>
@@ -547,6 +544,7 @@ public partial class TranscribeViewModel : ViewModelBase
                 return;
             }
 
+            _recordingStartedAt = Stopwatch.GetTimestamp();
             IsRecording = true;
             RecordingState = RecordingState.Idle;
             SetStatus(StatusKind.Recording);
@@ -738,7 +736,7 @@ public partial class TranscribeViewModel : ViewModelBase
         IsRecording = false;
         RecordingState = RecordingState.Disabled;
         AudioLevel = 0f;
-        _smoothedRms = 0f;
+        _lastSpeechTime = 0;
         SetStatus(StatusKind.Ready);
     }
 
@@ -837,26 +835,48 @@ public partial class TranscribeViewModel : ViewModelBase
 
     private void OnAudioLevelChanged(object? sender, AudioLevelEventArgs e)
     {
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        var receivedAt = Stopwatch.GetTimestamp();
+        Dispatcher.UIThread.Post(() =>
         {
-            AudioLevel = e.Level;
+            // A callback already queued when recording stopped must not revive the wave.
+            if (!IsRecording || receivedAt < _recordingStartedAt || Stopwatch.GetElapsedTime(receivedAt) >= SpeechHoldOff)
+                return;
 
-            // Exponential moving average: fast attack, slow decay
-            var factor = e.Level > _smoothedRms ? RmsAttack : RmsDecay;
-            _smoothedRms += (e.Level - _smoothedRms) * factor;
-
-            if (_smoothedRms >= SpeechThreshold)
+            var level = float.IsFinite(e.Level) ? Math.Clamp(e.Level, 0, 1) : 0;
+            var threshold = RecordingState == RecordingState.Active ? 0.0035f : SpeechThreshold;
+            AudioLevel = level >= threshold ? level : 0;
+            if (level >= threshold)
             {
-                _lastSpeechTime = DateTime.UtcNow;
+                // Measure the hold from actual audio, never from a slowly decaying EMA.
+                _lastSpeechTime = receivedAt;
                 RecordingState = RecordingState.Active;
-            }
-            else if (RecordingState == RecordingState.Active)
-            {
-                // Hold Active state for SpeechHoldOff after last speech
-                if (DateTime.UtcNow - _lastSpeechTime >= SpeechHoldOff)
-                    RecordingState = RecordingState.Idle;
+                if (_speechSilenceTimer is null)
+                {
+                    _speechSilenceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(40) };
+                    _speechSilenceTimer.Tick += OnSpeechSilenceTick;
+                    _speechSilenceTimer.Start();
+                }
             }
         });
+    }
+
+    private void OnSpeechSilenceTick(object? sender, EventArgs e)
+    {
+        // Also settle when capture stops delivering callbacks during silence.
+        if (Stopwatch.GetElapsedTime(_lastSpeechTime) >= SpeechHoldOff)
+        {
+            AudioLevel = 0;
+            RecordingState = RecordingState.Idle;
+        }
+    }
+
+    private void StopSpeechSilenceTimer()
+    {
+        if (_speechSilenceTimer is null)
+            return;
+        _speechSilenceTimer.Stop();
+        _speechSilenceTimer.Tick -= OnSpeechSilenceTick;
+        _speechSilenceTimer = null;
     }
 
     private sealed class DesignWindowManager : IWindowManager

@@ -64,3 +64,30 @@ Phase speed also interpolates between the idle rate (0.015) and active rate (0.0
 - EMA smoothing prevents jitter from noisy per-chunk RMS values; quiet speech gradually ramps up above threshold
 - The 1200ms hold-off accommodates natural pauses between words without dropping to Idle mid-sentence
 - The control uses `StreamGeometry` for the mic icon rather than an SVG dependency
+
+## Amendment — 2026-09-11: continuous audio response and quiet rest
+
+The original renderer substituted amplitude `0.6` whenever RMS fell below `0.01`,
+creating a discontinuity at that boundary. Combined with slow RMS decay and a
+1200ms state hold, this could keep a large decorative wave moving after speech.
+
+- `WaveformAnimation` now maps RMS through a continuous logarithmic response,
+  with a 65ms attack / 85ms release envelope and 45ms smoothing of each bar.
+  These are exponential time constants. Elapsed monotonic time replaces
+  frame-count increments; short integration steps keep the response consistent
+  at different frame rates. There is no fallback amplitude.
+- Seventeen fine rounded bars form a tapered silhouette with softer edges.
+  Positive sine lobes avoid the sharp corners introduced by absolute values.
+  Silence settles into stationary dots; it has no breathing animation.
+- The ViewModel uses raw RMS hysteresis (0.005 to enter, 0.0035 to sustain),
+  with a 180ms hold measured from the last above-threshold input. A 40ms timer
+  expires that hold even if capture delivers no further callbacks. Below-threshold
+  input immediately targets zero visual amplitude while the state hold bridges
+  short pauses. Visual smoothing lives in the renderer, independently of state.
+- Queued levels from stopped/previous recordings and stale callbacks are ignored.
+  Stopping or loading resets the animation envelope.
+
+Regression tests cover threshold continuity, onset, settling, frame-rate independence,
+missing callbacks, queued events across stop/restart, and real-control rendering in
+both themes. `PARLOTYPE_WAVEFORM_PREVIEW_DIRECTORY` optionally saves a six-second
+sequence from the headless rendering test for animation review.

@@ -642,21 +642,56 @@ public class TranscribeViewModelTests
         await Task.Delay(50);
         Assert.Equal(RecordingState.Active, vm.RecordingState);
 
-        // Decay smoothed RMS with many zero events (slow decay factor 0.05)
-        for (int i = 0; i < 100; i++)
-        {
-            levelProvider.RaiseLevelChanged(0.0f);
-            await Task.Delay(5);
-        }
-
-        // Wait past the hold-off (1200ms)
-        await Task.Delay(1300);
-
-        // Final zero event to trigger the hold-off expiry check
-        levelProvider.RaiseLevelChanged(0.0f);
-        await Task.Delay(50);
+        levelProvider.RaiseLevelChanged(0);
+        await Task.Delay(350);
 
         Assert.Equal(RecordingState.Idle, vm.RecordingState);
+    }
+
+    [AvaloniaFact]
+    public async Task AudioLevel_NoMoreCallbacks_SettlesToIdle()
+    {
+        var levelProvider = new MockAudioLevelProvider();
+        var vm = new TranscribeViewModel(new MockWindowManager(), new MockAudioPipeline(),
+            audioLevelProvider: levelProvider);
+        await vm.StartRecordingAsync();
+        levelProvider.RaiseLevelChanged(0.5f);
+        await Task.Delay(50);
+        Assert.Equal(RecordingState.Active, vm.RecordingState);
+        await Task.Delay(350);
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+        Assert.Equal(0, vm.AudioLevel);
+        await vm.StopRecordingAsync();
+    }
+
+    [AvaloniaFact]
+    public async Task AudioLevel_QueuedBeforeStop_DoesNotReviveWave()
+    {
+        var levelProvider = new MockAudioLevelProvider();
+        var vm = new TranscribeViewModel(new MockWindowManager(), new MockAudioPipeline(),
+            audioLevelProvider: levelProvider);
+        await vm.StartRecordingAsync();
+        levelProvider.RaiseLevelChanged(0.5f);
+        await vm.StopRecordingAsync();
+        await Task.Delay(250);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal(0, vm.AudioLevel);
+    }
+
+    [AvaloniaFact]
+    public async Task AudioLevel_QueuedInPreviousRecording_DoesNotActivateNewRecording()
+    {
+        var levelProvider = new MockAudioLevelProvider();
+        var vm = new TranscribeViewModel(new MockWindowManager(), new MockAudioPipeline(),
+            audioLevelProvider: levelProvider);
+        await vm.StartRecordingAsync();
+        levelProvider.RaiseLevelChanged(0.5f);
+        await vm.StopRecordingAsync();
+        await vm.StartRecordingAsync();
+        await Task.Delay(50);
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+        Assert.Equal(0, vm.AudioLevel);
+        await vm.StopRecordingAsync();
     }
 
     private sealed class DelayedSpeechEngineSettingsService(string engine) : ISettingsService

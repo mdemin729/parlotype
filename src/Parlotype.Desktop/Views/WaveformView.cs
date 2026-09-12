@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -11,8 +12,8 @@ namespace Parlotype.Desktop.Views;
 /// <list type="bullet">
 ///   <item><see cref="RecordingState.Disabled"/> — static microphone icon</item>
 ///   <item><see cref="RecordingState.Loading"/> — rotating arc spinner (model loading)</item>
-///   <item><see cref="RecordingState.Idle"/> — gently breathing bars (silence)</item>
-///   <item><see cref="RecordingState.Active"/> — animated multi-frequency wave (speech)</item>
+///   <item><see cref="RecordingState.Idle"/> — stationary, softly faded dots (silence)</item>
+///   <item><see cref="RecordingState.Active"/> — smooth audio-reactive wave (speech)</item>
 /// </list>
 /// </summary>
 public class WaveformView : Control
@@ -38,17 +39,11 @@ public class WaveformView : Control
     private double _phase;
     private DispatcherTimer? _timer;
 
-    /// <summary>Blend factor 0.0 (idle) → 1.0 (active), animated per tick for smooth transitions.</summary>
-    private double _activeBlend;
-
-    /// <summary>Blend change per frame (~16ms). 0.06 ≈ 300ms transition at 60fps.</summary>
-    private const double BlendSpeed = 0.06;
-
-    private const int BarCount = 13;
+    private readonly WaveformAnimation _animation = new();
+    private long _lastFrame;
 
     // Brushes resolved from theme resources, with fallbacks
     private static readonly IBrush FallbackActiveBrush = new SolidColorBrush(Color.Parse("#378ADD"));
-    private static readonly IBrush FallbackIdleBrush = new SolidColorBrush(Color.Parse("#B4B2A9"));
     private static readonly IBrush FallbackDisabledBrush = new SolidColorBrush(Color.Parse("#378ADD"));
 
     static WaveformView()
@@ -61,6 +56,7 @@ public class WaveformView : Control
         base.OnAttachedToVisualTree(e);
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
         _timer.Tick += OnTimerTick;
+        _lastFrame = Stopwatch.GetTimestamp();
         _timer.Start();
     }
 
@@ -75,21 +71,28 @@ public class WaveformView : Control
         base.OnDetachedFromVisualTree(e);
     }
 
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == StateProperty && State is RecordingState.Disabled or RecordingState.Loading)
+            _animation.Reset();
+    }
+
     private void OnTimerTick(object? sender, EventArgs e)
+    {
+        var now = Stopwatch.GetTimestamp();
+        var elapsed = Stopwatch.GetElapsedTime(_lastFrame, now).TotalSeconds;
+        _lastFrame = now;
+        AdvanceAnimation(elapsed);
+    }
+
+    internal void AdvanceAnimation(double elapsed)
     {
         if (State == RecordingState.Disabled)
             return;
 
-        // Animate blend factor toward target (1.0 for Active, 0.0 for Idle)
-        var target = State == RecordingState.Active ? 1.0 : 0.0;
-        if (_activeBlend < target)
-            _activeBlend = Math.Min(_activeBlend + BlendSpeed, 1.0);
-        else if (_activeBlend > target)
-            _activeBlend = Math.Max(_activeBlend - BlendSpeed, 0.0);
-
-        // Phase speed interpolates between idle (slow) and active (fast)
-        _phase += 0.015 + _activeBlend * (0.06 - 0.015);
-
+        _phase += elapsed;
+        _animation.Advance(elapsed, State == RecordingState.Active ? AudioAmplitude : 0);
         InvalidateVisual();
     }
 
@@ -104,10 +107,8 @@ public class WaveformView : Control
                 RenderSpinner(ctx);
                 break;
             case RecordingState.Idle:
-                RenderBars(ctx, idle: true);
-                break;
             case RecordingState.Active:
-                RenderBars(ctx, idle: false);
+                RenderBars(ctx);
                 break;
         }
     }
@@ -119,40 +120,28 @@ public class WaveformView : Control
         return fallback;
     }
 
-    private void RenderBars(DrawingContext ctx, bool idle)
+    private void RenderBars(DrawingContext ctx)
     {
         var w = Bounds.Width;
         var h = Bounds.Height;
-        var maxBarH = h * 0.95;
-        var barW = w / (BarCount * 1.8);
-        var totalW = BarCount * barW * 1.8;
-        var offsetX = (w - totalW) / 2;
+        if (w <= 0 || h <= 0)
+            return;
 
-        // Lerp brush color during transition
-        var blend = _activeBlend;
-        var brush = blend < 0.01
-            ? ResolveBrush("WaveformIdleBrush", FallbackIdleBrush)
-            : ResolveBrush("WaveformActiveBrush", FallbackActiveBrush);
+        const int count = WaveformAnimation.BarCount;
+        var barW = w / (count * 1.6);
+        var spacing = (w - barW) / (count - 1);
+        var restHeight = Math.Min(barW, h);
+        var brush = ResolveBrush("WaveformActiveBrush", FallbackActiveBrush);
 
-        for (int i = 0; i < BarCount; i++)
+        for (var i = 0; i < count; i++)
         {
-            // Compute both idle and active bar heights, then lerp
-            var idleH = maxBarH * (0.10 + 0.04 * Math.Sin(_phase + i * 0.4));
-
-            var amp = AudioAmplitude > 0.01f ? AudioAmplitude : 0.6f;
-            var wave = Math.Sin(_phase * 1.7 + i * 0.55) * 0.45
-                     + Math.Sin(_phase * 2.9 + i * 0.35) * 0.30
-                     + Math.Sin(_phase * 0.8 + i * 0.90) * 0.25;
-            var activeH = maxBarH * (0.12 + 0.88 * Math.Abs(wave) * amp);
-
-            var barH = idleH + (activeH - idleH) * blend;
-            barH = Math.Max(barH, 4);
-
-            var x = offsetX + i * barW * 1.8;
-            var y = (h - barH) / 2;
-            var rx = barW / 2;
-            var rect = new Rect(x, y, barW, barH);
-            ctx.DrawRectangle(brush, null, rect, rx, rx);
+            var edge = Math.Abs(i - (count - 1) / 2.0) / ((count - 1) / 2.0);
+            var energy = _animation.GetHeight(i);
+            var barH = restHeight + (h * 0.9 - restHeight) * energy;
+            var rect = new Rect(i * spacing, (h - barH) / 2, barW, barH);
+            // Fine rounded strokes, a luminous center and quiet translucent edges.
+            using (ctx.PushOpacity(0.48 + 0.42 * (1 - edge * edge) + 0.10 * energy))
+                ctx.DrawRectangle(brush, null, rect, barW / 2, barW / 2);
         }
     }
 
