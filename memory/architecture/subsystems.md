@@ -2,9 +2,9 @@
 title: Key Subsystems
 type: architecture
 status: active
-tags: [architecture, subsystems, hotkeys, settings, logging, startup]
-last_updated: 2026-09-05
-summary: Speech engines, text injection, global hotkeys, settings, logging, model management, startup, onboarding, and localization subsystems
+tags: [architecture, subsystems, hotkeys, settings, logging, startup, transcribe-window]
+last_updated: 2026-09-13
+summary: Speech engines, text injection, global hotkeys, settings, logging, model management, startup, onboarding, localization, and Transcribe window lifetime subsystems
 ---
 
 # Key Subsystems
@@ -211,6 +211,86 @@ Real-time visual feedback showing whether the user is speaking. See [[decisions/
     lapses; queued levels from a stopped/previous recording are ignored, and
     stopping/loading resets the animation envelope
   - Button turns blue `#378ADD` when recording (Idle or Active) or loading
+
+## Transcribe Window Lifetime
+
+Cross-cutting across the hotkey, window, pipeline and text-injection subsystems above:
+who shows the Transcribe widget, and who makes it go away. See
+[[decisions/_index|ADR-040]] (frameless chrome, hide-don't-close) and
+[[decisions/_index|ADR-068]] (auto-hide after a dictation session).
+
+- **Four ways to show it, two kinds of ownership.** `IWindowManager.ShowTranscribe(activate)`
+  is the *user-summoned* path — tray click, tray "Open", the ADR-055 relaunch-activates-the-
+  running-instance path, and onboarding tour steps (ADR-056) — and marks the window
+  `User`-owned: sticky, never auto-hides. `ShowTranscribeForDictation()` is the one
+  *dictation-summoned* path, called only from `HotkeyCoordinator` on a hotkey press, and
+  marks the window `Dictation`-owned: transient. A separate method rather than a reason
+  parameter on `ShowTranscribe` was a deliberate ADR-068 choice, so the other three call
+  sites stay untouched. Both funnel through `WindowManager`'s private `ShowCoreAsync`,
+  which restores the window to full opacity (`TranscribeWindow.RestoreChrome()`) and then
+  tells the per-window `TranscribeAutoHideController` it is showing (`NotifyShowing`) —
+  restore before ownership, so a window mid-fade is never asked "whose is this" while
+  half-invisible. A window already visible when `Show` is called keeps whatever ownership
+  it already had — a dictation gesture can never demote a window the user opened (FR-4).
+- **Only one way it disappears without the user asking.** `Dictation`-owned windows fade
+  themselves out and hide once the session has fully settled; `User`-owned windows still
+  only hide via the ✕ button or `Esc`, exactly as ADR-040 specified. Hiding, by either
+  route, resets ownership to `None` so the next `Show` decides afresh.
+- **"Settled" is `TranscribeViewModel.IsDictationBusy`, not `IsRecording`.** `IsRecording`
+  goes false as soon as `AudioPipelineService.StopAsync` finishes draining and
+  transcribing, but `OnTranscriptionAvailable` is `async void` and its call to
+  `ITextInjectionService.InjectTextAsync` — the clipboard save/set/Ctrl+V/restore round
+  trip — outlives that. `IsDictationBusy` folds in a start-pending flag, `IsRecording`,
+  `RecordingState.Loading`, and an `Interlocked`-guarded in-flight-injection counter, so a
+  paste in progress is not mistaken for a finished session.
+- **A failed session does not auto-hide.** `IsInErrorState` (derived from the existing
+  `StatusKind`, no new storage) covers the runtime-unavailable, restart-required and cloud
+  failure/misconfiguration states, but deliberately excludes `Cancelled` — an `Esc` or
+  ADR-057 command-shortcut abort is a clean end and hides normally. The widget staying up
+  after a failure is the "something needs attention" signal; the *reason* is still only on
+  the tooltip (ADR-040's status-is-tooltip-only rule), which ADR-068 explicitly leaves as a
+  follow-up rather than fixing.
+- **Two-tier interaction.** Hovering a `Dictation`-owned window pauses its countdown
+  without promoting it — restarts in full on pointer-leave. A tunnelled `PointerPressed`
+  (fires ahead of the grip/button handlers, so drag and click behaviour is unaffected) or
+  opening the language flyout (`IsLanguageFlyoutOpen`) promotes it to `User` permanently for
+  that visible lifetime. The hover watch is one `AvaloniaObject.PropertyChanged` subscription
+  filtered to `IsPointerOverProperty`/`IsVisibleProperty`, not two
+  `GetObservable(...).Subscribe(...)` calls — that pattern doesn't compile outside
+  `Avalonia.Base` (see [[knowledge/avalonia-getobservable-subscribe-trap]]).
+- **The countdown is injectable, not a `DispatcherTimer`.** `TranscribeAutoHideController`
+  (Desktop/Services, one instance per window, owned by `WindowManager` rather than DI) runs
+  the settle-to-hide delay (default 1.5 s) through a `DelayProvider` seam so headless tests
+  step it by hand instead of sleeping real time — the same idiom as
+  `TranscribeViewModel.LoadingSpinnerDelay`. The exit itself is a ~160 ms opacity fade on
+  `TranscribeWindow`'s `RootChrome` (`HideWithFadeAsync()`/`AbortFade()`/`FadeDuration`),
+  input-disabled for the duration; the entrance is never animated, since the widget
+  appearing is the user's confirmation the hotkey registered.
+- **`Window.Activated` is deliberately not an engagement signal.** The dictation path shows
+  the window with `ShowActivated = false`; if Windows activated it anyway, every
+  auto-summoned window would read as instantly "engaged" and silently never auto-hide. This
+  is the first thing the manual pass on Windows is meant to confirm.
+
+```mermaid
+stateDiagram-v2
+    [*] --> None : "window created / last hide"
+    None --> Dictation : "ShowTranscribeForDictation()"
+    None --> User : "ShowTranscribe() (tray, relaunch, onboarding)"
+    Dictation --> User : "click, drag, or flyout (UserEngaged)"
+    Dictation --> None : "settled, clean, pointer away, 1.5s elapses, fades, hides"
+    User --> None : "close button or Esc hides"
+
+    note right of Dictation
+        A Show call while already visible
+        keeps current ownership (FR-4).
+        Hover pauses the countdown;
+        busy or error state cancels it.
+    end note
+```
+
+No new setting governs any of this (the tray-open / click-to-keep paths are the escape
+valve) and no transparency was added — see ADR-068 for the full reasoning and the
+rejected alternatives.
 
 ## Packaging, App Paths & Updates
 

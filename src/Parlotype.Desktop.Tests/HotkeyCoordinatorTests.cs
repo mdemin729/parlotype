@@ -30,7 +30,15 @@ public class HotkeyCoordinatorTests
         // Allow the posted async lambda to complete.
         await Task.Delay(50, TestContext.Current.CancellationToken);
 
-        Assert.True(wm.ShowTranscribeCount >= 1);
+        // ADR-068: a hotkey press is a dictation gesture, so the coordinator
+        // must summon the window as the transient, auto-hiding HUD — not via
+        // the plain ShowTranscribe() a tray click/relaunch/onboarding uses.
+        // Asserting the dedicated call (and that the other one was never
+        // used) still pins "a hotkey press shows the Transcribe window", now
+        // through the correct summon path instead of a weaker "some show
+        // method fired" check.
+        Assert.True(wm.ShowTranscribeForDictationCount >= 1);
+        Assert.Equal(0, wm.ShowTranscribeCount);
         coordinator.Dispose();
     }
 

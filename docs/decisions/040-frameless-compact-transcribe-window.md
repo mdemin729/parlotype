@@ -24,6 +24,7 @@ The Transcribe window (240×184, system title bar) is a floating always-on-top w
 ### Hide, don't close
 
 - The ✕ button and `Esc` hide the window (recording continues; the tray icon reopens it) — consistent with `WindowManager`'s existing cancel-`Closing`-and-`Hide()` behaviour.
+- **Amended by [ADR-068](068-transcribe-window-auto-hide.md):** hiding is still never closing, but it is no longer always something only the user triggers — a window summoned by a dictation gesture now hides itself once the session settles. A window the user opened is unaffected and still only hides on ✕/`Esc`.
 
 ### Position persistence — a separate window-state store
 

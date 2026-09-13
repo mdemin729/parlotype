@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-09-07
+last_updated: 2026-09-13
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -76,6 +76,8 @@ This directory stores **stable facts** learned across sessions — things that a
 | [[httpclient-baseaddress-one-shot]] | `HttpClient.BaseAddress`/`DefaultRequestHeaders`/`Timeout` throw once a request has been sent (`CheckDisposedOrStarted`), so a field-initialized client is single-use — recreate it per `InitializeAsync` (done in `LlamaCppSpeechRecognizer` and `OpenAiCompatibleSpeechRecognizer`); the adopt-existing-server probe uses its own client and does **not** reproduce the crash | 2026-09-07 |
 | [[benchmark-memory-and-engine-caveats]] | `PeakWorkingSet64` is a high-water mark so warm-up RAM is inside every later sample; llama.cpp/Gemma's model lives in a child process and is never counted (the biggest engine reports the smallest); `EnvironmentInfo.WhisperRuntime` reads a Whisper-only static so every other engine stores the literal `"unknown"`. Plus the historical Gemma Q8_0 `<|channel>` HTTP-500 instability | 2026-09-07 |
 | [[cloud-stt-provider-survey-2026-07]] | The rejected alternatives behind ADR-032/043: Groq is byte-compatible with OpenAI (hence one configurable-base-URL engine) but has no streaming and a 10 s minimum bill; xAI Grok STT is us-east-1 only; Azure REST v3.x retired March 2026; Amazon Transcribe has **no synchronous endpoint** and retains audio by default; OpenAI Realtime needs 24 kHz vs our 16 kHz. **Pricing/limits are a 2026-07-05 snapshot — re-verify** | 2026-09-07 |
+| [[avalonia-getobservable-subscribe-trap]] | `AvaloniaObject.GetObservable(prop).Subscribe(lambda)` cannot compile outside `Avalonia.Base`: `IObservable<T>` declares its own `Subscribe(IObserver<T>)` so dot-style lookup never reaches the `Action<T>`-taking extension (CS1660), and that extension's declaring type `Avalonia.Reactive.Observable` is `internal` to `Avalonia.Base` so it cannot be called qualified either (CS0122) — found implementing ADR-068; use a filtered `AvaloniaObject.PropertyChanged` subscription instead | 2026-09-13 |
+| [[avaloniafact-drain-dispatcher-after-dispose]] | Disposing an object that launched fire-and-forget async work only cancels it — cancellation *schedules* the rest of that work onto the one process-wide headless dispatcher every `[AvaloniaFact]` shares, so it can still be queued when a later, unrelated test pumps that same dispatcher. Drain with `await Dispatcher.UIThread.InvokeAsync(() => { })` after `Dispose()`. A new instance of the hazard class in [[culture-changing-tests-need-avaloniafact]] | 2026-09-13 |
 
 ## Distillation Rules
 - Only store facts that are **not derivable** from reading current code or git history

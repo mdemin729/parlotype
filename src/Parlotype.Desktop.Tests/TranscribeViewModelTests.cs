@@ -932,4 +932,83 @@ public class TranscribeLanguageStripTests
         Assert.Equal(1, wm.ShowSettingsCount);
         Assert.Equal(SettingsSection.EngineModel, wm.LastSettingsSection);
     }
+
+    // ----- ADR-068: IsDictationBusy / IsInErrorState (auto-hide's settle signal) -----
+
+    [AvaloniaFact]
+    public async Task IsDictationBusy_TrueWhilePasteInFlight_FalseOnceInjectionCompletes()
+    {
+        // Regression guard (ADR-068): StopRecordingAsync returns once the pipeline
+        // has drained, but OnTranscriptionAvailable's paste is async void and can
+        // outlive it — a widget hidden on IsRecording alone would vanish mid-paste.
+        var pipeline = new MockAudioPipeline();
+        var gate = new TaskCompletionSource();
+        var injector = new MockTextInjectionService { Gate = gate };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, injector);
+
+        await vm.StartRecordingAsync();
+        pipeline.RaiseTranscriptionAvailable("hello world");
+
+        // The injection is now gated in flight; stopping settles every
+        // recording-related signal, but the paste itself has not finished.
+        await vm.StopRecordingAsync();
+
+        Assert.False(vm.IsRecording);
+        Assert.Empty(injector.InjectedTexts);
+        Assert.True(vm.IsDictationBusy);
+
+        gate.SetResult();
+        await Task.Delay(100, TestContext.Current.CancellationToken); // let the async void handler finish
+
+        Assert.False(vm.IsDictationBusy);
+        Assert.Single(injector.InjectedTexts);
+        Assert.Equal("hello world", injector.InjectedTexts[0]);
+    }
+
+    [AvaloniaFact]
+    public async Task IsDictationBusy_TrueFromStartThroughStopCompleting()
+    {
+        // A cold-ish start (StartDelay > 0) so a start genuinely in flight — before
+        // IsRecording ever becomes true — is observed as busy in its own right,
+        // not just as a side effect of IsRecording (ADR-068).
+        var pipeline = new MockAudioPipeline { StartDelay = TimeSpan.FromMilliseconds(50) };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        Assert.False(vm.IsDictationBusy);
+
+        var startTask = vm.StartRecordingAsync();
+        Assert.False(vm.IsRecording);
+        Assert.True(vm.IsDictationBusy); // busy: a start is in flight
+
+        await startTask;
+        Assert.True(vm.IsRecording);
+        Assert.True(vm.IsDictationBusy); // busy: actively recording
+
+        await vm.StopRecordingAsync();
+        Assert.False(vm.IsDictationBusy); // fully settled
+    }
+
+    [AvaloniaFact]
+    public async Task IsInErrorState_SetsOnCloudNotConfigured_ClearsOnNextCleanSession()
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            ThrowOnStart = new CloudProviderNotConfiguredException(
+                SpeechEngine.OpenAiCompatible,
+                CloudConfigurationError.MissingApiKey,
+                "No API key configured for the OpenAI-compatible provider."),
+        };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+
+        Assert.False(vm.IsInErrorState);
+
+        await vm.StartRecordingAsync(); // fails synchronously → CloudNotConfigured
+        Assert.True(vm.IsInErrorState);
+
+        // The next session is clean — the error self-heals (ADR-068, FR-8).
+        pipeline.ThrowOnStart = null;
+        await vm.StartRecordingAsync();
+
+        Assert.False(vm.IsInErrorState);
+    }
 }
