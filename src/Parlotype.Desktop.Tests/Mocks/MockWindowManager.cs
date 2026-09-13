@@ -6,6 +6,7 @@ namespace Parlotype.Desktop.Tests.Mocks;
 public sealed class MockWindowManager : IWindowManager
 {
     public int ShowTranscribeCount { get; private set; }
+    public int ShowTranscribeForDictationCount { get; private set; }
     public int ShowSettingsCount { get; private set; }
     public int HideTranscribeCount { get; private set; }
     public int ExitCount { get; private set; }
@@ -14,6 +15,7 @@ public sealed class MockWindowManager : IWindowManager
     public SettingsSection? LastSettingsSection { get; private set; }
 
     public void ShowTranscribe(bool activate = true) => ShowTranscribeCount++;
+    public void ShowTranscribeForDictation() => ShowTranscribeForDictationCount++;
 
     public void ShowSettings(SettingsSection? section = null)
     {

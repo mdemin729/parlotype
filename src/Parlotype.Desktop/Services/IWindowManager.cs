@@ -13,6 +13,17 @@ public interface IWindowManager
     /// <param name="activate">When true, activates (focuses) the window; when false, shows without stealing focus.</param>
     void ShowTranscribe(bool activate = true);
 
+    /// <summary>
+    /// Show the Transcribe window as the transient HUD for a dictation
+    /// gesture: without focus, and set to hide itself once the session
+    /// settles (ADR-068). A window the user already opened keeps its own
+    /// lifetime — a held key cannot take away a window the user is using. A
+    /// separate method from <see cref="ShowTranscribe"/> rather than a
+    /// parameter on it: the two are different operations with different
+    /// callers, and this leaves every existing call site untouched.
+    /// </summary>
+    void ShowTranscribeForDictation();
+
     /// <summary>Show + activate the Settings window. Creates it if needed.</summary>
     /// <param name="section">When set, deep-links the window to that section; otherwise the last-viewed section is shown.</param>
     void ShowSettings(SettingsSection? section = null);

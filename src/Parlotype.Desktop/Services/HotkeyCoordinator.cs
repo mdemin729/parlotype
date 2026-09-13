@@ -75,7 +75,9 @@ public sealed class HotkeyCoordinator : IDisposable
     private void OnStartRequested(object? sender, DictationStartEventArgs e) =>
         Dispatcher.UIThread.Post(async () =>
         {
-            _windowManager.ShowTranscribe(activate: false);
+            // Transient HUD, not a plain unfocused show: the widget hides
+            // itself once this session settles (ADR-068).
+            _windowManager.ShowTranscribeForDictation();
             await _transcribeViewModel.StartRecordingAsync(e.HoldScoped);
         });
 

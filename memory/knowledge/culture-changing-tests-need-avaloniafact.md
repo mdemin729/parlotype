@@ -3,8 +3,8 @@ title: Tests that change the interface language must be [AvaloniaFact]
 type: knowledge
 tags: [avalonia, testing, localization, threading, flaky]
 created: 2026-09-06
-last_updated: 2026-09-06 (third occurrence)
-summary: A plain [Fact] calling Localizer.SetCulture runs on an xUnit worker thread; the notification reaches bindings left behind by earlier UI tests and throws a thread-affinity error — but only under load, so the suite passes alone and fails intermittently in a full run. Also hit via a bare `await Task.Delay` inside an [AvaloniaFact] that calls SetCulture: the continuation resumes off the shared headless dispatcher thread and races other parallel tests
+last_updated: 2026-09-13 (fourth occurrence, generalized)
+summary: A plain [Fact] calling Localizer.SetCulture runs on an xUnit worker thread; the notification reaches bindings left behind by earlier UI tests and throws a thread-affinity error — but only under load, so the suite passes alone and fails intermittently in a full run. Also hit via a bare `await Task.Delay` inside an [AvaloniaFact] that calls SetCulture: the continuation resumes off the shared headless dispatcher thread and races other parallel tests. The broader rule this is one instance of: Avalonia Headless's dispatcher is one process-wide thread shared by every [AvaloniaFact] in the run — never let a test return while something it caused is still only scheduled, not finished, on it
 ---
 
 # Culture-changing tests need `[AvaloniaFact]`
@@ -84,6 +84,25 @@ consecutive clean `dotnet test src/Parlotype.Desktop.Tests` runs.
 If a genuine await is unavoidable in a culture-changing test, the correct fix is to get back
 onto the dispatcher explicitly before touching `Localizer` — `await Dispatcher.UIThread.InvokeAsync(...)`
 around the resumed work, not a bare `await Task.Delay`/`Task.Yield`.
+
+## Fourth occurrence, generalized: the hazard is the shared dispatcher, not culture specifically
+
+Hit again, in a different shape, while testing ADR-068's `TranscribeAutoHideController`:
+see [[avaloniafact-drain-dispatcher-after-dispose|Drain, don't just Dispose, fire-and-forget
+async work in an AvaloniaFact test]]. That case has nothing to do with
+`Localizer.SetCulture` — it is a test double's `Dispose()` cancelling a pending
+continuation, which only *schedules* the rest of that continuation onto the same shared
+headless dispatcher thread rather than running it before `Dispose()` returns.
+
+The two notes are the same underlying rule wearing different clothes: **Avalonia Headless's
+dispatcher is one process-wide thread that every `[AvaloniaFact]` test in the run shares**,
+and anything left merely *scheduled* on it — a culture-notification continuation resumed
+off-thread, or a cancelled countdown's cleanup — is live ammunition for whichever
+unrelated test pumps that dispatcher next. The fix pattern generalizes too: get back onto
+the dispatcher deliberately (`await Dispatcher.UIThread.InvokeAsync(...)`) before the test
+that caused the scheduled work returns, whether that means avoiding a bare `await
+Task.Delay` in the test body (this note) or draining after disposing a collaborator that
+started its own fire-and-forget work (the linked note).
 
 ## Related traps hit on the way
 

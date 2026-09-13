@@ -106,6 +106,18 @@
             BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
             ToolTip.Tip="{Binding StatusText}">
 
+        <!-- Auto-hide fade target (ADR-068): the window itself is already
+             transparent (TransparencyLevelHint="Transparent"), so this card is
+             the only visible surface — fading it, not Window.Opacity, avoids
+             betting on layered-window opacity behaving identically across the
+             Windows compositor and the headless test platform. Same idiom the
+             record button already uses below. -->
+        <Border.Transitions>
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+            </Transitions>
+        </Border.Transitions>
+
         <Grid RowDefinitions="24,*,Auto" Margin="0,0,0,8">
 
             <!-- Header zone: the grip strip is the only drag handle (Windows

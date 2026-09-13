@@ -87,13 +87,50 @@ public partial class TranscribeViewModel : ViewModelBase
     /// </summary>
     private bool _cancelRequested;
 
+    /// <summary>
+    /// Text injections started by <see cref="OnTranscriptionAvailable"/> that
+    /// have not yet completed. That handler runs fire-and-forget off the
+    /// pipeline's background task, not the UI thread (ADR-068), so the
+    /// counter is touched with <see cref="Interlocked"/> and
+    /// <see cref="IsDictationBusy"/>'s change notification is posted to the
+    /// UI thread via <see cref="NotifyBusyChanged"/> rather than raised inline.
+    /// </summary>
+    private int _injectionsInFlight;
+
+    /// <summary>
+    /// True while a dictation session still has work in flight: a start being
+    /// awaited, live recording, a model load, the post-stop drain, or a paste
+    /// that has not finished. Deliberately *not* just <see cref="IsRecording"/>
+    /// — <see cref="StopRecordingAsync"/> returns once the pipeline has
+    /// drained, but <see cref="OnTranscriptionAvailable"/> is <c>async void</c>
+    /// and the clipboard round trip outlives it, so an auto-hide controller
+    /// watching only <see cref="IsRecording"/> would pull the widget away
+    /// mid-paste. Backs the auto-hide "settled" check (ADR-068).
+    /// </summary>
+    public bool IsDictationBusy =>
+        _startTask is not null
+        || IsRecording
+        || RecordingState == RecordingState.Loading
+        || Volatile.Read(ref _injectionsInFlight) > 0;
+
+    /// <summary>
+    /// Raises <see cref="IsDictationBusy"/>'s change notification on the UI
+    /// thread. Safe to call from the pipeline's background task, unlike a
+    /// direct <see cref="ObservableObject.OnPropertyChanged(string)"/> call
+    /// (ADR-068).
+    /// </summary>
+    private void NotifyBusyChanged() =>
+        Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(IsDictationBusy)));
+
     [ObservableProperty]
     private string _statusText = Strings.Transcribe_Status_Ready;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDictationBusy))]
     private bool _isRecording;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDictationBusy))]
     private RecordingState _recordingState = RecordingState.Disabled;
 
     [ObservableProperty]
@@ -203,6 +240,7 @@ public partial class TranscribeViewModel : ViewModelBase
         _statusKind = kind;
         _statusParam = param;
         StatusText = ComputeStatusText(kind, param);
+        OnPropertyChanged(nameof(IsInErrorState));
     }
 
     private static string ComputeStatusText(StatusKind kind, object? param) => kind switch
@@ -220,6 +258,21 @@ public partial class TranscribeViewModel : ViewModelBase
         StatusKind.CloudFailed => Strings.Transcribe_Status_CloudFailed,
         _ => Strings.Transcribe_Status_Ready,
     };
+
+    /// <summary>
+    /// The last session ended in a state the user probably needs to see
+    /// (ADR-068, FR-8) — the auto-hide controller keeps the widget on screen
+    /// instead of fading it away. Cleared by the next <see cref="SetStatus"/>,
+    /// so the next clean dictation lets it hide again. Note
+    /// <see cref="StatusKind.Cancelled"/> is deliberately absent — a cancelled
+    /// take (Escape, an ADR-057 command abort) is a clean end, not an error
+    /// (FR-9).
+    /// </summary>
+    public bool IsInErrorState => _statusKind is
+        StatusKind.RuntimeRestartRequired or StatusKind.RuntimeUnavailable
+        or StatusKind.CloudNotConfigured or StatusKind.CloudKeyRejected
+        or StatusKind.CloudQuotaExceeded or StatusKind.CloudRateLimited
+        or StatusKind.CloudProviderUnavailable or StatusKind.CloudFailed;
 
     /// <summary>
     /// Re-renders everything this VM composes in C# after an interface-language
@@ -496,6 +549,11 @@ public partial class TranscribeViewModel : ViewModelBase
         _cancelRequested = false;
         var startTask = StartRecordingCoreAsync(_pipeline, holdScoped);
         _startTask = startTask;
+        // _startTask is a plain field, not an [ObservableProperty] — raise
+        // IsDictationBusy's notification by hand. Both assignment and clear
+        // happen on the UI thread, so a direct call (not NotifyBusyChanged's
+        // dispatcher hop) is fine here (ADR-068).
+        OnPropertyChanged(nameof(IsDictationBusy));
         try
         {
             await startTask;
@@ -504,6 +562,7 @@ public partial class TranscribeViewModel : ViewModelBase
         {
             _startTask = null;
             _cancelRequested = false;
+            OnPropertyChanged(nameof(IsDictationBusy));
         }
     }
 
@@ -745,6 +804,11 @@ public partial class TranscribeViewModel : ViewModelBase
         if (_textInjectionService is null || string.IsNullOrWhiteSpace(e.Result.Text))
             return;
 
+        // Runs on the pipeline's background processing task, not the UI
+        // thread — hence Interlocked for the counter and NotifyBusyChanged's
+        // dispatcher hop for the notification (ADR-068).
+        Interlocked.Increment(ref _injectionsInFlight);
+        NotifyBusyChanged();
         try
         {
             await _textInjectionService.InjectTextAsync(e.Result.Text);
@@ -752,6 +816,11 @@ public partial class TranscribeViewModel : ViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to inject transcribed text");
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _injectionsInFlight);
+            NotifyBusyChanged();
         }
     }
 
@@ -882,6 +951,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private sealed class DesignWindowManager : IWindowManager
     {
         public void ShowTranscribe(bool activate = true) { }
+        public void ShowTranscribeForDictation() { }
         public void ShowSettings(SettingsSection? section = null) { }
         public void HideTranscribe() { }
         public void Exit() { }
