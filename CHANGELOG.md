@@ -12,6 +12,19 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-09-13
+
+### Fixed
+
+- **The Transcribe widget hides itself after dictation finishes.** Holding your
+  dictation hotkey summoned the widget; releasing it kept it on screen, always
+  on top, until you reached for the mouse and closed it. Now it fades out roughly
+  1.5 seconds after the text is pasted — you see the recording happen, you see
+  the text land, and then the widget gets out of your way. Hovering over it pauses
+  the countdown, so you can read the transcript before it goes. If you deliberately
+  opened the widget from the tray (not via hotkey), it stays on screen as before,
+  until you close it.
+
 ## [0.5.1] — 2026-09-12
 
 ### Fixed
@@ -487,7 +500,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/mdemin729/parlotype/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.1
 [0.5.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.0
 [0.4.4]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.4
