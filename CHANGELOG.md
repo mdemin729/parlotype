@@ -12,6 +12,29 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-09-13
+
+### Fixed
+
+- **The dictation widget now closes itself when you're done.** Hold your
+  dictation key and it appears as before; release it, and once your words are
+  typed in, it fades out on its own about a second and a half later — it no
+  longer sits always-on-top over whatever you were dictating into until you
+  reach for the mouse and click ✕. Opening it yourself — from the tray, or a
+  second launch — still keeps it on screen, and touching a dictation-triggered
+  widget (clicking it, dragging it, or opening its language menu) keeps it
+  open too.
+
+<details>
+<summary>Under the hood</summary>
+
+- The widget's dismissal rule now depends on how it was summoned — a
+  dictation gesture auto-hides it, the user opening it directly does not —
+  instead of one fixed rule for both
+  ([ADR-068](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/068-transcribe-window-auto-hide.md)).
+
+</details>
+
 ## [0.5.1] — 2026-09-12
 
 ### Fixed
@@ -487,7 +510,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.2
 [0.5.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.1
 [0.5.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.0
 [0.4.4]: https://github.com/mdemin729/parlotype/releases/tag/v0.4.4
