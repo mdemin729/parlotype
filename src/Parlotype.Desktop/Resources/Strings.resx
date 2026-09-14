@@ -204,6 +204,9 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
   <data name="Transcribe_Status_Cancelled" xml:space="preserve">
     <value>Cancelled</value>
   </data>
+  <data name="Transcribe_Status_StartFailed" xml:space="preserve">
+    <value>Recording failed to start</value>
+  </data>
   <data name="Transcribe_Status_CloudNotConfigured" xml:space="preserve">
     <value>Cloud provider not configured</value>
   </data>
@@ -254,6 +257,12 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Cloud provider not configured</value>
+  </data>
+  <data name="Dialog_RecordingStartFailed_Title" xml:space="preserve">
+    <value>Recording failed to start</value>
+  </data>
+  <data name="Dialog_RecordingStartFailed_Message" xml:space="preserve">
+    <value>Parlotype could not start recording. Check the selected microphone and speech engine in Settings, then try again. Technical details are available in the log.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Cloud transcription failed</value>

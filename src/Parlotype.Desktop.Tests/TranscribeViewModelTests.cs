@@ -345,7 +345,7 @@ public class TranscribeViewModelTests
         await vm.StartRecordingAsync();
 
         Assert.False(vm.IsRecording);
-        Assert.Equal("Ready", vm.StatusText);
+        Assert.Equal("Recording failed to start", vm.StatusText);
         Assert.Equal(RecordingState.Disabled, vm.RecordingState);
     }
 
@@ -497,20 +497,152 @@ public class TranscribeViewModelTests
     }
 
     [AvaloniaFact]
-    public async Task StartRecording_GenericFailure_DoesNotShowDialog()
+    public async Task StartRecording_GenericFailure_ShowsActionableMessage()
     {
         var pipeline = new MockAudioPipeline
         {
-            ThrowOnStart = new InvalidOperationException("mic unavailable")
+            ThrowOnStart = new ArgumentException("Source must be stereo")
+        };
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+
+        await vm.TogglePlayCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, dialog.ShowMessageCount);
+        Assert.Equal(0, dialog.ShowConfirmationCount);
+        Assert.Equal("Recording failed to start", dialog.LastTitle);
+        Assert.Contains("microphone", dialog.LastMessage);
+        Assert.Contains("Settings", dialog.LastMessage);
+        Assert.DoesNotContain("Source must be stereo", dialog.LastMessage);
+        Assert.Equal("OK", dialog.LastConfirmText);
+        Assert.Equal("Recording failed to start", vm.StatusText);
+        Assert.False(vm.IsRecording);
+        Assert.False(vm.IsLoading);
+        Assert.False(vm.IsActive);
+        Assert.False(vm.IsIdle);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_FailedHold_DialogDoesNotBlockReleaseOrStack()
+    {
+        var pipeline = new MockAudioPipeline { ThrowOnStart = new ArgumentException("Source must be stereo") };
+        var gate = new TaskCompletionSource();
+        var dialog = new MockUserDialogService { Gate = gate };
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+
+        try
+        {
+            await vm.StartRecordingAsync(holdScoped: true)
+                .WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+            await vm.StopRecordingAsync()
+                .WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+            await vm.StartRecordingAsync(holdScoped: true);
+
+            Assert.Equal(1, dialog.ShowMessageCount);
+            Assert.Equal(0, pipeline.StopCount);
+            Assert.Equal("Recording failed to start", vm.StatusText);
+        }
+        finally
+        {
+            gate.TrySetResult();
+        }
+
+        Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+        await vm.StartRecordingAsync();
+        Assert.Equal(2, dialog.ShowMessageCount);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_FailureThenRetry_ClearsFailureAndDoesNotDuplicateHandlers()
+    {
+        var pipeline = new MockAudioPipeline { ThrowOnStart = new ArgumentException("Source must be stereo") };
+        var injector = new MockTextInjectionService();
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, injector, dialogService: dialog);
+
+        await vm.StartRecordingAsync();
+        pipeline.RaiseTranscriptionAvailable("must not be injected");
+        Assert.Empty(injector.InjectedTexts);
+
+        pipeline.ThrowOnStart = null;
+        await vm.StartRecordingAsync();
+        pipeline.RaiseTranscriptionAvailable("successful retry");
+
+        Assert.True(vm.IsRecording);
+        Assert.Equal(RecordingState.Idle, vm.RecordingState);
+        Assert.Equal("Recording...", vm.StatusText);
+        Assert.Equal(1, dialog.ShowMessageCount);
+        Assert.Equal(["successful retry"], injector.InjectedTexts);
+    }
+
+    [AvaloniaFact]
+    public async Task StartRecording_Cancelled_DoesNotReportFailure()
+    {
+        var pipeline = new MockAudioPipeline { ThrowOnStart = new OperationCanceledException() };
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+
+        await vm.StartRecordingAsync();
+
+        Assert.False(vm.IsRecording);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal("Cancelled", vm.StatusText);
+        Assert.Equal(0, dialog.ShowMessageCount);
+        Assert.Equal(0, dialog.ShowConfirmationCount);
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task StartRecording_RuntimeUnavailable_ShowsSpecificMessage(bool requiresRestart)
+    {
+        var pipeline = new MockAudioPipeline
+        {
+            ThrowOnStart = new RuntimeUnavailableException(RuntimePreference.Vulkan, "runtime missing", requiresRestart)
         };
         var dialog = new MockUserDialogService();
         var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
 
         await vm.StartRecordingAsync();
-        await Task.Delay(100, TestContext.Current.CancellationToken);
 
-        Assert.Equal(0, dialog.ShowConfirmationCount);
-        Assert.Equal("Ready", vm.StatusText);
+        Assert.False(vm.IsRecording);
+        Assert.Equal(1, dialog.ShowMessageCount);
+        Assert.Equal("Recording failed to start", dialog.LastTitle);
+        Assert.Equal(vm.StatusText, dialog.LastMessage);
+        Assert.Contains("Vulkan", dialog.LastMessage);
+        Assert.Equal(requiresRestart, dialog.LastMessage!.Contains("Restart"));
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task StartRecording_SlowFailure_ClearsSpinnerAndHonorsCancellation(bool cancel)
+    {
+        var gate = new TaskCompletionSource();
+        var pipeline = new MockAudioPipeline
+        {
+            StartGate = gate,
+            ThrowOnStart = new ArgumentException("Source must be stereo")
+        };
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog)
+        {
+            LoadingSpinnerDelay = TimeSpan.Zero
+        };
+
+        var start = vm.StartRecordingAsync();
+        Assert.True(vm.IsLoading);
+        if (cancel)
+            await vm.CancelRecordingAsync();
+
+        gate.SetResult();
+        await start;
+
+        Assert.False(vm.IsLoading);
+        Assert.False(vm.IsRecording);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal(cancel ? "Cancelled" : "Recording failed to start", vm.StatusText);
+        Assert.Equal(cancel ? 0 : 1, dialog.ShowMessageCount);
     }
 
     [AvaloniaFact]

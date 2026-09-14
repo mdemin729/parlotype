@@ -4,7 +4,7 @@ type: service-profile
 status: active
 tags: [desktop, avalonia, avalonia12, tray, ui, mvvm]
 criticality: medium
-last_updated: 2026-09-13
+last_updated: 2026-09-14
 summary: Avalonia 12 tray-based desktop frontend — sole desktop app
 ---
 
@@ -15,6 +15,17 @@ summary: Avalonia 12 tray-based desktop frontend — sole desktop app
 Tray-first desktop frontend on Avalonia 12.0.2 (GA). Sole desktop app after V1 sunset (ADR-018). Reuses `Parlotype.Core` + `Parlotype.Platform`. See ADR [[015-parlotype-desktop-avalonia12]].
 
 ## Key Paths
+
+**Recording-start feedback ([[decisions/_index|ADR-069]]):**
+`TranscribeViewModel` now retains `StatusKind.StartFailed` and shows a localized
+message for generic startup errors; runtime failures show their specific
+explanation too. Cancellation is not an error. `ShowRecordingStartErrorAsync`
+is fire-and-forget with a single-dialog guard so PTT release never waits for
+dismissal. This changes startup feedback only, not local transcription-error
+handling or the audio-capture implementation.
+`StartFailed` participates in `IsInErrorState` so ADR-068 keeps the error
+window visible; a later successful dictation still auto-hides after insertion
+finishes.
 
 - `src/Parlotype.Desktop/App.axaml(.cs)` — TrayIcon + NativeMenu, DI bootstrap, `ShutdownMode.OnExplicitShutdown`. **`OnFrameworkInitializationCompleted` opens with a runtime guard (ADR-063)**: `ResolveRuntimeLifetime(ApplicationLifetime, Design.IsDesignMode)` returns the desktop lifetime or null, and a null returns immediately without building the container. The XAML previewer reaches this method (it calls `BuildAvaloniaApp().SetupWithoutStarting()` without ever running `Program.Main`) and used to start the global hook, the microphone and a prewarmed multi-GB model in a `dotnet.exe` owned by the IDE. Two orthogonal conditions on purpose — Avalonia's own `Design.IsDesignMode`, plus the structural "is there a desktop lifetime". Everything after the guard may assume `desktop` is non-null
 - `src/Parlotype.Desktop/Services/IWindowManager.cs` + `WindowManager.cs` — single-instance Transcribe + Settings windows; `Closing` handler hides instead of closes; calls `TranscribeWindow.RestorePositionAsync(IWindowStateService)` before the first show so the frameless widget reopens where the user left it (ADR-040). **`ShowTranscribe(activate: false)`** is now the *user-summoned* path (tray click/Open, ADR-055 relaunch, onboarding), while **`ShowTranscribeForDictation()`** (ADR-068) is the dictation-gesture path called from `HotkeyCoordinator` — a separate method rather than a `TranscribeShowReason` parameter on `ShowTranscribe`, so the other three call sites are untouched. Both funnel through a private `ShowCoreAsync(activate, byDictation)`, which restores the window's chrome (`_transcribe.RestoreChrome()`) and then calls `_autoHide.NotifyShowing(byDictation)` — in that order, so a window mid-fade is fully opaque again before ownership is decided — before `Show()`. `HideTranscribe()` remains on `IWindowManager` with no production caller
@@ -58,7 +69,7 @@ Tray-first desktop frontend on Avalonia 12.0.2 (GA). Sole desktop app after V1 s
 - `src/Parlotype.Desktop/ViewModels/CloudErrorText.cs` — the same split for cloud failures (ADR-064 amendment): `Provider`, `NotConfigured`, `BaseUrl`, `Transcription` turn the enums and payload on `CloudProviderNotConfiguredException` / `CloudSpeechTranscriptionException` / `CloudBaseUrlFailure` into copy. Every `Cloud_*` format opens with the provider slot so the translated provider name never needs a grammatical case; the provider's own error text is substituted verbatim, never translated
 - `src/Parlotype.Desktop/Services/UiLanguageService.cs` — DI seam over `Localizer` (ADR-064). `ReadStoredLanguageAsync` / `ApplyLanguage` are deliberately split so `App` can read `SettingsKeys.UiLanguage` through `Task.Run` and apply the culture on the UI thread; awaiting `JsonFileStore` and blocking on the UI thread deadlocks before the first window
 - `src/Parlotype.Desktop/ViewModels/Settings/InterfaceLanguageSettingsViewModel.cs` + `Views/Settings/InterfaceLanguageSettingsView.axaml` — Settings → **Appearance** → Interface language (ADR-064). Rows are endonyms ("Русский") so they read from any locale; only the "System default" row is localized, with a detail line naming what it currently resolves to
-- `src/Parlotype.Desktop/Services/IUserDialogService.cs` + `UserDialogService.cs` + `Views/ConfirmationDialog.axaml(.cs)` + `ViewModels/ConfirmationDialogViewModel.cs` — reusable modal dialog (ADR-043 amendment): `ShowConfirmationAsync(title, message, confirmText, cancelText) → bool` + `ShowMessageAsync(title, message, buttonText)` (single-button variant — `ConfirmationDialogViewModel.HasCancel` hides the cancel button when the cancel caption is empty), UI-thread marshaling + `GetOwnerWindow()` per the `ModelDownloadDialogService` pattern; result via `ShowDialog<bool?>` (window close ⇒ cancel). Consumers: the cloud-provider-not-configured record-start flow and cloud transcription-error surfacing
+- `src/Parlotype.Desktop/Services/IUserDialogService.cs` + `UserDialogService.cs` + `Views/ConfirmationDialog.axaml(.cs)` + `ViewModels/ConfirmationDialogViewModel.cs` — reusable dialog (ADR-043/069): `ShowConfirmationAsync(title, message, confirmText, cancelText) → bool` + `ShowMessageAsync(title, message, buttonText)` (single-button variant; `HasCancel` hides the empty cancel caption). UI-thread marshaling; visible owner uses `ShowDialog<bool?>`, no visible owner uses internal `ConfirmationDialog.ShowStandaloneAsync()` without unhiding the widget. Window close means cancel in both modes. Consumers include recording-start failures and cloud transcription errors.
 - `src/Parlotype.Desktop/ViewModels/Settings/SettingsNavItem.cs` — flat-list nav row model; either a non-selectable header (`IsHeader=true`) or a section row; consumed by the left `ListBox`
 - `src/Parlotype.Desktop/Views/Settings/LlamaCppSettingsView.axaml` — sections: Active server (status + Managed/Manual badge + /props readout), Update banner, Installed (RadioButton + colored backend chip + Uninstall per row), Manual install (distinct background + "Not managed by Parlotype" badge), Available builds (per-row Install button, badge swap when already installed), port + Save/Reset
 - `src/Parlotype.Desktop/Views/SettingsWindow.axaml` — `SplitView` + `ListBox` (grouped nav with non-selectable headers via `navHeader` class) + `ContentControl` with `Window.DataTemplates` mapping each section VM type to its `UserControl`

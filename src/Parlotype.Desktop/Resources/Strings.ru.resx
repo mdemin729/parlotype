@@ -204,6 +204,9 @@
   <data name="Transcribe_Status_Cancelled" xml:space="preserve">
     <value>Отменено</value>
   </data>
+  <data name="Transcribe_Status_StartFailed" xml:space="preserve">
+    <value>Не удалось начать запись</value>
+  </data>
   <data name="Transcribe_Status_CloudNotConfigured" xml:space="preserve">
     <value>Облачный провайдер не настроен</value>
   </data>
@@ -254,6 +257,12 @@
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Облачный провайдер не настроен</value>
+  </data>
+  <data name="Dialog_RecordingStartFailed_Title" xml:space="preserve">
+    <value>Не удалось начать запись</value>
+  </data>
+  <data name="Dialog_RecordingStartFailed_Message" xml:space="preserve">
+    <value>Parlotype не удалось начать запись. Проверьте выбранный микрофон и движок распознавания в настройках и повторите попытку. Технические подробности доступны в журнале.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Не удалось распознать в облаке</value>

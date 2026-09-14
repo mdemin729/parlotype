@@ -34,6 +34,7 @@ public partial class TranscribeViewModel : ViewModelBase
         LoadingModel,
         Recording,
         Cancelled,
+        StartFailed,
         RuntimeRestartRequired,
         RuntimeUnavailable,
         CloudNotConfigured,
@@ -248,6 +249,7 @@ public partial class TranscribeViewModel : ViewModelBase
         StatusKind.LoadingModel => Strings.Transcribe_Status_LoadingModel,
         StatusKind.Recording => Strings.Transcribe_Status_Recording,
         StatusKind.Cancelled => Strings.Transcribe_Status_Cancelled,
+        StatusKind.StartFailed => Strings.Transcribe_Status_StartFailed,
         StatusKind.RuntimeRestartRequired => Strings.Format_Transcribe_Status_RuntimeRestartRequiredFormat(param),
         StatusKind.RuntimeUnavailable => Strings.Format_Transcribe_Status_RuntimeUnavailableFormat(param),
         StatusKind.CloudNotConfigured => Strings.Transcribe_Status_CloudNotConfigured,
@@ -269,7 +271,7 @@ public partial class TranscribeViewModel : ViewModelBase
     /// (FR-9).
     /// </summary>
     public bool IsInErrorState => _statusKind is
-        StatusKind.RuntimeRestartRequired or StatusKind.RuntimeUnavailable
+        StatusKind.StartFailed or StatusKind.RuntimeRestartRequired or StatusKind.RuntimeUnavailable
         or StatusKind.CloudNotConfigured or StatusKind.CloudKeyRejected
         or StatusKind.CloudQuotaExceeded or StatusKind.CloudRateLimited
         or StatusKind.CloudProviderUnavailable or StatusKind.CloudFailed;
@@ -622,6 +624,7 @@ public partial class TranscribeViewModel : ViewModelBase
             SetStatus(
                 ex.RequiresRestart ? StatusKind.RuntimeRestartRequired : StatusKind.RuntimeUnavailable,
                 ex.Requested);
+            _ = ShowRecordingStartErrorAsync(StatusText);
         }
         catch (CloudProviderNotConfiguredException ex)
         {
@@ -643,16 +646,46 @@ public partial class TranscribeViewModel : ViewModelBase
             // push-to-talk key release hang until the dialog is dismissed.
             _ = ShowCloudProviderConfigDialogAsync(ex);
         }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Recording start cancelled");
+            DetachPipelineHandlers();
+            ResetRecordingState();
+            SetStatus(StatusKind.Cancelled);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to start recording");
-            pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
-            pipeline.TranscriptionFailed -= OnTranscriptionFailed;
-            if (_audioLevelProvider is not null)
-                _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
-            IsRecording = false;
-            RecordingState = RecordingState.Disabled;
-            SetStatus(StatusKind.Ready);
+            DetachPipelineHandlers();
+            ResetRecordingState();
+            SetStatus(_cancelRequested ? StatusKind.Cancelled : StatusKind.StartFailed);
+            if (!_cancelRequested)
+                _ = ShowRecordingStartErrorAsync(Strings.Dialog_RecordingStartFailed_Message);
+        }
+    }
+
+    private bool _isRecordingStartErrorDialogOpen;
+
+    private async Task ShowRecordingStartErrorAsync(string message)
+    {
+        if (_dialogService is null || _isRecordingStartErrorDialogOpen)
+            return;
+
+        _isRecordingStartErrorDialogOpen = true;
+        try
+        {
+            // Do not await this from the start path: a push-to-talk release waits
+            // for _startTask, not for the user to dismiss an error (ADR-039).
+            await _dialogService.ShowMessageAsync(
+                Strings.Dialog_RecordingStartFailed_Title, message, Strings.Common_Ok);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to show recording-start error dialog");
+        }
+        finally
+        {
+            _isRecordingStartErrorDialogOpen = false;
         }
     }
 

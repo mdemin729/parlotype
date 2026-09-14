@@ -3,7 +3,7 @@ title: Key Subsystems
 type: architecture
 status: active
 tags: [architecture, subsystems, hotkeys, settings, logging, startup, transcribe-window]
-last_updated: 2026-09-13
+last_updated: 2026-09-14
 summary: Speech engines, text injection, global hotkeys, settings, logging, model management, startup, onboarding, localization, and Transcribe window lifetime subsystems
 ---
 
@@ -24,6 +24,19 @@ Three local engines + two opt-in cloud engines (ADR-032/043) behind one `ISpeech
 Cloud engines are strictly opt-in (never default), fail initialization with an actionable error when no API key is stored (`CloudProviderNotConfiguredException` → record-start dialog with "Open settings"), and light a persistent "Cloud" badge on the Transcribe window while active (ADR-032 transparency commitment). Utterance audio is WAV-encoded (`WavEncoder`) and POSTed per transcription; text post-processing stays centralized in `AudioPipelineService` for all five engines. Per-request HTTP failures are parsed + classified (`CloudSpeechHttpError` → `CloudSpeechTranscriptionException`/`CloudSpeechErrorKind`) and surfaced to the user via the pipeline's `TranscriptionFailed` event (quota/rate-limit/outage → message dialog, rejected key → "Open settings"), without stopping the recording (ADR-043 amendment).
 
 Engine-scoped settings sections hide via `RestrictToEngine` (ADR-028) or the capability-driven `IsVisibleFor` override (ADR-042 — the Language page hides for engines whose `LanguageCapabilities.HasLanguageChoices` is false, and the Transcribe widget's language strip hides + the window compacts 118→88 px). Model hot-swap for all engines via `UnloadAsync` (ADR-017); prewarm + loading spinner apply engine-agnostically through the delegating recognizer (ADR-038).
+
+## Recording Startup Feedback
+
+`TranscribeViewModel` resets failed starts to a non-recording state but retains
+a localized failure status and shows a message via `IUserDialogService`
+([[decisions/_index|ADR-069]]). Runtime failures keep specific restart/settings
+guidance; cloud configuration keeps its existing settings action; cancellation
+is not failure. Dialog dismissal is outside the start task so PTT release cannot
+block on it. Without a visible owner, the shared dialog opens standalone.
+`StartFailed` is an error outcome for ADR-068's auto-hide controller; successful
+dictation retains the original settle/injection-completion hiding behavior.
+The microphone-array conversion fix is separate and awaits approval; see
+[[naudio-multichannel-capture]].
 
 ## Text Injection
 
@@ -171,7 +184,7 @@ User-facing `RuntimePreference` (`Parlotype.Core/Speech/`) maps to Whisper.net's
 | `Cpu` | `[Cpu]` | n/a |
 
 - **Bootstrap**: `WhisperRuntimeBootstrap.Initialize(RuntimePreference, ILogger)` sets `RuntimeOptions.RuntimeLibraryOrder` once per process (first-call-wins). `IsSatisfiedBy(preference, loaded)` is the single matcher for "does the loaded library honour this preference" (`Auto` accepts anything; `Cpu` accepts `Cpu`+`CpuNoAvx`).
-- **Strict-mode guard**: `WhisperSpeechRecognizer` calls `IVulkanEnvironmentProvider` before factory creation (it no longer takes `INvidiaEnvironmentProvider` — [[decisions/_index|ADR-049]]). On a strict mismatch it throws `RuntimeUnavailableException` (Core) instead of silently falling back to CPU. `TranscribeViewModel` catches it and shows a status-bar message directing the user to Settings.
+- **Strict-mode guard**: `WhisperSpeechRecognizer` calls `IVulkanEnvironmentProvider` before factory creation (it no longer takes `INvidiaEnvironmentProvider` — [[decisions/_index|ADR-049]]). On a strict mismatch it throws `RuntimeUnavailableException` (Core) instead of silently falling back to CPU. `TranscribeViewModel` retains the localized status and shows an error dialog directing the user to Settings (or a restart for a latched runtime; ADR-069).
 - **Latch guard** ([[decisions/_index|ADR-048]]): `IWhisperRuntimeStatus` (Core) → `WhisperRuntimeStatus` (Platform) exposes the loaded runtime + `RequiresRestartFor(preference)`. `WhisperSpeechRecognizer.AssertRuntimeStillSelectable` runs **before the model download** in both `InitializeAsync` overloads and throws `RuntimeUnavailableException { RequiresRestart = true }`; the post-load assertion covers a stale *order* latch. Applies to `Cpu` too — a CPU selection under a latched GPU runtime is an error, not a silent GPU run.
 - **Factory lifetime** ([[decisions/_index|ADR-048]]): `CreateVerifiedFactory` disposes the `WhisperFactory` on any verification/build failure and `_factory` is assigned only after the processor exists; `UnloadAsync` releases whatever exists regardless of `IsReady`. `WhisperFactory` has no finalizer — see [[whisper-net-quirks]].
 - **UI**: `RuntimeSettingsViewModel` + `RuntimeSettingsView` (Settings → Runtime). Persists via `SettingsKeys.RuntimePreference`. Shows "Changes take effect after restart", plus a live "Restart required" panel (`RestartRequired`/`LoadedRuntimeName`) once the selection diverges from the loaded runtime — selection is process-global one-shot.

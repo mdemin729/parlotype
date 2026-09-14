@@ -204,6 +204,9 @@ Para que tu atajo funcione desde que inicias sesión, Parlotype se inicia con Wi
   <data name="Transcribe_Status_Cancelled" xml:space="preserve">
     <value>Cancelado</value>
   </data>
+  <data name="Transcribe_Status_StartFailed" xml:space="preserve">
+    <value>No se pudo iniciar la grabación</value>
+  </data>
   <data name="Transcribe_Status_CloudNotConfigured" xml:space="preserve">
     <value>Proveedor en la nube sin configurar</value>
   </data>
@@ -254,6 +257,12 @@ Para que tu atajo funcione desde que inicias sesión, Parlotype se inicia con Wi
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Proveedor en la nube sin configurar</value>
+  </data>
+  <data name="Dialog_RecordingStartFailed_Title" xml:space="preserve">
+    <value>No se pudo iniciar la grabación</value>
+  </data>
+  <data name="Dialog_RecordingStartFailed_Message" xml:space="preserve">
+    <value>Parlotype no pudo iniciar la grabación. Revisa el micrófono y el motor de reconocimiento seleccionados en Configuración y vuelve a intentarlo. Los detalles técnicos están disponibles en el registro.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>La transcripción en la nube falló</value>

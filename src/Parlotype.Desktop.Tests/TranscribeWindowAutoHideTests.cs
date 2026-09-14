@@ -54,10 +54,11 @@ public class TranscribeWindowAutoHideTests
     }
 
     private static (TranscribeWindow Window, TranscribeViewModel Vm, MockAudioPipeline Pipeline,
-        TranscribeAutoHideController Controller, ManualCountdown Delay) CreateHarness()
+        TranscribeAutoHideController Controller, ManualCountdown Delay) CreateHarness(
+            MockTextInjectionService? injector = null)
     {
         var pipeline = new MockAudioPipeline();
-        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, injector);
         var window = new TranscribeWindow
         {
             DataContext = vm,
@@ -166,6 +167,41 @@ public class TranscribeWindowAutoHideTests
 
         await DisposeControllerAsync(controller);
         window.Close();
+    }
+
+    [AvaloniaFact]
+    public async Task HoldReleased_PendingPaste_DefersAutoHideUntilInsertionCompletes()
+    {
+        var paste = new TaskCompletionSource();
+        var injector = new MockTextInjectionService { Gate = paste };
+        var (window, vm, pipeline, controller, delay) = CreateHarness(injector);
+
+        try
+        {
+            await vm.StartRecordingAsync(holdScoped: true);
+            Summon(window, controller, byDictation: true);
+            pipeline.RaiseTranscriptionAvailable("final words");
+            await vm.StopRecordingAsync();
+
+            Assert.False(vm.IsRecording);
+            Assert.True(vm.IsDictationBusy);
+            Assert.True(window.IsVisible);
+            Assert.Equal(0, delay.StartCount);
+
+            paste.SetResult();
+            await WaitUntilAsync(() => delay.StartCount == 1);
+            Assert.False(vm.IsDictationBusy);
+            Assert.Equal(["final words"], injector.InjectedTexts);
+
+            delay.Elapse();
+            await WaitUntilAsync(() => !window.IsVisible);
+        }
+        finally
+        {
+            paste.TrySetResult();
+            await DisposeControllerAsync(controller);
+            window.Close();
+        }
     }
 
     // 2. Tray-summoned (ShowTranscribe) + a full dictation session → still visible (FR-3).
@@ -327,15 +363,19 @@ public class TranscribeWindowAutoHideTests
 
     // 9. IsInErrorState after a failed start → no auto-hide (FR-8); a following
     //    clean session hides it — the state self-heals.
-    [AvaloniaFact]
-    public async Task ErrorState_SuppressesAutoHide_SelfHealsOnCleanSession()
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ErrorState_SuppressesAutoHide_SelfHealsOnCleanSession(bool genericFailure)
     {
         var pipeline = new MockAudioPipeline
         {
-            ThrowOnStart = new CloudProviderNotConfiguredException(
-                SpeechEngine.XaiGrok,
-                CloudConfigurationError.MissingApiKey,
-                "No API key configured for the xAI Grok provider."),
+            ThrowOnStart = genericFailure
+                ? new ArgumentException("Source must be stereo")
+                : new CloudProviderNotConfiguredException(
+                    SpeechEngine.XaiGrok,
+                    CloudConfigurationError.MissingApiKey,
+                    "No API key configured for the xAI Grok provider."),
         };
         var vm = new TranscribeViewModel(new MockWindowManager(), pipeline);
         var window = new TranscribeWindow
@@ -351,7 +391,7 @@ public class TranscribeWindowAutoHideTests
             DelayProvider = delay.Delay,
         };
 
-        await vm.StartRecordingAsync(); // fails synchronously → CloudNotConfigured
+        await vm.StartRecordingAsync();
         Assert.True(vm.IsInErrorState);
 
         Summon(window, controller, byDictation: true);

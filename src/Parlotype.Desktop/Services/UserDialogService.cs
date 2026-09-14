@@ -8,8 +8,8 @@ namespace Parlotype.Desktop.Services;
 
 /// <summary>
 /// <see cref="IUserDialogService"/> implementation backed by
-/// <see cref="ConfirmationDialog"/>. UI-thread marshaling and owner-window
-/// resolution follow the same pattern as <see cref="ModelDownloadDialogService"/>.
+/// <see cref="ConfirmationDialog"/>. Marshals to the UI thread and uses a
+/// visible owner when available, otherwise showing a standalone dialog.
 /// </summary>
 public sealed class UserDialogService : IUserDialogService
 {
@@ -49,7 +49,7 @@ public sealed class UserDialogService : IUserDialogService
         var owner = GetOwnerWindow();
         var result = owner is not null
             ? await dialog.ShowDialog<bool?>(owner)
-            : await dialog.ShowDialog<bool?>(dialog);
+            : await dialog.ShowStandaloneAsync();
 
         // Closing the window without choosing counts as a cancel.
         return result == true;
@@ -60,13 +60,14 @@ public sealed class UserDialogService : IUserDialogService
         if (Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
             return null;
 
-        // Prefer an active/visible window; fall back to MainWindow
+        // A hidden tray window is not a valid modal owner. In that case the
+        // dialog stands alone rather than failing to report the original error.
         foreach (var window in desktop.Windows)
         {
             if (window.IsVisible)
                 return window;
         }
 
-        return desktop.MainWindow;
+        return null;
     }
 }

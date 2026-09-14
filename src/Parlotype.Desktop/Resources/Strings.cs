@@ -101,6 +101,12 @@ public static class Strings
     /// <summary>Cloud transcription failed</summary>
     public static string Dialog_CloudTranscriptionFailed_Title => Localizer.Lookup(nameof(Dialog_CloudTranscriptionFailed_Title));
 
+    /// <summary>Parlotype could not start recording. Check the selected microphone and speech engine in Settings, then try again. Tec...</summary>
+    public static string Dialog_RecordingStartFailed_Message => Localizer.Lookup(nameof(Dialog_RecordingStartFailed_Message));
+
+    /// <summary>Recording failed to start</summary>
+    public static string Dialog_RecordingStartFailed_Title => Localizer.Lookup(nameof(Dialog_RecordingStartFailed_Title));
+
     /// <summary>Esc — cancel the current recording</summary>
     public static string Help_EscCancelLine => Localizer.Lookup(nameof(Help_EscCancelLine));
 
@@ -1306,6 +1312,9 @@ public static class Strings
     /// <summary>{0} runtime not available — change in Settings</summary>
     public static string Format_Transcribe_Status_RuntimeUnavailableFormat(object? arg0) =>
         string.Format(System.Globalization.CultureInfo.CurrentCulture, Transcribe_Status_RuntimeUnavailableFormat, arg0);
+
+    /// <summary>Recording failed to start</summary>
+    public static string Transcribe_Status_StartFailed => Localizer.Lookup(nameof(Transcribe_Status_StartFailed));
 
     /// <summary>Translate to</summary>
     public static string Transcribe_TargetPicker_Header => Localizer.Lookup(nameof(Transcribe_TargetPicker_Header));

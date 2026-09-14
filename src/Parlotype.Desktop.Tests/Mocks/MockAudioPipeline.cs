@@ -20,6 +20,8 @@ public sealed class MockAudioPipeline : IAudioPipeline
     /// <summary>When set, <see cref="StartAsync"/> will delay for this duration before completing.</summary>
     public TimeSpan? StartDelay { get; set; }
 
+    public TaskCompletionSource? StartGate { get; set; }
+
     public Task PrewarmAsync(CancellationToken cancellationToken = default)
     {
         PrewarmCount++;
@@ -33,11 +35,13 @@ public sealed class MockAudioPipeline : IAudioPipeline
     {
         LastStartMode = mode;
 
-        if (ThrowOnStart is not null)
-            throw ThrowOnStart;
-
+        if (StartGate is not null)
+            await StartGate.Task.WaitAsync(cancellationToken);
         if (StartDelay is not null)
             await Task.Delay(StartDelay.Value, cancellationToken);
+
+        if (ThrowOnStart is not null)
+            throw ThrowOnStart;
 
         IsRunning = true;
         StartCount++;

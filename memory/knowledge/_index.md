@@ -2,7 +2,7 @@
 title: Knowledge Base
 type: index
 status: active
-last_updated: 2026-09-13
+last_updated: 2026-09-14
 summary: Semantic memory — stable facts learned across sessions that are not derivable from code
 ---
 
@@ -24,6 +24,7 @@ This directory stores **stable facts** learned across sessions — things that a
 
 | Fact | Summary | Learned |
 |------|---------|---------|
+| [[naudio-multichannel-capture]] | NAudio 2.2.1 `ToMono()` only supports one/two channels; WDL preserves channel count. Synthetic 4/6-channel inputs reproduce the AMD array error. Capture fix and failed-start rollback await approval. | 2026-09-14 |
 | [[whisper-net-quirks]] | Whisper.net 1.9.0 NuGet `CudaHelper` differs from upstream master; `WhisperLogLevel` enum is inverted vs native ggml; `WhisperFactory` has no finalizer, so an undisposed factory leaks the whole model; native libs ship as plain `<None>` content with hard-coded TargetPaths, so `publish -r <rid>` cannot filter them and a `net10.0` TFM fires the Windows *and* macOS blocks | 2026-07-31 |
 | [[agent-skills]] | Claude/Copilot skills require `.claude/skills/<name>/SKILL.md`; description-triggered discovery does not reliably fire at session boundaries, so per-session protocols belong in CLAUDE.md | 2026-04-30 |
 | [[avalonia-devtools]] | Classic `Avalonia.Diagnostics` retired in 12; replacement is `AvaloniaUI.DiagnosticsSupport` (in-app) + `AvaloniaUI.DeveloperTools` (`avdt` global tool); free Essentials tier needs portal signup. Build telemetry: `AvaloniaStatsTask` POSTs hashed build metadata to `av-build-tel-api-v1.avaloniaui.net`; Community tier cannot opt out; no runtime telemetry. Set `AVALONIA_TELEMETRY_OPTOUT=1` when upgrading to paid tier. | 2026-04-30 |

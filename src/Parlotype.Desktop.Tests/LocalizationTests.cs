@@ -427,6 +427,27 @@ public class LocalizationTests : IDisposable
     }
 
     [AvaloniaFact]
+    public async Task TranscribeWidget_StartFailure_UsesCurrentLanguageAndRefreshesStatus()
+    {
+        var pipeline = new MockAudioPipeline { ThrowOnStart = new ArgumentException("Source must be stereo") };
+        var dialog = new MockUserDialogService();
+        var vm = new TranscribeViewModel(new MockWindowManager(), pipeline, dialogService: dialog);
+
+        foreach (var language in SupportedUiLanguages.All)
+        {
+            Localizer.Instance.SetCulture(CultureInfo.GetCultureInfo(language.CultureName));
+            await vm.StartRecordingAsync();
+
+            Assert.Equal(Strings.Transcribe_Status_StartFailed, vm.StatusText);
+            Assert.Equal(Strings.Dialog_RecordingStartFailed_Title, dialog.LastTitle);
+            Assert.Equal(Strings.Dialog_RecordingStartFailed_Message, dialog.LastMessage);
+        }
+
+        Localizer.Instance.SetCulture(Russian);
+        Assert.Equal("Не удалось начать запись", vm.StatusText);
+    }
+
+    [AvaloniaFact]
     public void HotkeySection_RefreshesRowsAndWarnings_OnCultureChange()
     {
         // Synchronous on purpose, unlike HotkeySettingsViewModelTests' usual
