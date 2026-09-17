@@ -1,8 +1,8 @@
 ---
 title: Twenty-five UI languages — match the interface set to Parakeet's speech set
-status: planned
+status: in_progress
 created: 2026-09-17
-started:
+started: 2026-09-17
 completed:
 ---
 
@@ -102,14 +102,13 @@ Phases are sequential; the five translation waves are interchangeable in order. 
 [implementation-plan.md](implementation-plan.md); verified facts about culture codes,
 endonyms, packaging and expansion in [research.md](research.md).
 
-- [ ] **Phase 0 — Pipeline.** `export-translation-brief.ps1` + `import-translations.ps1`.
-      Proven by round-tripping the existing `ru` and `es` files: export, re-import,
-      `git diff` must be empty.
-- [ ] **Phase 1 — Guardrails for 25.** Per-language `deliberatelyIdentical`; a fact that
+- [x] **Phase 0 — Pipeline.** `export-translation-brief.ps1` + `import-translations.ps1`.
+      Round-trip on `ru`/`es` caught three design errors — see implementation-plan.md.
+- [x] **Phase 1 — Guardrails for 25.** Per-language `deliberatelyIdentical`; a fact that
       every registry culture is a real .NET neutral culture with a distinct endonym; an
       advisory expansion report in `check-localization.ps1`.
-- [ ] **Phase 2 — Picker UX.** The interface-language page goes from 4 rows to 26.
-- [ ] **Phase 3 — Shared brief.** Do-not-translate register + the 25-term core glossary
+- [x] **Phase 2 — Picker UX.** The interface-language page goes from 4 rows to 26.
+- [x] **Phase 3 — Shared brief.** Do-not-translate register + the 25-term core glossary
       the per-language glossaries are written against.
 - [ ] **Phase 4 — Wave A:** `de` `fr` `it` `pl` `uk`
 - [ ] **Phase 5 — Wave B:** `pt` `nl` `sv` `da` `fi`
