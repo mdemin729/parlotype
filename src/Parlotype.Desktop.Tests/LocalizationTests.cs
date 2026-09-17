@@ -279,6 +279,44 @@ public class LocalizationTests : IDisposable
         var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
 
         Assert.IsNotAssignableFrom<IAsyncRelayCommand>(vm.LanguageOptions[0].SelectCommand);
+
+        // The pinned "System default" row lives outside LanguageOptions but
+        // shares the same command instance, so it is covered by the same
+        // argument — and would be the easiest row to regress independently.
+        Assert.IsNotAssignableFrom<IAsyncRelayCommand>(vm.SystemOption.SelectCommand);
+    }
+
+    [AvaloniaFact]
+    public void LanguagePicker_PinsSystemDefault_AndSortsTheRestByEndonym()
+    {
+        var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
+
+        // "System default" is a behaviour, not a language: it is held out of the
+        // list entirely rather than sorted among the endonyms.
+        Assert.Equal(SupportedUiLanguages.SystemSettingValue, vm.SystemOption.SettingValue);
+        Assert.DoesNotContain(
+            vm.LanguageOptions,
+            o => o.SettingValue == SupportedUiLanguages.SystemSettingValue);
+
+        Assert.Equal(SupportedUiLanguages.All.Count, vm.LanguageOptions.Length);
+
+        var labels = vm.LanguageOptions.Select(o => o.Label).ToArray();
+        Assert.Equal(labels.OrderBy(l => l, StringComparer.InvariantCulture), labels);
+    }
+
+    [AvaloniaFact]
+    public void LanguagePicker_KeepsItsOrder_WhenTheInterfaceLanguageChanges()
+    {
+        // Sorting under the *current* culture would reshuffle the list on every
+        // switch, moving the row the user just clicked out from under the cursor.
+        // Invariant sort order is what stops that.
+        Localizer.Instance.SetCulture(English);
+        var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
+        var before = vm.LanguageOptions.Select(o => o.SettingValue).ToArray();
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal(before, vm.LanguageOptions.Select(o => o.SettingValue).ToArray());
     }
 
     [AvaloniaFact]

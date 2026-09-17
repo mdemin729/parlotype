@@ -6,40 +6,55 @@
              x:Class="Parlotype.Desktop.Views.Settings.InterfaceLanguageSettingsView"
              x:DataType="vms:InterfaceLanguageSettingsViewModel"
              x:CompileBindings="True">
+    <UserControl.Resources>
+        <!-- One row, shared by the pinned "System default" entry and every
+             language in the list below it, so the two cannot drift apart. -->
+        <DataTemplate x:Key="LanguageRow" x:DataType="vm:UiLanguageDisplayItem">
+            <Button HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Background="Transparent"
+                    Padding="12,8"
+                    Margin="0,2"
+                    Command="{Binding SelectCommand}"
+                    CommandParameter="{Binding SettingValue}">
+                <Grid ColumnDefinitions="11,*">
+                    <Border Grid.Column="0"
+                            Width="3" Height="16" CornerRadius="1.5"
+                            Background="{DynamicResource SystemAccentColor}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsSelected}" />
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock Text="{Binding Label}" FontSize="14" />
+                        <TextBlock Text="{Binding Detail}"
+                                   IsVisible="{Binding HasDetail}"
+                                   FontSize="12" Opacity="0.6"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
     <StackPanel Spacing="12">
         <TextBlock Text="{loc:Tr Settings_InterfaceLanguage_Title}"
                    FontSize="20" FontWeight="SemiBold" />
         <TextBlock Text="{loc:Tr Settings_InterfaceLanguage_Description}"
                    Opacity="0.7" TextWrapping="Wrap" />
 
-        <ItemsControl ItemsSource="{Binding LanguageOptions}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:UiLanguageDisplayItem">
-                    <Button HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            Background="Transparent"
-                            Padding="12,8"
-                            Margin="0,2"
-                            Command="{Binding SelectCommand}"
-                            CommandParameter="{Binding SettingValue}">
-                        <Grid ColumnDefinitions="11,*">
-                            <Border Grid.Column="0"
-                                    Width="3" Height="16" CornerRadius="1.5"
-                                    Background="{DynamicResource SystemAccentColor}"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    IsVisible="{Binding IsSelected}" />
-                            <StackPanel Grid.Column="1" Spacing="2">
-                                <TextBlock Text="{Binding Label}" FontSize="14" />
-                                <TextBlock Text="{Binding Detail}"
-                                           IsVisible="{Binding HasDetail}"
-                                           FontSize="12" Opacity="0.6"
-                                           TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Grid>
-                    </Button>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <StackPanel Spacing="0">
+            <!-- Pinned above the separator: "System default" is a behaviour, not
+                 a language, and among twenty-five endonyms it would otherwise
+                 read as one more entry in the list. -->
+            <ContentControl Content="{Binding SystemOption}"
+                            ContentTemplate="{StaticResource LanguageRow}" />
+
+            <Border Height="1" Margin="12,8"
+                    Background="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                    Opacity="0.4" />
+
+            <ItemsControl ItemsSource="{Binding LanguageOptions}"
+                          ItemTemplate="{StaticResource LanguageRow}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>
