@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -100,19 +101,29 @@ public class LocalizationParityTests
         // Not a hard rule — "Esc", "Parlotype" and the like are legitimately
         // identical. But a long sentence copied verbatim into a locale is almost
         // always an unfinished translation, so it has to be deliberate.
-        // Empty today, on purpose: nothing is currently identical. Add a key here
-        // only when a language genuinely shares the English wording.
-        string[] deliberatelyIdentical = [];
+        //
+        // Keyed by culture, not a single shared list: an exemption is a claim
+        // about *one* language. A global list would excuse the key in all 25 at
+        // once, including the languages that simply forgot it — which is the
+        // exact failure this test exists to catch. Empty today, on purpose. Add
+        // an entry only with a stated reason.
+        Dictionary<string, string[]> deliberatelyIdentical = new(StringComparer.Ordinal)
+        {
+            // ["mt"] = ["Some_Key"],  // e.g. Maltese borrows the English term
+        };
 
         var neutral = ReadResx(NeutralPath());
 
         foreach (var language in SupportedUiLanguages.Translated)
         {
             var translated = ReadResx(SatellitePath(language.CultureName));
+            var exempt = deliberatelyIdentical.TryGetValue(language.CultureName, out var keys)
+                ? keys
+                : [];
 
             var suspicious = neutral
                 .Where(pair => pair.Value.Length > 25)
-                .Where(pair => !deliberatelyIdentical.Contains(pair.Key))
+                .Where(pair => !exempt.Contains(pair.Key))
                 .Where(pair => translated.TryGetValue(pair.Key, out var t) && t == pair.Value)
                 .Select(pair => pair.Key)
                 .OrderBy(k => k)
@@ -122,7 +133,75 @@ public class LocalizationParityTests
                 suspicious.Count == 0,
                 $"Strings.{language.CultureName}.resx repeats the English text verbatim for "
                 + $"{suspicious.Count} key(s): {string.Join(", ", suspicious)}. Translate them, or "
-                + "add the key to deliberatelyIdentical with a reason.");
+                + $"add the key to deliberatelyIdentical[\"{language.CultureName}\"] with a reason.");
+        }
+    }
+
+    [Fact]
+    public void EveryRegisteredLanguage_IsAWellFormedNeutralCulture()
+    {
+        // The registry is hand-edited once per language and read by everything
+        // else, so a slip here is easy to make and invisible until a user reports
+        // an English window. The resx parity tests cannot see it: they only
+        // compare files to each other, and a bogus culture name fails at runtime,
+        // not at build.
+        var seenCultures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenEndonyms = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        // CultureInfo.GetCultureInfo is NOT a validity check. Given any
+        // well-formed code it manufactures a culture rather than throwing, so
+        // "zz" and "ls" (a transposition of "sl") both come back as perfectly
+        // happy neutral CultureInfo objects. Measured, not assumed — an earlier
+        // version of this test asserted only that the lookup did not throw, and
+        // passed with a row reading new("zz", "Nonsense"). Membership in the
+        // predefined set is what actually answers the question.
+        var predefinedNeutrals = CultureInfo
+            .GetCultures(CultureTypes.NeutralCultures)
+            .Select(c => c.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var language in SupportedUiLanguages.All)
+        {
+            var culture = CultureInfo.GetCultureInfo(language.CultureName);
+
+            Assert.True(
+                culture.IsNeutralCulture,
+                $"'{language.CultureName}' is a specific culture. Ship the neutral code "
+                + "instead — .NET's satellite fallback serves every region from a neutral "
+                + "satellite, but never the other way round.");
+
+            Assert.True(
+                predefinedNeutrals.Contains(language.CultureName),
+                $"'{language.CultureName}' is not a language .NET knows. Check it against "
+                + "plans/2026-09-17-twenty-five-ui-languages/research.md — a transposed "
+                + "code such as 'ls' for 'sl' is accepted by GetCultureInfo and would "
+                + "otherwise ship a locale nobody's system will ever ask for.");
+
+            Assert.False(
+                string.IsNullOrWhiteSpace(language.EndonymName),
+                $"'{language.CultureName}' has no endonym.");
+
+            // Deliberately NOT asserted against CultureInfo.NativeName: .NET
+            // returns "français", "čeština", "polski" lowercase, because those
+            // languages lowercase their own name in running prose. As a list
+            // label this app capitalizes — it ships "Español", not "español" — so
+            // most endonyms differ from NativeName by their first letter on
+            // purpose, and pinning them to NativeName would force the wrong copy
+            // into the picker.
+
+            Assert.True(
+                seenCultures.Add(language.CultureName),
+                $"'{language.CultureName}' is registered twice.");
+
+            Assert.False(
+                seenEndonyms.TryGetValue(language.EndonymName, out var owner),
+                $"'{language.EndonymName}' labels both '{owner}' and '{language.CultureName}'. "
+                + "Slovak and Slovenian are the pair most likely to collide.");
+            seenEndonyms[language.EndonymName] = language.CultureName;
+
+            Assert.Equal(
+                language.CultureName,
+                SupportedUiLanguages.MatchSystemCulture(language.CultureName)?.CultureName);
         }
     }
 
