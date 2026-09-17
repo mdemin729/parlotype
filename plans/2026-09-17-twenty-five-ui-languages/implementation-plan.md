@@ -14,11 +14,11 @@ corrected.
 
 | Fact | Value |
 |------|-------|
-| Keys in `Strings.resx` | 392 |
+| Keys in `Strings.resx` | 389 |
 | Keys carrying `{0}`-style placeholders | 47 |
 | Keys carrying a `<comment>` | 140 (neutral), 138 (`ru`) |
 | Values longer than 120 chars | 36 |
-| Satellite files today | `ru`, `es` — both 392 keys |
+| Satellite files today | `ru`, `es` — both 389 keys |
 | Key **order** | Identical in all three files, and *not* alphabetical — it is authoring order |
 | Hardcoded-literal baseline | `pendingFiles: {}` — every `.axaml` is already clean |
 
@@ -43,7 +43,7 @@ Reads `Strings.resx` and emits JSON:
 ```json
 {
   "culture": "de",
-  "sourceKeyCount": 392,
+  "sourceKeyCount": 389,
   "entries": [
     { "key": "Settings_Theme_Title", "en": "Theme" },
     { "key": "Settings_InterfaceLanguage_SystemDetailFormat",
@@ -82,9 +82,11 @@ Output shape, copied exactly from the existing `Strings.ru.resx`:
 
 - Same XML declaration, `<root>`, `resheader` block, and `xsd:schema`.
 - `<data name="…" xml:space="preserve">` in **neutral-file order**.
-- `<comment>` carried through **from the neutral file**, verbatim. Translator notes
-  describe the English source, so they are not themselves translated.
-- UTF-8, `\n` line endings to match the tree, XML-escaped values.
+- `<comment>`: a comment the satellite **already has is kept**; the neutral file's is used
+  only where the satellite has none. See the round-trip finding below — this started as
+  "always clone the neutral comment" and that was wrong.
+- UTF-8 without BOM, **CRLF** line endings (the tree is CRLF under `core.autocrlf=true`),
+  XML-escaped values.
 
 `-Merge` keeps existing translations and applies only the supplied keys, for the
 `-Missing` round trip.
@@ -98,11 +100,34 @@ pwsh scripts/import-translations.ps1 -Culture ru -In $SCRATCH/ru.json
 git diff --stat src/Parlotype.Desktop/Resources/Strings.ru.resx
 ```
 
-The diff must be empty **or** limited to comment normalization. `ru` carries 138 comments
-against the neutral file's 140, so two keys have drifted; the importer will restore them.
-Inspect those two, confirm they are the drift and not a regression, and land the
-normalization as part of Phase 0 rather than forcing the diff to zero by weakening the
-script. Repeat for `es`.
+### What the round-trip actually caught — *(run 2026-09-17)*
+
+The proof earned its place immediately. Three findings, in increasing order of how badly
+they would have gone unnoticed:
+
+1. **The key count is 389, not 392.** A `grep -c` disagreed with every parser. Corrected
+   throughout the plan; research.md §5 carries the note.
+
+2. **XML load normalizes CRLF to LF, so the first output was mixed-ending.** An XML parser
+   rewrites every line break to `\n` on load per spec, and `NewLineHandling.None` then
+   wrote that out verbatim against a CRLF tree. Fixed with `NewLineHandling.Replace` plus
+   `NewLineChars = "\r\n"`, which also restores the two values that contain a real newline
+   (`Onboarding_Tray_Body`, `Settings_Data_DeleteDialog_BodyFormat`). Git's `autocrlf`
+   hides this in `git diff`, so it would have shipped silently.
+
+3. **Cloning the neutral `<comment>` destroyed real information.** This is the one that
+   mattered. `Strings.ru.resx` carries comments the neutral file cannot hold — notes about
+   *Russian*: "...so Russian uses the genitive here", and a `WaitFormat` note that
+   deliberately drops the neutral's reference to the `"s"` unit because Russian prints
+   `с`. The first importer overwrote all five with the generic English note. A satellite's
+   comment is guidance for whoever translates *that language* next, so the rule is now:
+   keep the satellite's, fall back to the neutral's. New languages, having none, inherit
+   the full neutral set as intended.
+
+After the fix the diff across both files is exactly **two added comments each** — keys
+added to the neutral file after `ru`/`es` were translated, which arrived with comments the
+satellites never got. That is the deliberate normalization this step was meant to surface,
+and it lands with Phase 0.
 
 Commit: `build(l10n): translation brief export/import pipeline`.
 
@@ -247,7 +272,7 @@ Commit: `docs(l10n): shared translation brief and core glossary`.
 > You are translating the Parlotype desktop app's interface into **\<language>**
 > (`<culture>`).
 >
-> Read `<path>/<culture>.brief.json` — 392 entries, each with `key`, `en`, an optional
+> Read `<path>/<culture>.brief.json` — 389 entries, each with `key`, `en`, an optional
 > `comment` written for you by the developer, and an optional `placeholders` list. Read
 > `plans/2026-09-17-twenty-five-ui-languages/brief.md` for the do-not-translate register,
 > the core glossary and the style rules. Read
@@ -257,7 +282,7 @@ Commit: `docs(l10n): shared translation brief and core glossary`.
 > Write two files:
 >
 > 1. `<scratch>/<culture>.json` — a flat JSON object, `{"key": "translation"}`, with all
->    392 keys and nothing else. No wrapper, no comments, no extra keys.
+    389 keys and nothing else. No wrapper, no comments, no extra keys.
 > 2. `plans/2026-09-17-twenty-five-ui-languages/glossary-<culture>.md` — the core glossary
 >    terms with the word you chose for each, your quotation-mark convention, and any term
 >    you were unsure about.

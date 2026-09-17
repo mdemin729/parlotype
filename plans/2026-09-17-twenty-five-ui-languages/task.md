@@ -36,7 +36,7 @@ rule should be written down rather than assumed, which is part of what the ADR i
 
 ## The real cost, stated up front
 
-392 keys × 22 languages = **8,624 new translated strings**, and from then on every future
+389 keys × 22 languages = **8,558 new translated strings**, and from then on every future
 UI string costs 24 translations instead of 2. The `Stop` hook and
 `LocalizationParityTests` will not let a session ship without them, which is correct and
 also means the per-string cost is now permanent and non-negotiable.

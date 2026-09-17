@@ -100,7 +100,7 @@ This matches any lowercase two-letter code, optionally followed by a `-Variant` 
 
 **Read:** `src/Parlotype.Desktop/Resources/Strings.resx` in full (1,335 lines).
 
-- **Total key count:** 392 (`<data name="...">` entries).
+- **Total key count:** 389 (`<data name="...">` entries). *(Corrected 2026-09-17 during Phase 0: the original 392 came from a `grep -c` that did not agree with a parse. Four independent counts — `grep -o | wc -l`, Python `ElementTree`, .NET `XmlDocument.SelectNodes`, and the importer's own run — all return 389.)*
 - **Keys with `{0}`/`{1}`/`{2}`-style placeholders:** 47.
 - **Keys with a `<comment>` element:** 140.
 
