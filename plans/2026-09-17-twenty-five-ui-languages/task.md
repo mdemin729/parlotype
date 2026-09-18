@@ -113,7 +113,7 @@ endonyms, packaging and expansion in [research.md](research.md).
 - [x] **Phase 4 — Wave A:** `de` `fr` `it` `pl` `uk`
 - [x] **Phase 5 — Wave B:** `pt` `nl` `sv` `da` `fi`
 - [x] **Phase 6 — Wave C:** `cs` `sk` `ro` `el` `hu`
-- [ ] **Phase 7 — Wave D:** `bg` `hr` `sl` `lt` `lv`
+- [x] **Phase 7 — Wave D:** `bg` `hr` `sl` `lt` `lv`
 - [ ] **Phase 8 — Wave E:** `et` `mt`
 - [ ] **Phase 9 — Verification.** Expansion report → screenshot audit in the worst-
       expanding locales; manual run of the real app in 3 spot-checked languages;
@@ -146,6 +146,23 @@ reports.
 
    The fix is to rephrase the **English**, which is a change to the neutral file and
    therefore a maintainer decision. Ready to prepare on request.
+
+   **Wave D turned this from a tally into a controlled comparison.** Bulgarian is Slavic —
+   the same family as pl, cs, sk, sl, hr, uk, ru, every one of which needed the fix — and
+   it did **not** need it, because Bulgarian lost its case system. Romanian reported the
+   same from the Romance side. So the variable is case marking, not language family and
+   not translator temperament: twelve languages restructured, two independently report
+   they were unaffected, and both exceptions are exactly the two languages without cases
+   in the slot. The mechanism is confirmed, not just the symptom.
+
+   **Three techniques are now in use**, worth knowing before rephrasing so the new English
+   does not defeat them:
+
+   | technique | what it solves | languages |
+   |---|---|---|
+   | Colon / label (`Käännä: {0}`) | case | universal fallback, all 12 |
+   | Carrier noun (`{0} vykdymo aplinka`) | case, when a native noun can take the ending | `fi` `hu` `lt` `lv` `bg` `ro` |
+   | Classifying noun (`Kalba {0}`) | unknown **gender**, which the other two do not touch | `pl` `lt` `lv` `cs` |
 2. **The importer needed a named-token check.** `Settings_Prompts_Help_BuiltInBody`
    carries `{speech_lang}` and `{text_lang}`, substituted *by name* by the Gemma prompt
    engine. Neither a numbered placeholder nor a wholly untranslated string, so nothing
