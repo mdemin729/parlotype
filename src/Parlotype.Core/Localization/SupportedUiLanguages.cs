@@ -52,6 +52,11 @@ public static class SupportedUiLanguages
         new("sv", "Svenska"),
         new("da", "Dansk"),
         new("fi", "Suomi"),
+        new("cs", "Čeština"),
+        new("sk", "Slovenčina"),
+        new("ro", "Română"),
+        new("el", "Ελληνικά"),
+        new("hu", "Magyar"),
     ];
 
     /// <summary>

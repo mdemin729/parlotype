@@ -337,7 +337,19 @@ automated guard:
   `glossary-<culture>.md` in `plans/2026-09-17-twenty-five-ui-languages/`. Extend the
   glossary rather than improvising a synonym.
 - Never translate an identifier the user sees verbatim elsewhere (`Parakeet TDT v3`,
-  `Vulkan`, `settings.json`, `Esc`).
+  `Vulkan`, `settings.json`, `Esc`). **Declension is not translation.** Finnish and
+  Hungarian cannot leave a name bare where grammar demands an ending, and `Parlotypessa`
+  or `Visual Studióban` is correct in a way that `Parlotype-ssa` would not be. The rule is
+  that the **stem survives and stays recognizable**; the suffix is the language's business.
+  Worth a check when a language lands:
+
+  ```python
+  # for each protected term, every key that has it in English must still have it
+  [k for k in keys_with_term_in_english if term not in translated[k]]
+  ```
+
+  Across eighteen languages that came back empty for every term except `Visual Studio`,
+  which Czech and Hungarian decline — accepted deliberately.
 - Use the locale's own typography: `«…»` in Russian, `„…"` in Polish, `”…”` in Swedish and
   Finnish, `»…«` in Danish, guillemets with narrow no-break spaces in French, a
   non-breaking space before units (`{1} с`).
