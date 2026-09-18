@@ -112,7 +112,7 @@ endonyms, packaging and expansion in [research.md](research.md).
       the per-language glossaries are written against.
 - [x] **Phase 4 — Wave A:** `de` `fr` `it` `pl` `uk`
 - [x] **Phase 5 — Wave B:** `pt` `nl` `sv` `da` `fi`
-- [ ] **Phase 6 — Wave C:** `cs` `sk` `ro` `el` `hu`
+- [x] **Phase 6 — Wave C:** `cs` `sk` `ro` `el` `hu`
 - [ ] **Phase 7 — Wave D:** `bg` `hr` `sl` `lt` `lv`
 - [ ] **Phase 8 — Wave E:** `et` `mt`
 - [ ] **Phase 9 — Verification.** Expansion report → screenshot audit in the worst-
@@ -126,13 +126,26 @@ endonyms, packaging and expansion in [research.md](research.md).
 Recorded as they were discovered, so they do not dissolve into individual agent
 reports.
 
-1. **Three English strings are wrong for inflected languages.** French, Ukrainian and
-   Polish independently flagged the same keys as forcing an uninflectable `{0}` into an
-   oblique case, and each moved the slot behind a colon to escape it:
-   `Language_Summary_Format`, `Language_ToggleSwitch_TranslateToFormat`,
-   `Language_Toast_TargetUnsupportedFormat`. Finnish (fifteen cases) will hit them
-   hardest. The fix is to rephrase the **English**, which is a change to the neutral file
-   and therefore a maintainer decision — not something a translator should paper over.
+1. **Three English strings are wrong for inflected languages — now with overwhelming
+   evidence.** `Language_Summary_Format` has been independently restructured by **fr, uk,
+   pl, fi, hu, sk, cs, el** — eight languages from four families, none of which kept the
+   English shape, all of which reached for the same colon form. The companions
+   `Language_ToggleSwitch_TranslateToFormat` and `Language_Toast_TargetUnsupportedFormat`
+   collected the same votes.
+
+   Two details make this conclusive rather than merely suggestive:
+
+   - **Polish knowingly shipped it fragile.** `Tłumacz na {0}` wants an accusative the
+     substituted value will never carry; the translator reported it as an accepted risk
+     rather than solving it. That defect is live in the tree today and cannot be fixed in
+     Polish — only in the English.
+   - **Romanian volunteered the negative case.** It reported that these keys were *not*
+     grammatically forced for Romanian and that it adopted the colon form as a style
+     choice. A translator that distinguishes "required" from "preferred" is one whose
+     "required" can be trusted.
+
+   The fix is to rephrase the **English**, which is a change to the neutral file and
+   therefore a maintainer decision. Ready to prepare on request.
 2. **The importer needed a named-token check.** `Settings_Prompts_Help_BuiltInBody`
    carries `{speech_lang}` and `{text_lang}`, substituted *by name* by the Gemma prompt
    engine. Neither a numbered placeholder nor a wholly untranslated string, so nothing
