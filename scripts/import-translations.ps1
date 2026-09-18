@@ -50,8 +50,15 @@ param(
     [string]$Culture,
 
     # Flat JSON object: { "Key_Name": "translation", ... }. Nothing else.
+    #
+    # Accepts several files, which are merged in the order given: a translator
+    # whose reply would exceed its output-token ceiling answers in slices (see
+    # -Part/-Of on export-translation-brief.ps1) and hands back one file each.
+    # A key appearing twice across the files is an error, not a last-one-wins —
+    # it means two slices overlapped and one of the two translations is being
+    # silently discarded.
     [Parameter(Mandatory)]
-    [string]$In,
+    [string[]]$In,
 
     # Keep the translations already in Strings.<culture>.resx and apply only the
     # keys present in -In. Without it, -In must cover every key.
@@ -68,8 +75,10 @@ $targetResx = Join-Path $resourcesDir "Strings.$Culture.resx"
 if ($Culture -eq 'en') {
     throw "'en' is Strings.resx itself. Edit it directly — it is the source, not a translation."
 }
-if (-not (Test-Path $In)) {
-    throw "Translation map not found: $In"
+foreach ($path in $In) {
+    if (-not (Test-Path $path)) {
+        throw "Translation map not found: $path"
+    }
 }
 
 function Get-Placeholders([string]$value) {
@@ -91,18 +100,29 @@ function Get-NamedTokens([string]$value) {
 
 # ------------------------------------------------------------- read the inputs
 
-$raw = Get-Content -Path $In -Raw -Encoding UTF8
-try {
-    $map = $raw | ConvertFrom-Json -AsHashtable
-}
-catch {
-    throw "Could not parse $In as JSON: $($_.Exception.Message)"
-}
+$map = @{}
+foreach ($path in $In) {
+    $raw = Get-Content -Path $path -Raw -Encoding UTF8
+    try {
+        $slice = $raw | ConvertFrom-Json -AsHashtable
+    }
+    catch {
+        throw "Could not parse $path as JSON: $($_.Exception.Message)"
+    }
 
-# A translator that wrapped the map in the brief's own envelope is a common
-# enough slip to be worth naming precisely rather than failing on 392 missing keys.
-if ($map.ContainsKey('entries') -or $map.ContainsKey('culture')) {
-    throw "$In looks like a brief, not a translation map. Expected a flat object: { `"Key`": `"translation`" }."
+    # A translator that wrapped the map in the brief's own envelope is a common
+    # enough slip to be worth naming precisely rather than failing on 389
+    # missing keys.
+    if ($slice.ContainsKey('entries') -or $slice.ContainsKey('culture')) {
+        throw "$path looks like a brief, not a translation map. Expected a flat object: { `"Key`": `"translation`" }."
+    }
+
+    foreach ($key in $slice.Keys) {
+        if ($map.ContainsKey($key)) {
+            throw "Key '$key' appears in more than one of the supplied files. The slices overlap, so one of the two translations would be thrown away silently."
+        }
+        $map[$key] = $slice[$key]
+    }
 }
 
 # PreserveWhitespace keeps the indentation text nodes intact, which is what makes

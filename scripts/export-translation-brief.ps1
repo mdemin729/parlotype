@@ -41,7 +41,20 @@ param(
 
     # Emit only the keys Strings.<culture>.resx is missing. Requires the file to
     # exist.
-    [switch]$Missing
+    [switch]$Missing,
+
+    # Slice the brief: -Part 2 -Of 4 emits the second quarter of the keys.
+    #
+    # A translator's *reply* has an output-token ceiling, and 389 values in one
+    # JSON object can exceed it — Finnish did, and the agent died before writing
+    # a single byte. Slicing lets one translator answer in several files while
+    # still seeing the whole job, which matters: splitting the work across
+    # several translators instead would split the terminology with it.
+    #
+    # Keys keep the neutral file's order, so the slices concatenate back to the
+    # whole with no gaps or overlap.
+    [int]$Part = 0,
+    [int]$Of = 0
 )
 
 $ErrorActionPreference = 'Stop'
@@ -118,11 +131,31 @@ if ($entries.Count -eq 0) {
     return
 }
 
+$sliceNote = $null
+if ($Of -gt 0) {
+    if ($Part -lt 1 -or $Part -gt $Of) {
+        throw "-Part must be between 1 and -Of ($Of); got $Part."
+    }
+
+    $total = $entries.Count
+    # Ceiling division, so the last slice is the short one rather than a
+    # surprise extra slice appearing after the caller has spawned -Of agents.
+    $size = [math]::Ceiling($total / $Of)
+    $skip = ($Part - 1) * $size
+    $entries = [System.Collections.Generic.List[object]](
+        $entries | Select-Object -Skip $skip -First $size)
+
+    $sliceNote = "part $Part of $Of"
+}
+
 $brief = [ordered]@{
     culture         = $Culture
     sourceKeyCount  = $neutral.Count
     entryCount      = $entries.Count
     entries         = $entries
+}
+if ($sliceNote) {
+    $brief.Insert(1, 'slice', $sliceNote)
 }
 
 # -Depth matters: the default of 2 silently truncates the entries array into
@@ -135,5 +168,6 @@ if ($outDir -and -not (Test-Path $outDir)) { $null = New-Item -ItemType Director
 
 [System.IO.File]::WriteAllText($Out, $json, (New-Object System.Text.UTF8Encoding $false))
 
-Write-Host "Wrote $($entries.Count) of $($neutral.Count) keys for '$Culture' to:"
+$what = if ($sliceNote) { "$($entries.Count) keys ($sliceNote)" } else { "$($entries.Count) of $($neutral.Count) keys" }
+Write-Host "Wrote $what for '$Culture' to:"
 Write-Host "  $Out"
