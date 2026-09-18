@@ -176,40 +176,70 @@ Apply this protocol every session. Full detail lives in
 
 ## Localization
 
-The UI ships in **English, Russian and Spanish** ([ADR-064](docs/decisions/064-ui-localization-foundation.md)).
+The UI is on its way to **25 languages**, matching the speech languages Parakeet supports
+([ADR-064](docs/decisions/064-ui-localization-foundation.md), ADR-069).
+`SupportedUiLanguages.All` (Core) is the registry and the only answer to which languages
+ship today — read it, never assume the set, and never hardcode a language list anywhere
+else.
+
 **Any change to user-facing text must update every language in the same change** — a locale
 left behind is a broken build, not a follow-up task. Use the `localization` skill
-(`.claude/skills/localization/SKILL.md`) whenever you touch UI copy.
+(`.claude/skills/localization/SKILL.md`) whenever you touch UI copy; it carries the detail
+this summary leaves out.
 
 - **Copy lives in resx.** `src/Parlotype.Desktop/Resources/Strings.resx` is the neutral file
   and *is* English (there is no `Strings.en.resx`); each language adds
   `Strings.<culture>.resx`. Keys are flat and area-prefixed: `Settings_Theme_Title`.
+- **Never hand-edit a satellite resx.** Translations go through a pipeline:
+  `export-translation-brief.ps1` emits a compact JSON brief, a translator returns a flat
+  `{key: translation}` map, and `import-translations.ps1` writes every byte of XML —
+  refusing missing, orphan, empty, placeholder-damaged or still-English values. `-Missing`
+  plus `-Merge` make a one-string change one small brief per language.
 - **AXAML never holds literal copy.** Bind it: `Text="{loc:Tr Settings_Theme_Title}"` with
   `xmlns:loc="using:Parlotype.Desktop.Markup"`. In C#, use `Strings.Settings_Theme_Title`.
 - **`Strings.cs` is generated** — `pwsh scripts/gen-strings.ps1`. Never hand-edit it. Keys
   containing `{0}` also get a typed `Format_<key>(...)` helper; use it instead of
   interpolating a translated string, so word order can move and arity is checked at compile
   time.
-- **Adding a language** is one row in `SupportedUiLanguages.All` (Core) plus one resx file.
-  Nothing in markup, view models or the settings UI changes.
-- **Switching is live.** Text bound with `{loc:Tr}` updates itself; copy a view model
-  composes in C# does not — override `SettingsSectionViewModelBase.OnCultureChanged()`.
+- **Adding a language** is one row in `SupportedUiLanguages.All` plus one resx file, landing
+  in the same commit. Nothing in markup, view models, the settings UI or any `.csproj`
+  changes — the SDK produces the satellite assembly on its own. Use a **neutral** culture
+  (`pt`, not `pt-PT`): .NET's fallback serves every region from a neutral file, never the
+  reverse.
+- **Switching is live, and copy composed in C# does not follow it.** Text bound with
+  `{loc:Tr}` updates itself; a status line, a computed label or an `ObservableCollection` of
+  strings is a snapshot that keeps the language the app started in. Override
+  `SettingsSectionViewModelBase.OnCultureChanged()`, and retain the *input* rather than the
+  finished string so it can be re-derived. A structural test
+  (`EverySettingsSection_ThatComposesCopyInCSharp_RefreshesItOnCultureChange`) fails the
+  build for a settings section that ignores this — it has been the source of the same bug
+  three times, most recently on six pages at once.
 - **`CurrentUICulture` moves, `CurrentCulture` does not** — dates and numbers keep following
   the user's Windows regional settings.
 - **Not localized:** log and exception messages, engine/model/runtime names
-  (`Parakeet TDT v3`, `Vulkan`), file paths, benchmark CLI output, and speech language names
-  (those come from ICU via `CultureInfo`).
+  (`Parakeet TDT v3`, `Vulkan`), file paths, benchmark CLI output, speech language names
+  (those come from ICU via `CultureInfo`), and named tokens substituted by the prompt engine
+  (`{speech_lang}`, `{text_lang}`).
 
 ```bash
-pwsh scripts/gen-strings.ps1          # regenerate the accessor after editing Strings.resx
-pwsh scripts/check-localization.ps1   # key parity, placeholder parity, hardcoded-literal scan
+pwsh scripts/gen-strings.ps1              # regenerate the accessor after editing Strings.resx
+pwsh scripts/check-localization.ps1       # key parity, placeholder parity, hardcoded-literal scan
+pwsh scripts/check-localization.ps1 -Report   # advisory text-expansion listing, worst first
+pwsh scripts/export-translation-brief.ps1 -Culture de -Missing   # brief for one language
+pwsh scripts/import-translations.ps1 -Culture de -In de.json -Merge
 ```
 
-`scripts/localization-baseline.json` records how much hardcoded copy each `.axaml` still has
-(migration is in progress — see [the plan](plans/2026-09-05-ui-localization/task.md)). Counts
-may shrink — then run `check-localization.ps1 -UpdateBaseline` — but never grow. Both a
+**The AXAML extraction is finished.** `scripts/localization-baseline.json` is empty: every
+`.axaml` is clean, so a hardcoded literal now fails the check outright rather than being
+recorded. `-UpdateBaseline` only ever lowers a count and cannot bless a regression. Both a
 `PostToolUse` and a `Stop` hook run this check (`.claude/settings.json`), and
 `LocalizationParityTests` enforces the same rules in `dotnet test`.
+
+Neither the checks nor the tests can catch a *short* string left in English — the
+verbatim-English rule only fires above 25 characters, because `Updates`, `Audio` and `OK`
+are legitimately identical in several languages. That gap is covered by the per-language
+glossaries in `plans/2026-09-17-twenty-five-ui-languages/` and by human review, not by
+tooling.
 
 ## Plans & Decisions
 
@@ -235,5 +265,5 @@ A non-trivial change is **not done** until all of the following hold:
    - `memory/decisions/_index.md` references any new ADR
    - For cross-cutting subsystems, `memory/architecture/subsystems.md` gains or updates a section
 5. **Knowledge captured** — facts learned along the way that are *not derivable from current code* (e.g. third-party quirks, environment gotchas) are recorded under `memory/knowledge/` with an index row.
-6. **Translations updated** — if the change adds, alters or removes user-facing UI text, every `Strings.<culture>.resx` carries the change and `pwsh scripts/check-localization.ps1` passes. This one is **not** deferrable under (7): shipping English-only copy leaves the other languages silently wrong. See the Localization section above.
+6. **Translations updated** — if the change adds, alters or removes user-facing UI text, every `Strings.<culture>.resx` carries the change (via the brief/import pipeline, not by hand) and `pwsh scripts/check-localization.ps1` passes. If the change adds copy composed in C# rather than bound with `{loc:Tr}`, the owning view model refreshes it on `OnCultureChanged()`. This one is **not** deferrable under (7): shipping English-only copy leaves the other languages silently wrong. See the Localization section above.
 7. **Ask before scope-pruning** — if you choose to defer (3), (4), or (5), surface the choice via `ask_user` rather than silently shipping. The user may reasonably want docs in a follow-up commit, but the agent should not decide that unilaterally.
