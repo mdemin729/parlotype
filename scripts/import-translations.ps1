@@ -78,6 +78,17 @@ function Get-Placeholders([string]$value) {
         Sort-Object -Unique) -join ','
 }
 
+# Not every brace in this file is a String.Format slot. The Gemma 4 prompt help
+# documents {speech_lang} and {text_lang}, which the prompt engine substitutes by
+# name — translate one of those and the prompt silently stops working, with
+# nothing to catch it: it is not a numbered placeholder, so the check above never
+# looks at it, and it is not a whole untranslated string either.
+function Get-NamedTokens([string]$value) {
+    return ([regex]::Matches($value, '\{([A-Za-z_][A-Za-z0-9_]*)\}') |
+        ForEach-Object { $_.Groups[1].Value } |
+        Sort-Object -Unique) -join ','
+}
+
 # ------------------------------------------------------------- read the inputs
 
 $raw = Get-Content -Path $In -Raw -Encoding UTF8
@@ -164,6 +175,13 @@ foreach ($node in $doc.SelectNodes('/root/data')) {
     $actual = Get-Placeholders $translation
     if ($expected -ne $actual) {
         $problems.Add("key '$key' has placeholders [$actual] but the English has [$expected]")
+        continue
+    }
+
+    $expectedTokens = Get-NamedTokens $english
+    $actualTokens = Get-NamedTokens $translation
+    if ($expectedTokens -ne $actualTokens) {
+        $problems.Add("key '$key' has named tokens [$actualTokens] but the English has [$expectedTokens] — these are substituted by name and must not be translated")
         continue
     }
 

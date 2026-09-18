@@ -34,6 +34,52 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     [ObservableProperty]
     private string _statusText = Strings.Settings_LlamaCpp_Status_NotProbed;
 
+    /// <summary>
+    /// Which status line is showing, retained so it can be re-rendered in a new
+    /// language without re-probing the server. Storing only the finished string
+    /// is what froze this page in whatever language the app started in.
+    /// </summary>
+    private ServerStatusLabel _statusLabel = ServerStatusLabel.NotProbed;
+
+    private enum ServerStatusLabel
+    {
+        NotProbed,
+        InvalidPort,
+        Connected,
+        Disconnected,
+        PortConflict,
+        LoadingModel,
+        Error,
+    }
+
+    private void SetStatus(ServerStatusLabel label)
+    {
+        _statusLabel = label;
+        StatusText = Describe(label);
+    }
+
+    private static string Describe(ServerStatusLabel label) => label switch
+    {
+        ServerStatusLabel.InvalidPort => Strings.Settings_LlamaCpp_Status_InvalidPort,
+        ServerStatusLabel.Connected => Strings.Settings_LlamaCpp_Status_Connected,
+        ServerStatusLabel.Disconnected => Strings.Settings_LlamaCpp_Status_Disconnected,
+        ServerStatusLabel.PortConflict => Strings.Settings_LlamaCpp_Status_PortConflict,
+        ServerStatusLabel.LoadingModel => Strings.Settings_LlamaCpp_Status_LoadingModel,
+        ServerStatusLabel.Error => Strings.Settings_LlamaCpp_Status_Error,
+        _ => Strings.Settings_LlamaCpp_Status_NotProbed,
+    };
+
+    /// <summary>
+    /// Re-renders the retained status label (ADR-064's live-switch rule).
+    /// Deliberately does not re-probe: a language change is not a reason to make
+    /// a network call.
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+        StatusText = Describe(_statusLabel);
+    }
+
     [ObservableProperty]
     private string _statusColor = "Gray";
 
@@ -200,7 +246,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         {
             if (!int.TryParse(PortText, out var port) || port is <= 0 or > 65535)
             {
-                StatusText = Strings.Settings_LlamaCpp_Status_InvalidPort;
+                SetStatus(ServerStatusLabel.InvalidPort);
                 StatusColor = "Red";
                 ErrorMessage = Strings.Settings_LlamaCpp_PortRangeError;
                 IsConnected = false;
@@ -213,7 +259,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
             switch (info.Status)
             {
                 case LlamaCppServerStatus.Connected:
-                    StatusText = Strings.Settings_LlamaCpp_Status_Connected;
+                    SetStatus(ServerStatusLabel.Connected);
                     StatusColor = "Green";
                     IsConnected = true;
                     HasPortConflict = false;
@@ -224,7 +270,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 case LlamaCppServerStatus.Disconnected:
-                    StatusText = Strings.Settings_LlamaCpp_Status_Disconnected;
+                    SetStatus(ServerStatusLabel.Disconnected);
                     StatusColor = "Gray";
                     IsConnected = false;
                     HasPortConflict = false;
@@ -232,7 +278,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 case LlamaCppServerStatus.PortConflict:
-                    StatusText = Strings.Settings_LlamaCpp_Status_PortConflict;
+                    SetStatus(ServerStatusLabel.PortConflict);
                     StatusColor = "Orange";
                     IsConnected = false;
                     HasPortConflict = true;
@@ -241,7 +287,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 case LlamaCppServerStatus.Loading:
-                    StatusText = Strings.Settings_LlamaCpp_Status_LoadingModel;
+                    SetStatus(ServerStatusLabel.LoadingModel);
                     StatusColor = "Blue";
                     IsConnected = false;
                     HasPortConflict = false;
@@ -249,7 +295,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     break;
 
                 default:
-                    StatusText = Strings.Settings_LlamaCpp_Status_Error;
+                    SetStatus(ServerStatusLabel.Error);
                     StatusColor = "Red";
                     IsConnected = false;
                     HasPortConflict = false;
@@ -261,7 +307,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to probe llama-server");
-            StatusText = Strings.Settings_LlamaCpp_Status_Error;
+            SetStatus(ServerStatusLabel.Error);
             StatusColor = "Red";
             ErrorMessage = ex.Message;
             IsConnected = false;

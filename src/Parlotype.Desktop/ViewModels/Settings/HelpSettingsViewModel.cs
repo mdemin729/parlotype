@@ -51,6 +51,37 @@ public sealed partial class HelpSettingsViewModel : SettingsSectionViewModelBase
     [RelayCommand]
     private void OpenTour() => _onboarding.ShowWizard();
 
+    /// <summary>
+    /// Every string on this page is composed in C#, so none of it updates itself
+    /// (ADR-064's live-switch rule).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The hotkey lines are the part that actually broke: they are an
+    /// <see cref="ObservableCollection{T}"/> filled once, so re-reading the
+    /// binding hands back the same collection holding the same stale strings.
+    /// That is why the heading around them appeared to follow the language while
+    /// the lines under it did not — navigating back to the page re-reads the
+    /// plain properties but cannot re-read the items.
+    /// </para>
+    /// <para>
+    /// The three text properties are raised as well. They are plain computed
+    /// getters with no backing field, so they happen to answer correctly the
+    /// moment anything re-reads them — but nothing tells a bound control to,
+    /// which left them right only by the accident of a navigation.
+    /// </para>
+    /// </remarks>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        OnPropertyChanged(nameof(IntroText));
+        OnPropertyChanged(nameof(OpenTourButtonText));
+        OnPropertyChanged(nameof(HotkeysHeadingText));
+
+        RebuildHotkeyLines();
+    }
+
     private void OnBindingsChanged(object? sender, EventArgs e)
     {
         // The hotkey service raises from its own dispatch context; collection

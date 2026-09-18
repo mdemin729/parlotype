@@ -121,12 +121,32 @@ public partial class StartupSettingsViewModel : SettingsSectionViewModelBase
             _suppressWrite = wasSuppressed;
         }
 
-        StatusText = !IsSupported
-            ? Strings.Settings_Startup_State_NotInstalled
-            : IsBlockedByWindows
-                ? Strings.Settings_Startup_State_BlockedByWindows
-                : effective
-                    ? Strings.Settings_Startup_State_Enabled
-                    : Strings.Settings_Startup_State_Disabled;
+        _lastEffective = effective;
+        StatusText = DescribeState();
+    }
+
+    /// <summary>
+    /// Whether the switch last rendered as on, retained so the status line can
+    /// be rebuilt in a new language without re-reading the OS launch state.
+    /// </summary>
+    private bool _lastEffective;
+
+    private string DescribeState() => !IsSupported
+        ? Strings.Settings_Startup_State_NotInstalled
+        : IsBlockedByWindows
+            ? Strings.Settings_Startup_State_BlockedByWindows
+            : _lastEffective
+                ? Strings.Settings_Startup_State_Enabled
+                : Strings.Settings_Startup_State_Disabled;
+
+    /// <summary>
+    /// Re-renders the status line (ADR-064's live-switch rule). This page's text
+    /// changes only when the user toggles the switch or Windows blocks it, so
+    /// without this it would hold the startup language indefinitely.
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+        StatusText = DescribeState();
     }
 }

@@ -206,6 +206,63 @@ public class LocalizationParityTests
     }
 
     [Fact]
+    public void EverySettingsSection_ThatComposesCopyInCSharp_RefreshesItOnCultureChange()
+    {
+        // The live-switch bug that keeps coming back (ADR-064): text bound through
+        // {loc:Tr} re-reads itself, but anything a view model builds in C# — a
+        // status line, a computed label, an ObservableCollection of strings — is a
+        // snapshot. Nothing fails, nothing throws; the page simply keeps the
+        // language the app started in, forever, and only a human switching
+        // languages and looking at that exact page ever notices.
+        //
+        // Six of nineteen sections had it at the time this test was written, and
+        // two of those were found by a user, not by us. Hence a structural check:
+        // if a section reaches for Strings beyond its own Title, it has to say how
+        // it refreshes.
+        var exempt = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["PromptSettingsViewModel"] =
+                "Its only Strings use names a *copied prompt* (\"{0} (copy)\"). That name is "
+                + "written to settings and becomes the user's own data — re-translating it on "
+                + "a language switch would rename something they own.",
+        };
+
+        var directory = Path.Combine(
+            RepoRoot(), "src", "Parlotype.Desktop", "ViewModels", "Settings");
+        var problems = new List<string>();
+
+        foreach (var path in Directory.EnumerateFiles(directory, "*ViewModel.cs").Order())
+        {
+            var name = Path.GetFileNameWithoutExtension(path);
+            var source = File.ReadAllText(path);
+
+            if (!source.Contains("SettingsSectionViewModelBase", StringComparison.Ordinal))
+                continue;
+
+            // "Title => Strings.X" is the one use the base class already handles.
+            var uses = Regex.Matches(source, @"Strings\.").Count
+                - Regex.Matches(source, @"Title\s*=>\s*Strings\.").Count;
+
+            if (uses <= 0)
+                continue;
+
+            if (source.Contains("override void OnCultureChanged", StringComparison.Ordinal))
+                continue;
+
+            if (exempt.ContainsKey(name))
+                continue;
+
+            problems.Add(
+                $"{name} composes UI copy in C# ({uses} Strings reference(s) beyond Title) but "
+                + "does not override OnCultureChanged, so that copy will keep the language the "
+                + "app started in. Override it — calling base — or add the class to 'exempt' "
+                + "above with the reason its text must NOT follow the interface language.");
+        }
+
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine + Environment.NewLine, problems));
+    }
+
+    [Fact]
     public void GeneratedAccessor_CoversEveryKey_InBothDirections()
     {
         // Catches "added the key but forgot to run gen-strings.ps1", and its

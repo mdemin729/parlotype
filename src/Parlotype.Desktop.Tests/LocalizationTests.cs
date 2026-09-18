@@ -320,6 +320,84 @@ public class LocalizationTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void HelpPage_HotkeyLines_FollowTheInterfaceLanguage()
+    {
+        // Reported from a running build: the Help page's heading was translated
+        // while the hotkey lines under it stayed in the language the app had
+        // started in. The lines are an ObservableCollection filled once, so
+        // navigating back to the page re-reads the plain properties around them
+        // and makes the page look *almost* right — which is why it survived.
+        Localizer.Instance.SetCulture(English);
+
+        var hotkeys = new MockGlobalHotkeyService();
+        var vm = new HelpSettingsViewModel(new MockOnboardingService(), hotkeys);
+
+        Assert.Contains(vm.HotkeyLines, line => line.Contains("Push to talk", StringComparison.Ordinal));
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.All(vm.HotkeyLines, line => Assert.DoesNotContain("Push to talk", line, StringComparison.Ordinal));
+        Assert.Contains(vm.HotkeyLines, line => line.Any(c => c is >= 'Ѐ' and <= 'ӿ'));
+    }
+
+    [AvaloniaFact]
+    public void HelpPage_ComposedText_RaisesOnCultureChange()
+    {
+        // The three text properties are plain getters with no backing field: they
+        // answer correctly whenever something re-reads them, but nothing asks.
+        Localizer.Instance.SetCulture(English);
+        var vm = new HelpSettingsViewModel(new MockOnboardingService(), new MockGlobalHotkeyService());
+
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Contains(nameof(HelpSettingsViewModel.IntroText), raised);
+        Assert.Contains(nameof(HelpSettingsViewModel.OpenTourButtonText), raised);
+        Assert.Contains(nameof(HelpSettingsViewModel.HotkeysHeadingText), raised);
+    }
+
+    [AvaloniaFact]
+    public void UpdatesPage_ComposedText_FollowsTheInterfaceLanguage()
+    {
+        // Also reported from a running build, and worse than it looks: this page
+        // only rewrites its text when the update service raises StatusChanged. On
+        // a development build — permanently "cannot update itself", nobody ever
+        // checking — it never does, so the page kept the startup language for the
+        // life of the process.
+        Localizer.Instance.SetCulture(English);
+
+        var updates = new MockUpdateService();
+        var vm = new UpdateSettingsViewModel(new MockSettingsService(), updates);
+
+        Assert.Equal("Never", vm.LastCheckedText);
+        Assert.Equal("development build", vm.CurrentVersionText);
+        Assert.Contains("cannot update itself", vm.StatusText, StringComparison.Ordinal);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("Никогда", vm.LastCheckedText);
+        Assert.Equal("сборка для разработки", vm.CurrentVersionText);
+        Assert.DoesNotContain("cannot update itself", vm.StatusText, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
+    public void UpdatesPage_DoesNotRetranslateARealVersionNumber()
+    {
+        // The "development build" label is a fallback for a missing version, not
+        // a translation of one. A real version string is data and must survive a
+        // language switch untouched.
+        Localizer.Instance.SetCulture(English);
+        var updates = new MockUpdateService { CurrentVersion = "0.5.2" };
+        var vm = new UpdateSettingsViewModel(new MockSettingsService(), updates);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("0.5.2", vm.CurrentVersionText);
+    }
+
+    [AvaloniaFact]
     public void RuntimeRestartNote_IsOneTranslatableSentence()
     {
         // It used to be five <Run>s with the runtime names interleaved — a

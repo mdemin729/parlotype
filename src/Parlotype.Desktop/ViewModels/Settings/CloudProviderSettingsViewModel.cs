@@ -137,6 +137,19 @@ public partial class CloudProviderSettingsViewModel : SettingsSectionViewModelBa
         ? Strings.Settings_CloudProviders_KeyStatus_Saved
         : Strings.Settings_CloudProviders_KeyStatus_None;
 
+    /// <summary>
+    /// The two key-status labels are plain computed getters over persistent
+    /// state, so nothing tells a bound control to re-read them when the language
+    /// changes (ADR-064's live-switch rule). Unlike a transient toast, "Saved" /
+    /// "Not set" stays on screen indefinitely, so a stale one is permanent.
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        OnPropertyChanged(nameof(OpenAiKeyStatus));
+        OnPropertyChanged(nameof(XaiKeyStatus));
+    }
     /// <summary>Show the editable entry row: no key yet, or replacing an existing one.</summary>
     public bool ShowXaiKeyEntry => !HasXaiKey || IsEditingXaiKey;
 
