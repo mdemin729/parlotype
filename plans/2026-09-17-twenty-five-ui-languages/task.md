@@ -110,7 +110,7 @@ endonyms, packaging and expansion in [research.md](research.md).
 - [x] **Phase 2 — Picker UX.** The interface-language page goes from 4 rows to 26.
 - [x] **Phase 3 — Shared brief.** Do-not-translate register + the 25-term core glossary
       the per-language glossaries are written against.
-- [ ] **Phase 4 — Wave A:** `de` `fr` `it` `pl` `uk`
+- [x] **Phase 4 — Wave A:** `de` `fr` `it` `pl` `uk`
 - [ ] **Phase 5 — Wave B:** `pt` `nl` `sv` `da` `fi`
 - [ ] **Phase 6 — Wave C:** `cs` `sk` `ro` `el` `hu`
 - [ ] **Phase 7 — Wave D:** `bg` `hr` `sl` `lt` `lv`
@@ -120,6 +120,31 @@ endonyms, packaging and expansion in [research.md](research.md).
       publish-size delta measured.
 - [ ] **Phase 10 — Documentation.** ADR-069; `localization` skill updated to make the
       brief/import scripts the standard path; memory vault; CHANGELOG.
+
+## Findings carried forward to ADR-069
+
+Recorded as they were discovered, so they do not dissolve into individual agent
+reports.
+
+1. **Three English strings are wrong for inflected languages.** French, Ukrainian and
+   Polish independently flagged the same keys as forcing an uninflectable `{0}` into an
+   oblique case, and each moved the slot behind a colon to escape it:
+   `Language_Summary_Format`, `Language_ToggleSwitch_TranslateToFormat`,
+   `Language_Toast_TargetUnsupportedFormat`. Finnish (fifteen cases) will hit them
+   hardest. The fix is to rephrase the **English**, which is a change to the neutral file
+   and therefore a maintainer decision — not something a translator should paper over.
+2. **The importer needed a named-token check.** `Settings_Prompts_Help_BuiltInBody`
+   carries `{speech_lang}` and `{text_lang}`, substituted *by name* by the Gemma prompt
+   engine. Neither a numbered placeholder nor a wholly untranslated string, so nothing
+   looked at it; translating a word inside those braces would break prompt substitution
+   silently. Now rejected outright.
+3. **Six settings pages did not follow a live language switch** — a pre-existing ADR-064
+   defect that 22 languages made visible, two of them reported by a user. Fixed with a
+   structural test rather than discipline. See the `fix(settings):` commit.
+4. **Expansion guidance was wrong about which language is worst.** Research §5 nominated
+   German; measured means are French 1.30×, German 1.23×, Italian 1.22×, Ukrainian 1.18×,
+   Polish 1.17×. German's `du` register is part of why. Phase 9 should aim the screenshot
+   pass using the report, not the prediction.
 
 ## Open decisions
 
