@@ -62,6 +62,8 @@ public static class SupportedUiLanguages
         new("sl", "Slovenščina"),
         new("lt", "Lietuvių"),
         new("lv", "Latviešu"),
+        new("et", "Eesti"),
+        new("mt", "Malti"),
     ];
 
     /// <summary>
