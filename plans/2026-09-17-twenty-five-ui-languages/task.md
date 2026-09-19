@@ -114,12 +114,34 @@ endonyms, packaging and expansion in [research.md](research.md).
 - [x] **Phase 5 — Wave B:** `pt` `nl` `sv` `da` `fi`
 - [x] **Phase 6 — Wave C:** `cs` `sk` `ro` `el` `hu`
 - [x] **Phase 7 — Wave D:** `bg` `hr` `sl` `lt` `lv`
-- [ ] **Phase 8 — Wave E:** `et` `mt`
+- [x] **Phase 8 — Wave E:** `et` `mt`
 - [ ] **Phase 9 — Verification.** Expansion report → screenshot audit in the worst-
       expanding locales; manual run of the real app in 3 spot-checked languages;
       publish-size delta measured.
 - [ ] **Phase 10 — Documentation.** ADR-069; `localization` skill updated to make the
       brief/import scripts the standard path; memory vault; CHANGELOG.
+
+## All 25 languages shipped — measured 2026-09-18
+
+24 translated files × 389 keys = **9,336 strings**. Across all of them: **zero** placeholder
+mismatches, **zero** named-token damage, **zero** strings left verbatim in English, and
+`Strings.cs` byte-identical throughout — adding a language touched no markup, no view
+model and no `.csproj`, exactly as ADR-064 promised.
+
+Expansion over English, measured rather than predicted:
+
+| | | | |
+|---|---|---|---|
+| da 1.08 | et 1.12 | sv 1.12 | sl 1.13 |
+| cs 1.13 | ru 1.15 | hr 1.16 | sk 1.17 |
+| pl 1.17 | fi 1.17 | nl 1.18 | bg 1.18 |
+| uk 1.18 | ro 1.18 | mt 1.19 | lv 1.19 |
+| pt 1.21 | hu 1.22 | it 1.22 | lt 1.22 |
+| de 1.23 | es 1.24 | **el 1.29** | **fr 1.30** |
+
+Research §5 nominated German primary and Finnish secondary. Both are mid-pack; French and
+Greek are the extremes. Phase 9 aims its screenshot pass from `-Report` and from these
+numbers, not from the guidance.
 
 ## Findings carried forward to ADR-069
 
