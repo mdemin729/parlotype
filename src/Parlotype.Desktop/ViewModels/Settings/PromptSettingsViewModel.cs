@@ -25,6 +25,19 @@ public partial class PromptSettingsViewModel : SettingsSectionViewModelBase
 
     public ObservableCollection<PromptDisplayItem> Prompts { get; } = [];
 
+    /// <summary>
+    /// Only the built-in prompt's name follows the interface language; every
+    /// other row is named by the user and is left alone (ADR-064's live-switch
+    /// rule).
+    /// </summary>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        foreach (var prompt in Prompts)
+            prompt.RefreshDisplayName();
+    }
+
     [ObservableProperty]
     private string _selectedPromptId = string.Empty;
 

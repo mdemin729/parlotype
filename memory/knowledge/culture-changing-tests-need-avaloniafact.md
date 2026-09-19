@@ -3,7 +3,7 @@ title: Tests that change the interface language must be [AvaloniaFact]
 type: knowledge
 tags: [avalonia, testing, localization, threading, flaky]
 created: 2026-09-06
-last_updated: 2026-09-13 (fourth occurrence, generalized)
+last_updated: 2026-09-18 (fifth occurrence: `await Task.Yield()`, and a duplicated harness)
 summary: A plain [Fact] calling Localizer.SetCulture runs on an xUnit worker thread; the notification reaches bindings left behind by earlier UI tests and throws a thread-affinity error — but only under load, so the suite passes alone and fails intermittently in a full run. Also hit via a bare `await Task.Delay` inside an [AvaloniaFact] that calls SetCulture: the continuation resumes off the shared headless dispatcher thread and races other parallel tests. The broader rule this is one instance of: Avalonia Headless's dispatcher is one process-wide thread shared by every [AvaloniaFact] in the run — never let a test return while something it caused is still only scheduled, not finished, on it
 ---
 
@@ -115,3 +115,32 @@ started its own fire-and-forget work (the linked note).
 - A screenshot/review harness that renders many views is best gated behind an environment
   variable (`PARLOTYPE_LAYOUT_REVIEW=1`) rather than left in the default suite: it leaves
   view trees bound to singletons and makes everything downstream timing-sensitive.
+
+## Fifth occurrence (2026-09-18, ADR-069 phase 9): `await Task.Yield()`, and a second harness
+
+Two mistakes in one change, both of which this note already warned about.
+
+**`await Task.Yield()` is the same trap as `await Task.Delay`.** A new regression test wrote
+`var vm = new PromptSettingsViewModel(registry); await Task.Yield();` to let a
+fire-and-forget `LoadAsync` settle. The continuation resumed off the shared headless
+dispatcher, and eight unrelated `LocalizationTests` failed. It is not about *which* awaitable
+— `Yield`, `Delay`, an un-awaited mock — it is that **any** `await` in a culture-changing
+`[AvaloniaFact]` can hand the rest of the test to a pool thread.
+
+The await was not needed at all: the mock registry completes every `Task`
+already-finished, so the fire-and-forget initializer has run by the time the constructor
+returns. The test is now a plain `void` and the assertions read directly. Where a result
+genuinely must be awaited, use `.GetAwaiter().GetResult()` rather than `await` — it blocks
+on the dispatcher thread instead of leaving it.
+
+**And: the layout-review harness got duplicated.** Phase 9 set out to render settings pages
+under the worst-expanding languages, and wrote a fresh class to do it — not having found
+`LocalizedLayoutReviewTests`, which does exactly that and is gated behind
+`PARLOTYPE_LAYOUT_REVIEW=1` *for this precise reason*. The new class was ungated, so it
+rendered 17 view trees into the ordinary suite and broke the culture-bound tests in the
+documented way. Deleted; the existing harness was extended instead (its hardcoded
+`{ en, ru, es }` now reads `SupportedUiLanguages.All`).
+
+The lesson worth keeping is not about threading: **search the test project for an existing
+harness before writing one.** A gate that exists for a reason looks like an absence of
+coverage to whoever has not read it.

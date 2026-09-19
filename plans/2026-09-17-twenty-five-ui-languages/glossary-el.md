@@ -183,3 +183,7 @@ added or dropped), the literal template tokens `{speech_lang}` and `{text_lang}`
 value over 25 characters is byte-identical to its English source. Monotonic
 accentuation was applied to every polysyllabic Greek word by hand during translation;
 this was not machine-checked and is the area most worth a native-speaker pass.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Προεπιλογή (αυτολεξεί μεταγραφή)"** — verbatim/word-for-word rendered as *αυτολεξεί (verbatim, word-for-word)*, paired with the already-established *μεταγραφή* for transcription; no new terms introduced.

@@ -195,3 +195,7 @@ Used the actual Slovak Windows 10/11 UI wording rather than literal translations
    consistently and this register doesn't mark grammatical gender on the user the way
    Polish past-tense forms do, so no gendered-default judgment call was needed here (unlike
    Polish, which had to pick a default gender for past-tense verbs referring to the user).
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predvolené (doslovný prepis)"** — verbatim/word-for-word rendered as *doslovný (literal)*, paired with the already-established *prepis* for transcription; no new terms introduced.

@@ -197,3 +197,7 @@ Used real Latvian Windows 10/11 UI wording rather than literal translations for:
    judgment call Polish and Finnish flagged for this key: generic enough to match the
    English's own vagueness, worth a second look once the category's exact contents are
    final.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Noklusējuma (burtiska transkripcija)"** — verbatim/word-for-word rendered as *burtiska (literal)*, paired with the already-established *transkripcija* for transcription; no new terms introduced.

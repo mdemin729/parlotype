@@ -208,3 +208,7 @@ Used real Windows 10/11 Hungarian UI wording rather than literal translations fo
    reviewer may prefer dropping the article outright in the tightest badges/labels
    rather than using `a(z)` — I kept it only in full sentences, never in bare
    labels or badges.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Alapértelmezett (szó szerinti átirat)"** — verbatim/word-for-word rendered as *szó szerinti (word-for-word)*, paired with the already-established *átirat* for transcription; no new terms introduced.

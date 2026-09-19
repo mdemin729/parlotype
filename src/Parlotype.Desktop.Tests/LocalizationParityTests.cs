@@ -219,13 +219,19 @@ public class LocalizationParityTests
         // two of those were found by a user, not by us. Hence a structural check:
         // if a section reaches for Strings beyond its own Title, it has to say how
         // it refreshes.
-        var exempt = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["PromptSettingsViewModel"] =
-                "Its only Strings use names a *copied prompt* (\"{0} (copy)\"). That name is "
-                + "written to settings and becomes the user's own data — re-translating it on "
-                + "a language switch would rename something they own.",
-        };
+        // Empty on purpose. PromptSettingsViewModel used to be exempt because its
+        // only Strings use named a *copied* prompt — user data, which must not be
+        // re-translated. Phase 9 found a second use it had been hiding: the
+        // built-in prompt's display name, which IS app copy and was reaching the
+        // screen in English in all 24 languages. The exemption had been covering
+        // it. The view model now overrides the hook and refreshes only the
+        // built-in row, so no exemption is needed — and the copied-prompt rule
+        // lives as a comment where the code makes the distinction, not here.
+        //
+        // The lesson for the next entry: an exemption silences the whole class,
+        // not the one string it was written for. Prefer overriding the hook and
+        // narrowing inside it.
+        var exempt = new Dictionary<string, string>(StringComparer.Ordinal);
 
         var directory = Path.Combine(
             RepoRoot(), "src", "Parlotype.Desktop", "ViewModels", "Settings");

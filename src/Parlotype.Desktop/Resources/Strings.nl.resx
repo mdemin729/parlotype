@@ -791,6 +791,10 @@ Je instellingen en API-sleutels blijven bewaard. Modellen worden automatisch opn
   <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
     <value>Ingebouwd</value>
   </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>Standaard (woordelijke transcriptie)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
+  </data>
   <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
     <value>Dupliceren</value>
   </data>

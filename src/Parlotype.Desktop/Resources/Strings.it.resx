@@ -791,6 +791,10 @@ Le impostazioni e le chiavi API vengono conservate. I modelli verranno scaricati
   <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
     <value>Predefinito</value>
   </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>Predefinito (trascrizione letterale)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
+  </data>
   <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
     <value>Duplica</value>
   </data>

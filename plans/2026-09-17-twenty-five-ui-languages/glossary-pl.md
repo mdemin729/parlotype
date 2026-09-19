@@ -164,3 +164,7 @@ Used the actual Polish Windows 10/11 UI wording rather than literal translations
    Polish software convention absent any gender signal from the user. This is a
    widely-used convention, not a settled rule, and some Polish software instead avoids
    the past tense entirely to sidestep it.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Domyślny (dosłowna transkrypcja)"** — verbatim/word-for-word rendered as *dosłowna (literal)*, paired with the already-established *transkrypcja* for transcription; no new terms introduced.

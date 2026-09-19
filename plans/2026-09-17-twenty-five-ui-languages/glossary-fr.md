@@ -158,3 +158,7 @@ present with no extras, every `{0}`/`{1}`/`{2}` placeholder set matches the
 English source exactly, the literal template tokens `{speech_lang}` and
 `{text_lang}` used inside prompt-help copy are preserved verbatim, and no value
 over 25 characters matches the English source byte-for-byte.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Par défaut (transcription mot à mot)"** — verbatim/word-for-word rendered as *mot à mot (word-for-word)*, paired with the already-established *transcription* for transcription; no new terms introduced.

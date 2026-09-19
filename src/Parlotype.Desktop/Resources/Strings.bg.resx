@@ -585,7 +585,7 @@
     <value>Добави клавишна комбинация</value>
   </data>
   <data name="Settings_Hotkeys_Recorder_Idle" xml:space="preserve">
-    <value>Запишете комбинация…</value>
+    <value>Запиши комбинация…</value>
   </data>
   <data name="Settings_Hotkeys_Recorder_Listening" xml:space="preserve">
     <value>Натиснете комбинация от клавиши…</value>
@@ -790,6 +790,10 @@
   </data>
   <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
     <value>Вграден</value>
+  </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>По подразбиране (дословно транскрибиране)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
   </data>
   <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
     <value>Дублирай</value>

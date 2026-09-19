@@ -195,3 +195,7 @@ Used real Lithuanian Windows 10/11 UI wording rather than literal translations f
 6. **`surinkimas` vs `versija` for "build"** — see the core glossary row above. A native
    reviewer might prefer a single word if Parlotype's own build/version concept and
    llama.cpp's build/version concept are ever shown side by side in one view.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Numatytoji (pažodinė transkripcija)"** — verbatim/word-for-word rendered as *pažodinė (word-for-word)*, paired with the already-established *transkripcija* for transcription; no new terms introduced.

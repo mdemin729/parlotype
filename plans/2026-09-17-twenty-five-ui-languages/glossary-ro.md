@@ -198,3 +198,7 @@ Win) are all treated as invariant borrowed tokens, never needing gender agreemen
 - No translated value over 25 characters is byte-identical to its English source.
 - No cedilla-form diacritic (ş U+015F, ţ U+0163) appears anywhere in either file — only the
   comma-below forms (ș U+0219, ț U+021B).
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Implicit (transcriere literală)"** — verbatim/word-for-word rendered as *literală*, paired with the already-established *transcriere* for transcription; no new terms introduced.

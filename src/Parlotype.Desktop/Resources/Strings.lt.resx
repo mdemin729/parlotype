@@ -791,6 +791,10 @@ Jūsų nustatymai ir API raktai bus išsaugoti. Modeliai vėl automatiškai atsi
   <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
     <value>Įtaisytasis</value>
   </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>Numatytoji (pažodinė transkripcija)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
+  </data>
   <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
     <value>Dubliuoti</value>
   </data>

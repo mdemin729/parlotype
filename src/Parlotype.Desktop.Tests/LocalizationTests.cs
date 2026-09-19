@@ -398,6 +398,62 @@ public class LocalizationTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void BuiltInPromptName_IsTranslated_ButUserPromptNamesAreNot()
+    {
+        // Found in phase 9 by rendering the Prompts page under Hungarian and
+        // reading it. The built-in's name is an English literal in
+        // JsonPromptTemplateRegistry — correct, since Platform has no resources —
+        // but it reached the screen untranslated in all 24 languages. Nothing
+        // could see it: not in AXAML, so the hardcoded-literal scan missed it;
+        // not in resx, so parity missed it.
+        Localizer.Instance.SetCulture(English);
+
+        // Synchronous on purpose, and no `await` anywhere. MockPromptTemplateRegistry
+        // completes every Task already-finished, so the view model's fire-and-forget
+        // LoadAsync has run by the time its constructor returns. An `await` here would
+        // resume off the shared headless dispatcher and corrupt the culture of whatever
+        // other [AvaloniaFact] is mid-flight — see
+        // memory/knowledge/culture-changing-tests-need-avaloniafact.md, which this test
+        // was the fifth occurrence of before it was written this way.
+        var registry = new MockPromptTemplateRegistry();
+        registry.AddOrUpdateAsync(new PromptTemplate(
+            Id: "mine", Name: "My own prompt", Text: "…", IsBuiltIn: false)).GetAwaiter().GetResult();
+
+        var vm = new PromptSettingsViewModel(registry);
+
+        var builtIn = vm.Prompts.Single(p => p.IsBuiltIn);
+        var mine = vm.Prompts.Single(p => !p.IsBuiltIn);
+
+        Assert.Equal("Default (verbatim transcription)", builtIn.Name);
+        Assert.Equal("My own prompt", mine.Name);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("По умолчанию (дословное распознавание)", builtIn.Name);
+
+        // The other half of the rule, and the reason this view model was exempt
+        // from the structural check until now: a name the user chose is their
+        // data. A language switch must not touch it.
+        Assert.Equal("My own prompt", mine.Name);
+    }
+
+    [AvaloniaFact]
+    public void BuiltInPromptName_IsTranslated_WhenTheAppStartsInThatLanguage()
+    {
+        // The path a Russian user actually takes: the app starts in their
+        // language and they never switch. That is the constructor, not the
+        // culture hook — and the two are easy to fix by halves. Asserting only
+        // after a switch let a reverted constructor pass.
+        Localizer.Instance.SetCulture(Russian);
+
+        var vm = new PromptSettingsViewModel(new MockPromptTemplateRegistry());
+
+        Assert.Equal(
+            "По умолчанию (дословное распознавание)",
+            vm.Prompts.Single(p => p.IsBuiltIn).Name);
+    }
+
+    [AvaloniaFact]
     public void RuntimeRestartNote_IsOneTranslatableSentence()
     {
         // It used to be five <Run>s with the runtime names interleaved — a

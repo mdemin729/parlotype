@@ -791,6 +791,10 @@ Asetuksesi ja API-avaimesi säilyvät. Mallit ladataan automaattisesti uudelleen
   <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
     <value>Sisäänrakennettu</value>
   </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>Oletus (sanatarkka litterointi)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
+  </data>
   <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
     <value>Monista</value>
   </data>

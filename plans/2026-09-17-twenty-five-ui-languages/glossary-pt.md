@@ -144,3 +144,7 @@ translated from description rather than a screenshot.
 - I did not find any key where the English forces a Portuguese gendered agreement onto a
   substituted `{0}` that I could not route around with a colon/dash placement — see
   the section above.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predefinição (transcrição literal)"** — verbatim/word-for-word rendered as *literal*, paired with the already-established *transcrição* for transcription; no new terms introduced.

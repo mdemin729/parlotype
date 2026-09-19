@@ -241,3 +241,7 @@ Used real Finnish Windows 10/11 UI wording rather than literal translations for:
    interchangeably in this UI (`Settings_Updates_*` vs `Settings_LlamaCpp_*`). A
    native reviewer might prefer distinguishing them if the two ever appear side by
    side in the same view.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Oletus (sanatarkka litterointi)"** — verbatim/word-for-word rendered as *sanatarkka (word-accurate)*, paired with the already-established *litterointi* for transcription; no new terms introduced.

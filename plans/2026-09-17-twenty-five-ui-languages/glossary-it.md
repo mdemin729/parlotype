@@ -142,3 +142,7 @@ gender differently, this format would need to change.
   everywhere it is embedded in longer sentences (e.g. inside `Settings_Engine_Description`),
   versus the fuller "motore di riconoscimento vocale" — I chose the shorter form
   everywhere for consistency and space, per the brief's compactness rule.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predefinito (trascrizione letterale)"** — verbatim/word-for-word rendered as *letterale*, paired with the already-established *trascrizione* for transcription; no new terms introduced.

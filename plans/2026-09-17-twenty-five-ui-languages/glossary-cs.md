@@ -207,3 +207,7 @@ placeholder set matches the English source per key, the literal tokens `{speech_
 and `{text_lang}` in `Settings_Prompts_Help_BuiltInBody` are preserved verbatim and with
 the same occurrence count as the English (`{speech_lang}` twice, `{text_lang}` once), and
 no translated value over 25 characters is byte-identical to the English source.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Výchozí (doslovný přepis)"** — verbatim/word-for-word rendered as *doslovný (literal)*, paired with the already-established *přepis* for transcription; no new terms introduced.

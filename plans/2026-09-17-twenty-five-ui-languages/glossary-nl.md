@@ -199,3 +199,7 @@ with no extras or omissions, every `{0}`/`{1}`/`{2}` placeholder set matches the
 English source exactly, the literal template tokens `{speech_lang}` and `{text_lang}`
 inside `Settings_Prompts_Help_BuiltInBody` are preserved verbatim, and no value over
 25 characters matches the English source byte-for-byte.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standaard (woordelijke transcriptie)"** — verbatim/word-for-word rendered as *woordelijke (word-for-word)*, paired with the already-established *transcriptie* for transcription; no new terms introduced.

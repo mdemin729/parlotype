@@ -253,3 +253,8 @@ English word standing next to them.
   the ordinary Bulgarian word for "environment" in general, and separately for
   "Wednesday" — context disambiguates in every key here, but worth a native check on
   `Settings_WhisperRuntime_Title` = "Whisper среда" in isolation, outside a full sentence).
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"По подразбиране (дословно транскрибиране)"** — verbatim/word-for-word rendered as *дословно (word-for-word)*, paired with the already-established *транскрибиране* for transcription; no new terms introduced.
+- **Fix:** `Settings_Hotkeys_Recorder_Idle` was in the formal 2pl imperative (`Запишете комбинация…`), breaking the button-label carve-out documented above — corrected to the 2sg imperative **`Запиши комбинация…`**, matching `Запази`/`Изтрий`/`Добави`/`Провери`.

@@ -252,3 +252,7 @@ far as I could judge, but Maltese noun phrases with the article attached
 English originals more often than in Romance languages proper. Flagging for a screenshot
 pass per item 6 above rather than shortening blind, per the brief's instruction to fix
 clipping by resizing controls, never by cutting the translation.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Prestabbilit (traskrizzjoni kelma b'kelma)"** — verbatim/word-for-word rendered as *kelma b'kelma (word-for-word)*, paired with the already-established *traskrizzjoni* for transcription; no new terms introduced.

@@ -141,3 +141,7 @@ No key was left untranslated, and no key needed to be paraphrased away from its 
 meaning to fit a grammatical constraint — Danish's lack of case marking meant the
 placeholder-agreement problem the brief warns about (the one that hits Russian hard) did
 not surface in this batch.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standard (ordret transskribering)"** — verbatim/word-for-word rendered as *ordret (word-for-word)*, paired with the already-established *transskribering* for transcription; no new terms introduced.

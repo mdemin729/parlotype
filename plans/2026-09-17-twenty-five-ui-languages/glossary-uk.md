@@ -189,3 +189,7 @@ English source exactly, the literal template tokens `{speech_lang}` and
 over 25 characters matches the English source byte-for-byte. No stray Latin
 characters were found embedded inside Cyrillic words (checked with a
 mixed-script regex scan) beyond the intended never-translate identifiers.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"За замовчуванням (дослівне розпізнавання)"** — verbatim/word-for-word rendered as *дослівне (literal)*, paired with the already-established *розпізнавання* for transcription; no new terms introduced.

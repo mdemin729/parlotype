@@ -929,6 +929,9 @@ public static class Strings
     /// <summary>Built-in</summary>
     public static string Settings_Prompts_BuiltInBadge => Localizer.Lookup(nameof(Settings_Prompts_BuiltInBadge));
 
+    /// <summary>Default (verbatim transcription)</summary>
+    public static string Settings_Prompts_BuiltInName => Localizer.Lookup(nameof(Settings_Prompts_BuiltInName));
+
     /// <summary>{0} (copy)</summary>
     public static string Settings_Prompts_CopySuffixFormat => Localizer.Lookup(nameof(Settings_Prompts_CopySuffixFormat));
     /// <summary>{0} (copy)</summary>

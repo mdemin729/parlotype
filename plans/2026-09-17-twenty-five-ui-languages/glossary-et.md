@@ -233,3 +233,7 @@ Used real Estonian Windows 10/11 UI wording rather than literal translations for
    attestation in that exact sense. I'm fairly confident in it (short, already inflects
    cleanly, no clash with any other glossary term) but it is a judgment call worth a
    second look from a native speaker working in Estonian AI tooling.
+
+## Later additions
+
+- `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Vaikimisi (sõnasõnaline transkriptsioon)"** — verbatim/word-for-word rendered as *sõnasõnaline (word-for-word)*, paired with the already-established *transkriptsioon* for transcription; no new terms introduced.

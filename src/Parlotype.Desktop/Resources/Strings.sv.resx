@@ -791,6 +791,10 @@ Dina inställningar och API-nycklar behålls. Modeller hämtas automatiskt igen 
   <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
     <value>Inbyggd</value>
   </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>Standard (ordagrann transkribering)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
+  </data>
   <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
     <value>Duplicera</value>
   </data>
