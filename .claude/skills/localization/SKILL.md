@@ -309,12 +309,45 @@ An `ObservableCollection<string>` filled once is worse: re-reading the binding h
 the same collection holding the same stale strings, so navigation does not even mask it.
 Rebuild the collection in the hook.
 
-### The one case where stale is correct
+### Prefer narrowing inside the hook over exempting a class
 
-`PromptSettingsViewModel` is exempt on purpose. Its only `Strings` use names a *copied
-prompt* — `"{0} (copy)"` — which is written to settings and becomes the user's own data.
-Re-translating it on a language switch would rename something they own. The test is about
-**UI copy**; a string that has become user data must not follow the interface language.
+The exemption list is empty, and it should stay that way.
+
+`PromptSettingsViewModel` used to be in it, for a good reason: its only `Strings` use named
+a *copied prompt* — `"{0} (copy)"` — which is written to settings and becomes the user's own
+data, and re-translating it would rename something they own. Correct rule, wrong mechanism.
+The exemption silenced the **class**, and it turned out to be covering a second use nobody
+had noticed: the built-in prompt's display name, hardcoded English in Platform and reaching
+the screen untranslated in all 24 languages.
+
+The view model now overrides the hook and refreshes only the built-in row:
+
+```csharp
+protected override void OnCultureChanged()
+{
+    base.OnCultureChanged();
+    foreach (var prompt in Prompts)
+        prompt.RefreshDisplayName();   // no-ops for anything the user named
+}
+```
+
+The user-data rule lives as a comment where the code makes the distinction. **An exemption
+is a claim about every string in a class, present and future.** If you add one, you are
+betting that nobody will add UI copy to that file.
+
+### Copy that lives outside Desktop reaches the screen too
+
+`JsonPromptTemplateRegistry` (Platform) holds `Name: "Default (verbatim transcription)"`.
+That literal is *correct* — Platform has no resources — but it was displayed verbatim in
+every language, and **no check could see it**: not in AXAML, so the hardcoded-literal scan
+missed it; not in resx, so parity missed it.
+
+Same split as everywhere else in ADR-064: **Platform supplies the identity, Desktop chooses
+the words.** When you add something to Core or Platform that carries a user-visible name or
+sentence, ask whether Desktop should be wording it. The invariant English stays for logs.
+
+This one was found by rendering a page under Hungarian and reading it — which is the only
+method that finds this class of bug.
 
 ### Surfaces outside the settings pages
 
@@ -423,8 +456,23 @@ literal path.)
 
 ### Then look at it
 
-Render the settings screenshot tests under the new culture and read the images. Fix
-clipping by making controls content-sized, **never** by shortening the translation.
+`LocalizedLayoutReviewTests` renders every settings page in every shipped language. **Use
+it; do not write a second one.**
+
+```bash
+PARLOTYPE_LAYOUT_REVIEW=1 dotnet test src/Parlotype.Desktop.Tests --filter LocalizedLayoutReviewTests
+# 500 images under reports/localized-layout/<culture>/
+```
+
+It is gated behind that environment variable because rendering that many pages leaves their
+view trees bound to the `Localizer` singleton, which destabilizes every culture-bound test
+in an ordinary run. The gate is load-bearing, and it looks exactly like missing coverage to
+anyone who has not read the class — ADR-069 phase 9 opened by writing an ungated duplicate
+and broke eight tests in precisely the documented way. If you want a narrower render, filter
+inside that class.
+
+Read the images. Fix clipping by making controls content-sized, **never** by shortening the
+translation.
 
 Aim that pass with `pwsh scripts/check-localization.ps1 -Report`, not with received wisdom
 about which languages are long. Measured across twelve: `da` 1.08, `sv` 1.12, `ru` 1.15,

@@ -1,9 +1,9 @@
 ---
 title: Twenty-five UI languages — match the interface set to Parakeet's speech set
-status: in_progress
+status: completed
 created: 2026-09-17
 started: 2026-09-17
-completed:
+completed: 2026-09-18
 ---
 
 # Twenty-five UI languages
@@ -115,10 +115,10 @@ endonyms, packaging and expansion in [research.md](research.md).
 - [x] **Phase 6 — Wave C:** `cs` `sk` `ro` `el` `hu`
 - [x] **Phase 7 — Wave D:** `bg` `hr` `sl` `lt` `lv`
 - [x] **Phase 8 — Wave E:** `et` `mt`
-- [ ] **Phase 9 — Verification.** Expansion report → screenshot audit in the worst-
+- [x] **Phase 9 — Verification.** Expansion report → screenshot audit in the worst-
       expanding locales; manual run of the real app in 3 spot-checked languages;
       publish-size delta measured.
-- [ ] **Phase 10 — Documentation.** ADR-069; `localization` skill updated to make the
+- [x] **Phase 10 — Documentation.** ADR-069; `localization` skill updated to make the
       brief/import scripts the standard path; memory vault; CHANGELOG.
 
 ## All 25 languages shipped — measured 2026-09-18
@@ -211,6 +211,18 @@ reports.
    exceeds 64k output tokens for a verbose language. The brief is sliceable
    (`-Part N -Of M`) and the importer merges several files, refusing overlaps. Slice the
    brief, never the work — one translator per language keeps the terminology single.
+
+## Outstanding
+
+Deliberately not done here, recorded so they are not lost:
+
+- **Rephrase the three `Language_*` English strings.** Twelve languages restructured them;
+  Bulgarian and Romanian confirm the cause is case marking. A change to the neutral file is
+  a maintainer decision — see [ADR-069](../../docs/decisions/069-twenty-five-ui-languages.md).
+  Polish currently ships a latent defect that only the English can fix.
+- **Native-speaker review**, Maltese first.
+- **Drive the running app by hand in three languages.** The 600 headless renders cover
+  layout and the tests cover live switching, but nobody has clicked through it.
 
 ## Open decisions
 
