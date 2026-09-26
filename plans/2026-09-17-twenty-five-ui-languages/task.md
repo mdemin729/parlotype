@@ -115,9 +115,9 @@ endonyms, packaging and expansion in [research.md](research.md).
 - [x] **Phase 6 — Wave C:** `cs` `sk` `ro` `el` `hu`
 - [x] **Phase 7 — Wave D:** `bg` `hr` `sl` `lt` `lv`
 - [x] **Phase 8 — Wave E:** `et` `mt`
-- [x] **Phase 9 — Verification.** Expansion report → screenshot audit in the worst-
-      expanding locales; manual run of the real app in 3 spot-checked languages;
-      publish-size delta measured.
+- [x] **Phase 9 — Verification.** Expansion report → layout audit (600 renders across all
+      25 languages, zero oversized, ~12 read by eye); publish-size delta measured
+      (+1.28 MB). **The manual run of the real app was not done** — see Outstanding.
 - [x] **Phase 10 — Documentation.** ADR-069; `localization` skill updated to make the
       brief/import scripts the standard path; memory vault; CHANGELOG.
 
@@ -150,7 +150,7 @@ reports.
 
 1. **Three English strings are wrong for inflected languages — now with overwhelming
    evidence.** `Language_Summary_Format` has been independently restructured by **fr, uk,
-   pl, fi, hu, sk, cs, el** — eight languages from four families, none of which kept the
+   pl, fi, hu, sk, cs, el, lt, hr, sl, lv** — twelve languages from four families, none of which kept the
    English shape, all of which reached for the same colon form. The companions
    `Language_ToggleSwitch_TranslateToFormat` and `Language_Toast_TargetUnsupportedFormat`
    collected the same votes.
@@ -194,18 +194,10 @@ reports.
    defect that 22 languages made visible, two of them reported by a user. Fixed with a
    structural test rather than discipline. See the `fix(settings):` commit.
 4. **Expansion guidance was wrong about which language is worst.** Research §5 nominated
-   German primary and Finnish secondary. Measured across all twelve translated languages:
-
-   | | | | |
-   |---|---|---|---|
-   | da 1.08 | sv 1.12 | ru 1.15 | pl 1.17 |
-   | fi 1.17 | nl 1.18 | uk 1.18 | pt 1.21 |
-   | it 1.22 | de 1.23 | es 1.24 | **fr 1.30** |
-
-   French is the worst case and Finnish sits mid-pack — the opposite of the prediction.
-   German's `du` register and Finnish's compounding both cut length rather than adding it.
-   Phase 9 aims the screenshot pass from `-Report`, not from this guidance. Worst single
-   ratio is Finnish at 3.25×, so it still deserves a look at the short-label pages.
+   German primary and Finnish secondary; both are mid-pack, and French and Greek lead. The
+   measured table for all 24 is above, under *All 25 languages shipped* — deliberately in
+   one place rather than two that can drift. Worst *single* ratios are short labels, topping
+   out at Slovak's 3.60× on a Reset button.
 
 5. **A translator's output ceiling is a real constraint.** 389 values in one JSON reply
    exceeds 64k output tokens for a verbose language. The brief is sliceable
@@ -236,8 +228,10 @@ unless overridden.
    "machine translated" badge in the UI — a disclaimer invites users to distrust copy
    they cannot compare against anything. Native-speaker review is tracked per language
    as follow-up issues, not as a gate on shipping.
-3. **Wave granularity.** Recommend one PR per wave (5 PRs). One PR for all 22 is
-   ~1.8 MB of diff nobody can review; one per language is 22 PRs of ceremony.
+3. **Wave granularity.** Recommended one PR per wave (5 PRs). **Overridden in practice:**
+   the waves landed as separate commits on one branch and shipped as a single PR, at the
+   user's direction. The per-wave commits are what makes that reviewable — the resx diff
+   is ~1.9 MB and is meant to be read per commit, or not at all.
 4. **Maltese.** The smallest language in the set and the one where LLM translation
    quality is weakest and hardest to verify. Recommend shipping it — an imperfect
    Maltese interface beats an English one for a Maltese speaker — but flagging it in
@@ -251,6 +245,8 @@ Beyond the repo-wide bar in `CLAUDE.md`:
 - `pwsh scripts/gen-strings.ps1` produces no diff — the accessor is culture-agnostic and
   must not change at all. If it does, something is wrong.
 - `dotnet build Parlotype.slnx` clean, `dotnet test` green.
-- The app launches and switches live into at least three of the new languages, one of
-  them Greek (the only new script).
+- ~~The app launches and switches live into at least three of the new languages, one of
+  them Greek (the only new script).~~ **Not done.** Substituted by 600 headless renders
+  across all 25 languages plus live-switch regression tests; a real click-through is still
+  outstanding, and the substitution is not equivalent.
 - Published size delta measured and recorded in the ADR.
