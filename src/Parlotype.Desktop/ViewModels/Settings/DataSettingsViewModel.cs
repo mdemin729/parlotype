@@ -155,6 +155,7 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
     private async Task RefreshSizeAsync()
     {
         var bytes = await Task.Run(() => MeasureBytes(_paths.ModelsDirectory));
+        _lastMeasuredBytes = bytes;
         ModelsSizeText = Describe(bytes);
     }
 
@@ -244,6 +245,39 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
             // Size is decoration; an unreadable directory must not break the page.
             return 0L;
         }
+    }
+
+    /// <summary>
+    /// The last measured size, retained so the label can be re-rendered in a new
+    /// language without walking the models directory again. **Nullable on
+    /// purpose**: zero means "measured, and there is nothing there", which is a
+    /// different statement from "not measured yet". Conflating them made a
+    /// culture switch during the first measurement replace the placeholder with
+    /// "Nothing downloaded" for a directory that turned out to be full.
+    /// </summary>
+    private long? _lastMeasuredBytes;
+
+    /// <summary>
+    /// Re-renders the size label (ADR-064's live-switch rule). Only the
+    /// "nothing downloaded" case is translated copy, but it is the case a fresh
+    /// install sits in permanently, so it is exactly the one a user would see
+    /// stuck in the wrong language.
+    /// </summary>
+    /// <remarks>
+    /// The transient status messages ("Path copied", "Models deleted") are left
+    /// alone on purpose: they are a response to something the user just did, and
+    /// re-rendering a stale one on an unrelated language switch would be odder
+    /// than letting it age out.
+    /// </remarks>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        // Nothing to re-render before the first measurement: the placeholder is
+        // a dash, which needs no translation, and claiming "nothing downloaded"
+        // here would be an answer we do not have yet.
+        if (_lastMeasuredBytes is { } bytes)
+            ModelsSizeText = Describe(bytes);
     }
 
     private static string Describe(long bytes) => bytes switch

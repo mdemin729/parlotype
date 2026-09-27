@@ -1,0 +1,1330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Onboarding_WindowTitle" xml:space="preserve">
+    <value>Prohlídka Parlotype</value>
+  </data>
+  <data name="Onboarding_Welcome_Title" xml:space="preserve">
+    <value>Vítejte v Parlotype</value>
+  </data>
+  <data name="Onboarding_Welcome_Body" xml:space="preserve">
+    <value>Parlotype mění řeč na text kdekoli v počítači: diktujte do libovolné aplikace a rozpoznaný text se napíše přesně tam, kde máte kurzor. Rozpoznávání ve výchozím nastavení běží celé v tomto počítači – zvukový záznam ho neopustí, dokud sami nezapnete cloudový modul.</value>
+  </data>
+  <data name="Onboarding_Recording_Title" xml:space="preserve">
+    <value>Začněte diktovat</value>
+  </data>
+  <data name="Onboarding_Recording_Body" xml:space="preserve">
+    <value>Stiskněte jednu z klávesových zkratek pro diktování nebo klikněte na zvýrazněné tlačítko nahrávání na widgetu. Jakmile domluvíte, rozpoznaný text se napíše do aplikace, kterou jste naposledy používali. Vaše klávesové zkratky:</value>
+  </data>
+  <data name="Onboarding_Recording_EscLine" xml:space="preserve">
+    <value>Esc – zruší aktuální nahrávání, aniž by se cokoli napsalo</value>
+  </data>
+  <data name="Onboarding_Hotkeys_None" xml:space="preserve">
+    <value>Není nastavena žádná klávesová zkratka pro diktování – použijte tlačítko nahrávání na widgetu, nebo přidejte zkratku v Nastavení → Klávesové zkratky.</value>
+  </data>
+  <data name="Onboarding_Widget_Title" xml:space="preserve">
+    <value>Widget nahrávání</value>
+  </data>
+  <data name="Onboarding_Widget_Body" xml:space="preserve">
+    <value>Toto malé okno, které zůstává vždy navrchu, je vaše ovládání diktování. Velké tlačítko spouští a zastavuje nahrávání; najetím na kartu zobrazíte aktuální stav. Přetažením úchytu nahoře widget přesunete kamkoli a tlačítko ✕ ho skryje do oznamovací oblasti. Moduly nabízející výběr jazyka zobrazují dole lištu jazyků.</value>
+  </data>
+  <data name="Onboarding_Engine_Title" xml:space="preserve">
+    <value>Zvolte hlasový modul</value>
+  </data>
+  <data name="Onboarding_Engine_Body" xml:space="preserve">
+    <value>Parlotype nabízí několik rozpoznávacích modulů – přepínejte mezi nimi ve zvýrazněném seznamu. Výchozí je Parakeet v3: rychlý, běžící celý v zařízení a automaticky rozpoznává 25 evropských jazyků. Každý modul přidává do navigace vlevo vlastní stránky.</value>
+  </data>
+  <data name="Onboarding_Model_Title" xml:space="preserve">
+    <value>Vyberte model</value>
+  </data>
+  <data name="Onboarding_Model_Body" xml:space="preserve">
+    <value>Každý lokální modul nabízí modely různých velikostí – větší modely jsou přesnější, ale pomalejší a zabírají více místa na disku. Soubory modelů se při prvním použití stáhnou automaticky; modely už uložené na disku jsou v seznamu označené.</value>
+  </data>
+  <data name="Onboarding_Cloud_Title" xml:space="preserve">
+    <value>Cloudové moduly jsou volitelné</value>
+  </data>
+  <data name="Onboarding_Cloud_Body" xml:space="preserve">
+    <value>Oba cloudové moduly jsou ve výchozím stavu vypnuté a vyžadují váš vlastní klíč API. Dokud je některý z nich aktivní, váš zvukový záznam se posílá danému poskytovateli k přepisu a widget zobrazuje trvalý odznak Cloud. Všechno ostatní v Parlotype zůstává čistě lokální.</value>
+  </data>
+  <data name="Onboarding_Tray_Title" xml:space="preserve">
+    <value>Parlotype běží v oznamovací oblasti</value>
+  </data>
+  <data name="Onboarding_Tray_Body" xml:space="preserve">
+    <value>Skrytí nebo zavření widgetu Parlotype neukončí – dál naslouchá vašim klávesovým zkratkám ze systémové oznamovací oblasti. Kliknutím na ikonu v oznamovací oblasti widget znovu zobrazíte. Chcete-li Parlotype úplně ukončit, klikněte na ikonu pravým tlačítkem a zvolte Ukončit.
+
+Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a čeká v oznamovací oblasti – žádné okno se přitom neotevře. Kdykoli to můžete vypnout v Nastavení → Aplikace → Po spuštění.</value>
+  </data>
+  <data name="Onboarding_Recap_Title" xml:space="preserve">
+    <value>Vše je připraveno</value>
+  </data>
+  <data name="Onboarding_Recap_Body" xml:space="preserve">
+    <value>Diktujte kdekoli pomocí klávesových zkratek nebo tlačítka na widgetu. Moduly, modely, klávesové zkratky a jazyky najdete v Nastavení – a tuto prohlídku spolu s přehledem klávesových zkratek máte vždy k dispozici v Nastavení → Nápověda.</value>
+  </data>
+  <data name="Onboarding_Nav_Back" xml:space="preserve">
+    <value>Zpět</value>
+  </data>
+  <data name="Onboarding_Nav_Next" xml:space="preserve">
+    <value>Další</value>
+  </data>
+  <data name="Onboarding_Nav_Finish" xml:space="preserve">
+    <value>Dokončit</value>
+  </data>
+  <data name="Onboarding_Nav_Skip" xml:space="preserve">
+    <value>Přeskočit prohlídku</value>
+  </data>
+  <data name="Onboarding_Progress_Format" xml:space="preserve">
+    <value>Krok {0} z {1}</value>
+  </data>
+  <data name="Help_Title" xml:space="preserve">
+    <value>Nápověda</value>
+  </data>
+  <data name="Help_Intro" xml:space="preserve">
+    <value>Poprvé v Parlotype? Prohlídka vás provede nahráváním, widgetem, moduly i modely – postupně otevírá jednotlivé obrazovky a zvýrazňuje ovládací prvky.</value>
+  </data>
+  <data name="Help_OpenTourButton" xml:space="preserve">
+    <value>Otevřít prohlídku</value>
+  </data>
+  <data name="Help_HotkeysHeading" xml:space="preserve">
+    <value>Aktuální klávesové zkratky pro diktování</value>
+  </data>
+  <data name="Help_NoHotkeys" xml:space="preserve">
+    <value>Nejsou nastavené žádné klávesové zkratky pro diktování. Přidejte je v sekci Klávesové zkratky.</value>
+  </data>
+  <data name="Help_EscCancelLine" xml:space="preserve">
+    <value>Esc – zruší aktuální nahrávání</value>
+  </data>
+  <data name="Settings_Theme_Title" xml:space="preserve">
+    <value>Motiv</value>
+  </data>
+  <data name="Settings_Theme_Description" xml:space="preserve">
+    <value>Zvolte systémový, světlý nebo tmavý vzhled.</value>
+  </data>
+  <data name="Settings_Theme_Default" xml:space="preserve">
+    <value>Výchozí (systém)</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>Světlý</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>Tmavý</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_Title" xml:space="preserve">
+    <value>Jazyk rozhraní</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_Description" xml:space="preserve">
+    <value>Jazyk, ve kterém jsou psaná vlastní okna Parlotype. Nemá vliv na to, v jakých jazycích můžete diktovat – ty se nastavují v sekci Jazyk.</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_System" xml:space="preserve">
+    <value>Podle systému</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat" xml:space="preserve">
+    <value>Řídí se Windows – aktuálně {0}</value>
+    <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
+    <value>Řídí se Windows – zatím nepřeloženo, používá se angličtina</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
+    <value>Střední</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Long" xml:space="preserve">
+    <value>Dlouhá</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Extended" xml:space="preserve">
+    <value>Prodloužená</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_VeryLong" xml:space="preserve">
+    <value>Velmi dlouhá</value>
+  </data>
+  <data name="Settings_SilenceTimeout_WaitFormat" xml:space="preserve">
+    <value>{0} ({1} s)</value>
+    <comment>{0} is the wait-time name, {1} the duration in seconds. Keep the "s" unit next to {1}.</comment>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Zrušit</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Zavřít</value>
+  </data>
+  <data name="Common_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common_OpenSettings" xml:space="preserve">
+    <value>Otevřít nastavení</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Otevřít</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Nastavení</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Ukončit</value>
+  </data>
+  <data name="Transcribe_WindowTitle" xml:space="preserve">
+    <value>Parlotype – Přepis</value>
+  </data>
+  <data name="Transcribe_CloudBadge" xml:space="preserve">
+    <comment>Short badge on the widget while a cloud engine is active. Keep it very short.</comment>
+    <value>Cloud</value>
+  </data>
+  <data name="Transcribe_HideWindowTooltip" xml:space="preserve">
+    <value>Skrýt okno</value>
+  </data>
+  <data name="Transcribe_SettingsTooltip" xml:space="preserve">
+    <value>Nastavení</value>
+  </data>
+  <data name="Transcribe_YouSpeakLabel" xml:space="preserve">
+    <value>Mluvíte</value>
+  </data>
+  <data name="Transcribe_OpenSettingsLink" xml:space="preserve">
+    <comment>Link on the widget's language strip. Keep the trailing arrow.</comment>
+    <value>Nastavení →</value>
+  </data>
+  <data name="Transcribe_Status_Ready" xml:space="preserve">
+    <value>Připraveno</value>
+  </data>
+  <data name="Transcribe_Status_LoadingModel" xml:space="preserve">
+    <value>Načítání modelu…</value>
+  </data>
+  <data name="Transcribe_Status_Recording" xml:space="preserve">
+    <value>Nahrávání…</value>
+  </data>
+  <data name="Transcribe_Status_Cancelled" xml:space="preserve">
+    <value>Zrušeno</value>
+  </data>
+  <data name="Transcribe_Status_CloudNotConfigured" xml:space="preserve">
+    <value>Cloudový poskytovatel není nastaven</value>
+  </data>
+  <data name="Transcribe_Status_RuntimeRestartRequiredFormat" xml:space="preserve">
+    <comment>{0} is a runtime name such as "Vulkan" or "Cpu" — never translated.</comment>
+    <value>Restartujte Parlotype, chcete-li použít prostředí: {0}</value>
+  </data>
+  <data name="Transcribe_Status_RuntimeUnavailableFormat" xml:space="preserve">
+    <comment>{0} is a runtime name such as "Vulkan" or "Cpu" — never translated.</comment>
+    <value>Prostředí {0} není dostupné – změňte ho v Nastavení</value>
+  </data>
+  <data name="Transcribe_Status_CloudKeyRejected" xml:space="preserve">
+    <value>Klíč API pro cloud byl zamítnut – zkontrolujte Nastavení</value>
+  </data>
+  <data name="Transcribe_Status_CloudQuotaExceeded" xml:space="preserve">
+    <value>Byla vyčerpána cloudová kvóta – zkontrolujte tarif a fakturaci</value>
+  </data>
+  <data name="Transcribe_Status_CloudRateLimited" xml:space="preserve">
+    <value>Byl dosažen limit požadavků cloudu – zkuste to za chvíli znovu</value>
+  </data>
+  <data name="Transcribe_Status_CloudProviderUnavailable" xml:space="preserve">
+    <value>Cloudový poskytovatel není dostupný – zkuste to za chvíli znovu</value>
+  </data>
+  <data name="Transcribe_Status_CloudFailed" xml:space="preserve">
+    <value>Přepis v cloudu se nezdařil</value>
+  </data>
+  <data name="Transcribe_CloudProvider_OpenAiCompatible" xml:space="preserve">
+    <comment>Badge naming the active cloud provider. "OpenAI" is a product name — do not translate it.</comment>
+    <value>Cloud: kompatibilní s OpenAI</value>
+  </data>
+  <data name="Transcribe_CloudProvider_XaiGrok" xml:space="preserve">
+    <comment>Badge naming the active cloud provider. "xAI Grok" is a product name — do not translate it.</comment>
+    <value>Cloud: xAI Grok</value>
+  </data>
+  <data name="Transcribe_TargetPicker_Header" xml:space="preserve">
+    <value>Překlad do</value>
+  </data>
+  <data name="Transcribe_TargetPicker_Off" xml:space="preserve">
+    <value>Vypnuto – bez překladu</value>
+  </data>
+  <data name="Transcribe_Source_Keyboard" xml:space="preserve">
+    <comment>Source-language chip when the language follows the OS keyboard layout but it could not be resolved to a name.</comment>
+    <value>Klávesnice</value>
+  </data>
+  <data name="Transcribe_Source_Auto" xml:space="preserve">
+    <comment>Source-language chip when the engine detects the language itself. Keep it short — it sits in a narrow chip.</comment>
+    <value>Auto</value>
+  </data>
+  <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
+    <value>Cloudový poskytovatel není nastaven</value>
+  </data>
+  <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
+    <value>Přepis v cloudu se nezdařil</value>
+  </data>
+  <data name="ModelDownload_Title" xml:space="preserve">
+    <value>Stažení modelu</value>
+  </data>
+  <data name="ModelDownload_DownloadButton" xml:space="preserve">
+    <value>Stáhnout</value>
+  </data>
+  <data name="ModelDownload_ConfirmFormat" xml:space="preserve">
+    <comment>{0} is the model name, {1} its download size (e.g. "1.5 GB").</comment>
+    <value>Stáhnout z internetu model „{0}“ ({1})?</value>
+  </data>
+  <data name="ModelDownload_ConfirmWithProjectorFormat" xml:space="preserve">
+    <comment>{0} is the model name, {1} its download size. Used for Gemma 4 models that bundle a vision projector.</comment>
+    <value>Stáhnout z internetu model „{0}“ ({1}, včetně vizuálního projektoru)?</value>
+  </data>
+  <data name="Settings_WindowTitle" xml:space="preserve">
+    <value>Parlotype – Nastavení</value>
+  </data>
+  <data name="Settings_NavHeading" xml:space="preserve">
+    <value>Nastavení</value>
+  </data>
+  <data name="Settings_Category_Audio" xml:space="preserve">
+    <value>Zvuk</value>
+  </data>
+  <data name="Settings_Category_SpeechEngine" xml:space="preserve">
+    <value>Hlasový modul</value>
+  </data>
+  <data name="Settings_Category_Input" xml:space="preserve">
+    <value>Vstup</value>
+  </data>
+  <data name="Settings_Category_Appearance" xml:space="preserve">
+    <value>Vzhled</value>
+  </data>
+  <data name="Settings_Category_Application" xml:space="preserve">
+    <value>Aplikace</value>
+  </data>
+  <data name="Settings_Microphone_Title" xml:space="preserve">
+    <value>Mikrofon</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Title" xml:space="preserve">
+    <value>Prodleva ticha</value>
+  </data>
+  <data name="Settings_Engine_Title" xml:space="preserve">
+    <value>Modul</value>
+  </data>
+  <data name="Settings_Language_Title" xml:space="preserve">
+    <value>Jazyk</value>
+  </data>
+  <data name="Settings_WhisperModel_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Model Whisper</value>
+  </data>
+  <data name="Settings_WhisperRuntime_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Prostředí Whisper</value>
+  </data>
+  <data name="Settings_WhisperOutput_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Výstup Whisper</value>
+  </data>
+  <data name="Settings_Gemma4Model_Title" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated.</comment>
+    <value>Model Gemma 4</value>
+  </data>
+  <data name="Settings_ParakeetModel_Title" xml:space="preserve">
+    <comment>"Parakeet" is a model family name — never translated.</comment>
+    <value>Model Parakeet</value>
+  </data>
+  <data name="Settings_CloudProviders_Title" xml:space="preserve">
+    <value>Cloudoví poskytovatelé</value>
+  </data>
+  <data name="Settings_Prompts_Title" xml:space="preserve">
+    <value>Prompty</value>
+  </data>
+  <data name="Settings_LlamaCppServer_Title" xml:space="preserve">
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+    <value>Server llama.cpp</value>
+  </data>
+  <data name="Settings_Hotkeys_Title" xml:space="preserve">
+    <value>Klávesové zkratky</value>
+  </data>
+  <data name="Settings_Startup_Title" xml:space="preserve">
+    <value>Po spuštění</value>
+  </data>
+  <data name="Settings_Updates_Title" xml:space="preserve">
+    <value>Aktualizace</value>
+  </data>
+  <data name="Settings_Data_Title" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="Settings_Microphone_Description" xml:space="preserve">
+    <value>Zvolte vstupní zařízení použité pro přepis.</value>
+  </data>
+  <data name="Settings_Microphone_SystemDefault" xml:space="preserve">
+    <value>Podle systému</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Description" xml:space="preserve">
+    <value>Jak dlouho čekat po skončení řeči, než se spustí přepis.</value>
+  </data>
+  <data name="Settings_SilenceTimeout_HoldNote" xml:space="preserve">
+    <value>Platí, když diktování zapínáte a vypínáte v režimu přepínání. Podržení ignoruje toto nastavení – uvolněním klávesy už sami určujete konec, takže se celé podržení přepíše najednou.</value>
+  </data>
+  <data name="Settings_Startup_Description" xml:space="preserve">
+    <value>Parlotype naslouchá vaší klávesové zkratce pro diktování ze systémové oznamovací oblasti, takže musí běžet ještě předtím, než začnete diktovat.</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn" xml:space="preserve">
+    <value>Spustit Parlotype při přihlášení do Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOff" xml:space="preserve">
+    <value>Nespouštět Parlotype automaticky</value>
+  </data>
+  <data name="Settings_Startup_BlockedHeading" xml:space="preserve">
+    <value>Vypnuto ve Windows</value>
+  </data>
+  <data name="Settings_Startup_BlockedBody" xml:space="preserve">
+    <comment>"Startup apps" and "Enable" name real Windows UI — use the wording Windows itself uses in this language.</comment>
+    <value>Otevřete Správce úloh, přejděte na kartu Po spuštění, vyberte Parlotype a zvolte Povolit. Windows si toto rozhodnutí pamatuje odděleně od tohoto nastavení a zrušit ho může jen Správce úloh.</value>
+  </data>
+  <data name="Settings_Startup_WhatChangesHeading" xml:space="preserve">
+    <value>Co se tím změní</value>
+  </data>
+  <data name="Settings_Startup_WhatChangesBody" xml:space="preserve">
+    <comment>"HKCU Run" is a registry path — never translated.</comment>
+    <value>Jedna položka pod vaším vlastním uživatelským účtem (HKCU Run), odkazující na Parlotype. Žádná služba, žádná naplánovaná úloha, žádná oprávnění správce, nic celosystémového. Sami ji můžete zobrazit a odebrat ve Správci úloh → Po spuštění.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
+    <comment>"Setup.exe" is a file name — never translated.</comment>
+    <value>Tato verze se nemůže spustit sama při přihlášení – nebyla nainstalována ze souboru Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
+    <value>Windows má Parlotype vypnutý ve Správci úloh → Po spuštění. Aby toto nastavení fungovalo, povolte ho tam znovu.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled" xml:space="preserve">
+    <value>Parlotype se spouští s Windows a čeká v oznamovací oblasti – žádné okno se přitom neotevře.</value>
+  </data>
+  <data name="Settings_Startup_State_Disabled" xml:space="preserve">
+    <value>Parlotype běží jen tehdy, když ho sami spustíte.</value>
+  </data>
+  <data name="Settings_Updates_Description" xml:space="preserve">
+    <value>Parlotype umí zkontrolovat GitHub, jestli nevyšla nová verze, stáhnout ji na pozadí a nainstalovat při ukončení.</value>
+  </data>
+  <data name="Settings_Updates_ToggleOn" xml:space="preserve">
+    <value>Automaticky kontrolovat aktualizace</value>
+  </data>
+  <data name="Settings_Updates_ToggleOff" xml:space="preserve">
+    <value>Automatická kontrola aktualizací vypnuta</value>
+  </data>
+  <data name="Settings_Updates_CadenceNote" xml:space="preserve">
+    <value>Když je zapnutá, Parlotype zkontroluje aktualizace krátce po spuštění a pak každých 6 hodin.</value>
+  </data>
+  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
+    <value>Co se odesílá</value>
+  </data>
+  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
+    <comment>"api.github.com" is a host name — never translated.</comment>
+    <value>Anonymní požadavek na api.github.com pro veřejný seznam verzí Parlotype a stažení samotného souboru s verzí. Žádný účet, žádný identifikátor zařízení, žádná data o používání. Toto je jediný síťový požadavek, který Parlotype odesílá, dokud jsou všechny vaše hlasové moduly lokální.</value>
+  </data>
+  <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
+    <value>Nainstalovaná verze:</value>
+  </data>
+  <data name="Settings_Updates_LastCheckedLabel" xml:space="preserve">
+    <value>Poslední kontrola:</value>
+  </data>
+  <data name="Settings_Updates_CheckNowButton" xml:space="preserve">
+    <value>Zkontrolovat</value>
+  </data>
+  <data name="Settings_Updates_InstallAndRestartButton" xml:space="preserve">
+    <value>Nainstalovat a restartovat</value>
+  </data>
+  <data name="Settings_Updates_Status_NotChecked" xml:space="preserve">
+    <value>Zatím nezkontrolováno.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
+    <comment>"Setup.exe" is a file name — never translated.</comment>
+    <value>Tato verze se nemůže aktualizovat sama – nebyla nainstalována ze souboru Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_Checking" xml:space="preserve">
+    <value>Kontroluje se dostupnost aktualizací…</value>
+  </data>
+  <data name="Settings_Updates_Status_UpToDate" xml:space="preserve">
+    <value>Parlotype je aktuální.</value>
+  </data>
+  <data name="Settings_Updates_Status_AvailableFormat" xml:space="preserve">
+    <comment>{0} is a version number such as "0.4.4".</comment>
+    <value>Je dostupná verze {0}.</value>
+  </data>
+  <data name="Settings_Updates_Status_DownloadingFormat" xml:space="preserve">
+    <comment>{0} is a version number such as "0.4.4".</comment>
+    <value>Stahuje se verze {0}…</value>
+  </data>
+  <data name="Settings_Updates_Status_ReadyFormat" xml:space="preserve">
+    <comment>{0} is a version number. The update is staged, not installed — it applies as Parlotype closes.</comment>
+    <value>Verze {0} je stažena. Nainstaluje se při ukončení Parlotype.</value>
+  </data>
+  <data name="Settings_Updates_Status_Failed" xml:space="preserve">
+    <value>Kontrola aktualizací se nezdařila.</value>
+  </data>
+  <data name="Settings_Updates_Never" xml:space="preserve">
+    <comment>Shown where a date would go, when no update check has ever run.</comment>
+    <value>Nikdy</value>
+  </data>
+  <data name="Settings_Updates_DevelopmentBuild" xml:space="preserve">
+    <comment>Shown where a version number would go, for a build that was not installed.</comment>
+    <value>vývojové sestavení</value>
+  </data>
+  <data name="Settings_Data_Description" xml:space="preserve">
+    <value>Kde Parlotype uchovává vaše modely, nastavení a klíče API.</value>
+  </data>
+  <data name="Settings_Data_LocationLabel" xml:space="preserve">
+    <value>Umístění</value>
+  </data>
+  <data name="Settings_Data_CopyPathButton" xml:space="preserve">
+    <value>Kopírovat cestu</value>
+  </data>
+  <data name="Settings_Data_OpenFolderButton" xml:space="preserve">
+    <value>Otevřít složku</value>
+  </data>
+  <data name="Settings_Data_DownloadedModelsLabel" xml:space="preserve">
+    <value>Stažené modely:</value>
+  </data>
+  <data name="Settings_Data_DeleteModelsButton" xml:space="preserve">
+    <value>Smazat stažené modely…</value>
+  </data>
+  <data name="Settings_Data_UninstallToggleOn" xml:space="preserve">
+    <value>Při odinstalaci Parlotype smazat vše</value>
+  </data>
+  <data name="Settings_Data_UninstallToggleOff" xml:space="preserve">
+    <value>Při odinstalaci Parlotype zachovat má data</value>
+  </data>
+  <data name="Settings_Data_UninstallNote" xml:space="preserve">
+    <value>Ve výchozím stavu vypnuto, takže opětovná instalace Parlotype nevyžaduje stahování několika gigabajtů znovu. Když je zapnuto, odinstalace zároveň odstraní stažené modely, nastavení a uložené klíče API.</value>
+  </data>
+  <data name="Settings_Data_NothingDownloaded" xml:space="preserve">
+    <value>Nic není stažené</value>
+  </data>
+  <data name="Settings_Data_SaveFailed_Keep" xml:space="preserve">
+    <value>Nastavení se nepodařilo uložit. I tak zůstanou vaše data při odinstalaci zachována.</value>
+  </data>
+  <data name="Settings_Data_SaveFailed_Delete" xml:space="preserve">
+    <value>Nastavení se nepodařilo uložit – i tak se při odinstalaci smažou stažené modely, nastavení i klíče API. Zkuste to prosím znovu.</value>
+  </data>
+  <data name="Settings_Data_PathCopied" xml:space="preserve">
+    <value>Cesta zkopírována do schránky.</value>
+  </data>
+  <data name="Settings_Data_PathCopyFailed" xml:space="preserve">
+    <value>Cestu se nepodařilo zkopírovat.</value>
+  </data>
+  <data name="Settings_Data_OpenFolderFailed" xml:space="preserve">
+    <value>Složku se nepodařilo otevřít.</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_Title" xml:space="preserve">
+    <value>Smazat stažené modely?</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_BodyFormat" xml:space="preserve">
+    <comment>{0} is a size such as "1.5 GB", {1} the models folder path. Keep the blank line between the two paragraphs.</comment>
+    <value>Tímto se odstraní {0} ze složky {1}.
+
+Vaše nastavení a klíče API zůstanou zachovány. Modely se při dalším diktování automaticky stáhnou znovu.</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_Confirm" xml:space="preserve">
+    <value>Smazat modely</value>
+  </data>
+  <data name="Settings_Data_ModelsDeleted" xml:space="preserve">
+    <value>Stažené modely byly smazány.</value>
+  </data>
+  <data name="Settings_Data_DeleteFailed" xml:space="preserve">
+    <value>Některé soubory se nepodařilo smazat – něco je stále používá. Restartujte Parlotype a zkuste to znovu.</value>
+  </data>
+  <data name="Settings_Runtime_Description" xml:space="preserve">
+    <comment>"Whisper.net" is a library name — never translated.</comment>
+    <value>Zvolte, které prostředí knihovny Whisper.net pohání hlasový model. Změna se projeví po restartu.</value>
+  </data>
+  <data name="Settings_Runtime_RestartHeading" xml:space="preserve">
+    <value>Nutný restart</value>
+  </data>
+  <data name="Settings_Runtime_RestartNoteFormat" xml:space="preserve">
+    <comment>{0} is the runtime already loaded, {1} the one just chosen — both names like "Vulkan" or "CPU", never translated.</comment>
+    <value>Tato relace už běží v prostředí: {0}. Whisper volí prostředí jen jednou za spuštění, restartujte proto Parlotype, chcete-li přepnout na prostředí: {1} – do té doby se nahrávání nespustí.</value>
+  </data>
+  <data name="Settings_Runtime_VulkanMissing" xml:space="preserve">
+    <comment>"vulkan-1.dll" is a file name — never translated.</comment>
+    <value>V tomto systému nebyl rozpoznán zavaděč Vulkan (vulkan-1.dll).</value>
+  </data>
+  <data name="Settings_Runtime_DownloadVulkanSdkButton" xml:space="preserve">
+    <comment>Keep the trailing arrow — it marks a link that leaves the app.</comment>
+    <value>Stáhnout Vulkan SDK →</value>
+  </data>
+  <data name="Settings_Runtime_Auto_Name" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="Settings_Runtime_Auto_Description" xml:space="preserve">
+    <value>Zkusí Vulkan, poté přejde na CPU. Doporučeno.</value>
+  </data>
+  <data name="Settings_Runtime_Vulkan_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>Vulkan</value>
+  </data>
+  <data name="Settings_Runtime_Vulkan_Description" xml:space="preserve">
+    <value>Libovolná grafická karta přes Vulkan (AMD, Intel, NVIDIA). Vyžaduje ovladače grafické karty s podporou Vulkan.</value>
+  </data>
+  <data name="Settings_Runtime_Cpu_Name" xml:space="preserve">
+    <comment>Kept as "CPU" in every language — it is the term users see in system tools.</comment>
+    <value>CPU</value>
+  </data>
+  <data name="Settings_Runtime_Cpu_Description" xml:space="preserve">
+    <value>Vynutí zpracování pouze na CPU. Funguje vždy, ale u větších modelů je pomalejší.</value>
+  </data>
+  <data name="Settings_Runtime_VulkanUnavailableReason" xml:space="preserve">
+    <comment>"vulkan-1.dll" is a file name — never translated.</comment>
+    <value>Zavaděč Vulkan (vulkan-1.dll) nebyl rozpoznán. Nainstalujte ovladače grafické karty nebo Vulkan SDK.</value>
+  </data>
+  <data name="Settings_Hotkeys_Description" xml:space="preserve">
+    <comment>"Esc" is a key name — use whatever that key is called on a keyboard in this language, usually "Esc".</comment>
+    <value>Podržením klávesy mluvíte, dvojím stisknutím diktujete bez podržení. Stisknutím Esc během nahrávání ho zahodíte.</value>
+  </data>
+  <data name="Settings_Hotkeys_ModeToggleTooltip" xml:space="preserve">
+    <value>Přepnout mezi podržením a přepínáním</value>
+  </data>
+  <data name="Settings_Hotkeys_RemoveTooltip" xml:space="preserve">
+    <value>Odebrat tuto klávesovou zkratku</value>
+  </data>
+  <data name="Settings_Hotkeys_None" xml:space="preserve">
+    <value>Není nastavená žádná klávesová zkratka – diktování lze spustit jen z widgetu.</value>
+  </data>
+  <data name="Settings_Hotkeys_AddButton" xml:space="preserve">
+    <value>Přidat klávesovou zkratku</value>
+  </data>
+  <data name="Settings_Hotkeys_Recorder_Idle" xml:space="preserve">
+    <value>Zaznamenat kombinaci kláves…</value>
+  </data>
+  <data name="Settings_Hotkeys_Recorder_Listening" xml:space="preserve">
+    <value>Stiskněte kombinaci kláves…</value>
+  </data>
+  <data name="Settings_Model_Installed" xml:space="preserve">
+    <comment>Badge on a model that is already on disk. Shared by the Gemma 4 and Parakeet lists.</comment>
+    <value>Nainstalováno</value>
+  </data>
+  <data name="Settings_Model_DownloadButton" xml:space="preserve">
+    <value>Stáhnout</value>
+  </data>
+  <data name="Settings_Model_DeleteButton" xml:space="preserve">
+    <value>Smazat</value>
+  </data>
+  <data name="Settings_Engine_Heading" xml:space="preserve">
+    <comment>Page heading. The shorter navigation label is Settings_Engine_Title.</comment>
+    <value>Hlasový modul</value>
+  </data>
+  <data name="Settings_Engine_Description" xml:space="preserve">
+    <value>Zvolte, který modul přepisuje vaši řeč. Změna se projeví při dalším nahrávání.</value>
+  </data>
+  <data name="Settings_Engine_Gemma4SectionLabel" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated. Only "(Experimental)" is prose.</comment>
+    <value>Gemma 4 (experimentální)</value>
+  </data>
+  <data name="Settings_Engine_PreloadToggleOn" xml:space="preserve">
+    <value>Načíst model už při spuštění</value>
+  </data>
+  <data name="Settings_Engine_PreloadToggleOff" xml:space="preserve">
+    <value>Načíst model až při prvním použití</value>
+  </data>
+  <data name="Settings_Engine_PreloadNote" xml:space="preserve">
+    <value>Když je zapnuto, hlasový model se načte na pozadí hned při spuštění aplikace, takže první nahrávání začne okamžitě. Za chodu spotřebovává víc paměti. Projeví se při dalším spuštění.</value>
+  </data>
+  <data name="Settings_Engine_Parakeet_Name" xml:space="preserve">
+    <comment>"Parakeet v3" is a model name — never translated. Only "(Recommended)" is prose.</comment>
+    <value>Parakeet v3 (doporučeno)</value>
+  </data>
+  <data name="Settings_Engine_Parakeet_Description" xml:space="preserve">
+    <comment>"NVIDIA Parakeet" and "ONNX" are product names — never translated.</comment>
+    <value>NVIDIA Parakeet přes ONNX. Stahování ~670 MB. 25 evropských jazyků, automatické rozpoznání. Nejrychlejší modul – běží na libovolném CPU, grafická karta není potřeba. Bez překladu.</value>
+  </data>
+  <data name="Settings_Engine_Whisper_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>Whisper</value>
+  </data>
+  <data name="Settings_Engine_Whisper_Description" xml:space="preserve">
+    <comment>"Whisper.net" is a library name — never translated.</comment>
+    <value>Lokální rozpoznávání řeči přes Whisper.net. Ověřené řešení, ~99 jazyků, výběr zdrojového jazyka a překlad do angličtiny.</value>
+  </data>
+  <data name="Settings_Engine_Gemma4_Name" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated. Only "(Experimental)" is prose.</comment>
+    <value>Gemma 4 (experimentální)</value>
+  </data>
+  <data name="Settings_Engine_Gemma4_Description" xml:space="preserve">
+    <comment>"Google Gemma 4 E4B" and "llama.cpp" are product names — never translated.</comment>
+    <value>Google Gemma 4 E4B přes llama.cpp. Vyžaduje stažení ~10 GB. Pouze angličtina. Nejlépe funguje na čisté řeči.</value>
+  </data>
+  <data name="Settings_Engine_OpenAiCompatible_Name" xml:space="preserve">
+    <comment>"OpenAI" is a product name — never translated.</comment>
+    <value>Kompatibilní s OpenAI (Cloud)</value>
+  </data>
+  <data name="Settings_Engine_OpenAiCompatible_Description" xml:space="preserve">
+    <comment>"Cloud providers" must match the wording of Settings_CloudProviders_Title — it names that page.</comment>
+    <value>Přepis v cloudu pomocí vašeho vlastního klíče API pro OpenAI, Groq nebo kompatibilní službu. Zvuk se odesílá nastavenému poskytovateli – lokálně neběží nic. Rychlé i na slabším hardwaru. Volitelné; klíč nastavte níže v sekci Cloudoví poskytovatelé.</value>
+  </data>
+  <data name="Settings_Engine_XaiGrok_Name" xml:space="preserve">
+    <comment>"xAI Grok" is a product name — never translated.</comment>
+    <value>xAI Grok (Cloud)</value>
+  </data>
+  <data name="Settings_Engine_XaiGrok_Description" xml:space="preserve">
+    <comment>"Cloud providers" must match the wording of Settings_CloudProviders_Title — it names that page.</comment>
+    <value>Převod řeči na text xAI Grok pomocí vašeho vlastního klíče API pro xAI. Zvuk se odesílá do xAI – lokálně neběží nic. Rychlé i na slabším hardwaru. Volitelné; klíč nastavte níže v sekci Cloudoví poskytovatelé.</value>
+  </data>
+  <data name="Settings_WhisperModel_Heading" xml:space="preserve">
+    <comment>Page heading. The navigation label is Settings_WhisperModel_Title.</comment>
+    <value>Model Whisper</value>
+  </data>
+  <data name="Settings_WhisperModel_Description" xml:space="preserve">
+    <value>Větší modely jsou přesnější, ale více zatěžují disk a CPU/GPU.</value>
+  </data>
+  <data name="Settings_WhisperModel_NoTranslationTooltip" xml:space="preserve">
+    <value>Jen přepis – překlad do angličtiny vyžaduje vícejazyčný model</value>
+  </data>
+  <data name="Settings_WhisperModel_NoTranslationBadge" xml:space="preserve">
+    <comment>Small badge beside a model that cannot translate. Keep it short.</comment>
+    <value>bez překladu</value>
+  </data>
+  <data name="Settings_WhisperModel_NotDownloaded" xml:space="preserve">
+    <comment>Keep the parentheses — it sits beside the model name.</comment>
+    <value>(nestaženo)</value>
+  </data>
+  <data name="Settings_WhisperOutput_Description" xml:space="preserve">
+    <comment>"Whisper" is a product name — never translated.</comment>
+    <value>Možnosti úpravy výstupu specifické pro modul Whisper.</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationOn" xml:space="preserve">
+    <value>Interpunkce ve výstupu zahrnuta</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationOff" xml:space="preserve">
+    <value>Interpunkce z výstupu odstraněna</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationNote" xml:space="preserve">
+    <value>Když je zapnuto, přepis obsahuje čárky, tečky a další interpunkci.</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityOn" xml:space="preserve">
+    <comment>The four asterisks are the literal masking Whisper applies — keep them.</comment>
+    <value>Vulgarismy maskované pomocí ****</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityOff" xml:space="preserve">
+    <value>Filtr vulgarismů vypnutý</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityNote" xml:space="preserve">
+    <value>Když je zapnuto, rozpoznané vulgarismy se nahradí hvězdičkami.</value>
+  </data>
+  <data name="Settings_Gemma4Model_Description" xml:space="preserve">
+    <comment>"Gemma 4", "llama.cpp", "E4B", "E2B" and "mmproj" are identifiers — never translated.</comment>
+    <value>Zvolte variantu Gemma 4 pro modul llama.cpp. E4B je přesnější, E2B rychlejší (méně aktivních parametrů). Každé stažení zahrnuje vizuální projektor (mmproj).</value>
+  </data>
+  <data name="Settings_ParakeetModel_Description" xml:space="preserve">
+    <comment>"NVIDIA Parakeet", "INT8" and "fp32" are identifiers — never translated.</comment>
+    <value>NVIDIA Parakeet běží celý na CPU – grafická karta není potřeba. Přepisuje 25 evropských jazyků (rozpoznaných automaticky) včetně interpunkce a velkých písmen. Doporučená výchozí volba je INT8: malý a rychlý. Plná přesnost (fp32) je o něco přesnější, ale 4× větší a pomalejší na dekódování.</value>
+  </data>
+  <data name="ApiKeyBox_ShowHideTooltip" xml:space="preserve">
+    <value>Zobrazit/skrýt klíč</value>
+  </data>
+  <data name="Settings_CloudProviders_OpenAi_Name" xml:space="preserve">
+    <comment>"OpenAI" is a product name — never translated.</comment>
+    <value>Kompatibilní s OpenAI</value>
+  </data>
+  <data name="Settings_CloudProviders_OpenAi_Description" xml:space="preserve">
+    <value>Funguje s OpenAI, Groq nebo jakoukoli jinou službou implementující přepisové API OpenAI.</value>
+  </data>
+  <data name="Settings_CloudProviders_Xai_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>xAI Grok</value>
+  </data>
+  <data name="Settings_CloudProviders_Xai_Description" xml:space="preserve">
+    <value>API xAI Grok pro převod řeči na text.</value>
+  </data>
+  <data name="Settings_CloudProviders_BaseUrlLabel" xml:space="preserve">
+    <value>Základní URL</value>
+  </data>
+  <data name="Settings_CloudProviders_ModelLabel" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Settings_CloudProviders_ApiKeyLabel" xml:space="preserve">
+    <value>Klíč API</value>
+  </data>
+  <data name="Settings_CloudProviders_KeySavedBadge" xml:space="preserve">
+    <comment>Keep the leading check mark.</comment>
+    <value>✓ Uloženo</value>
+  </data>
+  <data name="Settings_CloudProviders_ChangeButton" xml:space="preserve">
+    <value>Změnit</value>
+  </data>
+  <data name="Settings_CloudProviders_RemoveButton" xml:space="preserve">
+    <value>Odebrat</value>
+  </data>
+  <data name="Settings_CloudProviders_SaveButton" xml:space="preserve">
+    <value>Uložit</value>
+  </data>
+  <data name="Settings_CloudProviders_KeyStatus_Saved" xml:space="preserve">
+    <value>Klíč uložen</value>
+  </data>
+  <data name="Settings_CloudProviders_KeyStatus_None" xml:space="preserve">
+    <value>Bez klíče</value>
+  </data>
+  <data name="Settings_Prompts_Description" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated.</comment>
+    <value>Instrukce odesílaná modulu Gemma 4 s každým přepisem. Aktivní prompt je označen barevným pruhem.</value>
+  </data>
+  <data name="Settings_Prompts_HelpHeader" xml:space="preserve">
+    <value>Jak fungují prompty</value>
+  </data>
+  <data name="Settings_Prompts_Help_PlaceholdersHeading" xml:space="preserve">
+    <value>Zástupné symboly</value>
+  </data>
+  <data name="Settings_Prompts_Help_SpeechLangDescription" xml:space="preserve">
+    <comment>Follows the literal token {speech_lang}, which is rendered separately in bold. Keep the leading dash.</comment>
+    <value>– mluvený jazyk, převzatý ze stránky nastavení Jazyk. Při volbě „Automaticky rozpoznat“ se vykreslí jako „rozpoznaný jazyk“.</value>
+  </data>
+  <data name="Settings_Prompts_Help_TextLangDescription" xml:space="preserve">
+    <comment>Follows the literal token {text_lang}, which is rendered separately in bold. Keep the leading dash.</comment>
+    <value>– výstupní jazyk. Liší se od mluveného jazyka jen při aktivním překladu, jinak se vykresluje stejně jako mluvený jazyk.</value>
+  </data>
+  <data name="Settings_Prompts_Help_TranslationHeading" xml:space="preserve">
+    <value>Kdy se použije překlad</value>
+  </data>
+  <data name="Settings_Prompts_Help_TranslationBody" xml:space="preserve">
+    <value>Jen když platí všechny tři podmínky: přepínač Přeložit je zapnutý, je vybraný výstupní jazyk a liší se od mluveného jazyka (Automatické rozpoznání se vždy počítá jako odlišné). Jinak modul jen přepisuje a výstupní jazyk je stejný jako mluvený.</value>
+  </data>
+  <data name="Settings_Prompts_Help_BuiltInHeading" xml:space="preserve">
+    <value>Vestavěné a vlastní prompty</value>
+  </data>
+  <data name="Settings_Prompts_Help_BuiltInBody" xml:space="preserve">
+    <comment>{speech_lang} and {text_lang} are literal placeholder tokens the user types into a prompt — never translate them, and keep the braces exactly.</comment>
+    <value>Vestavěný výchozí prompt obsahuje tři varianty textu a modul si při každém přepisu jednu vybere: přepisovou variantu, kde výstupní jazyk odpovídá mluvenému, takže se {speech_lang} objeví dvakrát – „řeč v X do textu v X“; překladovou variantu, která pro výstup spojuje {speech_lang} s {text_lang}; a variantu pro automatické rozpoznání bez zástupných symbolů.</value>
+  </data>
+  <data name="Settings_Prompts_Help_CustomBody" xml:space="preserve">
+    <value>Vlastní prompt má jedinou variantu textu. Když se použije překlad, automaticky se k němu připojí instrukce „pak přelož do…“. Duplikováním vestavěného promptu se zkopíruje jen jeho přepisová varianta.</value>
+  </data>
+  <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
+    <value>Vestavěný</value>
+  </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>Výchozí (doslovný přepis)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
+  </data>
+  <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
+    <value>Duplikovat</value>
+  </data>
+  <data name="Settings_Prompts_EditButton" xml:space="preserve">
+    <value>Upravit</value>
+  </data>
+  <data name="Settings_Prompts_DeleteButton" xml:space="preserve">
+    <value>Smazat</value>
+  </data>
+  <data name="Settings_Prompts_NewButton" xml:space="preserve">
+    <value>Nový prompt</value>
+  </data>
+  <data name="Settings_Prompts_NameLabel" xml:space="preserve">
+    <value>Název</value>
+  </data>
+  <data name="Settings_Prompts_NamePlaceholder" xml:space="preserve">
+    <value>Můj prompt</value>
+  </data>
+  <data name="Settings_Prompts_TextLabel" xml:space="preserve">
+    <value>Text promptu</value>
+  </data>
+  <data name="Settings_Prompts_SaveButton" xml:space="preserve">
+    <value>Uložit</value>
+  </data>
+  <data name="Settings_Prompts_Editor_PlaceholdersLabel" xml:space="preserve">
+    <comment>Leads a line that continues with the bold token {speech_lang}. Keep the colon.</comment>
+    <value>Zástupné symboly:</value>
+  </data>
+  <data name="Settings_Prompts_Editor_SpeechLangHint" xml:space="preserve">
+    <comment>Follows the literal token {speech_lang}, rendered separately in bold. Keep the leading dash and the trailing semicolon.</comment>
+    <value>– mluvený jazyk („rozpoznaný jazyk“ při automatickém rozpoznávání);</value>
+  </data>
+  <data name="Settings_Prompts_Editor_TextLangHint" xml:space="preserve">
+    <comment>Follows the literal token {text_lang}, rendered separately in bold. Keep the leading dash.</comment>
+    <value>– výstupní jazyk, který odpovídá mluvenému, pokud není aktivní překlad.</value>
+  </data>
+  <data name="Settings_Prompts_Editor_TranslationNote" xml:space="preserve">
+    <value>Když je aktivní překlad, do promptu se automaticky připojí instrukce „pak přelož do…“.</value>
+  </data>
+  <data name="Settings_Prompts_CopySuffixFormat" xml:space="preserve">
+    <comment>{0} is the name of the prompt being duplicated.</comment>
+    <value>{0} (kopie)</value>
+  </data>
+  <data name="Settings_LlamaCpp_Heading" xml:space="preserve">
+    <comment>A project name — never translated, and keep the lower case.</comment>
+    <value>llama.cpp</value>
+  </data>
+  <data name="Settings_LlamaCpp_Description" xml:space="preserve">
+    <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
+    <value>Procházejte, instalujte a spravujte sestavení llama-server. Aktivní instalace pohání přepis Gemma 4.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
+    <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
+    <value>Spravováno</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualBadge" xml:space="preserve">
+    <comment>Badge: the user pointed Parlotype at a folder they downloaded themselves.</comment>
+    <value>Ruční</value>
+  </data>
+  <data name="Settings_LlamaCpp_RefreshButton" xml:space="preserve">
+    <value>Obnovit</value>
+  </data>
+  <data name="Settings_LlamaCpp_RunningInstallLabel" xml:space="preserve">
+    <value>Běžící instalace:</value>
+  </data>
+  <data name="Settings_LlamaCpp_PathLabel" xml:space="preserve">
+    <value>Cesta:</value>
+  </data>
+  <data name="Settings_LlamaCpp_ModelLabel" xml:space="preserve">
+    <value>Model:</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioLabel" xml:space="preserve">
+    <value>Zvuk:</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioSupported" xml:space="preserve">
+    <value>Podporováno</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioNotSupported" xml:space="preserve">
+    <value>Nepodporováno</value>
+  </data>
+  <data name="Settings_LlamaCpp_BuildLabel" xml:space="preserve">
+    <value>Sestavení:</value>
+  </data>
+  <data name="Settings_LlamaCpp_UpdateAvailableHeading" xml:space="preserve">
+    <value>Dostupná aktualizace</value>
+  </data>
+  <data name="Settings_LlamaCpp_UpdateAvailableBody" xml:space="preserve">
+    <comment>The build number follows this text in bold — keep the trailing space and colon.</comment>
+    <value>Na GitHubu je dostupné novější sestavení: </value>
+  </data>
+  <data name="Settings_LlamaCpp_CheckUpdatesButton" xml:space="preserve">
+    <value>Zkontrolovat aktualizace</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortConflictHeading" xml:space="preserve">
+    <comment>Keep the leading warning sign.</comment>
+    <value>⚠ Konflikt portu</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortConflictHint" xml:space="preserve">
+    <comment>"Save" must match Settings_LlamaCpp_SaveButton — it names that button.</comment>
+    <value>Změňte port níže a klikněte na Uložit.</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstalledHeading" xml:space="preserve">
+    <value>Nainstalováno</value>
+  </data>
+  <data name="Settings_LlamaCpp_RefreshListButton" xml:space="preserve">
+    <value>Obnovit seznam</value>
+  </data>
+  <data name="Settings_LlamaCpp_UseThisTooltip" xml:space="preserve">
+    <value>Použít tuto instalaci</value>
+  </data>
+  <data name="Settings_LlamaCpp_MissingBadge" xml:space="preserve">
+    <comment>Keep the leading warning sign. Shown when a recorded install is no longer on disk.</comment>
+    <value>⚠ chybí</value>
+  </data>
+  <data name="Settings_LlamaCpp_UninstallButton" xml:space="preserve">
+    <value>Odinstalovat</value>
+  </data>
+  <data name="Settings_LlamaCpp_NoManagedInstalls" xml:space="preserve">
+    <comment>"Available" must match Settings_LlamaCpp_AvailableBuildsHeading — it names that list.</comment>
+    <value>Zatím žádné spravované instalace. Vyberte jednu ze seznamu Dostupná sestavení níže.</value>
+  </data>
+  <data name="Settings_LlamaCpp_SelectionNote" xml:space="preserve">
+    <value>Výběr se projeví při dalším nahrávání.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualInstallHeading" xml:space="preserve">
+    <value>Ruční instalace</value>
+  </data>
+  <data name="Settings_LlamaCpp_NotManagedBadge" xml:space="preserve">
+    <value>Nespravováno Parlotype</value>
+  </data>
+  <data name="Settings_LlamaCpp_UseThisRadio" xml:space="preserve">
+    <value>Použít tuto</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualHint" xml:space="preserve">
+    <comment>"llama-server.exe" is a file name — never translated.</comment>
+    <value>Vyberte složku obsahující llama-server.exe, kterou jste si sami stáhli.</value>
+  </data>
+  <data name="Settings_LlamaCpp_BrowseButton" xml:space="preserve">
+    <value>Procházet…</value>
+  </data>
+  <data name="Settings_LlamaCpp_AvailableBuildsHeading" xml:space="preserve">
+    <value>Dostupná sestavení</value>
+  </data>
+  <data name="Settings_LlamaCpp_Loading" xml:space="preserve">
+    <comment>Keep the parentheses — it sits beside a heading.</comment>
+    <value>(načítání…)</value>
+  </data>
+  <data name="Settings_LlamaCpp_CudaRuntimeBadge" xml:space="preserve">
+    <comment>"CUDA" is a product name — never translated.</comment>
+    <value>+ prostředí CUDA</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstallButton" xml:space="preserve">
+    <value>Nainstalovat</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstalledBadge" xml:space="preserve">
+    <value>Nainstalováno</value>
+  </data>
+  <data name="Settings_LlamaCpp_NoBuildsMatched" xml:space="preserve">
+    <value>Žádné sestavení neodpovídá aktuálnímu OS / architektuře.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ServerPortHeading" xml:space="preserve">
+    <value>Port serveru</value>
+  </data>
+  <data name="Settings_LlamaCpp_ServerPortDescription" xml:space="preserve">
+    <comment>"llama-server" is an identifier and 8321 the default port — neither is translated.</comment>
+    <value>Port pro llama-server (výchozí: 8321). Změna se projeví při dalším nahrávání.</value>
+  </data>
+  <data name="Settings_LlamaCpp_SaveButton" xml:space="preserve">
+    <value>Uložit</value>
+  </data>
+  <data name="Settings_LlamaCpp_ResetButton" xml:space="preserve">
+    <value>Obnovit výchozí</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_NotProbed" xml:space="preserve">
+    <value>Neotestováno</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_InvalidPort" xml:space="preserve">
+    <value>Neplatný port</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Connected" xml:space="preserve">
+    <value>Připojeno</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Disconnected" xml:space="preserve">
+    <value>Odpojeno</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_PortConflict" xml:space="preserve">
+    <value>Konflikt portu</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_LoadingModel" xml:space="preserve">
+    <value>Načítání modelu…</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Error" xml:space="preserve">
+    <value>Chyba</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortRangeError" xml:space="preserve">
+    <value>Port musí být číslo od 1 do 65535.</value>
+  </data>
+  <data name="Settings_LlamaCpp_Backend_Unknown" xml:space="preserve">
+    <comment>Fallback for a llama-server build whose backend could not be identified. Every other backend name (CPU, CUDA, Vulkan, ROCm / HIP, SYCL, Metal, KleidiAI) is an identifier and stays as it is.</comment>
+    <value>Neznámé</value>
+  </data>
+  <data name="Settings_Language_Description" xml:space="preserve">
+    <value>Jeden vztah, čtěte zleva doprava: vy mluvíte zdrojovým jazykem, Parlotype píše cílovým. Spojka mezi nimi zapíná a vypíná překlad.</value>
+  </data>
+  <data name="Settings_Language_SourceCaption" xml:space="preserve">
+    <value>Mluvíte</value>
+  </data>
+  <data name="Settings_Language_TargetCaption" xml:space="preserve">
+    <value>Parlotype píše</value>
+  </data>
+  <data name="Settings_Language_PausedSubLine" xml:space="preserve">
+    <comment>Sits beside the translation switch, which stays on and operable (ADR-061). Keep it short.</comment>
+    <value>Pozastaveno – tento model neumí překládat</value>
+  </data>
+  <data name="Settings_Language_UnavailableTitle" xml:space="preserve">
+    <value>Překlad nedostupný</value>
+  </data>
+  <data name="Settings_Language_UnavailableSubtitle" xml:space="preserve">
+    <value>Tento model to nepodporuje</value>
+  </data>
+  <data name="Language_ChooseTranslatingModel" xml:space="preserve">
+    <comment>One button, two surfaces — the Language page and the Transcribe flyout (ADR-061). They must not drift, hence one key.</comment>
+    <value>Vybrat model, který umí překládat</value>
+  </data>
+  <data name="Language_Picker_SearchPlaceholder" xml:space="preserve">
+    <value>Hledat jazyky…</value>
+  </data>
+  <data name="Language_Picker_NoResultsFormat" xml:space="preserve">
+    <comment>{0} is whatever the user typed into the search box.</comment>
+    <value>Žádné jazyky neodpovídají výrazu „{0}“.</value>
+  </data>
+  <data name="Language_Connector_PausedTooltipFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name such as "Large v3 Turbo" — never translated.</comment>
+    <value>Překlad pozastaven – „{0}“ neumí překládat</value>
+  </data>
+  <data name="Language_Connector_TurnOffTooltip" xml:space="preserve">
+    <value>Vypnout překlad</value>
+  </data>
+  <data name="Language_Connector_TurnOnTooltip" xml:space="preserve">
+    <value>Zapnout překlad</value>
+  </data>
+  <data name="Language_ToggleSwitch_TranslateToFormat" xml:space="preserve">
+    <comment>{0} is a language name. NOTE: once phase 6 localizes language names, this slot needs a case other than nominative in Russian — see the plan's "language-name cases" note.</comment>
+    <value>Překlad: {0}</value>
+  </data>
+  <data name="Language_ToggleSwitch_Translate" xml:space="preserve">
+    <comment>Fallback label when the engine has no fixed translation target to name.</comment>
+    <value>Přeložit</value>
+  </data>
+  <data name="Language_UnavailableNoteFormat" xml:space="preserve">
+    <comment>{0} is an engine name ("Whisper", "Gemma 4", "Parakeet") — never translated, and it leads the sentence.</comment>
+    <value>{0} neumí překládat – Parlotype napíše přesně to, co řeknete.</value>
+  </data>
+  <data name="Language_Source_KeyboardLayout" xml:space="preserve">
+    <value>Rozložení klávesnice systému</value>
+  </data>
+  <data name="Language_Source_AutoDetect" xml:space="preserve">
+    <value>Automaticky rozpoznat</value>
+  </data>
+  <data name="Language_Source_DetectedFormat" xml:space="preserve">
+    <comment>{0} is the detected keyboard layout's friendly name. The colon keeps {0} in a position that needs no grammatical case.</comment>
+    <value>Rozpoznáno: {0}</value>
+  </data>
+  <data name="Language_Source_LayoutUnavailable" xml:space="preserve">
+    <value>Rozpoznání rozložení není dostupné – místo toho se jazyk rozpozná automaticky</value>
+  </data>
+  <data name="Language_Source_AutoDetectHint" xml:space="preserve">
+    <value>Nechat model rozpoznat jazyk</value>
+  </data>
+  <data name="Language_Source_SpokenLanguageHint" xml:space="preserve">
+    <value>Mluvený jazyk</value>
+  </data>
+  <data name="Language_Target_SameAsSource" xml:space="preserve">
+    <comment>Target card while translation is off — the output matches the spoken language.</comment>
+    <value>Stejný jako zdrojový</value>
+  </data>
+  <data name="Language_Summary_Format" xml:space="preserve">
+    <comment>{0} is the spoken language, {1} what gets typed. Both are language names, so keep each one where it needs no grammatical case — after a colon or dash rather than after a preposition.</comment>
+    <value>Mluvíte: {0} → Parlotype píše: {1}.</value>
+  </data>
+  <data name="Language_Summary_YourKeyboardLanguage" xml:space="preserve">
+    <comment>Substituted as {0} of Language_Summary_Format when the source follows the keyboard layout but it could not be resolved.</comment>
+    <value>jazyk vaší klávesnice</value>
+  </data>
+  <data name="Language_Summary_AnyLanguage" xml:space="preserve">
+    <comment>Substituted as {0} of Language_Summary_Format when the engine auto-detects.</comment>
+    <value>libovolný jazyk</value>
+  </data>
+  <data name="Language_Summary_TranslationPausedFormat" xml:space="preserve">
+    <comment>{0} is the spoken language. The result is substituted as {1} of Language_Summary_Format.</comment>
+    <value>{0} (překlad pozastaven)</value>
+  </data>
+  <data name="Language_Summary_NoTranslationFormat" xml:space="preserve">
+    <comment>{0} is the spoken language. The result is substituted as {1} of Language_Summary_Format.</comment>
+    <value>{0} (bez překladu)</value>
+  </data>
+  <data name="Language_TranslationPausedNoteFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name — never translated. "Medium" and "Large v1/v2/v3" are model names too.</comment>
+    <value>Překlad je pozastaven – „{0}“ umí jen přepis. Chcete-li pokračovat, zvolte Medium nebo Large v1/v2/v3.</value>
+  </data>
+  <data name="Language_Toast_SourceUnsupportedFormat" xml:space="preserve">
+    <comment>{0} is a language name and leads the sentence; {1} is an engine name, never translated.</comment>
+    <value>{0} nelze použít jako zdrojový jazyk v modulu: {1}. Použije se rozložení klávesnice.</value>
+  </data>
+  <data name="Language_Toast_EngineCannotTranslateFormat" xml:space="preserve">
+    <comment>{0} is an engine name — never translated, and it leads the sentence.</comment>
+    <value>{0} neumí překládat – výstup teď odpovídá vašemu mluvenému jazyku.</value>
+  </data>
+  <data name="Language_Toast_TargetUnsupportedFormat" xml:space="preserve">
+    <comment>{0} is the language that was dropped, {1} the engine name, {2} the language it fell back to. Keep {2} after a dash or colon so it needs no grammatical case.</comment>
+    <value>{0} nelze použít v modulu: {1}. Jazyk překladu: {2}.</value>
+  </data>
+  <data name="Language_Toast_TargetResetFormat" xml:space="preserve">
+    <comment>{0} is an engine name — never translated.</comment>
+    <value>Předchozí cílový jazyk byl resetován – modul {0} ho nepodporuje.</value>
+  </data>
+  <data name="Language_Toast_ModelPausedFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name — never translated.</comment>
+    <value>„{0}“ neumí překládat – překlad je pozastaven, dokud nezvolíte vícejazyčný model.</value>
+  </data>
+  <data name="Settings_CloudProviders_Intro" xml:space="preserve">
+    <comment>ADR-032's positioning line is quoted verbatim at the end — keep "Local by default. Cloud by choice." recognisable, and keep the ADR reference.</comment>
+    <value>Použijte vlastní klíč API. Když je aktivní cloudový modul, vaše zvukové nahrávky se odesílají nastavenému poskytovateli k přepisu – pro tento modul lokálně neběží nic. Fakturace probíhá přímo mezi vámi a poskytovatelem; Parlotype není zprostředkovatelem plateb (ADR-032, „Local by default. Cloud by choice.“).</value>
+  </data>
+  <data name="Settings_Engine_Gemma4SectionNote" xml:space="preserve">
+    <comment>"Gemma 4 E4B", "llama-server", "llama.cpp" and "Vulkan" are identifiers — never translated.</comment>
+    <value>Gemma 4 E4B běží přes lokální proces llama-server (llama.cpp, Vulkan). Pouze anglický přepis. Nejlépe funguje na čisté řeči a s kvalitním mikrofonem. Soubory modelu (~10 GB) se stáhnou při prvním použití.</value>
+  </data>
+  <data name="Settings_Hotkeys_Gesture_HoldFormat" xml:space="preserve">
+    <comment>{0} is a key name such as "Right Ctrl" — key names stay as they are printed on the keyboard, in every language.</comment>
+    <value>Podržet {0}</value>
+  </data>
+  <data name="Settings_Hotkeys_Gesture_DoubleTapFormat" xml:space="preserve">
+    <comment>{0} is a key name such as "Ctrl" — key names stay as they are printed on the keyboard, in every language.</comment>
+    <value>Dvakrát stisknout {0}</value>
+  </data>
+  <data name="Settings_Hotkeys_Mode_PushToTalk" xml:space="preserve">
+    <comment>Badge on a hotkey row: hold the key to talk, release to stop.</comment>
+    <value>Podržení</value>
+  </data>
+  <data name="Settings_Hotkeys_Mode_Toggle" xml:space="preserve">
+    <comment>Badge on a hotkey row: press once to start, again to stop.</comment>
+    <value>Přepínání</value>
+  </data>
+  <data name="Settings_Hotkeys_LineFormat" xml:space="preserve">
+    <comment>{0} is the gesture ("Hold Right Ctrl"), {1} its mode ("Push to talk"). Used in the Help page and the first-run tour.</comment>
+    <value>{0} – {1}</value>
+  </data>
+  <data name="Settings_Hotkeys_Modifier_LeftFormat" xml:space="preserve">
+    <value>Levý {0}</value>
+    <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
+  </data>
+  <data name="Settings_Hotkeys_Modifier_RightFormat" xml:space="preserve">
+    <value>Pravý {0}</value>
+    <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Invalid" xml:space="preserve">
+    <comment>Shown when the recorded gesture cannot be combined with its activation mode at all.</comment>
+    <value>Tuto kombinaci nelze použít jako klávesovou zkratku pro diktování.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AlreadyBoundFormat" xml:space="preserve">
+    <comment>{0} is the gesture ("Hold Right Ctrl"), {1} the mode it is already bound to (Settings_Hotkeys_Conflict_Mode_*). Each language decides how the mode reads inside the sentence, which is why those are separate keys from the badge labels.</comment>
+    <value>{0} je už přiřazeno k {1}.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_PushToTalk" xml:space="preserve">
+    <comment>Push-to-talk as it reads inside Settings_Hotkeys_Conflict_AlreadyBoundFormat (English wants it lowercase mid-sentence; Russian quotes it, so it stays capitalized).</comment>
+    <value>podržení</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_Toggle" xml:space="preserve">
+    <comment>Toggle mode as it reads inside Settings_Hotkeys_Conflict_AlreadyBoundFormat.</comment>
+    <value>přepínání</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ReservedFormat" xml:space="preserve">
+    <comment>{0} is the chord ("Win+L") — never translated; {1} is what the system does with it (Settings_Hotkeys_Reserved_*).</comment>
+    <value>{0} je vyhrazeno: {1}</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ParameterHintsFormat" xml:space="preserve">
+    <comment>{0} is the chord. "Visual Studio" and "VS Code" are product names — do not translate them.</comment>
+    <value>{0} zobrazuje nápovědu k parametrům ve Visual Studiu a VS Code.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AltGrFormat" xml:space="preserve">
+    <comment>{0} is the chord. "AltGr", "Ctrl", "Alt" and "Space" are key names — never translated.</comment>
+    <value>Na evropských rozloženích klávesnice funguje AltGr jako Ctrl+Alt, takže se {0} může spustit i při psaní znaků s diakritikou. Tomu zabráníte kombinací Ctrl+Alt+Space.</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_LockWorkstation" xml:space="preserve">
+    <comment>What Windows or macOS does with a shortcut Parlotype refuses to take over. These are OS feature names — use the wording the user's own operating system uses, not a literal translation of the English.</comment>
+    <value>Uzamknout počítač</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_FileExplorer" xml:space="preserve">
+    <value>Otevřít Průzkumník souborů</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_RunDialog" xml:space="preserve">
+    <value>Otevřít dialogové okno Spustit</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ShowDesktop" xml:space="preserve">
+    <value>Zobrazit nebo skrýt plochu</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSettings" xml:space="preserve">
+    <value>Otevřít Nastavení</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_TaskView" xml:space="preserve">
+    <value>Zobrazení úkolů</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ProjectDisplay" xml:space="preserve">
+    <value>Projekce</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_QuickLinkMenu" xml:space="preserve">
+    <value>Nabídka Rychlé odkazy</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_GameBar" xml:space="preserve">
+    <value>Otevřít Herní panel</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Screenshot" xml:space="preserve">
+    <value>Snímek obrazovky</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SecurityScreen" xml:space="preserve">
+    <value>Obrazovka zabezpečení</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSpeechRecognition" xml:space="preserve">
+    <value>Rozpoznávání řeči Windows</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SwitchInputSource" xml:space="preserve">
+    <value>Přepnutí vstupního zdroje</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacQuit" xml:space="preserve">
+    <value>Ukončit aplikaci (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacCloseWindow" xml:space="preserve">
+    <value>Zavřít okno (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Spotlight" xml:space="preserve">
+    <value>Vyhledávání Spotlight (macOS) / přepínání vstupního zdroje</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_VoiceTyping" xml:space="preserve">
+    <value>Hlasové psaní Windows; skrytí okna na macOS a GNOME</value>
+  </data>
+  <data name="Cloud_ProviderName_OpenAiCompatible" xml:space="preserve">
+    <comment>Names the provider inside error messages. Every Cloud_* format below puts this slot first, followed by a colon or a verb, so the name is always nominative and no language needs to inflect it. "OpenAI" is a product name — do not translate it.</comment>
+    <value>poskytovatel kompatibilní s OpenAI</value>
+  </data>
+  <data name="Cloud_ProviderName_XaiGrok" xml:space="preserve">
+    <comment>Product name — identical in every language.</comment>
+    <value>xAI Grok</value>
+  </data>
+  <data name="Cloud_NotConfigured_MissingKeyFormat" xml:space="preserve">
+    <comment>{0} is the provider name (Cloud_ProviderName_*).</comment>
+    <value>{0}: není nastaven klíč API. Přidejte ho v Nastavení → Hlasový modul.</value>
+  </data>
+  <data name="Cloud_NotConfigured_InvalidBaseUrlFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the reason the URL was refused (Cloud_BaseUrl_*).</comment>
+    <value>{0}: základní URL byla odmítnuta ({1}). Opravte ji v Nastavení → Hlasový modul.</value>
+  </data>
+  <data name="Cloud_BaseUrl_NotAbsolute" xml:space="preserve">
+    <comment>A sentence fragment: it is shown on its own under the base-URL field, and also embedded in Cloud_NotConfigured_InvalidBaseUrlFormat.</comment>
+    <value>není platná absolutní URL</value>
+  </data>
+  <data name="Cloud_BaseUrl_PlainHttp" xml:space="preserve">
+    <comment>See Cloud_BaseUrl_NotAbsolute. "http", "https" and "localhost" are literals.</comment>
+    <value>obyčejné http je povolené jen pro localhost – klíč API i zvuk by tento počítač opustily nešifrovaně</value>
+  </data>
+  <data name="Cloud_BaseUrl_UnsupportedSchemeFormat" xml:space="preserve">
+    <comment>{0} is the URL scheme the user typed ("ftp", "file"). See Cloud_BaseUrl_NotAbsolute.</comment>
+    <value>nepodporované schéma „{0}“ – použijte https</value>
+  </data>
+  <data name="Cloud_Error_KeyRejectedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text (arrives already written, in whatever language the provider chose).</comment>
+    <value>{0}: klíč API byl odmítnut (HTTP {1}). {2} Zkontrolujte klíč v Nastavení → Hlasový modul.</value>
+  </data>
+  <data name="Cloud_Error_QuotaExceededFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: kvóta API byla vyčerpána – zkontrolujte svůj tarif a fakturaci u poskytovatele. ({1})</value>
+  </data>
+  <data name="Cloud_Error_RateLimitedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: byl dosažen limit požadavků – chvíli počkejte a zkuste to znovu. ({1})</value>
+  </data>
+  <data name="Cloud_Error_ProviderUnavailableFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0} teď neodpovídá (HTTP {1}) – zkuste to za chvíli znovu. ({2})</value>
+  </data>
+  <data name="Cloud_Error_OtherFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0}: přepis se nezdařil (HTTP {1}). {2}</value>
+  </data>
+  <data name="Language_Picker_RecentGroup" xml:space="preserve">
+    <comment>Non-interactive group header above the MRU cluster in a language picker popover (Settings -&gt; Language and the Transcribe flyout share this).</comment>
+    <value>Nedávné</value>
+  </data>
+  <data name="Language_Picker_AllLanguagesGroup" xml:space="preserve">
+    <comment>Non-interactive group header above the full catalog in a language picker popover, shown only once the list is long enough to need Recent/All grouping (see LanguageRowFactory.SearchThreshold).</comment>
+    <value>Všechny jazyky</value>
+  </data>
+  <data name="Language_Target_TranslationHint" xml:space="preserve">
+    <comment>Sub-hint under the Settings -&gt; Language page's full-form target field while translation is on. Parallels Language_Source_SpokenLanguageHint.</comment>
+    <value>Cíl překladu</value>
+  </data>
+  <data name="Hotkey_Hint_None" xml:space="preserve">
+    <comment>Record-button tooltip and onboarding recap line, shown when no dictation hotkey is configured. Short — this sits in a tooltip, unlike the longer Onboarding_Hotkeys_None banner.</comment>
+    <value>Není nastavena klávesová zkratka</value>
+  </data>
+  <data name="Hotkey_Hint_TalkFormat" xml:space="preserve">
+    <comment>{0} is the already-localized gesture ("Hold Right Ctrl", "Ctrl+Alt+Space") for a push-to-talk binding — hold it, talk, release it.</comment>
+    <value>{0} pro mluvení</value>
+  </data>
+  <data name="Hotkey_Hint_DictateFormat" xml:space="preserve">
+    <comment>Same as Hotkey_Hint_TalkFormat, for a toggle binding (press once to start, again to stop) — there is no key to hold, so "talk" would be misleading.</comment>
+    <value>{0} pro diktování</value>
+  </data>
+  <data name="Hotkey_Hint_WithCancelFormat" xml:space="preserve">
+    <comment>{0} is the result of Hotkey_Hint_TalkFormat/DictateFormat. "Esc" is a key name — use whatever that key is called on a keyboard in this language, usually "Esc".</comment>
+    <value>{0} · Esc pro zrušení</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualFolderPlaceholder" xml:space="preserve">
+    <value>Není vybraná složka – vyberte složku obsahující llama-server.exe</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualFolderRequiredError" xml:space="preserve">
+    <value>Než přepnete na ruční instalaci, vyberte složku obsahující llama-server.exe a klikněte na Uložit.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningHeading" xml:space="preserve">
+    <value>⚠ Tato složka se při odinstalaci Parlotype smaže</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningBody" xml:space="preserve">
+    <value>Odinstalace Parlotype – nebo opětovné spuštění jeho instalátoru – smaže jeho instalační složku i vše v ní, včetně tohoto sestavení llama-server. Přesuňte sestavení jinam a nastavte zde nové umístění.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningPathLabel" xml:space="preserve">
+    <value>Instalační složka:</value>
+    <comment>Label before the Parlotype install folder path shown in the pack-folder warning. Distinct from Settings_LlamaCpp_PathLabel, which labels a llama-server or model path.</comment>
+  </data>
+  <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
+    <value>Vybrat složku llama-server</value>
+    <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+</root>

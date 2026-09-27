@@ -1,0 +1,1330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Onboarding_WindowTitle" xml:space="preserve">
+    <value>Тур на Parlotype</value>
+  </data>
+  <data name="Onboarding_Welcome_Title" xml:space="preserve">
+    <value>Добре дошли в Parlotype</value>
+  </data>
+  <data name="Onboarding_Welcome_Body" xml:space="preserve">
+    <value>Parlotype превръща речта в текст навсякъде на компютъра ви: диктувайте в произволно приложение и разпознатият текст се написва точно където е курсорът ви. По подразбиране разпознаването работи изцяло на този компютър — звукът ви никога не напуска устройството, освен ако съзнателно не превключите на облачен двигател.</value>
+  </data>
+  <data name="Onboarding_Recording_Title" xml:space="preserve">
+    <value>Започнете да диктувате</value>
+  </data>
+  <data name="Onboarding_Recording_Body" xml:space="preserve">
+    <value>Натиснете една от клавишните комбинации за диктовка или щракнете върху осветения бутон за запис на джаджата. Когато приключите да говорите, разпознатият текст се написва в приложението, което сте използвали последно. Вашите клавишни комбинации:</value>
+  </data>
+  <data name="Onboarding_Recording_EscLine" xml:space="preserve">
+    <value>Esc — отменя текущия запис, без да напечата каквото и да е</value>
+  </data>
+  <data name="Onboarding_Hotkeys_None" xml:space="preserve">
+    <value>Няма зададена клавишна комбинация за диктовка — използвайте бутона за запис на джаджата или добавете такава в Настройки → Клавишни комбинации.</value>
+  </data>
+  <data name="Onboarding_Widget_Title" xml:space="preserve">
+    <value>Джаджата за запис</value>
+  </data>
+  <data name="Onboarding_Widget_Body" xml:space="preserve">
+    <value>Този малък, винаги видим прозорец е вашето управление за диктовка. Големият бутон стартира и спира записа; задръжте върху картата, за да видите текущото състояние. Плъзнете лентата за захващане отгоре, за да я преместите където пожелаете, а бутонът ✕ я скрива в трея. Двигателите с избор на език показват лента с езици отдолу.</value>
+  </data>
+  <data name="Onboarding_Engine_Title" xml:space="preserve">
+    <value>Изберете речеви двигател</value>
+  </data>
+  <data name="Onboarding_Engine_Body" xml:space="preserve">
+    <value>Parlotype предлага няколко двигателя за разпознаване — превключвайте между тях в осветения списък. Parakeet v3 е двигателят по подразбиране: бърз, изцяло на устройството, и разпознава автоматично 25 европейски езика. Всеки двигател добавя собствени страници в навигацията вляво.</value>
+  </data>
+  <data name="Onboarding_Model_Title" xml:space="preserve">
+    <value>Изберете модел</value>
+  </data>
+  <data name="Onboarding_Model_Body" xml:space="preserve">
+    <value>Всеки локален двигател предлага модели с различен размер — по-големите модели са по-точни, но по-бавни и заемат повече място на диска. Файловете на моделите се изтеглят автоматично при първата им употреба; вече изтеглените модели са отбелязани в списъка.</value>
+  </data>
+  <data name="Onboarding_Cloud_Title" xml:space="preserve">
+    <value>Облачните двигатели са по избор</value>
+  </data>
+  <data name="Onboarding_Cloud_Body" xml:space="preserve">
+    <value>Двата облачни двигателя са изключени по подразбиране и изискват собствен API ключ. Докато някой от тях е активен, звукът ви се изпраща на съответния доставчик за разпознаване, а джаджата показва постоянен етикет „Облак“. Всичко останало в Parlotype остава изцяло локално.</value>
+  </data>
+  <data name="Onboarding_Tray_Title" xml:space="preserve">
+    <value>Parlotype живее в трея</value>
+  </data>
+  <data name="Onboarding_Tray_Body" xml:space="preserve">
+    <value>Скриването или затварянето на джаджата не спира Parlotype — приложението продължава да следи за вашите клавишни комбинации от системния трей. Щракнете върху иконата в трея, за да върнете джаджата. За да излезете напълно, щракнете с десния бутон върху иконата в трея и изберете Изход.
+
+За да работи клавишната ви комбинация от момента, в който влезете в системата, Parlotype стартира заедно с Windows и изчаква в трея — не се отваря прозорец. Изключете това по всяко време от Настройки → Приложение → Стартиране.</value>
+  </data>
+  <data name="Onboarding_Recap_Title" xml:space="preserve">
+    <value>Готови сте</value>
+  </data>
+  <data name="Onboarding_Recap_Body" xml:space="preserve">
+    <value>Диктувайте навсякъде с клавишните комбинации или бутона на джаджата. Двигателите, моделите, клавишните комбинации и езиците са в Настройки — а този тур, заедно със справочник за клавишните комбинации, е винаги достъпен от Настройки → Помощ.</value>
+  </data>
+  <data name="Onboarding_Nav_Back" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+  <data name="Onboarding_Nav_Next" xml:space="preserve">
+    <value>Напред</value>
+  </data>
+  <data name="Onboarding_Nav_Finish" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="Onboarding_Nav_Skip" xml:space="preserve">
+    <value>Пропусни тура</value>
+  </data>
+  <data name="Onboarding_Progress_Format" xml:space="preserve">
+    <value>Стъпка {0} от {1}</value>
+  </data>
+  <data name="Help_Title" xml:space="preserve">
+    <value>Помощ</value>
+  </data>
+  <data name="Help_Intro" xml:space="preserve">
+    <value>Нов сте в Parlotype? Насоченият тур преминава през записа, джаджата, двигателите и моделите — отваряйки всеки екран и осветявайки контролите по пътя.</value>
+  </data>
+  <data name="Help_OpenTourButton" xml:space="preserve">
+    <value>Отвори тура</value>
+  </data>
+  <data name="Help_HotkeysHeading" xml:space="preserve">
+    <value>Текущи клавишни комбинации за диктовка</value>
+  </data>
+  <data name="Help_NoHotkeys" xml:space="preserve">
+    <value>Няма зададени клавишни комбинации за диктовка. Добавете такава в раздел Клавишни комбинации.</value>
+  </data>
+  <data name="Help_EscCancelLine" xml:space="preserve">
+    <value>Esc — отменя текущия запис</value>
+  </data>
+  <data name="Settings_Theme_Title" xml:space="preserve">
+    <value>Тема</value>
+  </data>
+  <data name="Settings_Theme_Description" xml:space="preserve">
+    <value>Изберете между системен, светъл или тъмен изглед.</value>
+  </data>
+  <data name="Settings_Theme_Default" xml:space="preserve">
+    <value>По подразбиране (системна)</value>
+  </data>
+  <data name="Settings_Theme_Light" xml:space="preserve">
+    <value>Светла</value>
+  </data>
+  <data name="Settings_Theme_Dark" xml:space="preserve">
+    <value>Тъмна</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_Title" xml:space="preserve">
+    <value>Език на интерфейса</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_Description" xml:space="preserve">
+    <value>Езикът, на който са изписани собствените прозорци на Parlotype. Не влияе на езиците, на които можете да диктувате — те се задават в Език.</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_System" xml:space="preserve">
+    <value>По подразбиране на системата</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat" xml:space="preserve">
+    <value>Следва Windows — в момента {0}</value>
+    <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
+    <value>Следва Windows — все още не е преведен, затова се използва английски</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
+    <value>Средно</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Long" xml:space="preserve">
+    <value>Дълго</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_Extended" xml:space="preserve">
+    <value>Удължено</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Wait_VeryLong" xml:space="preserve">
+    <value>Много дълго</value>
+  </data>
+  <data name="Settings_SilenceTimeout_WaitFormat" xml:space="preserve">
+    <value>{0} ({1}s)</value>
+    <comment>{0} is the wait-time name, {1} the duration in seconds. Keep the "s" unit next to {1}.</comment>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Отказ</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Затвори</value>
+  </data>
+  <data name="Common_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common_OpenSettings" xml:space="preserve">
+    <value>Отвори настройките</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Отвори</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Изход</value>
+  </data>
+  <data name="Transcribe_WindowTitle" xml:space="preserve">
+    <value>Parlotype — Транскрибиране</value>
+  </data>
+  <data name="Transcribe_CloudBadge" xml:space="preserve">
+    <comment>Short badge on the widget while a cloud engine is active. Keep it very short.</comment>
+    <value>Облак</value>
+  </data>
+  <data name="Transcribe_HideWindowTooltip" xml:space="preserve">
+    <value>Скрий прозореца</value>
+  </data>
+  <data name="Transcribe_SettingsTooltip" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="Transcribe_YouSpeakLabel" xml:space="preserve">
+    <value>Говорите</value>
+  </data>
+  <data name="Transcribe_OpenSettingsLink" xml:space="preserve">
+    <comment>Link on the widget's language strip. Keep the trailing arrow.</comment>
+    <value>Настройки →</value>
+  </data>
+  <data name="Transcribe_Status_Ready" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="Transcribe_Status_LoadingModel" xml:space="preserve">
+    <value>Зареждане на модела...</value>
+  </data>
+  <data name="Transcribe_Status_Recording" xml:space="preserve">
+    <value>Записване...</value>
+  </data>
+  <data name="Transcribe_Status_Cancelled" xml:space="preserve">
+    <value>Отменено</value>
+  </data>
+  <data name="Transcribe_Status_CloudNotConfigured" xml:space="preserve">
+    <value>Облачният доставчик не е настроен</value>
+  </data>
+  <data name="Transcribe_Status_RuntimeRestartRequiredFormat" xml:space="preserve">
+    <comment>{0} is a runtime name such as "Vulkan" or "Cpu" — never translated.</comment>
+    <value>Рестартирайте Parlotype, за да използвате средата {0}</value>
+  </data>
+  <data name="Transcribe_Status_RuntimeUnavailableFormat" xml:space="preserve">
+    <comment>{0} is a runtime name such as "Vulkan" or "Cpu" — never translated.</comment>
+    <value>Средата {0} не е налична — променете от Настройки</value>
+  </data>
+  <data name="Transcribe_Status_CloudKeyRejected" xml:space="preserve">
+    <value>Облачният API ключ е отхвърлен — проверете в Настройки</value>
+  </data>
+  <data name="Transcribe_Status_CloudQuotaExceeded" xml:space="preserve">
+    <value>Облачната квота е надвишена — проверете плана и таксуването</value>
+  </data>
+  <data name="Transcribe_Status_CloudRateLimited" xml:space="preserve">
+    <value>Достигнат е облачен лимит на заявките — опитайте отново скоро</value>
+  </data>
+  <data name="Transcribe_Status_CloudProviderUnavailable" xml:space="preserve">
+    <value>Облачният доставчик не е достъпен — опитайте отново скоро</value>
+  </data>
+  <data name="Transcribe_Status_CloudFailed" xml:space="preserve">
+    <value>Облачното транскрибиране се провали</value>
+  </data>
+  <data name="Transcribe_CloudProvider_OpenAiCompatible" xml:space="preserve">
+    <comment>Badge naming the active cloud provider. "OpenAI" is a product name — do not translate it.</comment>
+    <value>Облак: OpenAI-съвместим</value>
+  </data>
+  <data name="Transcribe_CloudProvider_XaiGrok" xml:space="preserve">
+    <comment>Badge naming the active cloud provider. "xAI Grok" is a product name — do not translate it.</comment>
+    <value>Облак: xAI Grok</value>
+  </data>
+  <data name="Transcribe_TargetPicker_Header" xml:space="preserve">
+    <value>Преведи на</value>
+  </data>
+  <data name="Transcribe_TargetPicker_Off" xml:space="preserve">
+    <value>Изключено — без превод</value>
+  </data>
+  <data name="Transcribe_Source_Keyboard" xml:space="preserve">
+    <comment>Source-language chip when the language follows the OS keyboard layout but it could not be resolved to a name.</comment>
+    <value>Клавиатура</value>
+  </data>
+  <data name="Transcribe_Source_Auto" xml:space="preserve">
+    <comment>Source-language chip when the engine detects the language itself. Keep it short — it sits in a narrow chip.</comment>
+    <value>Авто</value>
+  </data>
+  <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
+    <value>Облачният доставчик не е настроен</value>
+  </data>
+  <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
+    <value>Облачното транскрибиране се провали</value>
+  </data>
+  <data name="ModelDownload_Title" xml:space="preserve">
+    <value>Изтегляне на модел</value>
+  </data>
+  <data name="ModelDownload_DownloadButton" xml:space="preserve">
+    <value>Изтегли</value>
+  </data>
+  <data name="ModelDownload_ConfirmFormat" xml:space="preserve">
+    <comment>{0} is the model name, {1} its download size (e.g. "1.5 GB").</comment>
+    <value>Да се изтегли ли „{0}“ ({1}) от интернет?</value>
+  </data>
+  <data name="ModelDownload_ConfirmWithProjectorFormat" xml:space="preserve">
+    <comment>{0} is the model name, {1} its download size. Used for Gemma 4 models that bundle a vision projector.</comment>
+    <value>Да се изтегли ли „{0}“ ({1}, включва визуален проектор) от интернет?</value>
+  </data>
+  <data name="Settings_WindowTitle" xml:space="preserve">
+    <value>Parlotype — Настройки</value>
+  </data>
+  <data name="Settings_NavHeading" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="Settings_Category_Audio" xml:space="preserve">
+    <value>Аудио</value>
+  </data>
+  <data name="Settings_Category_SpeechEngine" xml:space="preserve">
+    <value>Речеви двигател</value>
+  </data>
+  <data name="Settings_Category_Input" xml:space="preserve">
+    <value>Въвеждане</value>
+  </data>
+  <data name="Settings_Category_Appearance" xml:space="preserve">
+    <value>Външен вид</value>
+  </data>
+  <data name="Settings_Category_Application" xml:space="preserve">
+    <value>Приложение</value>
+  </data>
+  <data name="Settings_Microphone_Title" xml:space="preserve">
+    <value>Микрофон</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Title" xml:space="preserve">
+    <value>Време на изчакване</value>
+  </data>
+  <data name="Settings_Engine_Title" xml:space="preserve">
+    <value>Двигател</value>
+  </data>
+  <data name="Settings_Language_Title" xml:space="preserve">
+    <value>Език</value>
+  </data>
+  <data name="Settings_WhisperModel_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Whisper модел</value>
+  </data>
+  <data name="Settings_WhisperRuntime_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Whisper среда</value>
+  </data>
+  <data name="Settings_WhisperOutput_Title" xml:space="preserve">
+    <comment>"Whisper" is the engine's product name — never translated.</comment>
+    <value>Whisper изход</value>
+  </data>
+  <data name="Settings_Gemma4Model_Title" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated.</comment>
+    <value>Gemma 4 модел</value>
+  </data>
+  <data name="Settings_ParakeetModel_Title" xml:space="preserve">
+    <comment>"Parakeet" is a model family name — never translated.</comment>
+    <value>Parakeet модел</value>
+  </data>
+  <data name="Settings_CloudProviders_Title" xml:space="preserve">
+    <value>Облачни доставчици</value>
+  </data>
+  <data name="Settings_Prompts_Title" xml:space="preserve">
+    <value>Промптове</value>
+  </data>
+  <data name="Settings_LlamaCppServer_Title" xml:space="preserve">
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+    <value>Сървър llama.cpp</value>
+  </data>
+  <data name="Settings_Hotkeys_Title" xml:space="preserve">
+    <value>Клавишни комбинации</value>
+  </data>
+  <data name="Settings_Startup_Title" xml:space="preserve">
+    <value>Стартиране</value>
+  </data>
+  <data name="Settings_Updates_Title" xml:space="preserve">
+    <value>Актуализации</value>
+  </data>
+  <data name="Settings_Data_Title" xml:space="preserve">
+    <value>Данни</value>
+  </data>
+  <data name="Settings_Microphone_Description" xml:space="preserve">
+    <value>Изберете входното устройство, използвано за разпознаване.</value>
+  </data>
+  <data name="Settings_Microphone_SystemDefault" xml:space="preserve">
+    <value>По подразбиране на системата</value>
+  </data>
+  <data name="Settings_SilenceTimeout_Description" xml:space="preserve">
+    <value>Колко дълго да се изчаква след края на речта, преди да се транскрибира.</value>
+  </data>
+  <data name="Settings_SilenceTimeout_HoldNote" xml:space="preserve">
+    <value>Важи, когато превключвате диктовката включено/изключено. При задържане за говорене това не се прилага — самото задържане на клавиша вече показва кога сте приключили, затова целият запис се транскрибира наведнъж.</value>
+  </data>
+  <data name="Settings_Startup_Description" xml:space="preserve">
+    <value>Parlotype следи за клавишната ви комбинация за диктовка от системния трей, затова трябва да работи, преди да можете да диктувате.</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn" xml:space="preserve">
+    <value>Стартирай Parlotype при влизане в Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOff" xml:space="preserve">
+    <value>Не стартирай Parlotype автоматично</value>
+  </data>
+  <data name="Settings_Startup_BlockedHeading" xml:space="preserve">
+    <value>Изключено от Windows</value>
+  </data>
+  <data name="Settings_Startup_BlockedBody" xml:space="preserve">
+    <comment>"Startup apps" and "Enable" name real Windows UI — use the wording Windows itself uses in this language.</comment>
+    <value>Отворете Диспечера на задачите, отидете в раздела Приложения при стартиране, изберете Parlotype и изберете Активиране. Windows пази това решение отделно от тази настройка и само Диспечерът на задачите може да го отмени.</value>
+  </data>
+  <data name="Settings_Startup_WhatChangesHeading" xml:space="preserve">
+    <value>Какво се променя</value>
+  </data>
+  <data name="Settings_Startup_WhatChangesBody" xml:space="preserve">
+    <comment>"HKCU Run" is a registry path — never translated.</comment>
+    <value>Само един запис под собствения ви потребителски акаунт (HKCU Run), сочещ към Parlotype. Без услуга, без планирана задача, без администраторски права, нищо общосистемно. Можете да го видите и премахнете сами от Диспечера на задачите → Приложения при стартиране.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
+    <comment>"Setup.exe" is a file name — never translated.</comment>
+    <value>Тази версия не може да се стартира сама при влизане — не е инсталирана от Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
+    <value>Windows е изключил Parlotype от Диспечера на задачите → Приложения при стартиране. Активирайте го отново там, за да заработи тази настройка.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled" xml:space="preserve">
+    <value>Parlotype стартира заедно с Windows и изчаква в трея — не се отваря прозорец.</value>
+  </data>
+  <data name="Settings_Startup_State_Disabled" xml:space="preserve">
+    <value>Parlotype се стартира само когато го отворите сами.</value>
+  </data>
+  <data name="Settings_Updates_Description" xml:space="preserve">
+    <value>Parlotype може да проверява GitHub за нови версии, да ги изтегля във фонов режим и да ги инсталира, когато излезете от приложението.</value>
+  </data>
+  <data name="Settings_Updates_ToggleOn" xml:space="preserve">
+    <value>Проверявай автоматично за актуализации</value>
+  </data>
+  <data name="Settings_Updates_ToggleOff" xml:space="preserve">
+    <value>Автоматичната проверка за актуализации е изключена</value>
+  </data>
+  <data name="Settings_Updates_CadenceNote" xml:space="preserve">
+    <value>Когато е включена, Parlotype проверява малко след стартиране и на всеки 6 часа след това.</value>
+  </data>
+  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
+    <value>Какво се изпраща</value>
+  </data>
+  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
+    <comment>"api.github.com" is a host name — never translated.</comment>
+    <value>Анонимна заявка до api.github.com за публичния списък с версии на Parlotype и изтегляне на самия файл с версията. Без акаунт, без идентификатор на устройството, без данни за употреба. Това е единствената мрежова заявка, която Parlotype прави, докато всичките ви речеви двигатели са локални.</value>
+  </data>
+  <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
+    <value>Инсталирана версия:</value>
+  </data>
+  <data name="Settings_Updates_LastCheckedLabel" xml:space="preserve">
+    <value>Последна проверка:</value>
+  </data>
+  <data name="Settings_Updates_CheckNowButton" xml:space="preserve">
+    <value>Провери сега</value>
+  </data>
+  <data name="Settings_Updates_InstallAndRestartButton" xml:space="preserve">
+    <value>Инсталирай и рестартирай сега</value>
+  </data>
+  <data name="Settings_Updates_Status_NotChecked" xml:space="preserve">
+    <value>Все още не е проверявано.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
+    <comment>"Setup.exe" is a file name — never translated.</comment>
+    <value>Тази версия не може да се актуализира сама — не е инсталирана от Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_Checking" xml:space="preserve">
+    <value>Проверка за актуализации…</value>
+  </data>
+  <data name="Settings_Updates_Status_UpToDate" xml:space="preserve">
+    <value>Parlotype е актуален.</value>
+  </data>
+  <data name="Settings_Updates_Status_AvailableFormat" xml:space="preserve">
+    <comment>{0} is a version number such as "0.4.4".</comment>
+    <value>Налична е версия {0}.</value>
+  </data>
+  <data name="Settings_Updates_Status_DownloadingFormat" xml:space="preserve">
+    <comment>{0} is a version number such as "0.4.4".</comment>
+    <value>Изтегляне на версия {0}…</value>
+  </data>
+  <data name="Settings_Updates_Status_ReadyFormat" xml:space="preserve">
+    <comment>{0} is a version number. The update is staged, not installed — it applies as Parlotype closes.</comment>
+    <value>Версия {0} е изтеглена. Ще се инсталира, когато излезете от Parlotype.</value>
+  </data>
+  <data name="Settings_Updates_Status_Failed" xml:space="preserve">
+    <value>Проверката за актуализации се провали.</value>
+  </data>
+  <data name="Settings_Updates_Never" xml:space="preserve">
+    <comment>Shown where a date would go, when no update check has ever run.</comment>
+    <value>Никога</value>
+  </data>
+  <data name="Settings_Updates_DevelopmentBuild" xml:space="preserve">
+    <comment>Shown where a version number would go, for a build that was not installed.</comment>
+    <value>версия за разработка</value>
+  </data>
+  <data name="Settings_Data_Description" xml:space="preserve">
+    <value>Къде Parlotype пази моделите, настройките и API ключовете ви.</value>
+  </data>
+  <data name="Settings_Data_LocationLabel" xml:space="preserve">
+    <value>Местоположение</value>
+  </data>
+  <data name="Settings_Data_CopyPathButton" xml:space="preserve">
+    <value>Копирай пътя</value>
+  </data>
+  <data name="Settings_Data_OpenFolderButton" xml:space="preserve">
+    <value>Отвори папката</value>
+  </data>
+  <data name="Settings_Data_DownloadedModelsLabel" xml:space="preserve">
+    <value>Изтеглени модели:</value>
+  </data>
+  <data name="Settings_Data_DeleteModelsButton" xml:space="preserve">
+    <value>Изтрий изтеглените модели…</value>
+  </data>
+  <data name="Settings_Data_UninstallToggleOn" xml:space="preserve">
+    <value>Изтрий всичко при деинсталиране на Parlotype</value>
+  </data>
+  <data name="Settings_Data_UninstallToggleOff" xml:space="preserve">
+    <value>Запази данните ми при деинсталиране на Parlotype</value>
+  </data>
+  <data name="Settings_Data_UninstallNote" xml:space="preserve">
+    <value>Изключено по подразбиране, за да не се налага повторно изтегляне на няколко гигабайта при преинсталиране на Parlotype. Когато е включено, деинсталирането премахва и изтеглените модели, настройките и запазените API ключове.</value>
+  </data>
+  <data name="Settings_Data_NothingDownloaded" xml:space="preserve">
+    <value>Нищо не е изтеглено</value>
+  </data>
+  <data name="Settings_Data_SaveFailed_Keep" xml:space="preserve">
+    <value>Това предпочитание не можа да се запази. Деинсталирането пак ще запази данните ви.</value>
+  </data>
+  <data name="Settings_Data_SaveFailed_Delete" xml:space="preserve">
+    <value>Това предпочитание не можа да се запази — деинсталирането пак ще изтрие изтеглените модели, настройките и API ключовете ви. Моля, опитайте отново.</value>
+  </data>
+  <data name="Settings_Data_PathCopied" xml:space="preserve">
+    <value>Пътят е копиран в клипборда.</value>
+  </data>
+  <data name="Settings_Data_PathCopyFailed" xml:space="preserve">
+    <value>Пътят не можа да се копира.</value>
+  </data>
+  <data name="Settings_Data_OpenFolderFailed" xml:space="preserve">
+    <value>Папката не можа да се отвори.</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_Title" xml:space="preserve">
+    <value>Да се изтрият ли изтеглените модели?</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_BodyFormat" xml:space="preserve">
+    <comment>{0} is a size such as "1.5 GB", {1} the models folder path. Keep the blank line between the two paragraphs.</comment>
+    <value>Това премахва {0} от {1}.
+
+Настройките и API ключовете ви се запазват. Моделите се изтеглят отново автоматично при следващата ви диктовка.</value>
+  </data>
+  <data name="Settings_Data_DeleteDialog_Confirm" xml:space="preserve">
+    <value>Изтрий моделите</value>
+  </data>
+  <data name="Settings_Data_ModelsDeleted" xml:space="preserve">
+    <value>Изтеглените модели са изтрити.</value>
+  </data>
+  <data name="Settings_Data_DeleteFailed" xml:space="preserve">
+    <value>Не можаха да се изтрият всички файлове — нещо все още ги използва. Рестартирайте Parlotype и опитайте отново.</value>
+  </data>
+  <data name="Settings_Runtime_Description" xml:space="preserve">
+    <comment>"Whisper.net" is a library name — never translated.</comment>
+    <value>Изберете коя среда на Whisper.net изпълнява речевия модел. Промените влизат в сила след рестартиране.</value>
+  </data>
+  <data name="Settings_Runtime_RestartHeading" xml:space="preserve">
+    <value>Необходим е рестарт</value>
+  </data>
+  <data name="Settings_Runtime_RestartNoteFormat" xml:space="preserve">
+    <comment>{0} is the runtime already loaded, {1} the one just chosen — both names like "Vulkan" or "CPU", never translated.</comment>
+    <value>Тази сесия вече работи със средата {0}. Whisper избира средата си веднъж на стартиране, затова рестартирайте Parlotype, за да преминете към {1} — дотогава записът няма да започне.</value>
+  </data>
+  <data name="Settings_Runtime_VulkanMissing" xml:space="preserve">
+    <comment>"vulkan-1.dll" is a file name — never translated.</comment>
+    <value>Не е открит зареждащ модул на Vulkan (vulkan-1.dll) на тази система.</value>
+  </data>
+  <data name="Settings_Runtime_DownloadVulkanSdkButton" xml:space="preserve">
+    <comment>Keep the trailing arrow — it marks a link that leaves the app.</comment>
+    <value>Изтегли Vulkan SDK →</value>
+  </data>
+  <data name="Settings_Runtime_Auto_Name" xml:space="preserve">
+    <value>Авто</value>
+  </data>
+  <data name="Settings_Runtime_Auto_Description" xml:space="preserve">
+    <value>Опитва Vulkan, а при неуспех преминава към CPU. Препоръчително.</value>
+  </data>
+  <data name="Settings_Runtime_Vulkan_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>Vulkan</value>
+  </data>
+  <data name="Settings_Runtime_Vulkan_Description" xml:space="preserve">
+    <value>Всяка GPU чрез Vulkan (AMD, Intel, NVIDIA). Изисква драйвери за GPU с поддръжка на Vulkan.</value>
+  </data>
+  <data name="Settings_Runtime_Cpu_Name" xml:space="preserve">
+    <comment>Kept as "CPU" in every language — it is the term users see in system tools.</comment>
+    <value>CPU</value>
+  </data>
+  <data name="Settings_Runtime_Cpu_Description" xml:space="preserve">
+    <value>Принудително изпълнение само на CPU. Работи винаги, но по-бавно при по-големи модели.</value>
+  </data>
+  <data name="Settings_Runtime_VulkanUnavailableReason" xml:space="preserve">
+    <comment>"vulkan-1.dll" is a file name — never translated.</comment>
+    <value>Не е открит зареждащ модул на Vulkan (vulkan-1.dll). Инсталирайте драйвери за GPU или Vulkan SDK.</value>
+  </data>
+  <data name="Settings_Hotkeys_Description" xml:space="preserve">
+    <comment>"Esc" is a key name — use whatever that key is called on a keyboard in this language, usually "Esc".</comment>
+    <value>Задръжте клавиш, за да говорите, или натиснете двукратно за диктовка без ръце. Натиснете Esc по време на запис, за да го отхвърлите.</value>
+  </data>
+  <data name="Settings_Hotkeys_ModeToggleTooltip" xml:space="preserve">
+    <value>Смяна между задържане и превключване</value>
+  </data>
+  <data name="Settings_Hotkeys_RemoveTooltip" xml:space="preserve">
+    <value>Премахни тази клавишна комбинация</value>
+  </data>
+  <data name="Settings_Hotkeys_None" xml:space="preserve">
+    <value>Няма зададени клавишни комбинации — диктовката може да се стартира само от джаджата.</value>
+  </data>
+  <data name="Settings_Hotkeys_AddButton" xml:space="preserve">
+    <value>Добави клавишна комбинация</value>
+  </data>
+  <data name="Settings_Hotkeys_Recorder_Idle" xml:space="preserve">
+    <value>Запиши комбинация…</value>
+  </data>
+  <data name="Settings_Hotkeys_Recorder_Listening" xml:space="preserve">
+    <value>Натиснете комбинация от клавиши…</value>
+  </data>
+  <data name="Settings_Model_Installed" xml:space="preserve">
+    <comment>Badge on a model that is already on disk. Shared by the Gemma 4 and Parakeet lists.</comment>
+    <value>Инсталиран</value>
+  </data>
+  <data name="Settings_Model_DownloadButton" xml:space="preserve">
+    <value>Изтегли</value>
+  </data>
+  <data name="Settings_Model_DeleteButton" xml:space="preserve">
+    <value>Изтрий</value>
+  </data>
+  <data name="Settings_Engine_Heading" xml:space="preserve">
+    <comment>Page heading. The shorter navigation label is Settings_Engine_Title.</comment>
+    <value>Речеви двигател</value>
+  </data>
+  <data name="Settings_Engine_Description" xml:space="preserve">
+    <value>Изберете кой двигател транскрибира речта ви. Промените влизат в сила при следващия запис.</value>
+  </data>
+  <data name="Settings_Engine_Gemma4SectionLabel" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated. Only "(Experimental)" is prose.</comment>
+    <value>Gemma 4 (Експериментален)</value>
+  </data>
+  <data name="Settings_Engine_PreloadToggleOn" xml:space="preserve">
+    <value>Зареждай модела при стартиране</value>
+  </data>
+  <data name="Settings_Engine_PreloadToggleOff" xml:space="preserve">
+    <value>Зареждай модела при първа употреба</value>
+  </data>
+  <data name="Settings_Engine_PreloadNote" xml:space="preserve">
+    <value>Когато е включено, речевият модел се зарежда във фонов режим при стартиране на приложението, за да започне мигновено първият ви запис. Използва допълнителна памет в покой. Влиза в сила при следващото стартиране.</value>
+  </data>
+  <data name="Settings_Engine_Parakeet_Name" xml:space="preserve">
+    <comment>"Parakeet v3" is a model name — never translated. Only "(Recommended)" is prose.</comment>
+    <value>Parakeet v3 (Препоръчителен)</value>
+  </data>
+  <data name="Settings_Engine_Parakeet_Description" xml:space="preserve">
+    <comment>"NVIDIA Parakeet" and "ONNX" are product names — never translated.</comment>
+    <value>NVIDIA Parakeet чрез ONNX. Изтегляне ~670 MB. 25 европейски езика, разпознавани автоматично. Най-бързият двигател — работи на всеки CPU, без нужда от GPU. Без превод.</value>
+  </data>
+  <data name="Settings_Engine_Whisper_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>Whisper</value>
+  </data>
+  <data name="Settings_Engine_Whisper_Description" xml:space="preserve">
+    <comment>"Whisper.net" is a library name — never translated.</comment>
+    <value>Локално разпознаване на реч чрез Whisper.net. Добре тестван, ~99 езика, избор на изходен език и превод на английски.</value>
+  </data>
+  <data name="Settings_Engine_Gemma4_Name" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated. Only "(Experimental)" is prose.</comment>
+    <value>Gemma 4 (Експериментален)</value>
+  </data>
+  <data name="Settings_Engine_Gemma4_Description" xml:space="preserve">
+    <comment>"Google Gemma 4 E4B" and "llama.cpp" are product names — never translated.</comment>
+    <value>Google Gemma 4 E4B чрез llama.cpp. Изисква изтегляне на ~10 GB. Само на английски. Най-добър при чиста реч.</value>
+  </data>
+  <data name="Settings_Engine_OpenAiCompatible_Name" xml:space="preserve">
+    <comment>"OpenAI" is a product name — never translated.</comment>
+    <value>OpenAI-съвместим (Облак)</value>
+  </data>
+  <data name="Settings_Engine_OpenAiCompatible_Description" xml:space="preserve">
+    <comment>"Cloud providers" must match the wording of Settings_CloudProviders_Title — it names that page.</comment>
+    <value>Облачно транскрибиране чрез собствен API ключ за OpenAI, Groq или съвместима услуга. Звукът се изпраща на зададения доставчик — нищо не работи локално. Бързо дори на слаб хардуер. По избор; настройте ключа си в Облачни доставчици по-долу.</value>
+  </data>
+  <data name="Settings_Engine_XaiGrok_Name" xml:space="preserve">
+    <comment>"xAI Grok" is a product name — never translated.</comment>
+    <value>xAI Grok (Облак)</value>
+  </data>
+  <data name="Settings_Engine_XaiGrok_Description" xml:space="preserve">
+    <comment>"Cloud providers" must match the wording of Settings_CloudProviders_Title — it names that page.</comment>
+    <value>xAI Grok Speech-to-Text чрез собствен API ключ за xAI. Звукът се изпраща към xAI — нищо не работи локално. Бързо дори на слаб хардуер. По избор; настройте ключа си в Облачни доставчици по-долу.</value>
+  </data>
+  <data name="Settings_WhisperModel_Heading" xml:space="preserve">
+    <comment>Page heading. The navigation label is Settings_WhisperModel_Title.</comment>
+    <value>Whisper модел</value>
+  </data>
+  <data name="Settings_WhisperModel_Description" xml:space="preserve">
+    <value>По-големите модели са по-точни, но използват повече дисково пространство и CPU/GPU.</value>
+  </data>
+  <data name="Settings_WhisperModel_NoTranslationTooltip" xml:space="preserve">
+    <value>Само транскрибиране — преводът на английски изисква многоезичен модел</value>
+  </data>
+  <data name="Settings_WhisperModel_NoTranslationBadge" xml:space="preserve">
+    <comment>Small badge beside a model that cannot translate. Keep it short.</comment>
+    <value>без превод</value>
+  </data>
+  <data name="Settings_WhisperModel_NotDownloaded" xml:space="preserve">
+    <comment>Keep the parentheses — it sits beside the model name.</comment>
+    <value>(не е изтеглен)</value>
+  </data>
+  <data name="Settings_WhisperOutput_Description" xml:space="preserve">
+    <comment>"Whisper" is a product name — never translated.</comment>
+    <value>Настройки за оформяне на изхода, специфични за двигателя Whisper.</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationOn" xml:space="preserve">
+    <value>Пунктуацията е включена в изхода</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationOff" xml:space="preserve">
+    <value>Пунктуацията е премахната от изхода</value>
+  </data>
+  <data name="Settings_WhisperOutput_PunctuationNote" xml:space="preserve">
+    <value>Когато е включено, транскрибирането включва запетаи, точки и друга пунктуация.</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityOn" xml:space="preserve">
+    <comment>The four asterisks are the literal masking Whisper applies — keep them.</comment>
+    <value>Псувните се маскират с ****</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityOff" xml:space="preserve">
+    <value>Филтърът за псувни е изключен</value>
+  </data>
+  <data name="Settings_WhisperOutput_ProfanityNote" xml:space="preserve">
+    <value>Когато е включено, разпознатите псувни се заменят със звездички.</value>
+  </data>
+  <data name="Settings_Gemma4Model_Description" xml:space="preserve">
+    <comment>"Gemma 4", "llama.cpp", "E4B", "E2B" and "mmproj" are identifiers — never translated.</comment>
+    <value>Изберете вариант на Gemma 4 за двигателя llama.cpp. E4B е по-точен; E2B е по-бърз (по-малко активни параметри). Всяко изтегляне включва визуален проектор (mmproj).</value>
+  </data>
+  <data name="Settings_ParakeetModel_Description" xml:space="preserve">
+    <comment>"NVIDIA Parakeet", "INT8" and "fp32" are identifiers — never translated.</comment>
+    <value>NVIDIA Parakeet работи изцяло на CPU — не е нужна GPU. Транскрибира 25 европейски езика (разпознавани автоматично) с пунктуация и главни букви. INT8 е препоръчителната стойност по подразбиране: малка и бърза. Пълна точност (fp32) е малко по-точна, но 4× по-голяма и по-бавна за декодиране.</value>
+  </data>
+  <data name="ApiKeyBox_ShowHideTooltip" xml:space="preserve">
+    <value>Покажи / скрий ключа</value>
+  </data>
+  <data name="Settings_CloudProviders_OpenAi_Name" xml:space="preserve">
+    <comment>"OpenAI" is a product name — never translated.</comment>
+    <value>OpenAI-съвместим</value>
+  </data>
+  <data name="Settings_CloudProviders_OpenAi_Description" xml:space="preserve">
+    <value>Работи с OpenAI, Groq или всеки друг хост, който поддържа API за транскрибиране на OpenAI.</value>
+  </data>
+  <data name="Settings_CloudProviders_Xai_Name" xml:space="preserve">
+    <comment>A product name — never translated.</comment>
+    <value>xAI Grok</value>
+  </data>
+  <data name="Settings_CloudProviders_Xai_Description" xml:space="preserve">
+    <value>Grok Speech-to-Text API на xAI.</value>
+  </data>
+  <data name="Settings_CloudProviders_BaseUrlLabel" xml:space="preserve">
+    <value>Базов URL адрес</value>
+  </data>
+  <data name="Settings_CloudProviders_ModelLabel" xml:space="preserve">
+    <value>Модел</value>
+  </data>
+  <data name="Settings_CloudProviders_ApiKeyLabel" xml:space="preserve">
+    <value>API ключ</value>
+  </data>
+  <data name="Settings_CloudProviders_KeySavedBadge" xml:space="preserve">
+    <comment>Keep the leading check mark.</comment>
+    <value>✓ Запазен</value>
+  </data>
+  <data name="Settings_CloudProviders_ChangeButton" xml:space="preserve">
+    <value>Промени</value>
+  </data>
+  <data name="Settings_CloudProviders_RemoveButton" xml:space="preserve">
+    <value>Премахни</value>
+  </data>
+  <data name="Settings_CloudProviders_SaveButton" xml:space="preserve">
+    <value>Запази</value>
+  </data>
+  <data name="Settings_CloudProviders_KeyStatus_Saved" xml:space="preserve">
+    <value>Ключът е запазен</value>
+  </data>
+  <data name="Settings_CloudProviders_KeyStatus_None" xml:space="preserve">
+    <value>Няма ключ</value>
+  </data>
+  <data name="Settings_Prompts_Description" xml:space="preserve">
+    <comment>"Gemma 4" is a model family name — never translated.</comment>
+    <value>Инструкцията, изпращана до двигателя Gemma 4 при всяко транскрибиране. Активният промпт е отбелязан с цветна лента.</value>
+  </data>
+  <data name="Settings_Prompts_HelpHeader" xml:space="preserve">
+    <value>Как работят промптовете</value>
+  </data>
+  <data name="Settings_Prompts_Help_PlaceholdersHeading" xml:space="preserve">
+    <value>Местодържачи</value>
+  </data>
+  <data name="Settings_Prompts_Help_SpeechLangDescription" xml:space="preserve">
+    <comment>Follows the literal token {speech_lang}, which is rendered separately in bold. Keep the leading dash.</comment>
+    <value>— говоримият език, взет от страницата с настройки Език. При „Автоматично разпознаване“ се изписва като „разпознатия език“.</value>
+  </data>
+  <data name="Settings_Prompts_Help_TextLangDescription" xml:space="preserve">
+    <comment>Follows the literal token {text_lang}, which is rendered separately in bold. Keep the leading dash.</comment>
+    <value>— изходният език. Той се различава от говоримия само докато преводът е активен; в противен случай съвпада с говоримия език.</value>
+  </data>
+  <data name="Settings_Prompts_Help_TranslationHeading" xml:space="preserve">
+    <value>Кога се прилага преводът</value>
+  </data>
+  <data name="Settings_Prompts_Help_TranslationBody" xml:space="preserve">
+    <value>Само когато са изпълнени и трите условия: превключвателят Превод е включен, избран е изходен език и той се различава от говоримия (Автоматичното разпознаване винаги се брои за различно). В противен случай двигателят просто транскрибира, а изходният език е говоримият.</value>
+  </data>
+  <data name="Settings_Prompts_Help_BuiltInHeading" xml:space="preserve">
+    <value>Вградени и потребителски промптове</value>
+  </data>
+  <data name="Settings_Prompts_Help_BuiltInBody" xml:space="preserve">
+    <comment>{speech_lang} and {text_lang} are literal placeholder tokens the user types into a prompt — never translate them, and keep the braces exactly.</comment>
+    <value>Вграденото по подразбиране съдържа три варианта и двигателят избира по един за всяко транскрибиране: вариант за транскрибиране, при който изходният език съвпада с говоримия, затова {speech_lang} се среща два пъти — „реч на X, преобразувана в текст на X“; вариант за превод, който съчетава {speech_lang} с {text_lang} за изхода; и вариант за автоматично разпознаване без местодържачи.</value>
+  </data>
+  <data name="Settings_Prompts_Help_CustomBody" xml:space="preserve">
+    <value>Потребителският промпт има само един вариант. Когато преводът се прилага, към него автоматично се добавя инструкция „после преведи на ...“. Дублирането на вградения копира само неговия вариант за транскрибиране.</value>
+  </data>
+  <data name="Settings_Prompts_BuiltInBadge" xml:space="preserve">
+    <value>Вграден</value>
+  </data>
+  <data name="Settings_Prompts_BuiltInName" xml:space="preserve">
+    <value>По подразбиране (дословно транскрибиране)</value>
+    <comment>Display name of the one prompt that ships with the app. The user never named it and cannot rename it — a rename forks a copy — so it is app copy, not user data. Their own prompt names are never translated.</comment>
+  </data>
+  <data name="Settings_Prompts_DuplicateButton" xml:space="preserve">
+    <value>Дублирай</value>
+  </data>
+  <data name="Settings_Prompts_EditButton" xml:space="preserve">
+    <value>Редактирай</value>
+  </data>
+  <data name="Settings_Prompts_DeleteButton" xml:space="preserve">
+    <value>Изтрий</value>
+  </data>
+  <data name="Settings_Prompts_NewButton" xml:space="preserve">
+    <value>Нов промпт</value>
+  </data>
+  <data name="Settings_Prompts_NameLabel" xml:space="preserve">
+    <value>Име</value>
+  </data>
+  <data name="Settings_Prompts_NamePlaceholder" xml:space="preserve">
+    <value>Моят промпт</value>
+  </data>
+  <data name="Settings_Prompts_TextLabel" xml:space="preserve">
+    <value>Текст на промпта</value>
+  </data>
+  <data name="Settings_Prompts_SaveButton" xml:space="preserve">
+    <value>Запази</value>
+  </data>
+  <data name="Settings_Prompts_Editor_PlaceholdersLabel" xml:space="preserve">
+    <comment>Leads a line that continues with the bold token {speech_lang}. Keep the colon.</comment>
+    <value>Местодържачи:</value>
+  </data>
+  <data name="Settings_Prompts_Editor_SpeechLangHint" xml:space="preserve">
+    <comment>Follows the literal token {speech_lang}, rendered separately in bold. Keep the leading dash and the trailing semicolon.</comment>
+    <value>— говоримият език („разпознатия език“ при автоматично разпознаване);</value>
+  </data>
+  <data name="Settings_Prompts_Editor_TextLangHint" xml:space="preserve">
+    <comment>Follows the literal token {text_lang}, rendered separately in bold. Keep the leading dash.</comment>
+    <value>— изходният език, който съвпада с говоримия, освен ако преводът не е активен.</value>
+  </data>
+  <data name="Settings_Prompts_Editor_TranslationNote" xml:space="preserve">
+    <value>Когато преводът е активен, към промпта ви автоматично се добавя инструкция „после преведи на ...“.</value>
+  </data>
+  <data name="Settings_Prompts_CopySuffixFormat" xml:space="preserve">
+    <comment>{0} is the name of the prompt being duplicated.</comment>
+    <value>{0} (копие)</value>
+  </data>
+  <data name="Settings_LlamaCpp_Heading" xml:space="preserve">
+    <comment>A project name — never translated, and keep the lower case.</comment>
+    <value>llama.cpp</value>
+  </data>
+  <data name="Settings_LlamaCpp_Description" xml:space="preserve">
+    <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
+    <value>Разглеждайте, инсталирайте и управлявайте версии на llama-server. Активната инсталация захранва транскрибирането с Gemma 4.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
+    <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
+    <value>Управлявана</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualBadge" xml:space="preserve">
+    <comment>Badge: the user pointed Parlotype at a folder they downloaded themselves.</comment>
+    <value>Ръчна</value>
+  </data>
+  <data name="Settings_LlamaCpp_RefreshButton" xml:space="preserve">
+    <value>Опресни</value>
+  </data>
+  <data name="Settings_LlamaCpp_RunningInstallLabel" xml:space="preserve">
+    <value>Работеща инсталация:</value>
+  </data>
+  <data name="Settings_LlamaCpp_PathLabel" xml:space="preserve">
+    <value>Път:</value>
+  </data>
+  <data name="Settings_LlamaCpp_ModelLabel" xml:space="preserve">
+    <value>Модел:</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioLabel" xml:space="preserve">
+    <value>Аудио:</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioSupported" xml:space="preserve">
+    <value>Поддържа се</value>
+  </data>
+  <data name="Settings_LlamaCpp_AudioNotSupported" xml:space="preserve">
+    <value>Не се поддържа</value>
+  </data>
+  <data name="Settings_LlamaCpp_BuildLabel" xml:space="preserve">
+    <value>Версия:</value>
+  </data>
+  <data name="Settings_LlamaCpp_UpdateAvailableHeading" xml:space="preserve">
+    <value>Налична е актуализация</value>
+  </data>
+  <data name="Settings_LlamaCpp_UpdateAvailableBody" xml:space="preserve">
+    <comment>The build number follows this text in bold — keep the trailing space and colon.</comment>
+    <value>На GitHub има по-нова версия: </value>
+  </data>
+  <data name="Settings_LlamaCpp_CheckUpdatesButton" xml:space="preserve">
+    <value>Провери за актуализации</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortConflictHeading" xml:space="preserve">
+    <comment>Keep the leading warning sign.</comment>
+    <value>⚠ Конфликт на портове</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortConflictHint" xml:space="preserve">
+    <comment>"Save" must match Settings_LlamaCpp_SaveButton — it names that button.</comment>
+    <value>Променете порта по-долу и натиснете Запази.</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstalledHeading" xml:space="preserve">
+    <value>Инсталирани</value>
+  </data>
+  <data name="Settings_LlamaCpp_RefreshListButton" xml:space="preserve">
+    <value>Опресни списъка</value>
+  </data>
+  <data name="Settings_LlamaCpp_UseThisTooltip" xml:space="preserve">
+    <value>Използвай тази инсталация</value>
+  </data>
+  <data name="Settings_LlamaCpp_MissingBadge" xml:space="preserve">
+    <comment>Keep the leading warning sign. Shown when a recorded install is no longer on disk.</comment>
+    <value>⚠ липсва</value>
+  </data>
+  <data name="Settings_LlamaCpp_UninstallButton" xml:space="preserve">
+    <value>Деинсталирай</value>
+  </data>
+  <data name="Settings_LlamaCpp_NoManagedInstalls" xml:space="preserve">
+    <comment>"Available" must match Settings_LlamaCpp_AvailableBuildsHeading — it names that list.</comment>
+    <value>Все още няма управлявани инсталации. Изберете от списъка Налични версии по-долу.</value>
+  </data>
+  <data name="Settings_LlamaCpp_SelectionNote" xml:space="preserve">
+    <value>Изборът ще влезе в сила при следващия запис.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualInstallHeading" xml:space="preserve">
+    <value>Ръчна инсталация</value>
+  </data>
+  <data name="Settings_LlamaCpp_NotManagedBadge" xml:space="preserve">
+    <value>Не се управлява от Parlotype</value>
+  </data>
+  <data name="Settings_LlamaCpp_UseThisRadio" xml:space="preserve">
+    <value>Използвай тази</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualHint" xml:space="preserve">
+    <comment>"llama-server.exe" is a file name — never translated.</comment>
+    <value>Посочете папка, съдържаща llama-server.exe, която сте изтеглили сами.</value>
+  </data>
+  <data name="Settings_LlamaCpp_BrowseButton" xml:space="preserve">
+    <value>Преглед…</value>
+  </data>
+  <data name="Settings_LlamaCpp_AvailableBuildsHeading" xml:space="preserve">
+    <value>Налични версии</value>
+  </data>
+  <data name="Settings_LlamaCpp_Loading" xml:space="preserve">
+    <comment>Keep the parentheses — it sits beside a heading.</comment>
+    <value>(зареждане…)</value>
+  </data>
+  <data name="Settings_LlamaCpp_CudaRuntimeBadge" xml:space="preserve">
+    <comment>"CUDA" is a product name — never translated.</comment>
+    <value>+ CUDA среда</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstallButton" xml:space="preserve">
+    <value>Инсталирай</value>
+  </data>
+  <data name="Settings_LlamaCpp_InstalledBadge" xml:space="preserve">
+    <value>Инсталирана</value>
+  </data>
+  <data name="Settings_LlamaCpp_NoBuildsMatched" xml:space="preserve">
+    <value>Няма версии, съответстващи на текущата операционна система / архитектура.</value>
+  </data>
+  <data name="Settings_LlamaCpp_ServerPortHeading" xml:space="preserve">
+    <value>Порт на сървъра</value>
+  </data>
+  <data name="Settings_LlamaCpp_ServerPortDescription" xml:space="preserve">
+    <comment>"llama-server" is an identifier and 8321 the default port — neither is translated.</comment>
+    <value>Порт за llama-server (по подразбиране: 8321). Промените влизат в сила при следващия запис.</value>
+  </data>
+  <data name="Settings_LlamaCpp_SaveButton" xml:space="preserve">
+    <value>Запази</value>
+  </data>
+  <data name="Settings_LlamaCpp_ResetButton" xml:space="preserve">
+    <value>Нулирай</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_NotProbed" xml:space="preserve">
+    <value>Непроверено</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_InvalidPort" xml:space="preserve">
+    <value>Невалиден порт</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Connected" xml:space="preserve">
+    <value>Свързан</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Disconnected" xml:space="preserve">
+    <value>Прекъснат</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_PortConflict" xml:space="preserve">
+    <value>Конфликт на портове</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_LoadingModel" xml:space="preserve">
+    <value>Зареждане на модела...</value>
+  </data>
+  <data name="Settings_LlamaCpp_Status_Error" xml:space="preserve">
+    <value>Грешка</value>
+  </data>
+  <data name="Settings_LlamaCpp_PortRangeError" xml:space="preserve">
+    <value>Портът трябва да е число между 1 и 65535.</value>
+  </data>
+  <data name="Settings_LlamaCpp_Backend_Unknown" xml:space="preserve">
+    <comment>Fallback for a llama-server build whose backend could not be identified. Every other backend name (CPU, CUDA, Vulkan, ROCm / HIP, SYCL, Metal, KleidiAI) is an identifier and stays as it is.</comment>
+    <value>Неизвестен</value>
+  </data>
+  <data name="Settings_Language_Description" xml:space="preserve">
+    <value>Една връзка, четена отляво надясно: вие говорите изходния език, Parlotype пише целевия. Съединителят между тях включва и изключва превода.</value>
+  </data>
+  <data name="Settings_Language_SourceCaption" xml:space="preserve">
+    <value>Говорите</value>
+  </data>
+  <data name="Settings_Language_TargetCaption" xml:space="preserve">
+    <value>Parlotype пише</value>
+  </data>
+  <data name="Settings_Language_PausedSubLine" xml:space="preserve">
+    <comment>Sits beside the translation switch, which stays on and operable (ADR-061). Keep it short.</comment>
+    <value>На пауза — този модел не може да превежда</value>
+  </data>
+  <data name="Settings_Language_UnavailableTitle" xml:space="preserve">
+    <value>Преводът е недостъпен</value>
+  </data>
+  <data name="Settings_Language_UnavailableSubtitle" xml:space="preserve">
+    <value>Не се поддържа от този модел</value>
+  </data>
+  <data name="Language_ChooseTranslatingModel" xml:space="preserve">
+    <comment>One button, two surfaces — the Language page and the Transcribe flyout (ADR-061). They must not drift, hence one key.</comment>
+    <value>Изберете модел, който превежда</value>
+  </data>
+  <data name="Language_Picker_SearchPlaceholder" xml:space="preserve">
+    <value>Търсене на езици…</value>
+  </data>
+  <data name="Language_Picker_NoResultsFormat" xml:space="preserve">
+    <comment>{0} is whatever the user typed into the search box.</comment>
+    <value>Няма езици, съответстващи на „{0}“.</value>
+  </data>
+  <data name="Language_Connector_PausedTooltipFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name such as "Large v3 Turbo" — never translated.</comment>
+    <value>Преводът е на пауза — „{0}“ не може да превежда</value>
+  </data>
+  <data name="Language_Connector_TurnOffTooltip" xml:space="preserve">
+    <value>Изключи превода</value>
+  </data>
+  <data name="Language_Connector_TurnOnTooltip" xml:space="preserve">
+    <value>Включи превода</value>
+  </data>
+  <data name="Language_ToggleSwitch_TranslateToFormat" xml:space="preserve">
+    <comment>{0} is a language name. NOTE: once phase 6 localizes language names, this slot needs a case other than nominative in Russian — see the plan's "language-name cases" note.</comment>
+    <value>Преведи на {0}</value>
+  </data>
+  <data name="Language_ToggleSwitch_Translate" xml:space="preserve">
+    <comment>Fallback label when the engine has no fixed translation target to name.</comment>
+    <value>Превод</value>
+  </data>
+  <data name="Language_UnavailableNoteFormat" xml:space="preserve">
+    <comment>{0} is an engine name ("Whisper", "Gemma 4", "Parakeet") — never translated, and it leads the sentence.</comment>
+    <value>{0} не може да превежда — Parlotype пише точно това, което казвате.</value>
+  </data>
+  <data name="Language_Source_KeyboardLayout" xml:space="preserve">
+    <value>Системна клавиатурна подредба</value>
+  </data>
+  <data name="Language_Source_AutoDetect" xml:space="preserve">
+    <value>Автоматично разпознаване</value>
+  </data>
+  <data name="Language_Source_DetectedFormat" xml:space="preserve">
+    <comment>{0} is the detected keyboard layout's friendly name. The colon keeps {0} in a position that needs no grammatical case.</comment>
+    <value>Разпознат: {0}</value>
+  </data>
+  <data name="Language_Source_LayoutUnavailable" xml:space="preserve">
+    <value>Разпознаването на подредбата е недостъпно — вместо това се разпознава автоматично</value>
+  </data>
+  <data name="Language_Source_AutoDetectHint" xml:space="preserve">
+    <value>Оставете модела да разпознае езика</value>
+  </data>
+  <data name="Language_Source_SpokenLanguageHint" xml:space="preserve">
+    <value>Говорим език</value>
+  </data>
+  <data name="Language_Target_SameAsSource" xml:space="preserve">
+    <comment>Target card while translation is off — the output matches the spoken language.</comment>
+    <value>Същият като изходния</value>
+  </data>
+  <data name="Language_Summary_Format" xml:space="preserve">
+    <comment>{0} is the spoken language, {1} what gets typed. Both are language names, so keep each one where it needs no grammatical case — after a colon or dash rather than after a preposition.</comment>
+    <value>Говорите {0} → Parlotype пише {1}.</value>
+  </data>
+  <data name="Language_Summary_YourKeyboardLanguage" xml:space="preserve">
+    <comment>Substituted as {0} of Language_Summary_Format when the source follows the keyboard layout but it could not be resolved.</comment>
+    <value>езика на клавиатурата ви</value>
+  </data>
+  <data name="Language_Summary_AnyLanguage" xml:space="preserve">
+    <comment>Substituted as {0} of Language_Summary_Format when the engine auto-detects.</comment>
+    <value>произволен език</value>
+  </data>
+  <data name="Language_Summary_TranslationPausedFormat" xml:space="preserve">
+    <comment>{0} is the spoken language. The result is substituted as {1} of Language_Summary_Format.</comment>
+    <value>{0} (преводът е на пауза)</value>
+  </data>
+  <data name="Language_Summary_NoTranslationFormat" xml:space="preserve">
+    <comment>{0} is the spoken language. The result is substituted as {1} of Language_Summary_Format.</comment>
+    <value>{0} (без превод)</value>
+  </data>
+  <data name="Language_TranslationPausedNoteFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name — never translated. "Medium" and "Large v1/v2/v3" are model names too.</comment>
+    <value>Преводът е на пауза — „{0}“ е само за транскрибиране. Изберете Medium или Large v1/v2/v3, за да продължите.</value>
+  </data>
+  <data name="Language_Toast_SourceUnsupportedFormat" xml:space="preserve">
+    <comment>{0} is a language name and leads the sentence; {1} is an engine name, never translated.</comment>
+    <value>{0} не е изходен език в {1}. Използва се клавиатурната ви подредба.</value>
+  </data>
+  <data name="Language_Toast_EngineCannotTranslateFormat" xml:space="preserve">
+    <comment>{0} is an engine name — never translated, and it leads the sentence.</comment>
+    <value>{0} не може да превежда — изходът вече съвпада с говоримия ви език.</value>
+  </data>
+  <data name="Language_Toast_TargetUnsupportedFormat" xml:space="preserve">
+    <comment>{0} is the language that was dropped, {1} the engine name, {2} the language it fell back to. Keep {2} after a dash or colon so it needs no grammatical case.</comment>
+    <value>{0} не е наличен в {1}. Преводът е зададен на {2}.</value>
+  </data>
+  <data name="Language_Toast_TargetResetFormat" xml:space="preserve">
+    <comment>{0} is an engine name — never translated.</comment>
+    <value>Предишната цел е нулирана — не се поддържа от {0}.</value>
+  </data>
+  <data name="Language_Toast_ModelPausedFormat" xml:space="preserve">
+    <comment>{0} is a Whisper model name — never translated.</comment>
+    <value>„{0}“ не може да превежда — преводът е на пауза, докато не изберете многоезичен модел.</value>
+  </data>
+  <data name="Settings_CloudProviders_Intro" xml:space="preserve">
+    <comment>ADR-032's positioning line is quoted verbatim at the end — keep "Local by default. Cloud by choice." recognisable, and keep the ADR reference.</comment>
+    <value>Използвайте собствен API ключ. Когато е активен облачен двигател, звуковите ви записи се изпращат на зададения доставчик за транскрибиране — нищо не работи локално за този двигател. Таксуването е пряко между вас и доставчика; Parlotype не е посредник по таксуването (ADR-032, „Локално по подразбиране. Облачно по избор.“).</value>
+  </data>
+  <data name="Settings_Engine_Gemma4SectionNote" xml:space="preserve">
+    <comment>"Gemma 4 E4B", "llama-server", "llama.cpp" and "Vulkan" are identifiers — never translated.</comment>
+    <value>Gemma 4 E4B работи чрез локален процес llama-server (llama.cpp, Vulkan). Само транскрибиране на английски. Работи най-добре с чиста реч и добър микрофон. Файловете на модела (~10 GB) ще бъдат изтеглени при първа употреба.</value>
+  </data>
+  <data name="Settings_Hotkeys_Gesture_HoldFormat" xml:space="preserve">
+    <comment>{0} is a key name such as "Right Ctrl" — key names stay as they are printed on the keyboard, in every language.</comment>
+    <value>Задръжте {0}</value>
+  </data>
+  <data name="Settings_Hotkeys_Gesture_DoubleTapFormat" xml:space="preserve">
+    <comment>{0} is a key name such as "Ctrl" — key names stay as they are printed on the keyboard, in every language.</comment>
+    <value>Натиснете двукратно {0}</value>
+  </data>
+  <data name="Settings_Hotkeys_Mode_PushToTalk" xml:space="preserve">
+    <comment>Badge on a hotkey row: hold the key to talk, release to stop.</comment>
+    <value>Задържане</value>
+  </data>
+  <data name="Settings_Hotkeys_Mode_Toggle" xml:space="preserve">
+    <comment>Badge on a hotkey row: press once to start, again to stop.</comment>
+    <value>Превключване</value>
+  </data>
+  <data name="Settings_Hotkeys_LineFormat" xml:space="preserve">
+    <comment>{0} is the gesture ("Hold Right Ctrl"), {1} its mode ("Push to talk"). Used in the Help page and the first-run tour.</comment>
+    <value>{0} — {1}</value>
+  </data>
+  <data name="Settings_Hotkeys_Modifier_LeftFormat" xml:space="preserve">
+    <value>Ляв {0}</value>
+    <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
+  </data>
+  <data name="Settings_Hotkeys_Modifier_RightFormat" xml:space="preserve">
+    <value>Десен {0}</value>
+    <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Invalid" xml:space="preserve">
+    <comment>Shown when the recorded gesture cannot be combined with its activation mode at all.</comment>
+    <value>Тази комбинация не може да се използва като клавишна комбинация за диктовка.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AlreadyBoundFormat" xml:space="preserve">
+    <comment>{0} is the gesture ("Hold Right Ctrl"), {1} the mode it is already bound to (Settings_Hotkeys_Conflict_Mode_*). Each language decides how the mode reads inside the sentence, which is why those are separate keys from the badge labels.</comment>
+    <value>{0} вече е обвързана с {1}.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_PushToTalk" xml:space="preserve">
+    <comment>Push-to-talk as it reads inside Settings_Hotkeys_Conflict_AlreadyBoundFormat (English wants it lowercase mid-sentence; Russian quotes it, so it stays capitalized).</comment>
+    <value>задържане</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_Mode_Toggle" xml:space="preserve">
+    <comment>Toggle mode as it reads inside Settings_Hotkeys_Conflict_AlreadyBoundFormat.</comment>
+    <value>превключване</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ReservedFormat" xml:space="preserve">
+    <comment>{0} is the chord ("Win+L") — never translated; {1} is what the system does with it (Settings_Hotkeys_Reserved_*).</comment>
+    <value>{0} е запазена: {1}</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_ParameterHintsFormat" xml:space="preserve">
+    <comment>{0} is the chord. "Visual Studio" and "VS Code" are product names — do not translate them.</comment>
+    <value>{0} показва подсказки за параметри във Visual Studio и VS Code.</value>
+  </data>
+  <data name="Settings_Hotkeys_Conflict_AltGrFormat" xml:space="preserve">
+    <comment>{0} is the chord. "AltGr", "Ctrl", "Alt" and "Space" are key names — never translated.</comment>
+    <value>В европейските клавиатурни подредби AltGr действа като Ctrl+Alt, затова {0} може да се задейства при въвеждане на букви с ударения. Ctrl+Alt+Space избягва това.</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_LockWorkstation" xml:space="preserve">
+    <comment>What Windows or macOS does with a shortcut Parlotype refuses to take over. These are OS feature names — use the wording the user's own operating system uses, not a literal translation of the English.</comment>
+    <value>Заключване на работната станция</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_FileExplorer" xml:space="preserve">
+    <value>Отваряне на Файлов мениджър</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_RunDialog" xml:space="preserve">
+    <value>Отваряне на прозореца Изпълнение</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ShowDesktop" xml:space="preserve">
+    <value>Показване/скриване на работния плот</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSettings" xml:space="preserve">
+    <value>Отваряне на Настройки</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_TaskView" xml:space="preserve">
+    <value>Изглед на задачите</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_ProjectDisplay" xml:space="preserve">
+    <value>Проектиране на екрана</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_QuickLinkMenu" xml:space="preserve">
+    <value>Меню за бърз достъп</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_GameBar" xml:space="preserve">
+    <value>Отваряне на Game Bar</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Screenshot" xml:space="preserve">
+    <value>Екранна снимка</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SecurityScreen" xml:space="preserve">
+    <value>Екран за сигурност</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_WindowsSpeechRecognition" xml:space="preserve">
+    <value>Разпознаване на реч на Windows</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_SwitchInputSource" xml:space="preserve">
+    <value>Смяна на входния език</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacQuit" xml:space="preserve">
+    <value>Спиране на приложението (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_MacCloseWindow" xml:space="preserve">
+    <value>Затваряне на прозореца (macOS)</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_Spotlight" xml:space="preserve">
+    <value>Търсене със Spotlight (macOS) / смяна на входния език</value>
+  </data>
+  <data name="Settings_Hotkeys_Reserved_VoiceTyping" xml:space="preserve">
+    <value>Гласово въвеждане на Windows; скриване на прозореца в macOS и GNOME</value>
+  </data>
+  <data name="Cloud_ProviderName_OpenAiCompatible" xml:space="preserve">
+    <comment>Names the provider inside error messages. Every Cloud_* format below puts this slot first, followed by a colon or a verb, so the name is always nominative and no language needs to inflect it. "OpenAI" is a product name — do not translate it.</comment>
+    <value>OpenAI-съвместим доставчик</value>
+  </data>
+  <data name="Cloud_ProviderName_XaiGrok" xml:space="preserve">
+    <comment>Product name — identical in every language.</comment>
+    <value>xAI Grok</value>
+  </data>
+  <data name="Cloud_NotConfigured_MissingKeyFormat" xml:space="preserve">
+    <comment>{0} is the provider name (Cloud_ProviderName_*).</comment>
+    <value>{0}: не е зададен API ключ. Добавете такъв в Настройки → Речеви двигател.</value>
+  </data>
+  <data name="Cloud_NotConfigured_InvalidBaseUrlFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the reason the URL was refused (Cloud_BaseUrl_*).</comment>
+    <value>{0}: базовият URL адрес е отхвърлен ({1}). Коригирайте го в Настройки → Речеви двигател.</value>
+  </data>
+  <data name="Cloud_BaseUrl_NotAbsolute" xml:space="preserve">
+    <comment>A sentence fragment: it is shown on its own under the base-URL field, and also embedded in Cloud_NotConfigured_InvalidBaseUrlFormat.</comment>
+    <value>не е валиден абсолютен URL адрес</value>
+  </data>
+  <data name="Cloud_BaseUrl_PlainHttp" xml:space="preserve">
+    <comment>See Cloud_BaseUrl_NotAbsolute. "http", "https" and "localhost" are literals.</comment>
+    <value>обикновен http е разрешен само за localhost — иначе API ключът и звукът ще напуснат това устройство некриптирани</value>
+  </data>
+  <data name="Cloud_BaseUrl_UnsupportedSchemeFormat" xml:space="preserve">
+    <comment>{0} is the URL scheme the user typed ("ftp", "file"). See Cloud_BaseUrl_NotAbsolute.</comment>
+    <value>неподдържана схема „{0}“ — използвайте https</value>
+  </data>
+  <data name="Cloud_Error_KeyRejectedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text (arrives already written, in whatever language the provider chose).</comment>
+    <value>{0}: API ключът е отхвърлен (HTTP {1}). {2} Проверете ключа в Настройки → Речеви двигател.</value>
+  </data>
+  <data name="Cloud_Error_QuotaExceededFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: квотата на API е надвишена — проверете плана и таксуването при доставчика. ({1})</value>
+  </data>
+  <data name="Cloud_Error_RateLimitedFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the provider's own error text.</comment>
+    <value>{0}: достигнат е лимит на заявките — изчакайте малко и опитайте отново. ({1})</value>
+  </data>
+  <data name="Cloud_Error_ProviderUnavailableFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0} в момента е недостъпен (HTTP {1}) — опитайте отново скоро. ({2})</value>
+  </data>
+  <data name="Cloud_Error_OtherFormat" xml:space="preserve">
+    <comment>{0} is the provider name, {1} the HTTP status, {2} the provider's own error text.</comment>
+    <value>{0}: транскрибирането се провали (HTTP {1}). {2}</value>
+  </data>
+  <data name="Language_Picker_RecentGroup" xml:space="preserve">
+    <comment>Non-interactive group header above the MRU cluster in a language picker popover (Settings -&gt; Language and the Transcribe flyout share this).</comment>
+    <value>Скорошни</value>
+  </data>
+  <data name="Language_Picker_AllLanguagesGroup" xml:space="preserve">
+    <comment>Non-interactive group header above the full catalog in a language picker popover, shown only once the list is long enough to need Recent/All grouping (see LanguageRowFactory.SearchThreshold).</comment>
+    <value>Всички езици</value>
+  </data>
+  <data name="Language_Target_TranslationHint" xml:space="preserve">
+    <comment>Sub-hint under the Settings -&gt; Language page's full-form target field while translation is on. Parallels Language_Source_SpokenLanguageHint.</comment>
+    <value>Цел на превода</value>
+  </data>
+  <data name="Hotkey_Hint_None" xml:space="preserve">
+    <comment>Record-button tooltip and onboarding recap line, shown when no dictation hotkey is configured. Short — this sits in a tooltip, unlike the longer Onboarding_Hotkeys_None banner.</comment>
+    <value>Няма зададена клавишна комбинация</value>
+  </data>
+  <data name="Hotkey_Hint_TalkFormat" xml:space="preserve">
+    <comment>{0} is the already-localized gesture ("Hold Right Ctrl", "Ctrl+Alt+Space") for a push-to-talk binding — hold it, talk, release it.</comment>
+    <value>{0}, за да говорите</value>
+  </data>
+  <data name="Hotkey_Hint_DictateFormat" xml:space="preserve">
+    <comment>Same as Hotkey_Hint_TalkFormat, for a toggle binding (press once to start, again to stop) — there is no key to hold, so "talk" would be misleading.</comment>
+    <value>{0}, за да диктувате</value>
+  </data>
+  <data name="Hotkey_Hint_WithCancelFormat" xml:space="preserve">
+    <comment>{0} is the result of Hotkey_Hint_TalkFormat/DictateFormat. "Esc" is a key name — use whatever that key is called on a keyboard in this language, usually "Esc".</comment>
+    <value>{0} · Esc за отказ</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualFolderPlaceholder" xml:space="preserve">
+    <value>Няма избрана папка — изберете папката, съдържаща llama-server.exe</value>
+  </data>
+  <data name="Settings_LlamaCpp_ManualFolderRequiredError" xml:space="preserve">
+    <value>Изберете папката, съдържаща llama-server.exe, и натиснете Запази, преди да превключите към ръчната инсталация.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningHeading" xml:space="preserve">
+    <value>⚠ Тази папка се изтрива при деинсталиране на Parlotype</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningBody" xml:space="preserve">
+    <value>Деинсталирането на Parlotype — или повторното пускане на инсталатора му — изтрива инсталационната му папка и всичко в нея, включително тази версия на llama-server. Преместете версията другаде и посочете новото местоположение тук.</value>
+  </data>
+  <data name="Settings_LlamaCpp_PackFolderWarningPathLabel" xml:space="preserve">
+    <value>Инсталационна папка:</value>
+    <comment>Label before the Parlotype install folder path shown in the pack-folder warning. Distinct from Settings_LlamaCpp_PathLabel, which labels a llama-server or model path.</comment>
+  </data>
+  <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
+    <value>Изберете папка за llama-server</value>
+    <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+</root>

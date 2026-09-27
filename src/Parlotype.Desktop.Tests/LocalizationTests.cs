@@ -279,6 +279,225 @@ public class LocalizationTests : IDisposable
         var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
 
         Assert.IsNotAssignableFrom<IAsyncRelayCommand>(vm.LanguageOptions[0].SelectCommand);
+
+        // The pinned "System default" row lives outside LanguageOptions but
+        // shares the same command instance, so it is covered by the same
+        // argument — and would be the easiest row to regress independently.
+        Assert.IsNotAssignableFrom<IAsyncRelayCommand>(vm.SystemOption.SelectCommand);
+    }
+
+    [AvaloniaFact]
+    public void LanguagePicker_PinsSystemDefault_AndSortsTheRestByEndonym()
+    {
+        var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
+
+        // "System default" is a behaviour, not a language: it is held out of the
+        // list entirely rather than sorted among the endonyms.
+        Assert.Equal(SupportedUiLanguages.SystemSettingValue, vm.SystemOption.SettingValue);
+        Assert.DoesNotContain(
+            vm.LanguageOptions,
+            o => o.SettingValue == SupportedUiLanguages.SystemSettingValue);
+
+        Assert.Equal(SupportedUiLanguages.All.Count, vm.LanguageOptions.Length);
+
+        var labels = vm.LanguageOptions.Select(o => o.Label).ToArray();
+        Assert.Equal(labels.OrderBy(l => l, StringComparer.InvariantCulture), labels);
+    }
+
+    [AvaloniaFact]
+    public void LanguagePicker_KeepsItsOrder_WhenTheInterfaceLanguageChanges()
+    {
+        // Sorting under the *current* culture would reshuffle the list on every
+        // switch, moving the row the user just clicked out from under the cursor.
+        // Invariant sort order is what stops that.
+        Localizer.Instance.SetCulture(English);
+        var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
+        var before = vm.LanguageOptions.Select(o => o.SettingValue).ToArray();
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal(before, vm.LanguageOptions.Select(o => o.SettingValue).ToArray());
+    }
+
+    [AvaloniaFact]
+    public void HelpPage_HotkeyLines_FollowTheInterfaceLanguage()
+    {
+        // Reported from a running build: the Help page's heading was translated
+        // while the hotkey lines under it stayed in the language the app had
+        // started in. The lines are an ObservableCollection filled once, so
+        // navigating back to the page re-reads the plain properties around them
+        // and makes the page look *almost* right — which is why it survived.
+        Localizer.Instance.SetCulture(English);
+
+        var hotkeys = new MockGlobalHotkeyService();
+        var vm = new HelpSettingsViewModel(new MockOnboardingService(), hotkeys);
+
+        Assert.Contains(vm.HotkeyLines, line => line.Contains("Push to talk", StringComparison.Ordinal));
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.All(vm.HotkeyLines, line => Assert.DoesNotContain("Push to talk", line, StringComparison.Ordinal));
+        Assert.Contains(vm.HotkeyLines, line => line.Any(c => c is >= 'Ѐ' and <= 'ӿ'));
+    }
+
+    [AvaloniaFact]
+    public void HelpPage_ComposedText_RaisesOnCultureChange()
+    {
+        // The three text properties are plain getters with no backing field: they
+        // answer correctly whenever something re-reads them, but nothing asks.
+        Localizer.Instance.SetCulture(English);
+        var vm = new HelpSettingsViewModel(new MockOnboardingService(), new MockGlobalHotkeyService());
+
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Contains(nameof(HelpSettingsViewModel.IntroText), raised);
+        Assert.Contains(nameof(HelpSettingsViewModel.OpenTourButtonText), raised);
+        Assert.Contains(nameof(HelpSettingsViewModel.HotkeysHeadingText), raised);
+    }
+
+    [AvaloniaFact]
+    public void UpdatesPage_ComposedText_FollowsTheInterfaceLanguage()
+    {
+        // Also reported from a running build, and worse than it looks: this page
+        // only rewrites its text when the update service raises StatusChanged. On
+        // a development build — permanently "cannot update itself", nobody ever
+        // checking — it never does, so the page kept the startup language for the
+        // life of the process.
+        Localizer.Instance.SetCulture(English);
+
+        var updates = new MockUpdateService();
+        var vm = new UpdateSettingsViewModel(new MockSettingsService(), updates);
+
+        Assert.Equal("Never", vm.LastCheckedText);
+        Assert.Equal("development build", vm.CurrentVersionText);
+        Assert.Contains("cannot update itself", vm.StatusText, StringComparison.Ordinal);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("Никогда", vm.LastCheckedText);
+        Assert.Equal("сборка для разработки", vm.CurrentVersionText);
+        Assert.DoesNotContain("cannot update itself", vm.StatusText, StringComparison.Ordinal);
+    }
+
+    [AvaloniaFact]
+    public void UpdatesPage_DoesNotRetranslateARealVersionNumber()
+    {
+        // The "development build" label is a fallback for a missing version, not
+        // a translation of one. A real version string is data and must survive a
+        // language switch untouched.
+        Localizer.Instance.SetCulture(English);
+        var updates = new MockUpdateService { CurrentVersion = "0.5.2" };
+        var vm = new UpdateSettingsViewModel(new MockSettingsService(), updates);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("0.5.2", vm.CurrentVersionText);
+    }
+
+    [AvaloniaFact]
+    public void BuiltInPromptName_IsTranslated_ButUserPromptNamesAreNot()
+    {
+        // Found in phase 9 by rendering the Prompts page under Hungarian and
+        // reading it. The built-in's name is an English literal in
+        // JsonPromptTemplateRegistry — correct, since Platform has no resources —
+        // but it reached the screen untranslated in all 24 languages. Nothing
+        // could see it: not in AXAML, so the hardcoded-literal scan missed it;
+        // not in resx, so parity missed it.
+        Localizer.Instance.SetCulture(English);
+
+        // Synchronous on purpose, and no `await` anywhere. MockPromptTemplateRegistry
+        // completes every Task already-finished, so the view model's fire-and-forget
+        // LoadAsync has run by the time its constructor returns. An `await` here would
+        // resume off the shared headless dispatcher and corrupt the culture of whatever
+        // other [AvaloniaFact] is mid-flight — see
+        // memory/knowledge/culture-changing-tests-need-avaloniafact.md, which this test
+        // was the fifth occurrence of before it was written this way.
+        var registry = new MockPromptTemplateRegistry();
+        registry.AddOrUpdateAsync(new PromptTemplate(
+            Id: "mine", Name: "My own prompt", Text: "…", IsBuiltIn: false)).GetAwaiter().GetResult();
+
+        var vm = new PromptSettingsViewModel(registry);
+
+        var builtIn = vm.Prompts.Single(p => p.IsBuiltIn);
+        var mine = vm.Prompts.Single(p => !p.IsBuiltIn);
+
+        Assert.Equal("Default (verbatim transcription)", builtIn.Name);
+        Assert.Equal("My own prompt", mine.Name);
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal("По умолчанию (дословное распознавание)", builtIn.Name);
+
+        // The other half of the rule, and the reason this view model was exempt
+        // from the structural check until now: a name the user chose is their
+        // data. A language switch must not touch it.
+        Assert.Equal("My own prompt", mine.Name);
+    }
+
+    [AvaloniaFact]
+    public void BuiltInPromptName_IsTranslated_WhenTheAppStartsInThatLanguage()
+    {
+        // The path a Russian user actually takes: the app starts in their
+        // language and they never switch. That is the constructor, not the
+        // culture hook — and the two are easy to fix by halves. Asserting only
+        // after a switch let a reverted constructor pass.
+        Localizer.Instance.SetCulture(Russian);
+
+        var vm = new PromptSettingsViewModel(new MockPromptTemplateRegistry());
+
+        Assert.Equal(
+            "По умолчанию (дословное распознавание)",
+            vm.Prompts.Single(p => p.IsBuiltIn).Name);
+    }
+
+    [AvaloniaFact]
+    public void LlamaCppAppOwnedError_FollowsTheLanguage_ButProbeTextDoesNot()
+    {
+        // Review finding. This page's OnCultureChanged re-rendered StatusText and
+        // stopped there, on the stated assumption that ErrorMessage was external
+        // probe text — which was wrong: two of its writers are our own copy. The
+        // structural guard could not see it, because a class with *an* override
+        // satisfies that test however incomplete the override is.
+        Localizer.Instance.SetCulture(English);
+        var vm = new LlamaCppSettingsViewModel(new MockSettingsService());
+
+        vm.PortText = "not-a-port";
+        vm.RefreshServerInfoCommand.Execute(null);
+
+        Assert.Equal("Port must be a number between 1 and 65535.", vm.ErrorMessage);
+
+        var statusBefore = vm.StatusText;
+
+        Localizer.Instance.SetCulture(Russian);
+
+        // Diagnostic pairing: StatusText was already handled before this fix, so
+        // if it moves and ErrorMessage does not, the hook fired and the error was
+        // simply not covered. If neither moves, the hook never ran.
+        Assert.NotEqual(statusBefore, vm.StatusText);
+        Assert.Equal("Порт должен быть числом от 1 до 65535.", vm.ErrorMessage);
+    }
+
+    [AvaloniaFact]
+    public void DataPage_DoesNotClaimNothingIsDownloaded_BeforeItHasMeasured()
+    {
+        // Review finding. The retained byte count started at 0, which conflated
+        // "not measured yet" with "measured and empty" — so a language switch
+        // during the first measurement replaced the neutral placeholder with a
+        // claim about a directory nobody had looked in.
+        Localizer.Instance.SetCulture(English);
+        using var paths = new MockAppPaths();
+        var vm = new DataSettingsViewModel(
+            new MockSettingsService(), paths, new MockUserDialogService(), new MockShellService());
+
+        var placeholder = vm.ModelsSizeText;
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal(placeholder, vm.ModelsSizeText);
+        Assert.DoesNotContain("скач", vm.ModelsSizeText, StringComparison.OrdinalIgnoreCase);
     }
 
     [AvaloniaFact]

@@ -43,7 +43,15 @@ param(
     # change and the baseline increase landing together, where a reviewer can see
     # that one explains the other. If you reach for this without having just
     # edited $attributes above, you are using it wrong.
-    [switch]$Rescan
+    [switch]$Rescan,
+
+    # Print an advisory text-expansion report: the keys whose translation runs far
+    # longer than the English, worst first, per language. Never fails the build —
+    # see the note above the report itself.
+    [switch]$Report,
+
+    # Expansion ratio at or above which -Report lists a key.
+    [double]$ExpansionThreshold = 1.6
 )
 
 $ErrorActionPreference = 'Stop'
@@ -66,11 +74,7 @@ function Read-ResxEntries([string]$path) {
     return $map
 }
 
-function Get-Placeholders([string]$value) {
-    return ([regex]::Matches($value, '\{(\d+)') |
-        ForEach-Object { [int]$_.Groups[1].Value } |
-        Sort-Object -Unique) -join ','
-}
+. (Join-Path $PSScriptRoot 'lib/CompositeFormat.ps1')
 
 # ---------------------------------------------------------------- 1 + 2. Resx
 
@@ -102,10 +106,19 @@ foreach ($culture in $cultures) {
             continue
         }
 
-        $expected = Get-Placeholders $neutral[$key]
-        $actual = Get-Placeholders $translated[$key]
+        # string.Format decides validity, not a brace regex: "{0x}" and an
+        # unclosed "{0" both produce the neutral file's index set and then throw
+        # in production. Signatures then compare which arguments actually
+        # survive substitution, so an escaped "{{0}}" is not mistaken for one.
+        if ($malformed = Test-CompositeFormat $translated[$key]) {
+            $problems.Add("Strings.$culture.resx key '$key' $malformed")
+            continue
+        }
+
+        $expected = Get-FormatSignature $neutral[$key]
+        $actual = Get-FormatSignature $translated[$key]
         if ($expected -ne $actual) {
-            $problems.Add("Strings.$culture.resx key '$key' has placeholders [$actual] but the neutral file has [$expected].")
+            $problems.Add("Strings.$culture.resx key '$key' substitutes arguments [$actual] but the neutral file substitutes [$expected].")
         }
     }
 
@@ -244,4 +257,64 @@ $remaining = ($counts.Values | Measure-Object -Sum).Sum
 $keyCount = $neutral.Count
 $languages = ($cultures -join ', ')
 Write-Host "Localization OK: $keyCount keys x [en, $languages]; $remaining literal(s) still awaiting extraction."
+
+# ------------------------------------------------------- 5. Expansion (advisory)
+
+# Deliberately advisory, and deliberately after the exit-1 above: a hard length
+# limit would be met by shortening good translations, which is the wrong fix.
+# German and Finnish are legitimately longer than English and a UI that cannot
+# hold them is the bug. This report exists to aim a screenshot pass at the
+# strings most likely to clip, not to gate anything.
+#
+# Short strings are where the risk is. Expansion is inversely proportional to
+# source length, so a 6-character button label routinely doubles while a
+# 300-character paragraph grows ~30% — hence the MinLength floor, which keeps the
+# long bodies from crowding out the labels that actually break layouts.
+if ($Report) {
+    $minLength = 4
+    Write-Host ''
+    Write-Host "Expansion report (ratio >= $ExpansionThreshold, English >= $minLength chars) — advisory only:"
+
+    foreach ($culture in $cultures) {
+        $path = Join-Path $resourcesDir "Strings.$culture.resx"
+        if (-not (Test-Path $path)) { continue }
+        $translated = Read-ResxEntries $path
+
+        $rows = foreach ($key in $neutral.Keys) {
+            $source = [string]$neutral[$key]
+            if ($source.Length -lt $minLength) { continue }
+            if (-not $translated.Contains($key)) { continue }
+
+            $target = [string]$translated[$key]
+            $ratio = $target.Length / $source.Length
+            if ($ratio -lt $ExpansionThreshold) { continue }
+
+            [pscustomobject]@{
+                Ratio = $ratio
+                Key   = $key
+                En    = $source
+                Tr    = $target
+            }
+        }
+
+        $rows = @($rows | Sort-Object Ratio -Descending)
+        if ($rows.Count -eq 0) {
+            Write-Host "  ${culture}: nothing over the threshold."
+            continue
+        }
+
+        Write-Host ""
+        Write-Host "  ${culture}: $($rows.Count) key(s)"
+        foreach ($row in ($rows | Select-Object -First 15)) {
+            $ratio = '{0:N2}x' -f $row.Ratio
+            Write-Host ("    {0,-6} {1}" -f $ratio, $row.Key)
+            Write-Host ("           en: {0}" -f $row.En)
+            Write-Host ("           {0}: {1}" -f $culture, $row.Tr)
+        }
+        if ($rows.Count -gt 15) {
+            Write-Host "    ... and $($rows.Count - 15) more"
+        }
+    }
+}
+
 exit 0

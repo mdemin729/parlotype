@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Parlotype.Desktop.Resources;
 using Parlotype.Core.Hotkeys;
+using Parlotype.Core.Localization;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels.Settings;
 using Parlotype.Desktop.Views.Settings;
@@ -13,8 +14,7 @@ namespace Parlotype.Desktop.Tests;
 /// <summary>
 /// Renders every settings page in each shipped language and writes the images to
 /// <c>reports/localized-layout/</c> so text expansion can actually be looked at
-/// (ADR-064, localization plan phases 4–5). Russian runs roughly 35 % longer than
-/// English and Spanish about 20 %, which is where clipping shows up.
+/// (ADR-064, ADR-069).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -32,6 +32,13 @@ namespace Parlotype.Desktop.Tests;
 /// so leaving this in the ordinary suite made the culture-bound tests fail
 /// intermittently, passing or failing the same code depending on GC timing. A
 /// review harness is not worth an unreliable <c>dotnet test</c>.
+/// </para>
+/// <para>
+/// That gate is load-bearing and easy to work around by accident. Phase 9 of
+/// ADR-069 began with a second, ungated copy of this harness written by someone
+/// who had not found this file — which promptly broke eight culture-bound tests
+/// in exactly the documented way. If you want a narrower render, add a filter
+/// here; do not start a new class.
 /// </para>
 /// <para>
 /// Shares the culture-bound collection because it changes the process-wide
@@ -58,7 +65,26 @@ public class LocalizedLayoutReviewTests
     /// </summary>
     private const int ContentHeight = 770 - 48;
 
-    public static TheoryData<string> Cultures() => new() { "en", "ru", "es" };
+    /// <summary>
+    /// Every shipped language, read from the registry rather than listed here —
+    /// this used to be a hardcoded <c>{ "en", "ru", "es" }</c> and went stale the
+    /// moment the set grew to 25 (ADR-069).
+    /// </summary>
+    /// <remarks>
+    /// 20 pages × 25 languages is 500 images, which is the point: the harness
+    /// renders them all, and a human reads the handful the expansion report
+    /// points at. Aim it with <c>pwsh scripts/check-localization.ps1 -Report</c>.
+    /// Measured worst means are French 1.30 and Greek 1.29; the worst *single*
+    /// strings are short labels on Hotkeys, llama.cpp, Cloud providers, Theme and
+    /// Prompts.
+    /// </remarks>
+    public static TheoryData<string> Cultures()
+    {
+        var data = new TheoryData<string>();
+        foreach (var language in SupportedUiLanguages.All)
+            data.Add(language.CultureName);
+        return data;
+    }
 
     [AvaloniaTheory(
         Skip = "Layout review harness: set PARLOTYPE_LAYOUT_REVIEW=1 to render the pages.",

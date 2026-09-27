@@ -78,7 +78,7 @@ public partial class UpdateSettingsViewModel : SettingsSectionViewModelBase
         CheckAutomatically = !bool.TryParse(saved, out var enabled) || enabled;
         _loading = false;
 
-        CurrentVersionText = _updates.CurrentVersion ?? Strings.Settings_Updates_DevelopmentBuild;
+        CurrentVersionText = CurrentVersionOrFallback();
     }
 
     partial void OnCheckAutomaticallyChanged(bool value)
@@ -122,6 +122,34 @@ public partial class UpdateSettingsViewModel : SettingsSectionViewModelBase
         else
             Dispatcher.UIThread.Post(() => Apply(status));
     }
+
+    /// <summary>
+    /// Re-derives every piece of composed copy on this page from the status the
+    /// service currently holds (ADR-064's live-switch rule).
+    /// </summary>
+    /// <remarks>
+    /// The three text properties are <c>[ObservableProperty]</c> fields whose
+    /// initializers run once, and are only rewritten when
+    /// <see cref="IUpdateService.StatusChanged"/> fires. On a page nobody checks
+    /// for updates on — a development build, where the state is a permanent
+    /// "cannot update itself" — that meant the language the app started in was
+    /// the language this page kept forever.
+    /// </remarks>
+    protected override void OnCultureChanged()
+    {
+        base.OnCultureChanged();
+
+        Apply(_updates.Status);
+        CurrentVersionText = CurrentVersionOrFallback();
+    }
+
+    /// <summary>
+    /// The real version string when there is one; otherwise the translated
+    /// "development build" label. Shared so the culture hook cannot drift from
+    /// the initializer it mirrors.
+    /// </summary>
+    private string CurrentVersionOrFallback() =>
+        _updates.CurrentVersion ?? Strings.Settings_Updates_DevelopmentBuild;
 
     private void Apply(UpdateStatus status)
     {

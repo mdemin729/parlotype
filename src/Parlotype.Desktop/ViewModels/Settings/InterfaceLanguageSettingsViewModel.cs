@@ -20,6 +20,24 @@ public partial class InterfaceLanguageSettingsViewModel : SettingsSectionViewMod
     public override string Title => Strings.Settings_InterfaceLanguage_Title;
     public override SettingsCategory Category => SettingsCategory.Appearance;
 
+    /// <summary>
+    /// The "System default" row, held apart from the list. It names a behaviour,
+    /// not a language, and at 25 languages it stops reading as one if it just
+    /// sits at the top of the same list.
+    /// </summary>
+    public UiLanguageDisplayItem SystemOption { get; }
+
+    /// <summary>
+    /// The shipping languages, sorted by endonym.
+    /// </summary>
+    /// <remarks>
+    /// Sorted under the <em>invariant</em> culture, deliberately, not the current
+    /// UI culture: a list that reshuffles itself every time the user switches
+    /// language makes the row they just clicked jump out from under the cursor.
+    /// Sorting by endonym rather than English name is the other half of the same
+    /// idea — someone stranded in a language they cannot read is scanning for
+    /// their own language's spelling, not for its English name.
+    /// </remarks>
     public UiLanguageDisplayItem[] LanguageOptions { get; }
 
     [ObservableProperty]
@@ -32,12 +50,15 @@ public partial class InterfaceLanguageSettingsViewModel : SettingsSectionViewMod
         _uiLanguage = uiLanguage;
         _logger = logger ?? NullLogger<InterfaceLanguageSettingsViewModel>.Instance;
 
-        LanguageOptions =
-        [
-            new(SupportedUiLanguages.SystemSettingValue, Strings.Settings_InterfaceLanguage_System, SelectLanguageCommand),
-            .. SupportedUiLanguages.All.Select(l =>
-                new UiLanguageDisplayItem(l.CultureName, l.EndonymName, SelectLanguageCommand)),
-        ];
+        SystemOption = new(
+            SupportedUiLanguages.SystemSettingValue,
+            Strings.Settings_InterfaceLanguage_System,
+            SelectLanguageCommand);
+
+        LanguageOptions = SupportedUiLanguages.All
+            .OrderBy(l => l.EndonymName, StringComparer.InvariantCulture)
+            .Select(l => new UiLanguageDisplayItem(l.CultureName, l.EndonymName, SelectLanguageCommand))
+            .ToArray();
 
         RefreshLabels();
         UpdateSelection(SelectedSettingValue);
@@ -83,9 +104,8 @@ public partial class InterfaceLanguageSettingsViewModel : SettingsSectionViewMod
 
     private void RefreshLabels()
     {
-        var system = LanguageOptions[0];
-        system.Label = Strings.Settings_InterfaceLanguage_System;
-        system.Detail = _uiLanguage.SystemLanguage is { } shipped
+        SystemOption.Label = Strings.Settings_InterfaceLanguage_System;
+        SystemOption.Detail = _uiLanguage.SystemLanguage is { } shipped
             ? Strings.Format_Settings_InterfaceLanguage_SystemDetailFormat(shipped.EndonymName)
             : Strings.Settings_InterfaceLanguage_SystemDetailUnsupported;
 
@@ -95,6 +115,7 @@ public partial class InterfaceLanguageSettingsViewModel : SettingsSectionViewMod
 
     private void UpdateSelection(string settingValue)
     {
+        SystemOption.IsSelected = SystemOption.SettingValue == settingValue;
         foreach (var option in LanguageOptions)
             option.IsSelected = option.SettingValue == settingValue;
     }

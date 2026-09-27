@@ -12,6 +12,49 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+
+- **Parlotype now speaks 25 languages.** The interface is available in
+  Bulgarian, Croatian, Czech, Danish, Dutch, English, Estonian, Finnish,
+  French, German, Greek, Hungarian, Italian, Latvian, Lithuanian, Maltese,
+  Polish, Portuguese, Romanian, Russian, Slovak, Slovenian, Spanish, Swedish
+  and Ukrainian — the same 25 languages Parlotype can already transcribe. It
+  follows your Windows language automatically; pick a different one under
+  **Settings → Interface language**, and the whole app switches over without a
+  restart.
+
+  These translations have not yet been reviewed by native speakers. If
+  something reads oddly in your language, please
+  [open an issue](https://github.com/mdemin729/parlotype/issues) — a real
+  correction from someone who speaks it is worth more than anything we can
+  check ourselves.
+
+### Fixed
+
+- **Several settings pages kept the language the app started in.** If you
+  changed the interface language while Parlotype was running, the Help page's
+  hotkey list, the Updates page, and the Cloud providers, Data, llama.cpp and
+  Startup pages carried on in the old language until you restarted. They now
+  follow the switch like everything else.
+- **The built-in prompt's name** on Settings → Prompts was shown in English
+  whatever your interface language. Prompts you create yourself keep the name
+  you gave them, untouched.
+
+<details>
+<summary>Under the hood</summary>
+
+Translations now go
+through a brief/import pipeline — nobody hand-edits a satellite `.resx` — and
+the importer refuses a missing key, a damaged placeholder, or a string left in
+English. A structural test fails the build when a settings page composes copy in
+C# without refreshing it on a language change, which is what the six stale pages
+had in common. Twelve of the new languages independently reported that three
+English strings force a grammatical case onto a value substituted at runtime;
+that rewording is recorded in the ADR and is still to come
+([ADR-069](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/069-twenty-five-ui-languages.md)).
+
+</details>
+
 ## [0.5.2] — 2026-09-13
 
 ### Fixed
