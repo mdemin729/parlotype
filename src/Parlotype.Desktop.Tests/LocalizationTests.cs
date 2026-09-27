@@ -454,6 +454,53 @@ public class LocalizationTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void LlamaCppAppOwnedError_FollowsTheLanguage_ButProbeTextDoesNot()
+    {
+        // Review finding. This page's OnCultureChanged re-rendered StatusText and
+        // stopped there, on the stated assumption that ErrorMessage was external
+        // probe text — which was wrong: two of its writers are our own copy. The
+        // structural guard could not see it, because a class with *an* override
+        // satisfies that test however incomplete the override is.
+        Localizer.Instance.SetCulture(English);
+        var vm = new LlamaCppSettingsViewModel(new MockSettingsService());
+
+        vm.PortText = "not-a-port";
+        vm.RefreshServerInfoCommand.Execute(null);
+
+        Assert.Equal("Port must be a number between 1 and 65535.", vm.ErrorMessage);
+
+        var statusBefore = vm.StatusText;
+
+        Localizer.Instance.SetCulture(Russian);
+
+        // Diagnostic pairing: StatusText was already handled before this fix, so
+        // if it moves and ErrorMessage does not, the hook fired and the error was
+        // simply not covered. If neither moves, the hook never ran.
+        Assert.NotEqual(statusBefore, vm.StatusText);
+        Assert.Equal("Порт должен быть числом от 1 до 65535.", vm.ErrorMessage);
+    }
+
+    [AvaloniaFact]
+    public void DataPage_DoesNotClaimNothingIsDownloaded_BeforeItHasMeasured()
+    {
+        // Review finding. The retained byte count started at 0, which conflated
+        // "not measured yet" with "measured and empty" — so a language switch
+        // during the first measurement replaced the neutral placeholder with a
+        // claim about a directory nobody had looked in.
+        Localizer.Instance.SetCulture(English);
+        using var paths = new MockAppPaths();
+        var vm = new DataSettingsViewModel(
+            new MockSettingsService(), paths, new MockUserDialogService(), new MockShellService());
+
+        var placeholder = vm.ModelsSizeText;
+
+        Localizer.Instance.SetCulture(Russian);
+
+        Assert.Equal(placeholder, vm.ModelsSizeText);
+        Assert.DoesNotContain("скач", vm.ModelsSizeText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [AvaloniaFact]
     public void RuntimeRestartNote_IsOneTranslatableSentence()
     {
         // It used to be five <Run>s with the runtime names interleaved — a

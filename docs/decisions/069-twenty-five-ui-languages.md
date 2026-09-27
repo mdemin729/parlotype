@@ -176,6 +176,30 @@ Fixed the ADR-064 way — Platform supplies the identity (`IsBuiltIn`), Desktop 
 words — and the exemption list is now empty. **Prefer overriding the hook and narrowing
 inside it over exempting a class.**
 
+### A placeholder check must ask `string.Format`, not count braces
+
+Review found the validator's own blind spot, and it was the worst defect in the change.
+Comparing `\{(\d+)` index sets between the English and a translation waves through **three**
+distinct failures, all of which produce the same index set as a correct original:
+
+| translation | brace regex sees | what actually happens |
+|---|---|---|
+| `Schritt {0x} von {1}` | `0,1` | `FormatException` at runtime |
+| `Schritt {0 von {1}` | `0,1` | `FormatException` at runtime |
+| `Schritt {{0}} von {1}` | `0,1` | `{{0}}` is a **literal** `{0}`; argument 0 is silently dropped |
+
+So validity is now decided by calling `string.Format` — the parser that runs in production —
+and parity compares a **signature**: which sentinel arguments survive substitution. That is
+the only definition that treats an escaped brace correctly. `scripts/lib/CompositeFormat.ps1`
+is shared by the export, import, generation and check scripts; `LocalizationParityTests`
+carries the same rule in C#, since the two languages cannot share code.
+
+One refinement came from running the new check over the real tree rather than over test
+cases: it flagged `Settings_Prompts_Help_BuiltInBody` in all 25 languages at once. That key
+documents the Gemma prompt syntax and contains `{speech_lang}`/`{text_lang}`; it is never
+passed to `string.Format` at all. Named tokens are therefore masked before validation — with
+a pattern requiring a leading letter, so `{0x}` is still caught.
+
 ### Named tokens are not placeholders
 
 `Settings_Prompts_Help_BuiltInBody` documents `{speech_lang}` and `{text_lang}`, which the
@@ -226,9 +250,15 @@ about correct copy.
 `-Missing`/`-Merge` path is what makes it a small brief per language rather than a full
 pass; Phase 9 exercised it end-to-end on one key.
 
-**Adding the 26th language is one row and one pipeline run.** ADR-064's promise held: no
-markup, no view model, no `.csproj` changed across 22 languages, and `Strings.cs` is
-byte-identical throughout.
+**Adding the 26th language is one row and one pipeline run.** ADR-064's promise held in
+the sense that matters: **no per-language** markup, view model or `.csproj` change was
+needed for any of the 22, and `Strings.cs` did not move while they were added.
+
+Stated precisely, because the loose version is false and a reviewer caught it: this branch
+*does* change a view and a view model — the interface-language picker went from 4 rows to
+26 — and `Strings.cs` *does* gain one accessor, for the key phase 9 added. Neither is
+per-language work. The picker change would have been needed for the 4th language as much
+as the 25th, and the new accessor is an ordinary new string.
 
 **Published size grows 1.28 MB** — 24 satellites at ~55 KB each, produced by the SDK with
 no build change. Nothing in `Directory.Build.targets` filters them, though
@@ -236,8 +266,9 @@ no build change. Nothing in `Directory.Build.targets` filters them, though
 satellites live in `<culture>/`: no collision exists today, but the two namespaces are one
 unlucky RID apart.
 
-**Layout review is 500 images.** `LocalizedLayoutReviewTests` renders every page in every
-language behind `PARLOTYPE_LAYOUT_REVIEW=1`, gated because rendering many view trees leaves
+**Layout review is 600 images** — 24 pages (19 settings pages plus five warning states)
+across 25 languages. `LocalizedLayoutReviewTests` renders them behind
+`PARLOTYPE_LAYOUT_REVIEW=1`, gated because rendering many view trees leaves
 them bound to the `Localizer` singleton and destabilizes the culture-bound tests. That gate
 is load-bearing: Phase 9 began by writing a second, ungated copy of the harness — by someone
 who had not found the first — which broke eight tests in exactly the documented way. The

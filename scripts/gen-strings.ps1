@@ -28,6 +28,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+. (Join-Path $PSScriptRoot 'lib/CompositeFormat.ps1')
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $resxPath = Join-Path $repoRoot 'src/Parlotype.Desktop/Resources/Strings.resx'
 $outPath = Join-Path $repoRoot 'src/Parlotype.Desktop/Resources/Strings.cs'
@@ -83,6 +85,10 @@ foreach ($entry in $entries) {
     $null = $builder.AppendLine("    public static string $name => Localizer.Lookup(nameof($name));")
 
     # Composite format keys get a typed Format_ helper.
+    if ($malformed = Test-CompositeFormat $value) {
+        throw "Key '$name' $malformed"
+    }
+
     $indexes = [regex]::Matches($value, '\{(\d+)') |
         ForEach-Object { [int]$_.Groups[1].Value } |
         Sort-Object -Unique

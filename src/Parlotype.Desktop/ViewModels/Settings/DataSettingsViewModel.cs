@@ -249,9 +249,13 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
 
     /// <summary>
     /// The last measured size, retained so the label can be re-rendered in a new
-    /// language without walking the models directory again.
+    /// language without walking the models directory again. **Nullable on
+    /// purpose**: zero means "measured, and there is nothing there", which is a
+    /// different statement from "not measured yet". Conflating them made a
+    /// culture switch during the first measurement replace the placeholder with
+    /// "Nothing downloaded" for a directory that turned out to be full.
     /// </summary>
-    private long _lastMeasuredBytes;
+    private long? _lastMeasuredBytes;
 
     /// <summary>
     /// Re-renders the size label (ADR-064's live-switch rule). Only the
@@ -268,7 +272,12 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
     protected override void OnCultureChanged()
     {
         base.OnCultureChanged();
-        ModelsSizeText = Describe(_lastMeasuredBytes);
+
+        // Nothing to re-render before the first measurement: the placeholder is
+        // a dash, which needs no translation, and claiming "nothing downloaded"
+        // here would be an answer we do not have yet.
+        if (_lastMeasuredBytes is { } bytes)
+            ModelsSizeText = Describe(bytes);
     }
 
     private static string Describe(long bytes) => bytes switch

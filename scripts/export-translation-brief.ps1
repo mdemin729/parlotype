@@ -59,6 +59,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+. (Join-Path $PSScriptRoot 'lib/CompositeFormat.ps1')
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $resourcesDir = Join-Path $repoRoot 'src/Parlotype.Desktop/Resources'
 $neutralResx = Join-Path $resourcesDir 'Strings.resx'

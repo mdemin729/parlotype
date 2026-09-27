@@ -74,11 +74,7 @@ function Read-ResxEntries([string]$path) {
     return $map
 }
 
-function Get-Placeholders([string]$value) {
-    return ([regex]::Matches($value, '\{(\d+)') |
-        ForEach-Object { [int]$_.Groups[1].Value } |
-        Sort-Object -Unique) -join ','
-}
+. (Join-Path $PSScriptRoot 'lib/CompositeFormat.ps1')
 
 # ---------------------------------------------------------------- 1 + 2. Resx
 
@@ -110,10 +106,19 @@ foreach ($culture in $cultures) {
             continue
         }
 
-        $expected = Get-Placeholders $neutral[$key]
-        $actual = Get-Placeholders $translated[$key]
+        # string.Format decides validity, not a brace regex: "{0x}" and an
+        # unclosed "{0" both produce the neutral file's index set and then throw
+        # in production. Signatures then compare which arguments actually
+        # survive substitution, so an escaped "{{0}}" is not mistaken for one.
+        if ($malformed = Test-CompositeFormat $translated[$key]) {
+            $problems.Add("Strings.$culture.resx key '$key' $malformed")
+            continue
+        }
+
+        $expected = Get-FormatSignature $neutral[$key]
+        $actual = Get-FormatSignature $translated[$key]
         if ($expected -ne $actual) {
-            $problems.Add("Strings.$culture.resx key '$key' has placeholders [$actual] but the neutral file has [$expected].")
+            $problems.Add("Strings.$culture.resx key '$key' substitutes arguments [$actual] but the neutral file substitutes [$expected].")
         }
     }
 

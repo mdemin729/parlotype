@@ -82,7 +82,9 @@ public class LocalizationParityTests
     public void EveryLanguage_KeepsThePlaceholdersItWasGiven(string culture)
     {
         // A translation that drops {1} throws FormatException at runtime, in
-        // production, in the one language nobody on the team reads.
+        // production, in the one language nobody on the team reads. So does one
+        // that writes "{0x}" — which a brace-counting check cannot tell apart
+        // from "{0}". See FormatSignature.
         var neutral = ReadResx(NeutralPath());
         var translated = ReadResx(SatellitePath(culture));
 
@@ -91,8 +93,44 @@ public class LocalizationParityTests
             if (!translated.TryGetValue(key, out var translation))
                 continue; // reported by EveryLanguage_TranslatesEveryKey
 
-            Assert.Equal(Placeholders(value), Placeholders(translation));
+            var expected = FormatSignature(value);
+            Assert.True(
+                expected is not null,
+                $"Strings.resx key '{key}' is not a valid composite format string.");
+
+            var actual = FormatSignature(translation);
+            Assert.True(
+                actual is not null,
+                $"Strings.{culture}.resx key '{key}' is not a valid composite format string — "
+                + $"string.Format would throw on it: {translation}");
+
+            Assert.Equal(expected, actual);
         }
+    }
+
+    [Theory]
+    [InlineData("Step {0} of {1}", "0,1")]
+    [InlineData("no placeholders", "")]
+    [InlineData("Transcribe in {speech_lang} into {text_lang}.", "")]
+    [InlineData("Use {speech_lang} and also {0}", "0")]
+    public void FormatSignature_ReadsWhatIsActuallySubstituted(string value, string expected) =>
+        Assert.Equal(expected, FormatSignature(value));
+
+    [Theory]
+    [InlineData("Schritt {0x} von {1}")]      // malformed — string.Format throws
+    [InlineData("Schritt {0 von {1}")]        // unclosed — throws
+    [InlineData("{99}")]                      // absurd index
+    public void FormatSignature_RejectsWhatWouldThrowAtRuntime(string value) =>
+        Assert.Null(FormatSignature(value));
+
+    [Fact]
+    public void FormatSignature_TreatsAnEscapedBraceAsLiteralText()
+    {
+        // "{{0}}" renders as the literal "{0}" and substitutes nothing, so a
+        // translation that escapes a placeholder the English does not is
+        // dropping an argument. A brace regex reports [0,1] for both.
+        Assert.Equal("0,1", FormatSignature("Schritt {0} von {1}"));
+        Assert.Equal("1", FormatSignature("Schritt {{0}} von {1}"));
     }
 
     [Fact]
@@ -483,13 +521,62 @@ public class LocalizationParityTests
                 e => e.Attribute("name")!.Value,
                 e => e.Element("value")?.Value ?? string.Empty);
 
-    private static string Placeholders(string value) =>
-        string.Join(
-            ',',
-            Regex.Matches(value, @"\{(\d+)")
-                .Select(m => int.Parse(m.Groups[1].Value))
-                .Distinct()
-                .Order());
+    /// <summary>
+    /// Which argument indices a composite format actually substitutes, as a
+    /// comparable string — or <see langword="null"/> when the value is not a
+    /// valid format at all.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This used to be a regex over <c>\{(\d+)</c>, and that cannot see three
+    /// separate ways to break a format string, all of which produce the *same*
+    /// index set as a correct English original and reach production:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><c>"Schritt {0x} von {1}"</c> — <c>string.Format</c> throws.</item>
+    /// <item><c>"Schritt {0 von {1}"</c> — unclosed; throws.</item>
+    /// <item><c>"Schritt {{0}} von {1}"</c> — <c>{{0}}</c> is a *literal*
+    /// <c>{0}</c>, so argument 0 is silently dropped.</item>
+    /// </list>
+    /// <para>
+    /// So validity is decided by <c>string.Format</c> itself — the parser that
+    /// runs in production — and the signature is derived from which sentinel
+    /// arguments survive substitution, which is the only definition that treats
+    /// an escaped brace correctly. Mirrors
+    /// <c>scripts/lib/CompositeFormat.ps1</c>; the two are separate
+    /// implementations of one rule because one is PowerShell and one is C#, so a
+    /// change to either belongs in both.
+    /// </para>
+    /// </remarks>
+    private static string? FormatSignature(string value)
+    {
+        // Not every brace is a format item: Settings_Prompts_Help_BuiltInBody
+        // documents {speech_lang}/{text_lang}, which the prompt engine
+        // substitutes by name and string.Format never sees. The pattern requires
+        // a leading letter, so "{0x}" is not masked and still fails.
+        var masked = Regex.Replace(value, @"\{([A-Za-z_]\w*)\}", "$1");
+
+        const int maxIndex = 15;
+        if (Regex.Matches(masked, @"\{(\d+)").Select(m => int.Parse(m.Groups[1].Value)).Any(i => i > maxIndex))
+            return null;
+
+        var sentinels = Enumerable.Range(0, maxIndex + 1)
+            .Select(i => (object)$"\u0001{i}\u0001")
+            .ToArray();
+
+        try
+        {
+            var rendered = string.Format(masked, sentinels);
+            return string.Join(
+                ',',
+                Enumerable.Range(0, maxIndex + 1)
+                    .Where(i => rendered.Contains($"\u0001{i}\u0001", StringComparison.Ordinal)));
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>
     /// Walks up from the test assembly to the directory holding Parlotype.slnx.

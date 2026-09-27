@@ -52,6 +52,40 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         Error,
     }
 
+    /// <summary>
+    /// Which app-owned error is showing, if any.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="ErrorMessage"/> is not purely external probe text, which is
+    /// what this class was documented as assuming and what a reviewer caught:
+    /// two of its writers are our own copy (`Settings_LlamaCpp_PortRangeError`,
+    /// `Settings_LlamaCpp_ManualFolderRequiredError`). Enter an invalid port
+    /// under English, probe, then switch to Russian — the status line beside it
+    /// changed and the error did not. Text that arrives from the probe or an
+    /// exception is left exactly as it came: that is someone else's wording.
+    /// </remarks>
+    private AppErrorLabel _appErrorLabel = AppErrorLabel.None;
+
+    private enum AppErrorLabel
+    {
+        None,
+        PortRange,
+        ManualFolderRequired,
+    }
+
+    private void SetAppError(AppErrorLabel label)
+    {
+        _appErrorLabel = label;
+        ErrorMessage = DescribeAppError(label);
+    }
+
+    private static string? DescribeAppError(AppErrorLabel label) => label switch
+    {
+        AppErrorLabel.PortRange => Strings.Settings_LlamaCpp_PortRangeError,
+        AppErrorLabel.ManualFolderRequired => Strings.Settings_LlamaCpp_ManualFolderRequiredError,
+        _ => null,
+    };
+
     private void SetStatus(ServerStatusLabel label)
     {
         _statusLabel = label;
@@ -78,6 +112,9 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     {
         base.OnCultureChanged();
         StatusText = Describe(_statusLabel);
+
+        if (_appErrorLabel != AppErrorLabel.None)
+            ErrorMessage = DescribeAppError(_appErrorLabel);
     }
 
     [ObservableProperty]
@@ -240,6 +277,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     private async Task RefreshServerInfoAsync()
     {
         IsRefreshing = true;
+        _appErrorLabel = AppErrorLabel.None;
         ErrorMessage = null;
 
         try
@@ -248,7 +286,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
             {
                 SetStatus(ServerStatusLabel.InvalidPort);
                 StatusColor = "Red";
-                ErrorMessage = Strings.Settings_LlamaCpp_PortRangeError;
+                SetAppError(AppErrorLabel.PortRange);
                 IsConnected = false;
                 HasPortConflict = false;
                 return;
@@ -282,6 +320,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     StatusColor = "Orange";
                     IsConnected = false;
                     HasPortConflict = true;
+                    _appErrorLabel = AppErrorLabel.None;
                     ErrorMessage = info.ErrorMessage;
                     ClearServerProps();
                     break;
@@ -299,6 +338,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
                     StatusColor = "Red";
                     IsConnected = false;
                     HasPortConflict = false;
+                    _appErrorLabel = AppErrorLabel.None;
                     ErrorMessage = info.ErrorMessage;
                     ClearServerProps();
                     break;
@@ -309,6 +349,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
             _logger.LogError(ex, "Failed to probe llama-server");
             SetStatus(ServerStatusLabel.Error);
             StatusColor = "Red";
+            _appErrorLabel = AppErrorLabel.None;
             ErrorMessage = ex.Message;
             IsConnected = false;
             HasPortConflict = false;
@@ -326,7 +367,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     {
         if (!int.TryParse(PortText, out var port) || port is <= 0 or > 65535)
         {
-            ErrorMessage = Strings.Settings_LlamaCpp_PortRangeError;
+            SetAppError(AppErrorLabel.PortRange);
             return;
         }
 
@@ -339,6 +380,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         await _settings.SetAsync(SettingsKeys.LlamaCppPort, port.ToString());
         await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, folder);
         _logger.LogInformation("llama.cpp settings saved: port={Port}, folder={Folder}", port, folder);
+        _appErrorLabel = AppErrorLabel.None;
         ErrorMessage = null;
         ManualFolderPath = folder;
 
@@ -367,6 +409,7 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         await _settings.SetAsync(SettingsKeys.LlamaCppPort, DefaultPort.ToString());
         await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, "");
         _logger.LogInformation("llama.cpp settings reset to defaults");
+        _appErrorLabel = AppErrorLabel.None;
         ErrorMessage = null;
         ManualFolderPath = "";
 
@@ -524,11 +567,12 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         // text would activate a manual install the recognizer cannot see.
         if (string.IsNullOrWhiteSpace(ManualFolderPath))
         {
-            ErrorMessage = Strings.Settings_LlamaCpp_ManualFolderRequiredError;
+            SetAppError(AppErrorLabel.ManualFolderRequired);
             await ReloadInstalledAndActiveAsync();
             return;
         }
 
+        _appErrorLabel = AppErrorLabel.None;
         ErrorMessage = null;
         await _registry.SetActiveAsync(installId: null, LlamaServerSource.Manual);
         await UnloadRecognizerAsync();

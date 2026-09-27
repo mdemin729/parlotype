@@ -81,11 +81,7 @@ foreach ($path in $In) {
     }
 }
 
-function Get-Placeholders([string]$value) {
-    return ([regex]::Matches($value, '\{(\d+)') |
-        ForEach-Object { [int]$_.Groups[1].Value } |
-        Sort-Object -Unique) -join ','
-}
+. (Join-Path $PSScriptRoot 'lib/CompositeFormat.ps1')
 
 # Not every brace in this file is a String.Format slot. The Gemma 4 prompt help
 # documents {speech_lang} and {text_lang}, which the prompt engine substitutes by
@@ -191,10 +187,23 @@ foreach ($node in $doc.SelectNodes('/root/data')) {
         continue
     }
 
-    $expected = Get-Placeholders $english
-    $actual = Get-Placeholders $translation
+    # Validity before parity. A malformed format ("{0x}", an unclosed "{0")
+    # produces the *same* index set as the English under a naive brace regex and
+    # then throws FormatException in production — so ask string.Format, which is
+    # the parser that will actually run.
+    if ($malformed = Test-CompositeFormat $translation) {
+        $problems.Add("key '$key' $malformed")
+        continue
+    }
+
+    # Signatures, not brace counts: "{{0}}" is a literal "{0}" and substitutes
+    # nothing, so a translation that escapes a placeholder the English does not
+    # silently drops an argument. Comparing which arguments survive substitution
+    # is the only comparison that sees that.
+    $expected = Get-FormatSignature $english
+    $actual = Get-FormatSignature $translation
     if ($expected -ne $actual) {
-        $problems.Add("key '$key' has placeholders [$actual] but the English has [$expected]")
+        $problems.Add("key '$key' substitutes arguments [$actual] but the English substitutes [$expected]")
         continue
     }
 
