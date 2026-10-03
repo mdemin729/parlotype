@@ -12,6 +12,8 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-10-03
+
 ### Added
 
 - **Parlotype now speaks 25 languages.** The interface is available in
@@ -553,7 +555,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.6.0
 [0.5.2]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.2
 [0.5.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.1
 [0.5.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.0
