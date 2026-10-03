@@ -156,7 +156,7 @@ var text = stream.Result.Text;
   speech-engine section; `memory/decisions/_index.md` row; knowledge note
   `memory/knowledge/sherpa-onnx.md` (NuGet CPU-only, native lib layout, any
   spike quirks).
-- `CLAUDE.md`: mention third engine in Project Overview + settings list.
+- `AGENTS.md`: mention third engine in Project Overview + settings list.
 
 ## Sequencing & estimate
 

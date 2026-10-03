@@ -599,7 +599,7 @@ public class LocalizationTests : IDisposable
         Localizer.Instance.SetCulture(Russian);
 
         // "Whisper" itself is an engine identifier and stays untranslated in
-        // every language (CLAUDE.md) — the description is ordinary prose.
+        // every language (AGENTS.md) — the description is ordinary prose.
         Assert.NotEqual(englishDescription, whisperCard.Description);
         Assert.Equal(Strings.Settings_Engine_Whisper_Name, whisperCard.DisplayName);
         Assert.Equal(Strings.Settings_Engine_Whisper_Description, whisperCard.Description);

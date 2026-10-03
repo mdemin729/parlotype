@@ -226,7 +226,7 @@ Grid rows: [HeaderRow, PickerRow]
 
 - Use `Classes.active="{Binding IsSourcePickerOpen}"` etc. and `<UserControl.Styles>` to
   paint the green focus border on the active button (mirrors the existing
-  `Classes.recording` pattern on the microphone button, per `CLAUDE.md`).
+  `Classes.recording` pattern on the microphone button, per `AGENTS.md`).
 - The disabled-button greying for the arrow + target can use a style on
   `Classes.disabled` or simply rely on Avalonia's default disabled visual; pick during
   implementation.

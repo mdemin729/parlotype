@@ -56,4 +56,4 @@ into Settings).
       coverage for capability flags, strip hide/reappear, window resize,
       preference-preserving round trip
 - [x] ADR-042, vault updates (core/platform/desktop, subsystems, decisions
-      index), CLAUDE.md overview
+      index), AGENTS.md overview

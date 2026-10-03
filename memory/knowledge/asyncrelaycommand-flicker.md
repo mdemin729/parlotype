@@ -50,7 +50,7 @@ An unrelated, real defect was fixed first in the same investigation
 down and rebuilding the whole settings page on the same `CultureChanged` event) and did
 **not** resolve the report, because it was a different bug in the same feature. This pattern
 — multiple `UiLanguageDisplayItem`/`WhisperModelDisplayItem`-style rows sharing one command —
-is common across Parlotype's settings pages (CLAUDE.md's "Flyout bindings" convention), so
+is common across Parlotype's settings pages (AGENTS.md's "Flyout bindings" convention), so
 **any list of buttons/rows sharing a command is the first thing to check** when the reported
 symptom is "the list flashes/flickers," before looking at collection rebuilds, DynamicResource,
 or rendering. The regression test can't just check the view model's final state — it has to

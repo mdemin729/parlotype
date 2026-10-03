@@ -1,0 +1,65 @@
+---
+title: Parlotype Memory Vault
+type: router
+status: active
+last_updated: 2026-09-07
+summary: Root router for AI agent orientation in the Parlotype voice-to-text project
+---
+
+# Parlotype — Agent Memory Vault
+
+Parlotype is a local-by-default voice-to-text desktop app. On-device speech recognition is the default: Parakeet TDT v3 via sherpa-onnx (default engine, CPU-only — ADR-041/042), Whisper.net, or Gemma 4 via llama.cpp. Two opt-in BYOK cloud engines ship as well — OpenAI-compatible and xAI Grok STT (ADR-032/043). Built with .NET 10 + Avalonia UI.
+
+## Quick Commands
+
+```bash
+dotnet build Parlotype.slnx                    # Build (zero warnings required)
+dotnet test                                     # All tests
+dotnet run --project src/Parlotype.Desktop      # Launch app
+```
+
+## Navigation
+
+| Need to know about... | Read this |
+|----------------------|-----------|
+| Full vault contents | [[vault-map]] |
+| Domain terminology | [[glossary]] |
+| Project architecture | [[architecture/_index]] |
+| Audio pipeline flow | [[audio-pipeline]] |
+| Individual projects | [[services/_index]] |
+| Coding conventions | [[conventions/_index]] |
+| Past design decisions | [[decisions/_index]] |
+| Session handoffs | [[sessions/_template]] |
+| Older session notes | `sessions/archive/` (>30 days, pruned from the working set) |
+| Learned knowledge | [[knowledge/_index]] |
+| Agent skills | `.claude/skills/` |
+
+## Dependency Direction
+
+```
+Desktop → Platform → Core
+Benchmark → Platform → Core
+Tests → Core, Platform
+Desktop.Tests → Desktop, Core
+Benchmark.Tests → Benchmark, Core
+```
+
+## Key Architectural Constraints
+
+- **Local-by-default**: on-device speech recognition is the default and only baseline guarantee. Cloud / online providers (when added) are opt-in, clearly indicated in the UI, and use user-supplied credentials (BYOK) — see [[../docs/decisions/032-online-speech-providers-positioning|ADR-032]] and [[knowledge/brand-positioning]]
+- **Warnings as errors**: `TreatWarningsAsErrors=true` in `Directory.Build.props`
+- **Interfaces in Core, implementations in Platform**: never add platform packages to Core
+- **All services are singletons** registered in `PlatformServiceExtensions.cs`
+- **Whisper model lifecycle**: never load multiple models simultaneously; sequential load→unload→load is supported via `UnloadAsync()` (ADR-017)
+
+## Definition of Done
+
+A non-trivial change isn't finished when the build is green — it's finished when the next agent can find it. Before declaring complete:
+
+1. **Build/tests/behaviour verified** (zero warnings, tests pass, end-to-end exercised).
+2. **ADR required** if the change adds a Core interface, a `PlatformServiceExtensions` registration, a new `.csproj` dependency, an OS/build-flag-conditional behaviour, a new native/P-Invoke call, or touches audio/hotkey/settings/Whisper subsystems.
+3. **Vault updated** when public symbols/services/subsystems change: `memory/services/<project>.md`, `memory/decisions/_index.md`, and `memory/architecture/subsystems.md` as applicable.
+4. **Knowledge captured** for non-derivable facts (third-party quirks, environment gotchas) under `memory/knowledge/`.
+5. **Ask, don't prune silently** — if deferring (2)–(4), surface that to the user via `ask_user` before completing.
+
+Full rules and triggers: see "Definition of Done" section in `AGENTS.md`.

@@ -45,12 +45,12 @@ avoided "so the CLI build stays deterministic under warnings-as-errors"
 free; at 450 it is not. Hence the generator-script-plus-parity-test approach rather than
 either extreme.
 
-**Compiled bindings are mandatory.** CLAUDE.md: *"Always use `x:CompileBindings="True"`
+**Compiled bindings are mandatory.** AGENTS.md: *"Always use `x:CompileBindings="True"`
 and `x:DataType`. Never use `{ReflectionBinding}`."* A localizer-indexer binding is
 structurally what that rule forbids, which is why live-vs-restart is called out as a
 decision needing an ADR rather than settled silently in a markup extension.
 
-**Flyouts are disconnected from the visual tree.** CLAUDE.md documents the existing
+**Flyouts are disconnected from the visual tree.** AGENTS.md documents the existing
 workaround — commands embedded in display-item wrappers (`MicrophoneDisplayItem`,
 `WhisperModelDisplayItem`) rather than `$parent` traversal. Any live-refresh mechanism
 has to work through those wrappers too, since a flyout's `Localizer` binding lives

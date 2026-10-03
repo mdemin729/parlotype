@@ -39,7 +39,7 @@ UI thread and tripped Avalonia's thread affinity check.
 
 1. **`Localizer.SetCulture` marshals** — it raises `CultureChanged` and invalidates entries
    through `Dispatcher.UIThread`, because subscribers rebuild `ObservableCollection`s and
-   notify bindings. This is the convention CLAUDE.md already states for background threads.
+   notify bindings. This is the convention AGENTS.md already states for background threads.
 2. **Every culture-changing test is `[AvaloniaFact]`**, which is what actually made the
    suite deterministic. It also matches reality: the app only ever calls `SetCulture` from
    the UI thread.

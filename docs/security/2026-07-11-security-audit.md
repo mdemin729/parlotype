@@ -55,7 +55,7 @@ logging. Regression test asserts the pipeline path emits no transcript text
 into captured logs.
 
 Residual risk: a future log statement could reintroduce the leak — convention
-recorded in `CLAUDE.md`-adjacent vault conventions: *never log recognizer
+recorded in `AGENTS.md`-adjacent vault conventions: *never log recognizer
 output text*.
 
 ### S2 — No integrity verification on model downloads (High, fixed)

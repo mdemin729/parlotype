@@ -110,7 +110,7 @@ independent ones already agree.
   because it needs the DI container. Previews render in the default variant — which is the
   better default anyway: a design surface should not depend on one developer's settings.
 - Design-time data is unaffected: `<Design.DataContext>` with parameterless ViewModel
-  constructors never went through the container (existing convention, `CLAUDE.md`).
+  constructors never went through the container (existing convention, `AGENTS.md`).
 - Anything added to `OnFrameworkInitializationCompleted` from now on is automatically covered.
   The guard is the first statement, so there is no ordering rule to remember.
 - ADR-062's watchdog and the `desktop.Exit` ordering it introduced stay as they are; they
