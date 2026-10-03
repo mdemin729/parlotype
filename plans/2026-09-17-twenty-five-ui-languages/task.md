@@ -239,7 +239,7 @@ unless overridden.
 
 ## Definition of Done
 
-Beyond the repo-wide bar in `CLAUDE.md`:
+Beyond the repo-wide bar in `AGENTS.md`:
 
 - `pwsh scripts/check-localization.ps1` passes with 24 satellite files.
 - `pwsh scripts/gen-strings.ps1` produces no diff — the accessor is culture-agnostic and

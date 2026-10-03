@@ -232,7 +232,7 @@ in Desktop.Tests updates accordingly.
 - Inline conflict/warning text per the two-tier detector (§7): reserved →
   binding rejected; warning tier → accepted with amber note (existing
   `ConflictWarning` styling).
-- Follow the flyout-lifecycle and display-item conventions from CLAUDE.md
+- Follow the flyout-lifecycle and display-item conventions from AGENTS.md
   (commands embedded in display-item wrappers, no `$parent` bindings).
 
 ## 10. Test plan

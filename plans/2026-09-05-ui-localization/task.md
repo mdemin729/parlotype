@@ -29,7 +29,7 @@ Two constraints from the current code make this non-trivial:
    to be generated, and the generation must survive `TreatWarningsAsErrors` on a plain
    CLI build (the reason ADR-056 avoided the designer in the first place).
 2. **`x:CompileBindings="True"` is mandatory and `{ReflectionBinding}` is banned**
-   (CLAUDE.md). Live language switching wants a binding to a localizer indexer, which
+   (AGENTS.md). Live language switching wants a binding to a localizer indexer, which
    is exactly the shape the ban targets. This needs an explicit, narrow exemption or a
    restart-required design — a decision, not an implementation detail.
 
@@ -92,7 +92,7 @@ independent of each other; everything else is sequential.
       verbatim-English-translation check — so `dotnet test` and the release gate enforce
       it, not just Claude sessions; `.claude/skills/localization/SKILL.md`;
       `PostToolUse` + `Stop` hooks in a new checked-in `.claude/settings.json` via
-      `scripts/hooks/localization-guard.ps1`; CLAUDE.md Localization section and a sixth,
+      `scripts/hooks/localization-guard.ps1`; AGENTS.md Localization section and a sixth,
       non-deferrable Definition-of-Done item; memory vault updated.
       No separate CI step: the repo has no general workflow, and `release.yml`'s existing
       `dotnet test` gate now covers all three checks.
@@ -192,7 +192,7 @@ independent of each other; everything else is sequential.
    `Binding` to `ReflectionBinding` and added `CompiledBinding.Create<TIn, TOut>(expr, source)`.
    Giving each key its own `LocalizedString` object makes the binding expression a plain
    property access (`s => s.Value`), so `{loc:Tr}` is a **compiled** binding and the
-   CLAUDE.md rule stands untouched. The trade-off the plan priced in was never paid.
+   AGENTS.md rule stands untouched. The trade-off the plan priced in was never paid.
 2. **Tray menu** — confirmed: `NativeMenu` headers are built once and need an explicit
    rebuild. Deferred to Phase 3a, where the tray copy is extracted; `Localizer.CultureChanged`
    is the hook.

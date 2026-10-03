@@ -37,7 +37,7 @@ while IFS= read -r file; do
     echo "  MISSING: ${file#$VAULT_DIR/}"
     missing=$((missing + 1))
   fi
-done < <(find "$VAULT_DIR" -name "*.md" -not -path "*/.obsidian/*" -not -path "*/scripts/*" -not -name "CLAUDE.md")
+done < <(find "$VAULT_DIR" -name "*.md" -not -path "*/.obsidian/*" -not -path "*/scripts/*" -not -name "AGENTS.md" -not -name "CLAUDE.md")
 
 if [ "$missing" -eq 0 ]; then
   echo "  All notes have frontmatter."

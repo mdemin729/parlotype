@@ -97,7 +97,7 @@ summoned it. That one rule is what makes a settings toggle unnecessary (see Q2).
 - The escape valve already exists and needs no explanation. Want the widget parked on
   screen? Open it from the tray, or click it once — both make it user-owned, and
   user-owned never auto-hides. That is discoverable by doing, not by reading a checkbox.
-- Every user-facing string costs three resx files (CLAUDE.md's localization rule), so a
+- Every user-facing string costs three resx files (AGENTS.md's localization rule), so a
   toggle is never one line here.
 - A *duration* control is the worse half of the idea in any case: nobody knows whether
   they want 1.2 s or 2.0 s, and hover-to-pause removes the reason to care.

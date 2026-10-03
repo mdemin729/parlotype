@@ -12,7 +12,7 @@ summary: Master index of the entire Parlotype memory vault
 
 ```
 memory/
-├── CLAUDE.md                 # Root router (always loaded first)
+├── AGENTS.md                 # Root router (always loaded first)
 ├── _index/
 │   ├── vault-map.md          # This file — master index
 │   └── glossary.md           # Domain terminology

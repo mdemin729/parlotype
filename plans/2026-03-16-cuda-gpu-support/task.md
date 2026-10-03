@@ -88,7 +88,7 @@ The loaded runtime is logged at startup. `RuntimeOptions.LoadedLibrary` reports 
 ### Phase 5 — Documentation & ADR
 
 - [ ] **P5.1** Create ADR `012-cuda-gpu-acceleration.md` capturing: runtime selection strategy, static `RuntimeOptions` constraint, conditional NuGet reference pattern, fallback behavior.
-- [ ] **P5.2** Update `CLAUDE.md` with CUDA build notes (e.g., `dotnet build -p:EnableCuda=false` for CPU-only builds).
+- [ ] **P5.2** Update `AGENTS.md` with CUDA build notes (e.g., `dotnet build -p:EnableCuda=false` for CPU-only builds).
 
 ## Out of scope
 

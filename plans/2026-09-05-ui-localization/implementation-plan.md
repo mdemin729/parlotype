@@ -12,7 +12,7 @@ folder, one branch, one PR.
 >   cost of live switching. Avalonia 12 turned out to expose
 >   `CompiledBinding.Create<TIn, TOut>(expr, source)`, and giving each key its own
 >   `LocalizedString` makes the expression a plain property access — so `{loc:Tr}` is a
->   compiled binding and CLAUDE.md's rule stands untouched. Ignore the indexer-binding
+>   compiled binding and AGENTS.md's rule stands untouched. Ignore the indexer-binding
 >   sketch and the exemption paragraph.
 > - **No separate CI step.** The repo has no general workflow; `release.yml`'s existing
 >   `dotnet test` gate covers all the checks, which is why they were also written as xUnit
@@ -59,7 +59,7 @@ exactly one view migrated. Everything after this phase is repetition.
 | | Live (recommended) | Restart required |
 |---|---|---|
 | AXAML | `{loc:Tr Key}` to a binding | `{loc:Tr Key}` to a constant string |
-| CLAUDE.md conflict | needs a scoped `{ReflectionBinding}` exemption in the ADR | none |
+| AGENTS.md conflict | needs a scoped `{ReflectionBinding}` exemption in the ADR | none |
 | Tray menu | needs explicit rebuild on change | free |
 | UX | matches Theme, which already switches live | a second "Restart required" panel |
 
@@ -151,7 +151,7 @@ Both.
 ### Also in this phase
 
 - CI: run the script in the build workflow next to `dotnet test`.
-- `CLAUDE.md`: a Localization section, and a seventh Definition-of-Done item — *UI text
+- `AGENTS.md`: a Localization section, and a seventh Definition-of-Done item — *UI text
   changes update every supported locale*.
 - Memory vault: a Localization section in `memory/architecture/subsystems.md`;
   `Localizer` / `TrExtension` / `UiLanguageService` listed in

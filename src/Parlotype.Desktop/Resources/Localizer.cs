@@ -18,7 +18,7 @@ namespace Parlotype.Desktop.Resources;
 /// One instance per key, created on first use and kept for the process lifetime by
 /// <see cref="Localizer"/>. This exists so that <c>{loc:Tr}</c> can bind to a plain
 /// property: an indexer or a method call would force a reflection binding, which
-/// the project bans (CLAUDE.md). <see cref="Value"/> is an ordinary CLR property,
+/// the project bans (AGENTS.md). <see cref="Value"/> is an ordinary CLR property,
 /// so the binding is compiled like every other binding in the app.
 /// </remarks>
 public sealed partial class LocalizedString : ObservableObject
@@ -142,7 +142,7 @@ public sealed class Localizer
 
         // Everything below reaches UI-affine state — LocalizedString notifies
         // bindings, and CultureChanged subscribers rebuild ObservableCollections
-        // (CLAUDE.md: background-thread mutations must dispatch to the UI
+        // (AGENTS.md: background-thread mutations must dispatch to the UI
         // thread). SetCulture is called from the UI thread in the app, where
         // Invoke runs inline; the dispatch exists for every other caller.
         if (Dispatcher.UIThread.CheckAccess())

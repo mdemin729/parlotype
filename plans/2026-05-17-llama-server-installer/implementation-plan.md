@@ -230,7 +230,7 @@ Headless UI tests in `Parlotype.Desktop.Tests` using the new mocks.
 
 ## Definition of Done checklist
 
-Per [CLAUDE.md](../../CLAUDE.md) §Definition of Done:
+Per [AGENTS.md](../../AGENTS.md) §Definition of Done:
 
 1. ☐ `dotnet build Parlotype.slnx` clean (zero warnings) and `dotnet test` green after every phase.
 2. ☐ End-to-end manual verification on Windows (see [task.md](task.md) §Verification, steps 1-12).

@@ -5,7 +5,7 @@ status: active
 tags: [agent, skills, claude, copilot, session-management]
 created: 2026-04-30
 last_updated: 2026-05-04
-summary: How Claude/Copilot skill auto-discovery actually behaves, and why per-session protocols belong in CLAUDE.md rather than description-triggered skills.
+summary: How Claude/Copilot skill auto-discovery actually behaves, and why per-session protocols belong in AGENTS.md rather than description-triggered skills.
 ---
 
 # Agent Skills & Per-Session Protocols
@@ -37,7 +37,7 @@ The agent rarely reasons "I am starting a session" or "I am ending a session"
 unless prompted, so a session-lifecycle skill cannot be trusted to fire on its
 own.
 
-Consequence: **always-on per-session protocols belong in `CLAUDE.md`**, which
+Consequence: **always-on per-session protocols belong in `AGENTS.md`**, which
 is loaded unconditionally on every turn. Description-triggered skills work
 well for *topic*-driven activation (e.g. "I am debugging the audio pipeline")
 but not for *temporal* activation (e.g. "the session is starting / ending").
@@ -46,14 +46,14 @@ but not for *temporal* activation (e.g. "the session is starting / ending").
 
 | Where it lives | What goes there |
 |----------------|-----------------|
-| `CLAUDE.md` | Invariants and protocols that must apply every session/turn (Definition of Done, Session Lifecycle summary, hard architectural rules). |
+| `AGENTS.md` | Invariants and protocols that must apply every session/turn (Definition of Done, Session Lifecycle summary, hard architectural rules). |
 | `.claude/skills/<x>/SKILL.md` | Topic-triggered workflows the agent should auto-load when the user's request matches (debug-pipeline, implement-feature, obsidian-markdown, release-notes). |
 
 `release-notes` is the clearest case of the topic-triggered pattern working: "we
 are cutting a release" is something the agent *does* reason about explicitly, and
 the skill carries editorial rules (what counts as user-facing, which words are
-banned in a bullet) that would be dead weight in `CLAUDE.md` on every other turn.
+banned in a bullet) that would be dead weight in `AGENTS.md` on every other turn.
 
 ## See also
 - `.claude/skills/session-management/SKILL.md`
-- `CLAUDE.md` → "Session Lifecycle"
+- `AGENTS.md` → "Session Lifecycle"

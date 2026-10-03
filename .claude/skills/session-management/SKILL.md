@@ -7,7 +7,7 @@ description: Use at the start or end of a working session, or when distilling le
 
 ## Session Start Protocol
 
-1. Read `memory/CLAUDE.md` for orientation
+1. Read `memory/AGENTS.md` for orientation
 2. Check `memory/sessions/` for the most recent session handoff
 3. Read the **Next Action** from the last session to understand where to pick up
 4. Check `memory/knowledge/_index.md` for recently learned facts

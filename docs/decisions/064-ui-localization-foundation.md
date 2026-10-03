@@ -25,7 +25,7 @@ expensive to revisit once several hundred keys exist.
 keys and collapses at 450.
 
 **Live switching versus restart.** The project mandates `x:CompileBindings="True"` and bans
-`{ReflectionBinding}` (CLAUDE.md). A localizer bound through an indexer or a method call is
+`{ReflectionBinding}` (AGENTS.md). A localizer bound through an indexer or a method call is
 precisely the shape that ban targets, so live switching looked like it would need a scoped
 exemption — and the alternative, a restart prompt, would be the app's second one after
 `RuntimePreference`.
