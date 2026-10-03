@@ -212,3 +212,10 @@ Used real Windows 10/11 Hungarian UI wording rather than literal translations fo
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Alapértelmezett (szó szerinti átirat)"** — verbatim/word-for-word rendered as *szó szerinti (word-for-word)*, paired with the already-established *átirat* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Tartsd lenyomva: jobb Ctrl`.**
+
+Side is now lowercase after the colon: `jobb {0}` / `bal {0}`. `Conflict_AlreadyBoundFormat` quotes the gesture.

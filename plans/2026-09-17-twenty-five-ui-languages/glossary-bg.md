@@ -258,3 +258,10 @@ English word standing next to them.
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"По подразбиране (дословно транскрибиране)"** — verbatim/word-for-word rendered as *дословно (word-for-word)*, paired with the already-established *транскрибиране* for transcription; no new terms introduced.
 - **Fix:** `Settings_Hotkeys_Recorder_Idle` was in the formal 2pl imperative (`Запишете комбинация…`), breaking the button-label carve-out documented above — corrected to the 2sg imperative **`Запиши комбинация…`**, matching `Запази`/`Изтрий`/`Добави`/`Провери`.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Задръжте десния Ctrl`.**
+
+Side is now `десния {0}` / `левия {0}` (definite masculine, object of the imperative), lowercase; it was `Десен {0}`. `Conflict_AlreadyBoundFormat` quotes the imperative gesture and names the mode with a noun — `Комбинацията „{0}“ вече е обвързана с режим {1}.` — because an imperative cannot be the subject, and `с {1}` broke on `задържане` (needs `със`).

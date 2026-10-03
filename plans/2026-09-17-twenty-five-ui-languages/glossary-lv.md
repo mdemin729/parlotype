@@ -201,3 +201,10 @@ Used real Latvian Windows 10/11 UI wording rather than literal translations for:
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Noklusējuma (burtiska transkripcija)"** — verbatim/word-for-word rendered as *burtiska (literal)*, paired with the already-established *transkripcija* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Turēt: labais Ctrl`.**
+
+Side is now lowercase after the colon: `labais {0}` / `kreisais {0}`. `Conflict_AlreadyBoundFormat` quotes the gesture.

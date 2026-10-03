@@ -224,3 +224,10 @@ no translated value over 25 characters is byte-identical to the English source.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Zadano (doslovno prepisivanje)"** — verbatim/word-for-word rendered as *doslovno (word-for-word)*, paired with the already-established *prepisivanje* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Drži desni Ctrl`.**
+
+Side is now `desni {0}` / `lijevi {0}`, lowercase (accusative = nominative for masculine inanimate). `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `„{0}” je već dodijeljeno načinu rada: {1}.`

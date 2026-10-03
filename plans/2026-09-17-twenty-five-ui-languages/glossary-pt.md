@@ -148,3 +148,10 @@ translated from description rather than a screenshot.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predefinição (transcrição literal)"** — verbatim/word-for-word rendered as *literal*, paired with the already-established *transcrição* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Manter Ctrl direito premido`.**
+
+Side unchanged. `Conflict_AlreadyBoundFormat` is now `{0} já está associado ao modo {1}.` — `associado a alternância` needed `à`.

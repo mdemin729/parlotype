@@ -199,3 +199,10 @@ Used real Lithuanian Windows 10/11 UI wording rather than literal translations f
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Numatytoji (pažodinė transkripcija)"** — verbatim/word-for-word rendered as *pažodinė (word-for-word)*, paired with the already-established *transkripcija* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Laikykite dešinįjį Ctrl`.**
+
+Side is now **accusative**, lowercase: `dešinįjį {0}` / `kairįjį {0}` — both gesture verbs are imperatives governing the accusative. The earlier note that `{0}` stays a bare nominative object applied to the key name only, never to the side adjective. `Conflict_AlreadyBoundFormat` quotes the imperative gesture.

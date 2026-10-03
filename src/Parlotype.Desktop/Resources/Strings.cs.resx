@@ -1144,11 +1144,11 @@ Vaše nastavení a klíče API zůstanou zachovány. Modely se při dalším dik
     <value>{0} – {1}</value>
   </data>
   <data name="Settings_Hotkeys_Modifier_LeftFormat" xml:space="preserve">
-    <value>Levý {0}</value>
+    <value>levý {0}</value>
     <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
   </data>
   <data name="Settings_Hotkeys_Modifier_RightFormat" xml:space="preserve">
-    <value>Pravý {0}</value>
+    <value>pravý {0}</value>
     <comment>{0} is a key name such as "Ctrl" — never translated. Word order is free: English puts the side first, Spanish puts it last.</comment>
   </data>
   <data name="Settings_Hotkeys_Conflict_Invalid" xml:space="preserve">

@@ -203,3 +203,10 @@ inside `Settings_Prompts_Help_BuiltInBody` are preserved verbatim, and no value 
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standaard (woordelijke transcriptie)"** — verbatim/word-for-word rendered as *woordelijke (word-for-word)*, paired with the already-established *transcriptie* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Houd rechter Ctrl ingedrukt`.**
+
+Side is now `rechter {0}` / `linker {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `“{0}” is al gekoppeld aan {1}.`

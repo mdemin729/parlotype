@@ -199,3 +199,10 @@ Used the actual Slovak Windows 10/11 UI wording rather than literal translations
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predvolené (doslovný prepis)"** — verbatim/word-for-word rendered as *doslovný (literal)*, paired with the already-established *prepis* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Podržte pravý Ctrl`.**
+
+Side is now `pravý {0}` / `ľavý {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `„{0}“ je už priradené k režimu: {1}.`
