@@ -176,6 +176,12 @@ words go:
 | Russian | `правого Ctrl` (genitive) | `Удержание правого Ctrl` |
 | Spanish | `Ctrl derecho` (**after**) | `Mantener Ctrl derecho` |
 
+The side word is **mid-phrase**: write it lowercase (`pravý`, `højre`, `oikea`), in the case
+the gesture verb governs — Greek genitive `δεξιού`, Lithuanian accusative `dešinįjį`. And a
+gesture that is an imperative or a `Label: key` cannot be the subject of
+`Settings_Hotkeys_Conflict_AlreadyBoundFormat`, so quote it there. `LocalizationParityTests`
+catches a capital; nothing catches a wrong case, so render the string and read it.
+
 `HotkeyText` (Desktop) does this. Core's `HotkeyGesture.DisplayString` is deliberately
 *not* localized: the hotkey log lines write it, and a log that changes language with the
 UI cannot be grepped.

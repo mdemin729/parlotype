@@ -109,6 +109,32 @@ public class LocalizationParityTests
     }
 
     [Theory]
+    [MemberData(nameof(TranslatedCultures))]
+    public void ModifierSide_IsLowercase_UnlessTheGestureLeadsWithIt(string culture)
+    {
+        // The side is substituted into "Hold {0}" / "Double-tap {0}", so the
+        // word it adds sits mid-phrase: "Podržet pravý Ctrl", not "Podržet Pravý
+        // Ctrl". Only a language that puts the key first in *both* gesture
+        // formats ("{0} halten") leaves the side at the start of the sentence,
+        // where German capitalizes it.
+        var strings = ReadResx(SatellitePath(culture));
+        var leads = strings["Settings_Hotkeys_Gesture_HoldFormat"].StartsWith("{0}", StringComparison.Ordinal)
+                    && strings["Settings_Hotkeys_Gesture_DoubleTapFormat"].StartsWith("{0}", StringComparison.Ordinal);
+        if (leads)
+            return;
+
+        foreach (var key in new[] { "Settings_Hotkeys_Modifier_LeftFormat", "Settings_Hotkeys_Modifier_RightFormat" })
+        {
+            foreach (var word in Regex.Matches(strings[key].Replace("{0}", " "), @"\p{L}+").Select(m => m.Value))
+            {
+                Assert.True(
+                    char.IsLower(word[0]),
+                    $"Strings.{culture}.resx {key} writes '{word}' with a capital in the middle of a phrase: {strings[key]}");
+            }
+        }
+    }
+
+    [Theory]
     [InlineData("Step {0} of {1}", "0,1")]
     [InlineData("no placeholders", "")]
     [InlineData("Transcribe in {speech_lang} into {text_lang}.", "")]

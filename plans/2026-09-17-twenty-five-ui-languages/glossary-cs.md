@@ -211,3 +211,10 @@ no translated value over 25 characters is byte-identical to the English source.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Výchozí (doslovný přepis)"** — verbatim/word-for-word rendered as *doslovný (literal)*, paired with the already-established *přepis* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Podržet pravý Ctrl`.**
+
+Side is now `pravý {0}` / `levý {0}`, lowercase (accusative of a masculine inanimate adjective equals the nominative). `Conflict_AlreadyBoundFormat` unchanged — the infinitive "Podržet …" is a fine subject.

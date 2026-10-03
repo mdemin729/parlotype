@@ -825,6 +825,19 @@ public class LocalizationTests : IDisposable
         Assert.Equal("Hold Right Ctrl", hold.DisplayString);
     }
 
+    [AvaloniaTheory]
+    [InlineData("el", "Κράτημα δεξιού Ctrl", "Διπλό πάτημα δεξιού Ctrl")]   // "holding" governs the genitive
+    [InlineData("lt", "Laikykite dešinįjį Ctrl", "Dukart spustelėkite dešinįjį Ctrl")] // imperative governs the accusative
+    [InlineData("cs", "Podržet pravý Ctrl", "Dvakrát stisknout pravý Ctrl")]
+    [InlineData("fi", "Pidä pohjassa: oikea Ctrl", "Kaksoisnapauta: oikea Ctrl")]
+    public void HotkeyText_PutsTheSideInTheCaseTheGestureVerbGoverns(string culture, string hold, string doubleTap)
+    {
+        Localizer.Instance.SetCulture(CultureInfo.GetCultureInfo(culture));
+
+        Assert.Equal(hold, HotkeyText.Gesture(DictationHotkey.Hold(ModifierKey.Ctrl, ModifierSide.Right).Gesture));
+        Assert.Equal(doubleTap, HotkeyText.Gesture(DictationHotkey.DoubleTap(ModifierKey.Ctrl, ModifierSide.Right).Gesture));
+    }
+
     [AvaloniaFact]
     public async Task ChosenLanguage_IsPersisted_AndAppliedOnTheNextStartup()
     {

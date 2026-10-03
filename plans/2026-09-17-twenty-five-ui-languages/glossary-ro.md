@@ -202,3 +202,10 @@ Win) are all treated as invariant borrowed tokens, never needing gender agreemen
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Implicit (transcriere literală)"** — verbatim/word-for-word rendered as *literală*, paired with the already-established *transcriere* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Ține apăsat Ctrl dreapta`.**
+
+Side unchanged. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `„{0}” este deja alocat pentru {1}.`

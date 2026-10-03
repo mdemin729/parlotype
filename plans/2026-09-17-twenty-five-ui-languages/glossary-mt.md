@@ -256,3 +256,10 @@ clipping by resizing controls, never by cutting the translation.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Prestabbilit (traskrizzjoni kelma b'kelma)"** — verbatim/word-for-word rendered as *kelma b'kelma (word-for-word)*, paired with the already-established *traskrizzjoni* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Żomm Ctrl tal-lemin`.**
+
+Side is now `{0} tal-lemin` / `{0} tax-xellug` — the word after the hyphen is not capitalized (it was `tal-Lemin`, `tax-Xellug`). `Conflict_AlreadyBoundFormat` quotes the imperative gesture.

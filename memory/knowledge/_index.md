@@ -84,3 +84,4 @@ This directory stores **stable facts** learned across sessions — things that a
 - Include the "why" — reasoning, context, constraints
 - Update or remove entries when they become stale
 - Prefer specific, actionable facts over vague observations
+| [hotkey-gesture-grammar-per-language.md](hotkey-gesture-grammar-per-language.md) | localization, hotkeys, grammar | Side word is mid-phrase (lowercase, verb-governed case); imperative gestures get quoted in AlreadyBound |

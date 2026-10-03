@@ -162,3 +162,10 @@ over 25 characters matches the English source byte-for-byte.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Par défaut (transcription mot à mot)"** — verbatim/word-for-word rendered as *mot à mot (word-for-word)*, paired with the already-established *transcription* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Maintenir Ctrl droit`.**
+
+Side unchanged. `Conflict_AlreadyBoundFormat` is now `{0} est déjà associé au mode {1}.` — `associé à bascule` lacked an article.

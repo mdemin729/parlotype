@@ -187,3 +187,10 @@ this was not machine-checked and is the area most worth a native-speaker pass.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Προεπιλογή (αυτολεξεί μεταγραφή)"** — verbatim/word-for-word rendered as *αυτολεξεί (verbatim, word-for-word)*, paired with the already-established *μεταγραφή* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Κράτημα δεξιού Ctrl`.**
+
+Side is now **genitive**, lowercase: `δεξιού {0}` / `αριστερού {0}`. "Κράτημα" and "Διπλό πάτημα" are nouns and govern the genitive; the earlier note that the neuter nominative agrees with an implied "πλήκτρο" was wrong for these frames. `Conflict_AlreadyBoundFormat` is now `Το «{0}» είναι ήδη συνδεδεμένο με {1}.` — the gesture starts with a capital and sat after the article.

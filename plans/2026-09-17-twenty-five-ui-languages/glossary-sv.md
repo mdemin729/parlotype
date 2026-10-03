@@ -183,3 +183,10 @@ verbatim, and no value over 25 characters matches the English source byte-for-by
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standard (ordagrann transkribering)"** — verbatim/word-for-word rendered as *ordagrann (word-for-word)*, paired with the already-established *transkribering* for transcription; no new terms introduced.
+
+
+## Hotkey gesture grammar (correction 2026-10-03)
+
+`Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Håll höger Ctrl`.**
+
+Side is now `höger {0}` / `vänster {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `”{0}” är redan kopplat till {1}.`

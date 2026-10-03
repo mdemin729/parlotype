@@ -1157,7 +1157,7 @@ Vos paramètres et vos clés API sont conservés. Les modèles se retélécharge
   </data>
   <data name="Settings_Hotkeys_Conflict_AlreadyBoundFormat" xml:space="preserve">
     <comment>{0} is the gesture ("Hold Right Ctrl"), {1} the mode it is already bound to (Settings_Hotkeys_Conflict_Mode_*). Each language decides how the mode reads inside the sentence, which is why those are separate keys from the badge labels.</comment>
-    <value>{0} est déjà associé à {1}.</value>
+    <value>{0} est déjà associé au mode {1}.</value>
   </data>
   <data name="Settings_Hotkeys_Conflict_Mode_PushToTalk" xml:space="preserve">
     <comment>Push-to-talk as it reads inside Settings_Hotkeys_Conflict_AlreadyBoundFormat (English wants it lowercase mid-sentence; Russian quotes it, so it stays capitalized).</comment>
