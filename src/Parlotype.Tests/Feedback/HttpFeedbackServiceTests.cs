@@ -64,6 +64,13 @@ public class HttpFeedbackServiceTests
         { 429, """{"ok":false,"error":"something_new"}""", FeedbackSendOutcome.ServerError, true },
         { 403, "<html>Attention required</html>", FeedbackSendOutcome.ServerError, true },
         { 301, "", FeedbackSendOutcome.ServerError, true },
+        // Valid JSON in the wrong shape: "ok" without a usable id is not the API.
+        { 201, """{"ok":true,"id":"bad"}""", FeedbackSendOutcome.ServerError, true },
+        { 201, """{"ok":true,"id":1.5}""", FeedbackSendOutcome.ServerError, true },
+        { 201, """{"ok":true}""", FeedbackSendOutcome.ServerError, true },
+        { 200, """{"ok":true,"id":null,"duplicate":true}""", FeedbackSendOutcome.ServerError, true },
+        { 429, """{"ok":false,"error":42}""", FeedbackSendOutcome.ServerError, true },
+        { 201, "[1,2,3]", FeedbackSendOutcome.ServerError, true },
     };
 
     [Theory]
@@ -78,6 +85,22 @@ public class HttpFeedbackServiceTests
         Assert.Equal(expected, result.Outcome);
         Assert.Equal(status, result.StatusCode);
         Assert.Equal(offersFallback, result.OffersFallback);
+    }
+
+    [Theory]
+    [InlineData("""{"ok":true,"id":"bad"}""")]
+    [InlineData("""{"ok":true,"id":{"n":1}}""")]
+    [InlineData("""{"ok":"yes","id":true,"duplicate":"no","error":[],"field":{}}""")]
+    public async Task AMalformedBody_IsAResult_NeverAnException(string body)
+    {
+        // JsonElement.TryGetInt64 throws on a non-number; the service promises to turn
+        // every response into a result, so a proxy's odd JSON must take the fallback.
+        using var service = NewService(StubHandler.Respond(HttpStatusCode.Created, body));
+
+        var result = await service.SendAsync(Submission());
+
+        Assert.Equal(FeedbackSendOutcome.ServerError, result.Outcome);
+        Assert.True(result.OffersFallback);
     }
 
     [Fact]

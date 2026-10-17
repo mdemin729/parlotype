@@ -42,11 +42,13 @@
                                  GroupName="FeedbackKind"
                                  Content="{loc:Tr Feedback_Kind_Feedback}"
                                  AutomationProperties.Name="{loc:Tr Feedback_Kind_Feedback}"
+                                 IsEnabled="{Binding IsEditable}"
                                  IsChecked="{Binding IsFeedback, Mode=TwoWay}" />
                     <RadioButton Name="BugKindButton"
                                  GroupName="FeedbackKind"
                                  Content="{loc:Tr Feedback_Kind_Bug}"
                                  AutomationProperties.Name="{loc:Tr Feedback_Kind_Bug}"
+                                 IsEnabled="{Binding IsEditable}"
                                  IsChecked="{Binding IsBugReport, Mode=TwoWay}" />
                 </StackPanel>
             </StackPanel>
@@ -59,6 +61,7 @@
                        FontWeight="SemiBold" />
                 <TextBox Name="MessageBox"
                          Text="{Binding Message, Mode=TwoWay}"
+                         IsReadOnly="{Binding IsSending}"
                          MaxLength="{Binding MessageMaxLength}"
                          AcceptsReturn="True"
                          AcceptsTab="False"
@@ -81,6 +84,7 @@
                        FontWeight="SemiBold" />
                 <TextBox Name="EmailBox"
                          Text="{Binding Email, Mode=TwoWay}"
+                         IsReadOnly="{Binding IsSending}"
                          MaxLength="{Binding EmailMaxLength}"
                          Classes.invalid="{Binding IsEmailInvalid}"
                          PlaceholderText="{loc:Tr Feedback_EmailHint}"
@@ -102,15 +106,18 @@
                     <CheckBox Name="IncludeAppVersionBox"
                               Content="{Binding AppVersionLabel}"
                               AutomationProperties.Name="{Binding AppVersionLabel}"
-                              IsChecked="{Binding IncludeAppVersion, Mode=TwoWay}" />
+                              IsChecked="{Binding IncludeAppVersion, Mode=TwoWay}"
+                              IsEnabled="{Binding IsEditable}" />
                     <CheckBox Name="IncludeOsBox"
                               Content="{Binding OperatingSystemLabel}"
                               AutomationProperties.Name="{Binding OperatingSystemLabel}"
-                              IsChecked="{Binding IncludeOperatingSystem, Mode=TwoWay}" />
+                              IsChecked="{Binding IncludeOperatingSystem, Mode=TwoWay}"
+                              IsEnabled="{Binding IsEditable}" />
                     <CheckBox Name="IncludeUiLanguageBox"
                               Content="{Binding UiLanguageLabel}"
                               AutomationProperties.Name="{Binding UiLanguageLabel}"
-                              IsChecked="{Binding IncludeUiLanguage, Mode=TwoWay}" />
+                              IsChecked="{Binding IncludeUiLanguage, Mode=TwoWay}"
+                              IsEnabled="{Binding IsEditable}" />
                     <TextBlock Text="{loc:Tr Feedback_PrivacyNote}"
                                Margin="0,6,0,0"
                                FontSize="12"

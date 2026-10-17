@@ -97,7 +97,14 @@ public sealed partial class FeedbackViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SendCommand))]
+    [NotifyPropertyChangedFor(nameof(IsEditable))]
     private bool _isSending;
+
+    /// <summary>
+    /// False while a request is in flight: what the user sees must stay what was sent,
+    /// so the form is locked until the answer arrives.
+    /// </summary>
+    public bool IsEditable => !IsSending;
 
     /// <summary>True once the app could not deliver the message and the user should be offered another way.</summary>
     [ObservableProperty]
@@ -161,6 +168,12 @@ public sealed partial class FeedbackViewModel : ViewModelBase
         IsSending = true;
         SetStatus(FeedbackStatus.Sending);
 
+        // The draft as it was when Send was pressed. The view locks the fields while
+        // the request is in flight; this covers any other writer, so a success never
+        // wipes text that was not part of what the server stored.
+        var sentMessage = Message;
+        var sentEmail = Email;
+
         FeedbackSendResult result;
         try
         {
@@ -187,6 +200,13 @@ public sealed partial class FeedbackViewModel : ViewModelBase
                     Strings.Feedback_Sent_Title,
                     Strings.Format_Feedback_Sent_MessageFormat(result.SubmissionId?.ToString(CultureInfo.CurrentCulture) ?? "—"),
                     Strings.Common_Ok);
+                if (Message != sentMessage || Email != sentEmail)
+                {
+                    // Edited after Send: that text is newer than what was stored.
+                    // Keep it, and keep the window open for it.
+                    return;
+                }
+
                 ClearDraft();
                 CloseRequested?.Invoke(this, EventArgs.Empty);
                 return;

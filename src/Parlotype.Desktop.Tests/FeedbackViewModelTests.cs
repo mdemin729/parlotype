@@ -83,6 +83,64 @@ public class FeedbackViewModelTests : IDisposable
     }
 
     [AvaloniaFact]
+    public async Task WhileARequestIsInFlight_TheFormIsLocked()
+    {
+        _service.Gate = new TaskCompletionSource();
+        var vm = NewViewModel();
+        Assert.True(vm.IsEditable);
+
+        var send = vm.SendCommand.ExecuteAsync(null);
+        Assert.False(vm.IsEditable);
+
+        _service.Result = Result(FeedbackSendOutcome.RateLimited, 429, "rate_limited");
+        _service.Gate.SetResult();
+        await send;
+
+        Assert.True(vm.IsEditable);
+    }
+
+    [AvaloniaFact]
+    public async Task ASuccess_KeepsTextEditedAfterSendWasPressed()
+    {
+        // The review case: the stored message is the snapshot taken at Send, so a
+        // success must not wipe newer text, nor close the window over it.
+        _service.Gate = new TaskCompletionSource();
+        var vm = NewViewModel("first version");
+        vm.Email = "someone@example.com";
+        var closed = false;
+        vm.CloseRequested += (_, _) => closed = true;
+
+        var send = vm.SendCommand.ExecuteAsync(null);
+        vm.Message = "first version, plus more";
+        _service.Gate.SetResult();
+        await send;
+
+        Assert.Equal("first version", Assert.Single(_service.Submissions).Message);
+        Assert.Equal(1, _dialogs.ShowMessageCount);
+        Assert.Equal("first version, plus more", vm.Message);
+        Assert.Equal("someone@example.com", vm.Email);
+        Assert.False(closed);
+    }
+
+    [AvaloniaFact]
+    public async Task ASuccess_KeepsAnEmailEditedAfterSendWasPressed()
+    {
+        _service.Gate = new TaskCompletionSource();
+        var vm = NewViewModel("hello");
+        var closed = false;
+        vm.CloseRequested += (_, _) => closed = true;
+
+        var send = vm.SendCommand.ExecuteAsync(null);
+        vm.Email = "late@example.com";
+        _service.Gate.SetResult();
+        await send;
+
+        Assert.Equal("hello", vm.Message);
+        Assert.Equal("late@example.com", vm.Email);
+        Assert.False(closed);
+    }
+
+    [AvaloniaFact]
     public void Limits_AreTheContracts()
     {
         var vm = NewViewModel();

@@ -67,6 +67,31 @@ public class FeedbackWindowTests : IDisposable
     }
 
     [AvaloniaFact]
+    public async Task WhileSending_TheInputsCannotBeEdited()
+    {
+        var service = new MockFeedbackService { Gate = new TaskCompletionSource() };
+        var vm = new FeedbackViewModel(service, new MockShellService(), new MockUserDialogService()) { Message = "hello" };
+        var window = Open(vm);
+
+        var send = vm.SendCommand.ExecuteAsync(null);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.True(Find<TextBox>(window, "MessageBox").IsReadOnly);
+        Assert.True(Find<TextBox>(window, "EmailBox").IsReadOnly);
+        foreach (var name in new[] { "FeedbackKindButton", "BugKindButton", "IncludeAppVersionBox", "IncludeOsBox", "IncludeUiLanguageBox" })
+            Assert.False(Find<Control>(window, name).IsEnabled, $"{name} is still enabled while sending");
+
+        service.Result = new Parlotype.Core.Feedback.FeedbackSendResult(Parlotype.Core.Feedback.FeedbackSendOutcome.RateLimited, 429, "rate_limited");
+        service.Gate.SetResult();
+        await send;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.False(Find<TextBox>(window, "MessageBox").IsReadOnly);
+        Assert.True(Find<Control>(window, "IncludeOsBox").IsEnabled);
+        window.Close();
+    }
+
+    [AvaloniaFact]
     public void EmailBox_IsCappedAtTheContractsLength()
     {
         var window = Open(NewViewModel());

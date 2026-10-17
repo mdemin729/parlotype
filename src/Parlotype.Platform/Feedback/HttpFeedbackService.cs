@@ -145,7 +145,9 @@ public sealed class HttpFeedbackService : IFeedbackService, IDisposable
 
         var outcome = (status, error) switch
         {
-            (201 or 200, _) when body?.Ok == true => FeedbackSendOutcome.Sent,
+            // Success needs the number the contract promises; "ok" without a usable id
+            // is not the API talking, so it takes the fallback like any other oddity.
+            (201 or 200, _) when body is { Ok: true, Id: not null } => FeedbackSendOutcome.Sent,
             (400, "invalid_field") when field == "email" => FeedbackSendOutcome.InvalidEmail,
             (400, "invalid_field" or "invalid_json") => FeedbackSendOutcome.Rejected,
             (403, "turnstile_failed") => FeedbackSendOutcome.Rejected,
@@ -218,7 +220,11 @@ public sealed class HttpFeedbackService : IFeedbackService, IDisposable
 
             return new ResponseBody(
                 Ok: root.TryGetProperty("ok", out var ok) && ok.ValueKind == JsonValueKind.True,
-                Id: root.TryGetProperty("id", out var id) && id.TryGetInt64(out var number) ? number : null,
+                // TryGetInt64 throws on a non-number, so check the kind first: a proxy
+                // answering {"id":"x"} must become a failed result, not an exception.
+                Id: root.TryGetProperty("id", out var id) && id.ValueKind == JsonValueKind.Number && id.TryGetInt64(out var number)
+                    ? number
+                    : null,
                 Duplicate: root.TryGetProperty("duplicate", out var duplicate) && duplicate.ValueKind == JsonValueKind.True,
                 Error: StringOrNull(root, "error"),
                 Field: StringOrNull(root, "field"));
