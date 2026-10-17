@@ -104,6 +104,16 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc – avbryt den pågående inspelningen</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Feedback och felrapporter</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Hittat ett fel eller har en idé? Skicka det direkt till utvecklaren härifrån.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Skicka feedback…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Tema</value>
   </data>
@@ -168,6 +178,10 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Inställningar</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Skicka feedback…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Avsluta</value>
@@ -407,12 +421,20 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>När det är på söker Parlotype strax efter start och sedan var sjätte timme.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Vad som skickas</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Vad Parlotype ansluter till</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>En anonym förfrågan till api.github.com efter den offentliga listan över Parlotype-versioner, samt hämtningen av själva utgivningsfilen. Inget konto, ingen maskinidentifierare, ingen användningsdata. Det här är den enda nätverksförfrågan Parlotype gör så länge alla dina talmotorer är lokala.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>På egen hand söker Parlotype bara efter uppdateringar: en anonym förfrågan till api.github.com efter den offentliga listan över Parlotype-versioner, och sedan hämtningen av utgivningsfilen när en nyare finns. Inget konto, ingen maskinidentifierare, ingen användningsdata.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>När du öppnar Inställningar läses även listan över llama.cpp-serverbuilds från api.github.com, för Gemma 4-motorn.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Allt annat sker bara när du ber om det: när du hämtar en talmodell (huggingface.co) eller en llama.cpp-server (github.com), transkriberar med en molnmotor som du har konfigurerat och skickar feedback – en HTTPS-förfrågan till parlotype.dev när du trycker på Skicka.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Installerad version:</value>
@@ -1326,5 +1348,122 @@ Dina inställningar och API-nycklar behålls. Modeller hämtas automatiskt igen 
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Välj mapp för llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Skicka feedback</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Berätta för utvecklaren vad som fungerar, vad som inte gör det eller vad du vill att Parlotype ska kunna.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Typ</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Feedback</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Felrapport</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Meddelande</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Beskriv din idé eller problemet. Vid ett fel: vad du gjorde, vad du förväntade dig och vad som hände i stället.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>E-post (valfritt)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Bara om du vill ha svar.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Det här ser inte ut som en e-postadress. Rätta den eller lämna fältet tomt.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Skickas med</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Appversion: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Operativsystem: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Gränssnittsspråk: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Skickas bara till parlotype.dev, via HTTPS, när du trycker på Skicka. Där sparas ditt meddelande, din e-postadress om du anger en och de uppgifter du låter vara markerade. Inget annat bifogas – inga loggar, inget ljud och inga transkriberingar – och din IP-adress sparas inte.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Skicka</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Stäng</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Om du stänger fönstret sparas texten tills du avslutar Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Skickar…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>För många meddelanden på kort tid. Vänta en minut och tryck sedan på Skicka igen – texten finns kvar.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>Något gick fel i Parlotype och meddelandet skickades inte. Texten finns kvar – du kan skicka den från webbplatsen i stället.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Det går inte att skicka från appen just nu. Texten finns kvar – skicka den från webbplatsen i stället.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>parlotype.dev kunde inte ta emot meddelandet just nu. Texten finns kvar – försök igen senare eller skicka den från webbplatsen.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Det gick inte att nå parlotype.dev. Texten finns kvar – kontrollera anslutningen och försök igen, eller skicka den från webbplatsen.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Meddelandet har kopierats. Klistra in det på sidan som öppnades i webbläsaren.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Det gick inte att kopiera meddelandet. Markera det, kopiera det och klistra in det på sidan som öppnades i webbläsaren.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Det gick inte att öppna webbläsaren. Gå själv till den här adressen: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Skicka från webbplatsen</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Tack</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Meddelandet har skickats – tack för att du hjälper till att göra Parlotype bättre. Referens: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

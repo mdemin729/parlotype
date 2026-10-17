@@ -362,10 +362,36 @@ Windows-only — macOS and Linux have no uninstall hooks.
   silent no-op.
 - **Desktop**: `App` kicks off `StartAsync` fire-and-forget;
   `UpdateSettingsViewModel` drives Settings → Application → Updates.
-- **Privacy**: the only outbound request in local mode. Anonymous GET of the
+- **Privacy**: the only request the app makes on its own. Anonymous GET of the
   public GitHub releases API — no machine id, install id, or usage data. Default
   on (`SettingsKeys.UpdatesCheckAutomatically`), disclosed in README and in the
-  page itself, one-click opt-out.
+  page itself, one-click opt-out. Every other request follows a user action —
+  the full list is `docs/network-requests.md` (ADR-070 corrected the old "only
+  network request" claim, which model downloads and the llama.cpp list had
+  already broken).
+
+### Feedback
+
+See [[decisions/_index|ADR-070]].
+
+- **Core** (`Feedback/`): `IFeedbackService` (`Diagnostics`, `SendAsync` — never
+  throws except on caller cancellation), `FeedbackSubmission`, `FeedbackKind`,
+  `FeedbackSendResult` + `FeedbackSendOutcome` (`Sent`, `InvalidEmail`,
+  `RateLimited`, `Rejected`, `AppPathClosed`, `ServerError`, `Timeout`,
+  `NetworkError`; `OffersFallback`), `FeedbackDiagnostics`, `FeedbackLimits` (the
+  server's field rules, mirrored), `FeedbackLinks` (endpoint, website form per
+  language, GitHub Issues).
+- **Platform**: `HttpFeedbackService` — own `HttpClient`, 15 s timeout, no
+  redirects, no cookies, no `User-Agent`, no retries. Classifies on status **and**
+  `error` per the website's `docs/feedback-api.md`. `OperatingSystemDescription`
+  builds `Windows 11 24H2 (10.0.26100)` from the build number and the registry's
+  `DisplayVersion`. `PARLOTYPE_FEEDBACK_ENDPOINT` overrides the endpoint in Debug
+  builds only.
+- **Desktop**: `FeedbackWindow` (rebuilt per open; focus starts in the message) +
+  `FeedbackViewModel` (singleton — the unsent draft survives closing the window for
+  the session). Opened by `IWindowManager.ShowFeedback()` from the tray and Settings
+  → Help. Fallback copies the message via `IShellService.CopyTextAsync` and opens
+  the site with `IShellService.OpenUrlAsync`.
 
 ### Launch at sign-in
 

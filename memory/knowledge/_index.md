@@ -85,3 +85,4 @@ This directory stores **stable facts** learned across sessions — things that a
 - Update or remove entries when they become stale
 - Prefer specific, actionable facts over vague observations
 | [hotkey-gesture-grammar-per-language.md](hotkey-gesture-grammar-per-language.md) | localization, hotkeys, grammar | Side word is mid-phrase (lowercase, verb-governed case); imperative gestures get quoted in AlreadyBound |
+| [local-feedback-worker-testing.md](local-feedback-worker-testing.md) | feedback, testing, wrangler, windows | Test the feedback client against `wrangler dev`, never production; short `--persist-to` for local D1 on Windows; orphaned `workerd` turns "server down" into a timeout |

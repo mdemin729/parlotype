@@ -104,6 +104,16 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc – prekliče trenutno snemanje</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Odzivi in poročila o napakah</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Ste našli napako ali imate idejo? Pošljite jo neposredno razvijalcu kar od tod.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Pošlji odziv…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Tema</value>
   </data>
@@ -168,6 +178,10 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Nastavitve</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Pošlji odziv…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Izhod</value>
@@ -407,12 +421,20 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Ko je vklopljeno, Parlotype preveri kmalu po zagonu in nato vsakih 6 ur.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Kaj se s tem pošlje</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Kam se Parlotype povezuje</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Anonimna zahteva na api.github.com za javni seznam izdaj Parlotype in prenos same datoteke izdaje. Brez računa, brez identifikatorja naprave, brez podatkov o uporabi. To je edina omrežna zahteva, ki jo Parlotype pošlje, dokler so vsi vaši govorni mehanizmi lokalni.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Sam od sebe Parlotype le preverja posodobitve: anonimna zahteva na api.github.com za javni seznam izdaj Parlotype, nato pa prenos datoteke izdaje, ko je na voljo novejša. Brez računa, brez identifikatorja naprave, brez podatkov o uporabi.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Ko odprete Nastavitve, Parlotype z api.github.com prebere tudi seznam gradenj strežnika llama.cpp za mehanizem Gemma 4.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Vse drugo se zgodi le, ko to zahtevate: prenos govornega modela (huggingface.co) ali strežnika llama.cpp (github.com), prepisovanje z oblačnim mehanizmom, ki ste ga nastavili, in pošiljanje odziva – ena zahteva HTTPS na parlotype.dev, ko pritisnete „Pošlji“.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Nameščena različica:</value>
@@ -1326,5 +1348,122 @@ Vaše nastavitve in ključi API ostanejo. Modeli se ob naslednjem narekovanju sa
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Izberite mapo llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Pošlji odziv</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Povejte razvijalcu, kaj deluje, kaj ne ali kaj bi želeli, da Parlotype počne.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Vrsta</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Odziv</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Poročilo o napaki</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Sporočilo</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Opišite svojo idejo ali težavo. Pri napaki: kaj ste naredili, kaj ste pričakovali in kaj se je zgodilo namesto tega.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>E-pošta (neobvezno)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Samo če želite odgovor.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>To ni videti kot e-poštni naslov. Popravite ga ali pustite polje prazno.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Poslano bo</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Različica aplikacije: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Operacijski sistem: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Jezik vmesnika: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Pošlje se samo na parlotype.dev prek HTTPS, ko pritisnete „Pošlji“. Shrani se vaše sporočilo, vaš e-poštni naslov, če ga navedete, in podrobnosti, ki jih pustite označene. Nič drugega ni priloženo – brez dnevnikov, zvoka ali prepisov – in vaš naslov IP se ne shrani.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Pošlji</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Zapri</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Če okno zaprete, se besedilo ohrani do izhoda iz Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Pošiljanje…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Preveč sporočil v kratkem času. Počakajte minuto in nato znova pritisnite „Pošlji“ – vaše besedilo je še vedno tukaj.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>V Parlotype je prišlo do napake in sporočilo ni bilo poslano. Vaše besedilo je še vedno tukaj – namesto tega ga lahko pošljete s spletnega mesta.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Pošiljanje iz aplikacije trenutno ni na voljo. Vaše besedilo je še vedno tukaj – pošljite ga s spletnega mesta.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>parlotype.dev trenutno ne more sprejeti sporočila. Vaše besedilo je še vedno tukaj – poskusite znova pozneje ali ga pošljite s spletnega mesta.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Povezave s parlotype.dev ni bilo mogoče vzpostaviti. Vaše besedilo je še vedno tukaj – preverite povezavo in poskusite znova ali ga pošljite s spletnega mesta.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Sporočilo je kopirano. Prilepite ga na stran, ki se je odprla v brskalniku.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Sporočila ni bilo mogoče kopirati. Označite ga, kopirajte in prilepite na stran, ki se je odprla v brskalniku.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Brskalnika ni bilo mogoče odpreti. Sami obiščite ta naslov: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Pošlji s spletnega mesta</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Hvala</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Sporočilo je bilo poslano – hvala, ker pomagate izboljšati Parlotype. Sklic: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

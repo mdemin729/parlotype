@@ -101,8 +101,128 @@ public static class Strings
     /// <summary>Cloud transcription failed</summary>
     public static string Dialog_CloudTranscriptionFailed_Title => Localizer.Lookup(nameof(Dialog_CloudTranscriptionFailed_Title));
 
+    /// <summary>{0} / {1}</summary>
+    public static string Feedback_CharacterCountFormat => Localizer.Lookup(nameof(Feedback_CharacterCountFormat));
+    /// <summary>{0} / {1}</summary>
+    public static string Format_Feedback_CharacterCountFormat(object? arg0, object? arg1) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Feedback_CharacterCountFormat, arg0, arg1);
+
+    /// <summary>Close</summary>
+    public static string Feedback_CloseButton => Localizer.Lookup(nameof(Feedback_CloseButton));
+
+    /// <summary>App version: {0}</summary>
+    public static string Feedback_Detail_AppVersionFormat => Localizer.Lookup(nameof(Feedback_Detail_AppVersionFormat));
+    /// <summary>App version: {0}</summary>
+    public static string Format_Feedback_Detail_AppVersionFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Feedback_Detail_AppVersionFormat, arg0);
+
+    /// <summary>Operating system: {0}</summary>
+    public static string Feedback_Detail_OperatingSystemFormat => Localizer.Lookup(nameof(Feedback_Detail_OperatingSystemFormat));
+    /// <summary>Operating system: {0}</summary>
+    public static string Format_Feedback_Detail_OperatingSystemFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Feedback_Detail_OperatingSystemFormat, arg0);
+
+    /// <summary>Interface language: {0}</summary>
+    public static string Feedback_Detail_UiLanguageFormat => Localizer.Lookup(nameof(Feedback_Detail_UiLanguageFormat));
+    /// <summary>Interface language: {0}</summary>
+    public static string Format_Feedback_Detail_UiLanguageFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Feedback_Detail_UiLanguageFormat, arg0);
+
+    /// <summary>Will be sent</summary>
+    public static string Feedback_DetailsHeading => Localizer.Lookup(nameof(Feedback_DetailsHeading));
+
+    /// <summary>Closing the window keeps your text until you quit Parlotype.</summary>
+    public static string Feedback_DraftNote => Localizer.Lookup(nameof(Feedback_DraftNote));
+
+    /// <summary>Only if you'd like a reply.</summary>
+    public static string Feedback_EmailHint => Localizer.Lookup(nameof(Feedback_EmailHint));
+
+    /// <summary>This doesn't look like an email address. Correct it, or leave the field empty.</summary>
+    public static string Feedback_EmailInvalid => Localizer.Lookup(nameof(Feedback_EmailInvalid));
+
+    /// <summary>Email (optional)</summary>
+    public static string Feedback_EmailLabel => Localizer.Lookup(nameof(Feedback_EmailLabel));
+
+    /// <summary>GitHub Issues</summary>
+    public static string Feedback_Fallback_GitHubButton => Localizer.Lookup(nameof(Feedback_Fallback_GitHubButton));
+
+    /// <summary>Send from the website</summary>
+    public static string Feedback_Fallback_WebsiteButton => Localizer.Lookup(nameof(Feedback_Fallback_WebsiteButton));
+
+    /// <summary>Tell the developer what works, what doesn't, or what you'd like Parlotype to do.</summary>
+    public static string Feedback_Intro => Localizer.Lookup(nameof(Feedback_Intro));
+
+    /// <summary>Bug report</summary>
+    public static string Feedback_Kind_Bug => Localizer.Lookup(nameof(Feedback_Kind_Bug));
+
+    /// <summary>Feedback</summary>
+    public static string Feedback_Kind_Feedback => Localizer.Lookup(nameof(Feedback_Kind_Feedback));
+
+    /// <summary>Type</summary>
+    public static string Feedback_KindLabel => Localizer.Lookup(nameof(Feedback_KindLabel));
+
+    /// <summary>Message</summary>
+    public static string Feedback_MessageLabel => Localizer.Lookup(nameof(Feedback_MessageLabel));
+
+    /// <summary>Describe your idea or the problem. For a bug: what you did, what you expected, and what happened instead.</summary>
+    public static string Feedback_MessagePlaceholder => Localizer.Lookup(nameof(Feedback_MessagePlaceholder));
+
+    /// <summary>Sent only to parlotype.dev, over HTTPS, when you press Send. It keeps your message, your email if you give one, and t...</summary>
+    public static string Feedback_PrivacyNote => Localizer.Lookup(nameof(Feedback_PrivacyNote));
+
+    /// <summary>Send</summary>
+    public static string Feedback_SendButton => Localizer.Lookup(nameof(Feedback_SendButton));
+
+    /// <summary>Your message was sent — thank you for helping make Parlotype better. Reference: #{0}</summary>
+    public static string Feedback_Sent_MessageFormat => Localizer.Lookup(nameof(Feedback_Sent_MessageFormat));
+    /// <summary>Your message was sent — thank you for helping make Parlotype better. Reference: #{0}</summary>
+    public static string Format_Feedback_Sent_MessageFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Feedback_Sent_MessageFormat, arg0);
+
+    /// <summary>Thank you</summary>
+    public static string Feedback_Sent_Title => Localizer.Lookup(nameof(Feedback_Sent_Title));
+
+    /// <summary>Sending from the app isn't available right now. Your text is still here — send it from the website instead.</summary>
+    public static string Feedback_Status_AppPathClosed => Localizer.Lookup(nameof(Feedback_Status_AppPathClosed));
+
+    /// <summary>Couldn't open your browser. Go to this address yourself: {0}</summary>
+    public static string Feedback_Status_BrowserFailedFormat => Localizer.Lookup(nameof(Feedback_Status_BrowserFailedFormat));
+    /// <summary>Couldn't open your browser. Go to this address yourself: {0}</summary>
+    public static string Format_Feedback_Status_BrowserFailedFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Feedback_Status_BrowserFailedFormat, arg0);
+
+    /// <summary>Your message is copied. Paste it into the page that opened in your browser.</summary>
+    public static string Feedback_Status_Copied => Localizer.Lookup(nameof(Feedback_Status_Copied));
+
+    /// <summary>Couldn't copy your message. Select it, copy it, and paste it into the page that opened in your browser.</summary>
+    public static string Feedback_Status_CopyFailed => Localizer.Lookup(nameof(Feedback_Status_CopyFailed));
+
+    /// <summary>Couldn't reach parlotype.dev. Your text is still here — check your connection and try again, or send it from the webs...</summary>
+    public static string Feedback_Status_Offline => Localizer.Lookup(nameof(Feedback_Status_Offline));
+
+    /// <summary>Too many messages in a short time. Wait a minute, then press Send again — your text is still here.</summary>
+    public static string Feedback_Status_RateLimited => Localizer.Lookup(nameof(Feedback_Status_RateLimited));
+
+    /// <summary>Something went wrong in Parlotype and the message wasn't sent. Your text is still here — you can send it from the web...</summary>
+    public static string Feedback_Status_Rejected => Localizer.Lookup(nameof(Feedback_Status_Rejected));
+
+    /// <summary>Sending…</summary>
+    public static string Feedback_Status_Sending => Localizer.Lookup(nameof(Feedback_Status_Sending));
+
+    /// <summary>parlotype.dev couldn't take the message right now. Your text is still here — try again later, or send it from the web...</summary>
+    public static string Feedback_Status_ServerError => Localizer.Lookup(nameof(Feedback_Status_ServerError));
+
+    /// <summary>Send feedback</summary>
+    public static string Feedback_WindowTitle => Localizer.Lookup(nameof(Feedback_WindowTitle));
+
     /// <summary>Esc — cancel the current recording</summary>
     public static string Help_EscCancelLine => Localizer.Lookup(nameof(Help_EscCancelLine));
+
+    /// <summary>Found a bug or have an idea? Send it straight to the developer from here.</summary>
+    public static string Help_FeedbackBody => Localizer.Lookup(nameof(Help_FeedbackBody));
+
+    /// <summary>Feedback and bug reports</summary>
+    public static string Help_FeedbackHeading => Localizer.Lookup(nameof(Help_FeedbackHeading));
 
     /// <summary>Current dictation hotkeys</summary>
     public static string Help_HotkeysHeading => Localizer.Lookup(nameof(Help_HotkeysHeading));
@@ -115,6 +235,9 @@ public static class Strings
 
     /// <summary>Open the tour</summary>
     public static string Help_OpenTourButton => Localizer.Lookup(nameof(Help_OpenTourButton));
+
+    /// <summary>Send feedback…</summary>
+    public static string Help_SendFeedbackButton => Localizer.Lookup(nameof(Help_SendFeedbackButton));
 
     /// <summary>Help</summary>
     public static string Help_Title => Localizer.Lookup(nameof(Help_Title));
@@ -1145,6 +1268,18 @@ public static class Strings
     /// <summary>Last checked:</summary>
     public static string Settings_Updates_LastCheckedLabel => Localizer.Lookup(nameof(Settings_Updates_LastCheckedLabel));
 
+    /// <summary>By itself, Parlotype only checks for updates: an anonymous request to api.github.com for the public list of Parlotype...</summary>
+    public static string Settings_Updates_NetworkAutomaticBody => Localizer.Lookup(nameof(Settings_Updates_NetworkAutomaticBody));
+
+    /// <summary>What Parlotype connects to</summary>
+    public static string Settings_Updates_NetworkHeading => Localizer.Lookup(nameof(Settings_Updates_NetworkHeading));
+
+    /// <summary>Everything else happens only when you ask for it: downloading a speech model (huggingface.co) or a llama.cpp server (...</summary>
+    public static string Settings_Updates_NetworkOnRequestBody => Localizer.Lookup(nameof(Settings_Updates_NetworkOnRequestBody));
+
+    /// <summary>Opening Settings also reads the list of llama.cpp server builds from api.github.com, for the Gemma 4 engine.</summary>
+    public static string Settings_Updates_NetworkSettingsBody => Localizer.Lookup(nameof(Settings_Updates_NetworkSettingsBody));
+
     /// <summary>Never</summary>
     public static string Settings_Updates_Never => Localizer.Lookup(nameof(Settings_Updates_Never));
 
@@ -1189,12 +1324,6 @@ public static class Strings
 
     /// <summary>Check for updates automatically</summary>
     public static string Settings_Updates_ToggleOn => Localizer.Lookup(nameof(Settings_Updates_ToggleOn));
-
-    /// <summary>An anonymous request to api.github.com for the public list of Parlotype releases, and a download of the release file ...</summary>
-    public static string Settings_Updates_WhatSendsBody => Localizer.Lookup(nameof(Settings_Updates_WhatSendsBody));
-
-    /// <summary>What this sends</summary>
-    public static string Settings_Updates_WhatSendsHeading => Localizer.Lookup(nameof(Settings_Updates_WhatSendsHeading));
 
     /// <summary>Larger models are more accurate but use more disk and CPU/GPU.</summary>
     public static string Settings_WhisperModel_Description => Localizer.Lookup(nameof(Settings_WhisperModel_Description));
@@ -1327,6 +1456,9 @@ public static class Strings
 
     /// <summary>Open</summary>
     public static string Tray_Open => Localizer.Lookup(nameof(Tray_Open));
+
+    /// <summary>Send feedback…</summary>
+    public static string Tray_SendFeedback => Localizer.Lookup(nameof(Tray_SendFeedback));
 
     /// <summary>Settings</summary>
     public static string Tray_Settings => Localizer.Lookup(nameof(Tray_Settings));

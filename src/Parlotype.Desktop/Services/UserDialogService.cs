@@ -60,7 +60,15 @@ public sealed class UserDialogService : IUserDialogService
         if (Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
             return null;
 
-        // Prefer an active/visible window; fall back to MainWindow
+        // Prefer the window the user is working in — a dialog raised from the
+        // feedback window must sit over it, not over the always-on-top widget —
+        // then any visible window, then MainWindow.
+        foreach (var window in desktop.Windows)
+        {
+            if (window.IsActive)
+                return window;
+        }
+
         foreach (var window in desktop.Windows)
         {
             if (window.IsVisible)
