@@ -104,6 +104,16 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc – zruší aktuální nahrávání</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Zpětná vazba a hlášení chyb</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Narazili jste na chybu nebo máte nápad? Pošlete to vývojáři přímo odsud.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Odeslat zpětnou vazbu…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Motiv</value>
   </data>
@@ -168,6 +178,10 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Nastavení</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Odeslat zpětnou vazbu…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Ukončit</value>
@@ -407,12 +421,20 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Když je zapnutá, Parlotype zkontroluje aktualizace krátce po spuštění a pak každých 6 hodin.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Co se odesílá</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>K čemu se Parlotype připojuje</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Anonymní požadavek na api.github.com pro veřejný seznam verzí Parlotype a stažení samotného souboru s verzí. Žádný účet, žádný identifikátor zařízení, žádná data o používání. Toto je jediný síťový požadavek, který Parlotype odesílá, dokud jsou všechny vaše hlasové moduly lokální.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Sám od sebe Parlotype jen kontroluje aktualizace: anonymní požadavek na api.github.com pro veřejný seznam verzí Parlotype, a pokud je k dispozici novější – stažení souboru s verzí. Žádný účet, žádný identifikátor zařízení, žádná data o používání.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Při otevření okna Nastavení se navíc z api.github.com načte seznam sestavení serveru llama.cpp pro modul Gemma 4.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Všechno ostatní proběhne jen na vaši žádost: stažení hlasového modelu (huggingface.co) nebo serveru llama.cpp (github.com), přepis cloudovým modulem, který si nastavíte, a odeslání zpětné vazby – jeden požadavek HTTPS na parlotype.dev ve chvíli, kdy stisknete „Odeslat“.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Nainstalovaná verze:</value>
@@ -1326,5 +1348,122 @@ Vaše nastavení a klíče API zůstanou zachovány. Modely se při dalším dik
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Vybrat složku llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Odeslat zpětnou vazbu</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Napište vývojáři, co funguje, co ne, nebo co byste od Parlotype chtěli.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Typ</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Zpětná vazba</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Hlášení chyby</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Zpráva</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Popište svůj nápad nebo problém. U chyby: co jste udělali, co jste čekali a co se stalo místo toho.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>E-mail (nepovinné)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Jen pokud chcete odpověď.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Tohle nevypadá jako e-mailová adresa. Opravte ji, nebo pole nechte prázdné.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Odešle se</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Verze aplikace: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Operační systém: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Jazyk rozhraní: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Odesílá se jen na parlotype.dev přes HTTPS, když stisknete „Odeslat“. Uloží se vaše zpráva, váš e-mail, pokud ho uvedete, a údaje, které necháte zaškrtnuté. Nic dalšího se nepřikládá – žádné protokoly, zvuk ani přepisy – a vaše IP adresa se neukládá.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Odeslat</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Zavřít</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Po zavření okna zůstane text zachovaný až do ukončení Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Odesílá se…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Příliš mnoho zpráv v krátké době. Počkejte minutu a znovu stiskněte „Odeslat“ – váš text tu zůstává.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>V Parlotype se něco pokazilo a zpráva se neodeslala. Váš text tu zůstává – můžete ho místo toho odeslat přes web.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Odesílání z aplikace teď není k dispozici. Váš text tu zůstává – odešlete ho přes web.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>Server parlotype.dev teď zprávu nemůže přijmout. Váš text tu zůstává – zkuste to později, nebo ho odešlete přes web.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Nepodařilo se spojit s parlotype.dev. Váš text tu zůstává – zkontrolujte připojení a zkuste to znovu, nebo ho odešlete přes web.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Zpráva je zkopírovaná. Vložte ji do stránky, která se otevřela v prohlížeči.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Zprávu se nepodařilo zkopírovat. Označte ji, zkopírujte a vložte do stránky, která se otevřela v prohlížeči.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Nepodařilo se otevřít prohlížeč. Přejděte sami na tuto adresu: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Odeslat přes web</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Děkujeme</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Zpráva byla odeslána – děkujeme, že pomáháte Parlotype vylepšovat. Číslo zprávy: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

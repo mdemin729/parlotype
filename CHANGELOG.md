@@ -12,6 +12,26 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+
+- **Send feedback from the app.** Found a bug or have an idea? Choose **Send
+  feedback…** in the tray menu or under **Settings → Help**, write your message,
+  and press **Send**. You can add an email address if you would like a reply.
+  The window shows exactly what goes with your message — the app version, your
+  Windows version and the interface language — and you can untick any of them.
+  Nothing is sent until you press Send, and nothing else is attached: no logs,
+  audio or transcripts. If the message can't be sent from the app, your text
+  stays in the window and you can send it from the website or GitHub instead.
+
+### Changed
+
+- **Settings → Updates now lists everything Parlotype connects to.** It used to
+  say the update check was the only network request, which was not accurate:
+  speech models download from huggingface.co, and opening Settings reads the
+  list of llama.cpp server builds from GitHub. The page now says what Parlotype
+  contacts on its own (only the update check) and what happens only when you
+  ask for it, including feedback.
+
 ## [0.6.0] — 2026-10-03
 
 ### Added

@@ -8,8 +8,8 @@ using Parlotype.Desktop.Services;
 namespace Parlotype.Desktop.ViewModels.Settings;
 
 /// <summary>
-/// Settings → Help (ADR-056): re-launches the onboarding tour and lists the
-/// currently configured dictation hotkeys, kept fresh via
+/// Settings → Help (ADR-056): re-launches the onboarding tour, opens the feedback
+/// window (ADR-070) and lists the currently configured dictation hotkeys, kept fresh via
 /// <see cref="IGlobalHotkeyService.BindingsChanged"/>. All copy comes from
 /// <see cref="Strings"/> so the view holds no text of its own.
 /// </summary>
@@ -17,13 +17,16 @@ public sealed partial class HelpSettingsViewModel : SettingsSectionViewModelBase
 {
     private readonly IOnboardingService _onboarding;
     private readonly IGlobalHotkeyService? _hotkeyService;
+    private readonly IWindowManager? _windowManager;
 
     public HelpSettingsViewModel(
         IOnboardingService onboarding,
-        IGlobalHotkeyService? hotkeyService = null)
+        IGlobalHotkeyService? hotkeyService = null,
+        IWindowManager? windowManager = null)
     {
         _onboarding = onboarding;
         _hotkeyService = hotkeyService;
+        _windowManager = windowManager;
 
         if (_hotkeyService is not null)
             _hotkeyService.BindingsChanged += OnBindingsChanged;
@@ -50,6 +53,10 @@ public sealed partial class HelpSettingsViewModel : SettingsSectionViewModelBase
 
     [RelayCommand]
     private void OpenTour() => _onboarding.ShowWizard();
+
+    /// <summary>Opens the "Send feedback" window (ADR-070).</summary>
+    [RelayCommand]
+    private void SendFeedback() => _windowManager?.ShowFeedback();
 
     /// <summary>
     /// Every string on this page is composed in C#, so none of it updates itself

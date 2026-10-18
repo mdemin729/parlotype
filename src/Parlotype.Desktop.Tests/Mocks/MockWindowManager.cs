@@ -8,6 +8,7 @@ public sealed class MockWindowManager : IWindowManager
     public int ShowTranscribeCount { get; private set; }
     public int ShowTranscribeForDictationCount { get; private set; }
     public int ShowSettingsCount { get; private set; }
+    public int ShowFeedbackCount { get; private set; }
     public int HideTranscribeCount { get; private set; }
     public int ExitCount { get; private set; }
 
@@ -22,6 +23,8 @@ public sealed class MockWindowManager : IWindowManager
         ShowSettingsCount++;
         LastSettingsSection = section;
     }
+
+    public void ShowFeedback() => ShowFeedbackCount++;
 
     public void HideTranscribe() => HideTranscribeCount++;
     public void Exit() => ExitCount++;

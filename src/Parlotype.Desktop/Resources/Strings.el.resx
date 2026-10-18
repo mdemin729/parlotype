@@ -104,6 +104,16 @@
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — ακύρωση της τρέχουσας εγγραφής</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Σχόλια και αναφορές σφαλμάτων</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Βρήκατε κάποιο σφάλμα ή έχετε μια ιδέα; Στείλτε το απευθείας στον προγραμματιστή από εδώ.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Αποστολή σχολίων…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Θέμα</value>
   </data>
@@ -168,6 +178,10 @@
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Ρυθμίσεις</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Αποστολή σχολίων…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Έξοδος</value>
@@ -407,12 +421,20 @@
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Όταν είναι ενεργό, το Parlotype ελέγχει λίγο μετά την εκκίνηση και κάθε 6 ώρες έπειτα.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Τι αποστέλλεται</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Με τι συνδέεται το Parlotype</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Ένα ανώνυμο αίτημα προς το api.github.com για τη δημόσια λίστα εκδόσεων του Parlotype, καθώς και η λήψη του ίδιου του αρχείου έκδοσης. Κανένας λογαριασμός, κανένα αναγνωριστικό συσκευής, κανένα δεδομένο χρήσης. Αυτό είναι το μόνο αίτημα δικτύου που πραγματοποιεί το Parlotype όσο όλες οι μηχανές ομιλίας σας είναι τοπικές.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Από μόνο του, το Parlotype ελέγχει μόνο για ενημερώσεις: ένα ανώνυμο αίτημα προς το api.github.com για τη δημόσια λίστα εκδόσεων του Parlotype και, όταν υπάρχει νεότερη, η λήψη του αρχείου έκδοσης. Κανένας λογαριασμός, κανένα αναγνωριστικό συσκευής, κανένα δεδομένο χρήσης.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Όταν ανοίγετε τις Ρυθμίσεις, διαβάζεται επίσης από το api.github.com η λίστα εκδόσεων του διακομιστή llama.cpp, για τη μηχανή Gemma 4.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Όλα τα υπόλοιπα γίνονται μόνο όταν το ζητήσετε: η λήψη ενός μοντέλου ομιλίας (huggingface.co) ή ενός διακομιστή llama.cpp (github.com), η μεταγραφή με μια μηχανή cloud που έχετε ρυθμίσει και η αποστολή σχολίων — ένα αίτημα HTTPS προς το parlotype.dev όταν πατάτε Αποστολή.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Εγκατεστημένη έκδοση:</value>
@@ -1326,5 +1348,122 @@
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Επιλογή φακέλου llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Αποστολή σχολίων</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Πείτε στον προγραμματιστή τι λειτουργεί, τι όχι ή τι θα θέλατε να κάνει το Parlotype.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Τύπος</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Σχόλιο</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Αναφορά σφάλματος</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Μήνυμα</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Περιγράψτε την ιδέα σας ή το πρόβλημα. Για σφάλμα: τι κάνατε, τι περιμένατε και τι συνέβη αντί γι' αυτό.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>Email (προαιρετικό)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Μόνο αν θέλετε απάντηση.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Αυτό δεν μοιάζει με διεύθυνση email. Διορθώστε το ή αφήστε το πεδίο κενό.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Θα αποσταλούν</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Έκδοση εφαρμογής: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Λειτουργικό σύστημα: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Γλώσσα διεπαφής: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Αποστέλλεται μόνο στο parlotype.dev, μέσω HTTPS, όταν πατάτε Αποστολή. Διατηρούνται το μήνυμά σας, το email σας αν το δώσετε και οι λεπτομέρειες που αφήνετε επιλεγμένες. Τίποτα άλλο δεν επισυνάπτεται — ούτε αρχεία καταγραφής, ούτε ήχος, ούτε μεταγραφές — και η διεύθυνση IP σας δεν αποθηκεύεται.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Αποστολή</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Κλείσιμο</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Αν κλείσετε το παράθυρο, το κείμενό σας διατηρείται μέχρι να κλείσετε το Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Αποστολή…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Πάρα πολλά μηνύματα σε σύντομο χρόνο. Περιμένετε ένα λεπτό και πατήστε ξανά Αποστολή — το κείμενό σας είναι ακόμη εδώ.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>Κάτι πήγε στραβά στο Parlotype και το μήνυμα δεν στάλθηκε. Το κείμενό σας είναι ακόμη εδώ — μπορείτε να το στείλετε από τον ιστότοπο.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Η αποστολή από την εφαρμογή δεν είναι διαθέσιμη αυτή τη στιγμή. Το κείμενό σας είναι ακόμη εδώ — στείλτε το από τον ιστότοπο.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>Το parlotype.dev δεν μπόρεσε να δεχτεί το μήνυμα αυτή τη στιγμή. Το κείμενό σας είναι ακόμη εδώ — δοκιμάστε ξανά αργότερα ή στείλτε το από τον ιστότοπο.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η σύνδεση με το parlotype.dev. Το κείμενό σας είναι ακόμη εδώ — ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά ή στείλτε το από τον ιστότοπο.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Το μήνυμά σας αντιγράφηκε. Επικολλήστε το στη σελίδα που άνοιξε στο πρόγραμμα περιήγησής σας.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η αντιγραφή του μηνύματός σας. Επιλέξτε το, αντιγράψτε το και επικολλήστε το στη σελίδα που άνοιξε στο πρόγραμμα περιήγησής σας.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Δεν άνοιξε το πρόγραμμα περιήγησης. Μεταβείτε μόνοι σας σε αυτή τη διεύθυνση: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Αποστολή από τον ιστότοπο</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Ευχαριστούμε</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Το μήνυμά σας στάλθηκε — ευχαριστούμε που βοηθάτε να γίνει καλύτερο το Parlotype. Κωδικός αναφοράς: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

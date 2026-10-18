@@ -66,10 +66,25 @@ for this repository — followed by a download of the release file itself if a n
 exists. No account, no machine identifier, no install id, no usage data, and no custom
 headers are sent. Nothing about you or your machine is transmitted.
 
-**This is the only network request Parlotype makes while your speech engines are local.**
-Turn it off at **Settings → Application → Updates**, which also shows when the feed was
-last reached and offers a manual *Check now*. With the toggle off, the updater makes no
-outbound requests at all.
+**This is the only request Parlotype makes on its own.** Turn it off at
+**Settings → Application → Updates**, which also shows when the feed was last reached and
+offers a manual *Check now*. With the toggle off, the updater makes no outbound requests
+at all.
+
+Everything else follows something you do:
+
+- **Opening Settings** reads the list of llama.cpp server builds from `api.github.com`
+  (for the Gemma 4 engine), at most once an hour.
+- **Downloads you start or confirm**: speech models from `huggingface.co`, llama.cpp
+  servers from `github.com`.
+- **Cloud engines**, when you select one, send each recording to the provider you set up.
+- **Send feedback** (tray menu, or Settings → Help) sends one HTTPS request to
+  `parlotype.dev` when you press *Send*: your message, your email if you give one, and the
+  app version, OS and interface language only if you leave them ticked. No logs, audio or
+  transcripts; the server does not store your IP address. Nothing is sent automatically,
+  retried or queued.
+
+The full list, with endpoints, is in [docs/network-requests.md](docs/network-requests.md).
 
 ## Speech Engines
 
@@ -183,7 +198,7 @@ Findings from the [2026-07 security audit](docs/security/2026-07-11-security-aud
 - **Cloud API keys live outside `settings.json`** — in `secrets.json`, encrypted with DPAPI (`CurrentUser` scope) on Windows, so settings backups, sync, or diagnostics never carry credentials. Undecryptable values are treated as absent and re-prompted. On non-Windows platforms they are base64-encoded with a logged warning (OS keychain support is a known gap).
 - **Cloud base URLs must be HTTPS** unless the host is loopback, enforced at recognizer initialization.
 - **`settings.json` and `secrets.json` are written atomically** (temp file + move), and the `llama-server` sidecar is spawned with an argument list rather than a quoted command line.
-- **The update check is the only outbound request** in local mode, it is anonymous, and it can be switched off. See [Updates](#updates) for the exact endpoint and what is sent.
+- **The update check is the only request Parlotype makes on its own**; it is anonymous and can be switched off. Every other request follows a user action — opening Settings, a download, a cloud engine, or pressing *Send* in the feedback window. See [Updates](#updates) and [docs/network-requests.md](docs/network-requests.md).
 
 ## Where Parlotype Stores Data
 

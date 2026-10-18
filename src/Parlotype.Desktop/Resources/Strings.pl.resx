@@ -104,6 +104,16 @@ Aby skrót klawiszowy działał od razu po zalogowaniu, Parlotype uruchamia się
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — anuluje bieżące nagrywanie</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Opinie i zgłoszenia błędów</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Masz pomysł albo widzisz błąd? Wyślij go stąd prosto do twórcy aplikacji.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Wyślij opinię…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Motyw</value>
   </data>
@@ -168,6 +178,10 @@ Aby skrót klawiszowy działał od razu po zalogowaniu, Parlotype uruchamia się
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Ustawienia</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Wyślij opinię…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Zakończ</value>
@@ -407,12 +421,20 @@ Aby skrót klawiszowy działał od razu po zalogowaniu, Parlotype uruchamia się
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Gdy ta opcja jest włączona, Parlotype sprawdza aktualizacje krótko po uruchomieniu, a potem co 6 godzin.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Co jest wysyłane</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Z czym łączy się Parlotype</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Anonimowe zapytanie do api.github.com o publiczną listę wydań Parlotype oraz pobranie samego pliku wydania. Żadnego konta, identyfikatora komputera ani danych o użytkowaniu. To jedyne żądanie sieciowe, jakie wykonuje Parlotype, dopóki wszystkie Twoje silniki mowy są lokalne.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Sam z siebie Parlotype tylko sprawdza aktualizacje: anonimowe zapytanie do api.github.com o publiczną listę wydań Parlotype, a gdy jest nowsze wydanie — pobranie jego pliku. Żadnego konta, identyfikatora komputera ani danych o użytkowaniu.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Po otwarciu okna Ustawienia Parlotype pobiera też z api.github.com listę kompilacji serwera llama.cpp dla silnika Gemma 4.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Wszystko inne dzieje się tylko na Twoje żądanie: pobranie modelu mowy (huggingface.co) lub serwera llama.cpp (github.com), transkrypcja w skonfigurowanym przez Ciebie silniku chmurowym oraz wysłanie opinii — jedno żądanie HTTPS do parlotype.dev po naciśnięciu „Wyślij”.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Zainstalowana wersja:</value>
@@ -1326,5 +1348,122 @@ Twoje ustawienia i klucze API zostaną zachowane. Modele pobiorą się ponownie 
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Wybierz folder llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Wyślij opinię</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Napisz twórcy, co działa, co nie działa i czego oczekujesz od Parlotype.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Typ</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Opinia</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Zgłoszenie błędu</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Wiadomość</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Opisz pomysł lub problem. Przy błędzie: co robisz, czego oczekujesz i co dzieje się zamiast tego.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>E-mail (opcjonalnie)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Tylko jeśli chcesz otrzymać odpowiedź.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>To nie wygląda na adres e-mail. Popraw go lub zostaw pole puste.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Zostanie wysłane</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Wersja aplikacji: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>System operacyjny: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Język interfejsu: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Wysyłane tylko do parlotype.dev przez HTTPS, gdy naciśniesz „Wyślij”. Przechowywane są: Twoja wiadomość, adres e-mail, jeśli go podasz, oraz zaznaczone informacje. Nic więcej nie jest dołączane — żadnych logów, dźwięku ani transkrypcji — a Twój adres IP nie jest zapisywany.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Wyślij</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Zamknij</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Po zamknięciu okna tekst zostaje zachowany aż do zamknięcia Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Wysyłanie…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Za dużo wiadomości w krótkim czasie. Odczekaj minutę i ponownie naciśnij „Wyślij” — Twój tekst jest zachowany.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>W Parlotype coś poszło nie tak i wiadomość nie została wysłana. Twój tekst jest zachowany — możesz zamiast tego wysłać go przez stronę.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Wysyłanie z aplikacji jest teraz niedostępne. Twój tekst jest zachowany — wyślij go przez stronę.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>Serwer parlotype.dev nie może teraz przyjąć wiadomości. Twój tekst jest zachowany — spróbuj później lub wyślij go przez stronę.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Nie udało się połączyć z parlotype.dev. Twój tekst jest zachowany — sprawdź połączenie i spróbuj ponownie lub wyślij go przez stronę.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Wiadomość została skopiowana. Wklej ją na stronie otwartej w przeglądarce.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Nie udało się skopiować wiadomości. Zaznacz ją, skopiuj i wklej na stronie otwartej w przeglądarce.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Nie udało się otworzyć przeglądarki. Przejdź samodzielnie pod ten adres: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Wyślij przez stronę</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Dziękujemy</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Wiadomość została wysłana — dziękujemy za pomoc w ulepszaniu Parlotype. Numer zgłoszenia: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>
