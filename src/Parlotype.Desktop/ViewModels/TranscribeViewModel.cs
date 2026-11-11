@@ -953,6 +953,7 @@ public partial class TranscribeViewModel : ViewModelBase
         public void ShowTranscribe(bool activate = true) { }
         public void ShowTranscribeForDictation() { }
         public void ShowSettings(SettingsSection? section = null) { }
+        public void ShowFeedback() { }
         public void HideTranscribe() { }
         public void Exit() { }
     }

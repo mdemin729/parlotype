@@ -15,6 +15,7 @@ internal sealed class WindowManager : IWindowManager
     private readonly IServiceProvider _services;
     private TranscribeWindow? _transcribe;
     private SettingsWindow? _settings;
+    private FeedbackWindow? _feedback;
 
     /// <summary>
     /// One per <see cref="_transcribe"/> instance, built alongside it in
@@ -102,6 +103,27 @@ internal sealed class WindowManager : IWindowManager
         _settings.Show();
         _settings.WindowState = WindowState.Normal;
         _settings.Activate();
+    });
+
+    /// <summary>
+    /// Unlike Settings, the feedback window really closes and is rebuilt on the next
+    /// open: it holds no state of its own — the draft is in the singleton view model —
+    /// and a fresh window is what puts the focus back in the message box every time.
+    /// </summary>
+    public void ShowFeedback() => Dispatcher.UIThread.Post(() =>
+    {
+        if (_feedback is null)
+        {
+            _feedback = new FeedbackWindow
+            {
+                DataContext = _services.GetRequiredService<FeedbackViewModel>(),
+            };
+            _feedback.Closed += (_, _) => _feedback = null;
+        }
+
+        _feedback.Show();
+        _feedback.WindowState = WindowState.Normal;
+        _feedback.Activate();
     });
 
     public void HideTranscribe() => Dispatcher.UIThread.Post(() => _transcribe?.Hide());

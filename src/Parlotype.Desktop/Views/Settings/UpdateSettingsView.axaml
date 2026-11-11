@@ -20,13 +20,19 @@
                        Text="{loc:Tr Settings_Updates_CadenceNote}" />
         </StackPanel>
 
-        <!-- Privacy note: this is the only outbound request the app makes in local mode. -->
+        <!-- Privacy note: every host Parlotype contacts, and what makes it do so.
+             The update check is the only request the app makes on its own (ADR-053);
+             feedback is one request, only on Send (ADR-070). Keep this list true. -->
         <Border Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                 CornerRadius="4" Padding="12">
             <StackPanel Spacing="6">
-                <TextBlock Text="{loc:Tr Settings_Updates_WhatSendsHeading}" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="{loc:Tr Settings_Updates_NetworkHeading}" FontWeight="SemiBold" FontSize="13" />
                 <TextBlock Opacity="0.75" FontSize="12" TextWrapping="Wrap"
-                           Text="{loc:Tr Settings_Updates_WhatSendsBody}" />
+                           Text="{loc:Tr Settings_Updates_NetworkAutomaticBody}" />
+                <TextBlock Opacity="0.75" FontSize="12" TextWrapping="Wrap"
+                           Text="{loc:Tr Settings_Updates_NetworkSettingsBody}" />
+                <TextBlock Opacity="0.75" FontSize="12" TextWrapping="Wrap"
+                           Text="{loc:Tr Settings_Updates_NetworkOnRequestBody}" />
             </StackPanel>
         </Border>
 

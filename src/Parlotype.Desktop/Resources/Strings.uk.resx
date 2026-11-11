@@ -104,6 +104,16 @@
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — скасувати поточний запис</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Відгуки та повідомлення про помилки</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Знайшли помилку чи маєте ідею? Надішліть її розробникові просто звідси.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Надіслати відгук…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Тема</value>
   </data>
@@ -168,6 +178,10 @@
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Налаштування</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Надіслати відгук…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Вихід</value>
@@ -407,12 +421,20 @@
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Коли увімкнено, Parlotype перевіряє оновлення невдовзі після запуску, а потім кожні 6 годин.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Що це надсилає</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>До чого підключається Parlotype</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Анонімний запит до api.github.com за публічним списком версій Parlotype та завантаження самого файлу випуску. Жодного облікового запису, жодного ідентифікатора пристрою, жодних даних про використання. Це єдиний мережевий запит, який Parlotype робить, поки всі ваші рушії мовлення локальні.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Сам по собі Parlotype лише перевіряє оновлення: анонімний запит до api.github.com за публічним списком версій Parlotype, а якщо вийшла новіша — завантаження файлу випуску. Жодного облікового запису, жодного ідентифікатора пристрою, жодних даних про використання.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Під час відкриття вікна «Налаштування» також завантажується список збірок сервера llama.cpp з api.github.com — для рушія Gemma 4.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Усе інше відбувається лише на ваш запит: завантаження мовної моделі (huggingface.co) або сервера llama.cpp (github.com), розпізнавання налаштованим вами хмарним рушієм і надсилання відгуку — один HTTPS-запит до parlotype.dev, коли ви натискаєте «Надіслати».</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Встановлена версія:</value>
@@ -1326,5 +1348,122 @@
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Виберіть папку llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Надіслати відгук</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Розкажіть розробникові, що працює, що ні і чого вам бракує в Parlotype.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Тип</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Відгук</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Повідомлення про помилку</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Повідомлення</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Опишіть ідею або проблему. Для помилки: що ви зробили, чого очікували і що сталося натомість.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>Ел. пошта (необов'язково)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Лише якщо хочете отримати відповідь.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Це не схоже на адресу електронної пошти. Виправте її або залиште поле порожнім.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Буде надіслано</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Версія застосунку: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Операційна система: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Мова інтерфейсу: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Надсилається лише на parlotype.dev через HTTPS, коли ви натискаєте «Надіслати». Зберігаються ваше повідомлення, адреса пошти (якщо ви її вказали) та позначені відомості. Більше нічого не додається — ні журналів, ні аудіо, ні розпізнаного тексту, — а ваша IP-адреса не зберігається.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Надіслати</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Закрити</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Якщо закрити вікно, текст збережеться до виходу з Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Надсилання…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Забагато повідомлень за короткий час. Зачекайте хвилину й знову натисніть «Надіслати» — ваш текст збережено.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>У Parlotype щось пішло не так, і повідомлення не надіслано. Ваш текст збережено — його можна надіслати через сайт.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Надсилання із застосунку зараз недоступне. Ваш текст збережено — надішліть його через сайт.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>Сервер parlotype.dev зараз не може прийняти повідомлення. Ваш текст збережено — спробуйте пізніше або надішліть його через сайт.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Не вдалося з'єднатися з parlotype.dev. Ваш текст збережено — перевірте підключення й спробуйте ще раз або надішліть його через сайт.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Повідомлення скопійовано. Вставте його на сторінку, що відкрилася в браузері.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Не вдалося скопіювати повідомлення. Виділіть його, скопіюйте й вставте на сторінку, що відкрилася в браузері.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Не вдалося відкрити браузер. Перейдіть за цією адресою самостійно: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Надіслати через сайт</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Дякуємо</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Повідомлення надіслано — дякуємо, що допомагаєте робити Parlotype кращим. Номер звернення: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

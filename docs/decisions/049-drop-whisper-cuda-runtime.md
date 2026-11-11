@@ -25,7 +25,7 @@ Three things changed the cost/benefit since ADR-012 was written:
    settings page existed to explain that, with a "Download CUDA Toolkit" button.
 3. **Vulkan measured well.** On the LibriSpeech test-other benchmark
    (`docs/research/2026-05-23-librispeech-cuda-comparison/comparison.md`, same models, same
-   dataset, warm-up per ADR-070), CUDA is 8–26% faster by RTF, but `Small` and
+   dataset, warm-up per ADR-071), CUDA is 8–26% faster by RTF, but `Small` and
    `Medium` produce **identical WER**, and `LargeV3Turbo` is actually *better* on
    Vulkan (10.15% vs 11.48% WER).
 

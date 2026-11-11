@@ -13,7 +13,7 @@ advertise. Some make cross-engine comparisons meaningless rather than merely noi
 ## 1. Peak RAM is a process high-water mark, so warm-up is inside it
 
 Per-sample memory comes from `Process.PeakWorkingSet64`, which never falls. Once the
-warm-up pass ([ADR-070](../decisions/070-benchmark-warmup-pass.md)) has run its throwaway
+warm-up pass ([ADR-071](../decisions/071-benchmark-warmup-pass.md)) has run its throwaway
 transcription, its allocation is baked into the peak for **every** sample that follows.
 Per-sample RAM is therefore an upper bound on the whole run to date, not a measurement of
 that sample.

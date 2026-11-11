@@ -8,7 +8,7 @@ _Generated: 2026-05-23T16:50_ — Whisper re-run with CUDA runtime for an apples
 **VAD:** disabled (full-file transcription)
 **Whisper runtime:** **CUDA** (`Whisper.net.Runtime.Cuda`, strict mode via `runtimePreference: "Cuda"` in each config)
 **Gemma 4 backend:** llama.cpp, CUDA build **b9297-win-cuda-13.1-x64**, port 8321
-**Warm-up:** one throwaway transcription on the first sample before the timed loop ([ADR 070](../../decisions/070-benchmark-warmup-pass.md))
+**Warm-up:** one throwaway transcription on the first sample before the timed loop ([ADR 071](../../decisions/071-benchmark-warmup-pass.md))
 
 ## Results (sorted by WER, lower is better)
 

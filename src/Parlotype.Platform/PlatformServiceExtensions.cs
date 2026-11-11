@@ -1,11 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Parlotype.Core.Audio;
+using Parlotype.Core.Feedback;
 using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Core.LlamaServer;
 using Parlotype.Core.Updates;
 using Parlotype.Platform.Audio;
+using Parlotype.Platform.Feedback;
 using Parlotype.Platform.Hotkeys;
 using Parlotype.Platform.Settings;
 using Parlotype.Platform.Speech;
@@ -52,9 +54,12 @@ public static class PlatformServiceExtensions
         // Single source of truth for every path the app writes to. Must resolve
         // outside the Velopack pack folder, which is wiped on uninstall (ADR-053).
         services.AddSingleton<IAppPaths>(AppPaths.Default);
-        // The only outbound request Parlotype makes in local mode. Opt-out lives
-        // at SettingsKeys.UpdatesCheckAutomatically (ADR-053).
+        // The only request Parlotype makes on its own, without the user asking.
+        // Opt-out lives at SettingsKeys.UpdatesCheckAutomatically (ADR-053).
         services.AddSingleton<IUpdateService, VelopackUpdateService>();
+        // One POST to parlotype.dev per press of Send in the feedback window, and
+        // never otherwise — no retries, no queue (ADR-070).
+        services.AddSingleton<IFeedbackService, HttpFeedbackService>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         // API keys for the opt-in cloud providers live outside settings.json,
         // encrypted at rest where the OS supports it (ADR-032).

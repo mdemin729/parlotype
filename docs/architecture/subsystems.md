@@ -11,6 +11,7 @@ path itself see [audio-pipeline.md](audio-pipeline.md); for engines and projects
 - [Transcribe window lifetime](#transcribe-window-lifetime)
 - [Settings, secrets and window state](#settings-secrets-and-window-state)
 - [Packaging, app paths and updates](#packaging-app-paths-and-updates)
+- [Feedback](#feedback)
 - [Launch at sign-in](#launch-at-sign-in)
 - [Onboarding tour](#onboarding-tour)
 - [Localization](#localization)
@@ -265,10 +266,49 @@ files. Windows only; macOS and Linux have no uninstall hooks.
 
 `VelopackUpdateService` checks the public GitHub Releases feed 30 s after startup and then
 every six hours, downloads in the background and applies on restart. It is the only
-outbound request in local mode: an anonymous GET with no machine id, install id or usage
+request the app makes on its own: an anonymous GET with no machine id, install id or usage
 data. It is on by default (`SettingsKeys.UpdatesCheckAutomatically`), disclosed in the
 README and on Settings → Application → Updates, and can be turned off there. Dev and
 portable builds are not installed, so the service no-ops for them.
+
+Every other request follows a user action: opening Settings (the llama.cpp release list),
+a model or `llama-server` download, a cloud engine, or Send in the feedback window.
+[`../network-requests.md`](../network-requests.md) is the full list. It, the README's
+Updates section and Settings → Updates must say the same thing, and a new outbound request
+needs an ADR.
+
+## Feedback
+
+The "Send feedback" window, opened from the tray menu and Settings → Help, posts a message
+or bug report to `https://parlotype.dev/api/feedback`
+([ADR-070](../decisions/070-send-feedback-from-the-app.md)).
+
+- **The contract is not in this repository.** It lives in the website repository
+  (`docs/feedback-api.md`) and is public, and released app versions depend on it. Changing
+  a field or a status code means a new API version on the server plus an app release, not
+  an edit here. `FeedbackLimits` mirrors the server's field limits so the dialog enforces
+  exactly what the server would; it must never be stricter than the server.
+- **One POST per press of Send, and nothing else.** No retry, no queue, no background or
+  crash-time send: a request the user did not just ask for would be a new kind of network
+  traffic. No secret either, since anything shipped in the binary can be extracted (the
+  server relies on rate limits and a kill switch), and no `User-Agent`, cookies or
+  redirects, because a `User-Agent` would carry the app version even when the user
+  unticked it and a redirect would send the message somewhere the dialog did not name.
+  `HttpFeedbackService` owns its `HttpClient` with a 15 s timeout; the shared one has a
+  one-hour timeout for model downloads.
+- **Failures are results.** Responses are classified on status and the contract's `error`
+  code together; anything unrecognized is a server error. Every failure except an invalid
+  email or a rate limit offers the fallback, which copies the message to the clipboard and
+  opens the website's feedback form or GitHub Issues. The URL carries only the language.
+- **The draft lives in memory.** `FeedbackViewModel` is a DI singleton while the window is
+  rebuilt on each open, so text survives closing the window for the rest of the session.
+  It is never written to disk, and a successful send clears it.
+- **Testing never touches production.** `PARLOTYPE_FEEDBACK_ENDPOINT` overrides the
+  endpoint in Debug builds only (Release builds compile the check out), and the service
+  logs a warning when it is overridden. Tests hand a fake `HttpMessageHandler` to the
+  internal constructor. Never send a test message to the production endpoint: each one
+  reaches the developer's inbox. The local-Worker recipe is in
+  [`local-feedback-worker-testing`](../knowledge/local-feedback-worker-testing.md).
 
 ## Launch at sign-in
 

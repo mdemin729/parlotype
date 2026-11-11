@@ -6,7 +6,7 @@ namespace Parlotype.Desktop.ViewModels;
 
 /// <summary>
 /// Top-level view model bound to the tray icon. Exposes commands for
-/// the Open / Settings / Exit menu items, and their labels.
+/// the Open / Settings / Send feedback / Exit menu items, and their labels.
 /// </summary>
 public partial class AppViewModel : ViewModelBase
 {
@@ -25,6 +25,7 @@ public partial class AppViewModel : ViewModelBase
         {
             OnPropertyChanged(nameof(TrayOpenLabel));
             OnPropertyChanged(nameof(TraySettingsLabel));
+            OnPropertyChanged(nameof(TraySendFeedbackLabel));
             OnPropertyChanged(nameof(TrayExitLabel));
         };
     }
@@ -36,6 +37,8 @@ public partial class AppViewModel : ViewModelBase
 
     public string TraySettingsLabel => Strings.Tray_Settings;
 
+    public string TraySendFeedbackLabel => Strings.Tray_SendFeedback;
+
     public string TrayExitLabel => Strings.Tray_Exit;
 
     [RelayCommand]
@@ -43,6 +46,9 @@ public partial class AppViewModel : ViewModelBase
 
     [RelayCommand]
     private void OpenSettings() => _windowManager.ShowSettings();
+
+    [RelayCommand]
+    private void OpenFeedback() => _windowManager.ShowFeedback();
 
     [RelayCommand]
     private void Exit() => _windowManager.Exit();
@@ -59,6 +65,7 @@ public partial class AppViewModel : ViewModelBase
         public void ShowTranscribe(bool activate = true) { }
         public void ShowTranscribeForDictation() { }
         public void ShowSettings(SettingsSection? section = null) { }
+        public void ShowFeedback() { }
         public void HideTranscribe() { }
         public void Exit() { }
     }

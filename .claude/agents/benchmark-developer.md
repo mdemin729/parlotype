@@ -35,7 +35,7 @@ config field and metric; keep it true when you change any of them.
 
 - `docs/knowledge/benchmark-memory-and-engine-caveats.md` (peak-RAM caveats, runtime
   reporting, the `sweep` engine-selection trap) and `docs/knowledge/vad-tuning.md`.
-- ADRs 009 (CLI design), 011 (pipeline settings), 070 (warm-up pass); the generated
+- ADRs 009 (CLI design), 011 (pipeline settings), 071 (warm-up pass); the generated
   `docs/decisions/README.md` lists the rest.
 - `docs/research/2026-03-04-benchmark-requirements/` for the original dataset and result
   schema requirements.

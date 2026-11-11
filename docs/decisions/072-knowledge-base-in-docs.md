@@ -4,7 +4,7 @@ date: 2026-11-11
 supersedes: [013]
 ---
 
-# 071. Project knowledge lives in docs/, the memory vault and session journal are retired
+# 072. Project knowledge lives in docs/, the memory vault and session journal are retired
 
 ## Context
 

@@ -28,6 +28,12 @@ public interface IWindowManager
     /// <param name="section">When set, deep-links the window to that section; otherwise the last-viewed section is shown.</param>
     void ShowSettings(SettingsSection? section = null);
 
+    /// <summary>
+    /// Show + activate the "Send feedback" window (ADR-070). Creates it if needed; the
+    /// unsent draft lives in its view model, so it survives closing the window.
+    /// </summary>
+    void ShowFeedback();
+
     /// <summary>Hide the Transcribe window if it is open.</summary>
     void HideTranscribe();
 

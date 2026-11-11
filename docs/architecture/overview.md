@@ -9,7 +9,7 @@ way, the threading and lifecycle rules, and the flows that cross subsystems.
 |---|---|
 | [overview.md](overview.md) | Projects and dependency direction, speech engines, external processes, glossary |
 | [audio-pipeline.md](audio-pipeline.md) | Capture → VAD → recognizer → injection, the three-stage threading model, modes, shutdown and cancel |
-| [subsystems.md](subsystems.md) | Hotkeys, language and translation, Whisper runtime selection, Transcribe window lifetime, packaging, paths and updates, startup, single instance, development runs |
+| [subsystems.md](subsystems.md) | Hotkeys, language and translation, Whisper runtime selection, Transcribe window lifetime, packaging, paths and updates, feedback, startup, single instance, development runs |
 | [llamacpp-subsystem.md](llamacpp-subsystem.md) | The managed `llama-server` sidecar used by Gemma 4 |
 
 Decisions are recorded as ADRs in [`../decisions/`](../decisions/); this folder links to
@@ -91,9 +91,9 @@ Rules that hold across engines:
 - **Local by default.** Audio leaves the machine only while a cloud engine is selected.
   Cloud engines are never the default, use the user's own key, and show a persistent
   Cloud badge on the Transcribe window while active
-  ([ADR-032](../decisions/032-online-speech-providers-positioning.md)). The only other
-  outbound request in local mode is the update check (see
-  [subsystems.md](subsystems.md#updates)).
+  ([ADR-032](../decisions/032-online-speech-providers-positioning.md)). Apart from the
+  update check, which the app makes on its own, every network request follows a user
+  action; [`../network-requests.md`](../network-requests.md) lists them all.
 - **API keys never go in `settings.json`.** They live in `ISecretStore`
   (`secrets.json`, DPAPI-encrypted per value on Windows). A cloud engine with no key fails
   initialization with `CloudProviderNotConfiguredException`, which the record-start flow

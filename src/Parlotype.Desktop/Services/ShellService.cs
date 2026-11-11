@@ -76,6 +76,30 @@ public sealed class ShellService : IShellService
         }
     }
 
+    public Task<bool> OpenUrlAsync(Uri url)
+    {
+        // Only web addresses: a file: or custom-scheme URI handed to the shell would
+        // launch whatever is registered for it.
+        if (!url.IsAbsoluteUri || (url.Scheme != Uri.UriSchemeHttps && url.Scheme != Uri.UriSchemeHttp))
+        {
+            _logger.LogWarning("Refused to open {Url}: not a web address", url);
+            return Task.FromResult(false);
+        }
+
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo(url.AbsoluteUri) { UseShellExecute = true });
+
+            _logger.LogInformation("Opened {Url} in the browser", url);
+            return Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to open {Url} in the browser", url);
+            return Task.FromResult(false);
+        }
+    }
+
     private static Window? GetOwnerWindow()
     {
         if (Avalonia.Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)

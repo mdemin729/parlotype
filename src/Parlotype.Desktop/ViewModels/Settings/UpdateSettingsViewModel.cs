@@ -14,8 +14,9 @@ namespace Parlotype.Desktop.ViewModels.Settings;
 /// reached, and a manual "Check now" (ADR-053).
 /// </summary>
 /// <remarks>
-/// The update check is the only outbound request Parlotype makes in local mode,
-/// so this page states plainly what is contacted and lets the user turn it off.
+/// The update check is the only request Parlotype makes on its own, so this page
+/// states plainly what is contacted and lets the user turn it off — and lists the
+/// requests that only follow a user action (downloads, cloud engines, feedback).
 /// </remarks>
 public partial class UpdateSettingsViewModel : SettingsSectionViewModelBase
 {

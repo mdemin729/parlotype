@@ -67,9 +67,13 @@ subsystem; `overview.md` says which document covers what.
   compose one by hand. The Windows data root is `%LOCALAPPDATA%/parlotype-data`, not
   `parlotype`: that folder belongs to the Velopack installer and is deleted on uninstall
   ([ADR-053](docs/decisions/053-velopack-packaging-and-auto-update.md)).
-- **Network.** In local mode, apart from downloads the user starts (models, `llama-server`),
-  the only outbound request is the update check (`IUpdateService`, opt-out via
-  `SettingsKeys.UpdatesCheckAutomatically`). A new one needs an ADR.
+- **Network.** The update check (`IUpdateService`, opt-out via
+  `SettingsKeys.UpdatesCheckAutomatically`) is the only request the app makes on its own;
+  every other one follows a user action. [`docs/network-requests.md`](docs/network-requests.md)
+  lists them and must agree with the README and Settings → Updates. A new one needs an ADR.
+- **Feedback.** Never send a test message to production: point a Debug build at a local
+  Worker with `PARLOTYPE_FEEDBACK_ENDPOINT` (Release builds ignore it; see
+  [the knowledge note](docs/knowledge/local-feedback-worker-testing.md)).
 - **Logs.** Recognized text is never logged at any level; log lengths and counts only
   ([ADR-046](docs/decisions/046-security-hardening-batch.md)).
 - **Models.** Never load two Whisper models at once; switching is unload → load
@@ -116,6 +120,7 @@ whenever you touch UI copy. The hard rules:
 | How the system fits together, and why | `docs/architecture/` | Living. Fix the statement you made false. |
 | Gotchas not derivable from code | `docs/knowledge/` | One fact per note; frontmatter `title`, `area`, `summary`, `verified`. Check it before debugging a dependency. |
 | Research that fed a decision | `docs/research/YYYY-MM-DD-topic/` | Dated snapshot, not updated later. |
+| Outbound requests | `docs/network-requests.md` | Every request the app can make. Keep it in step with the README and Settings → Updates. |
 | Translator material | `docs/localization/` | Glossaries, brief, terminology, outstanding items. |
 | Work in flight | `plans/` | One folder per live plan, never a bare `.md` in `plans/`; deleted on completion. See [`plans/WORKFLOW.md`](plans/WORKFLOW.md). |
 

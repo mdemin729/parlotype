@@ -3,7 +3,7 @@ status: accepted
 date: 2026-05-23
 ---
 
-# 070. Always-on benchmark warm-up pass
+# 071. Always-on benchmark warm-up pass
 
 ## Context
 

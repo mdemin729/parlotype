@@ -3,8 +3,8 @@ using Parlotype.Desktop.Services;
 namespace Parlotype.Desktop.Tests.Mocks;
 
 /// <summary>
-/// Records clipboard and file-manager requests instead of performing them, so
-/// tests never touch the real clipboard or spawn Explorer windows.
+/// Records clipboard, file-manager and browser requests instead of performing them,
+/// so tests never touch the real clipboard or spawn Explorer or browser windows.
 /// </summary>
 public sealed class MockShellService : IShellService
 {
@@ -16,6 +16,19 @@ public sealed class MockShellService : IShellService
 
     public int OpenDirectoryCount { get; private set; }
     public string? LastOpenedPath { get; private set; }
+
+    public int OpenUrlCount { get; private set; }
+    public Uri? LastOpenedUrl { get; private set; }
+
+    /// <summary>What <see cref="OpenUrlAsync"/> reports. Defaults to success.</summary>
+    public bool OpenUrlResult { get; set; } = true;
+
+    public Task<bool> OpenUrlAsync(Uri url)
+    {
+        OpenUrlCount++;
+        LastOpenedUrl = url;
+        return Task.FromResult(OpenUrlResult);
+    }
 
     public Task<bool> CopyTextAsync(string text)
     {

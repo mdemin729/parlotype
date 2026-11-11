@@ -104,6 +104,16 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — katkesta praegune salvestus</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Tagasiside ja vearaportid</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Leidsid vea või on sul idee? Saada see siit otse arendajale.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Saada tagasisidet…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Teema</value>
   </data>
@@ -168,6 +178,10 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Seaded</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Saada tagasisidet…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Välju</value>
@@ -407,12 +421,20 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Kui see on sisse lülitatud, kontrollib Parlotype uuendusi kohe pärast käivitamist ja seejärel iga 6 tunni järel.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Mida see saadab</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Millega Parlotype ühendub</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Anonüümne päring aadressile api.github.com Parlotype'i avalike väljalasete loendi saamiseks ning väljalaskefaili enda allalaadimine. Ei mingit kontot, seadme tunnust ega kasutusandmeid. See on ainus võrgupäring, mida Parlotype teeb, kui kõik sinu kõnetuvastusmootorid on kohalikud.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Omal algatusel kontrollib Parlotype ainult uuendusi: anonüümne päring aadressile api.github.com Parlotype'i avalike väljalasete loendi saamiseks ja seejärel väljalaskefaili allalaadimine, kui uuem väljalase on olemas. Ei mingit kontot, seadme tunnust ega kasutusandmeid.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Seadete avamisel loetakse aadressilt api.github.com ka llama.cpp serveri väljalasete loend Gemma 4 mootori jaoks.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Kõik muu toimub ainult siis, kui sa seda palud: kõnemudeli (huggingface.co) või llama.cpp serveri (github.com) allalaadimine, transkribeerimine sinu seadistatud pilvemootoriga ja tagasiside saatmine — üks HTTPS-päring aadressile parlotype.dev, kui vajutad Saada.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Paigaldatud versioon:</value>
@@ -1326,5 +1348,122 @@ Sinu seaded ja API-võtmed säilivad. Mudelid laaditakse järgmisel dikteerimise
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Vali llama-server'i kaust</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Saada tagasisidet</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Kirjuta arendajale, mis töötab, mis mitte või mida sooviksid, et Parlotype teeks.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Tüüp</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Tagasiside</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Vearaport</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Sõnum</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Kirjelda oma ideed või probleemi. Vea korral: mida tegid, mida ootasid ja mis selle asemel juhtus.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>E-post (valikuline)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Ainult siis, kui soovid vastust.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>See ei näe välja nagu e-posti aadress. Paranda see või jäta väli tühjaks.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Saadetakse kaasa</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Rakenduse versioon: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Operatsioonisüsteem: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Liidese keel: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Saadetakse ainult aadressile parlotype.dev üle HTTPS-i, kui vajutad Saada. Talletatakse sinu sõnum, sinu e-posti aadress, kui selle annad, ja märgituks jäetud andmed. Midagi muud ei lisata — ei logisid, heli ega transkriptsioone — ja sinu IP-aadressi ei salvestata.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Saada</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Sulge</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Akna sulgemisel jääb sinu tekst alles, kuni väljud Parlotype'ist.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Saatmine…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Liiga palju sõnumeid lühikese aja jooksul. Oota minut ja vajuta siis uuesti Saada — sinu tekst on endiselt alles.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>Parlotype'is läks midagi valesti ja sõnumit ei saadetud. Sinu tekst on endiselt alles — saad selle hoopis veebisaidilt saata.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Rakendusest saatmine ei ole praegu saadaval. Sinu tekst on endiselt alles — saada see hoopis veebisaidilt.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>parlotype.dev ei saanud sõnumit praegu vastu võtta. Sinu tekst on endiselt alles — proovi hiljem uuesti või saada see veebisaidilt.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Aadressiga parlotype.dev ei õnnestunud ühendust saada. Sinu tekst on endiselt alles — kontrolli ühendust ja proovi uuesti või saada see veebisaidilt.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Sinu sõnum on kopeeritud. Kleebi see brauseris avanenud lehele.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Sinu sõnumit ei õnnestunud kopeerida. Vali see, kopeeri ja kleebi brauseris avanenud lehele.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Brauserit ei õnnestunud avada. Mine ise sellele aadressile: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Saada veebisaidilt</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Aitäh</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Sinu sõnum saadeti — aitäh, et aitad Parlotype'i paremaks muuta. Viide: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

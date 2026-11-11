@@ -398,6 +398,9 @@ public class App : Application
         services.AddSingleton<SettingsWindowViewModel>();
         services.AddSingleton<TranscribeViewModel>();
         services.AddSingleton<OnboardingWizardViewModel>();
+        // Singleton on purpose: the window is rebuilt on each open, and the unsent
+        // draft has to outlive it for the rest of the session (ADR-070).
+        services.AddSingleton<FeedbackViewModel>();
         services.AddSingleton<AppViewModel>();
 
         services.AddSingleton<IWindowManager, WindowManager>();

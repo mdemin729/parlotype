@@ -2,7 +2,7 @@ name: Docs Check
 
 # Keeps the documentation honest without building the solution:
 #   - docs/decisions/README.md and docs/knowledge/README.md are generated from
-#     frontmatter (ADR-071); the check fails if either is stale or an ADR
+#     frontmatter (ADR-072); the check fails if either is stale or an ADR
 #     relation is one-sided.
 #   - every relative Markdown link in the tree must resolve.
 

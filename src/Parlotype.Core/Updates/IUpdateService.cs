@@ -5,8 +5,11 @@ namespace Parlotype.Core.Updates;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The update check is the only outbound network request Parlotype makes in local
-/// mode, so it is a product decision as much as an implementation detail (ADR-053).
+/// The update check is the only network request Parlotype makes on its own, without
+/// the user asking — so it is a product decision as much as an implementation detail
+/// (ADR-053). Every other request follows a user action: opening Settings (the
+/// llama.cpp release list), a model or server download, a cloud engine, or pressing
+/// Send in the feedback window (ADR-070). <c>docs/network-requests.md</c> lists them.
 /// Implementations must send nothing beyond what fetching the public release feed
 /// requires: no machine identifier, no install id, no usage data, no custom headers
 /// carrying user information. The check is a plain unauthenticated read of a public

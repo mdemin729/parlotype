@@ -104,6 +104,16 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — anulează înregistrarea curentă</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Feedback și raportarea erorilor</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Ai găsit o eroare sau ai o idee? Trimite-o direct dezvoltatorului, de aici.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Trimite feedback…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Temă</value>
   </data>
@@ -168,6 +178,10 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Setări</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Trimite feedback…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Ieșire</value>
@@ -407,12 +421,20 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Când este activă, Parlotype verifică la scurt timp după pornire și apoi la fiecare 6 ore.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Ce se trimite</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>La ce se conectează Parlotype</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>O cerere anonimă către api.github.com pentru lista publică a versiunilor Parlotype, plus descărcarea fișierului versiunii respective. Fără cont, fără identificator al dispozitivului, fără date de utilizare. Aceasta este singura cerere de rețea făcută de Parlotype cât timp toate motoarele tale de recunoaștere sunt locale.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Din proprie inițiativă, Parlotype doar verifică actualizările: o cerere anonimă către api.github.com pentru lista publică a versiunilor Parlotype, apoi descărcarea fișierului versiunii, dacă există una mai nouă. Fără cont, fără identificator al dispozitivului, fără date de utilizare.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Când deschizi Setări, Parlotype citește și lista versiunilor serverului llama.cpp de pe api.github.com, pentru motorul Gemma 4.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Tot restul se întâmplă doar când ceri tu: descărcarea unui model de voce (huggingface.co) sau a unui server llama.cpp (github.com), transcrierea cu un motor cloud configurat de tine și trimiterea de feedback — o singură cerere HTTPS către parlotype.dev când apeși Trimite.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Versiune instalată:</value>
@@ -1326,5 +1348,122 @@ Setările și cheile API sunt păstrate. Modelele se descarcă din nou automat d
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Selectează folderul llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Trimite feedback</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Spune-i dezvoltatorului ce funcționează, ce nu sau ce ți-ar plăcea să facă Parlotype.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Tip</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Feedback</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Raport de eroare</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Descrie ideea sau problema. Pentru o eroare: ce ai făcut, ce te așteptai să se întâmple și ce s-a întâmplat de fapt.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>E-mail (opțional)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Doar dacă vrei un răspuns.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Aceasta nu pare o adresă de e-mail. Corecteaz-o sau lasă câmpul gol.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Se vor trimite</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Versiunea aplicației: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Sistem de operare: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Limba interfeței: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Se trimite doar către parlotype.dev, prin HTTPS, când apeși Trimite. Se păstrează mesajul tău, adresa de e-mail, dacă o dai, și detaliile pe care le lași bifate. Nimic altceva nu este atașat — fără jurnale, sunet sau transcrieri — iar adresa ta IP nu este stocată.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Trimite</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Închide</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Dacă închizi fereastra, textul tău rămâne păstrat până când închizi Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Se trimite…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Prea multe mesaje într-un timp scurt. Așteaptă un minut, apoi apasă din nou Trimite — textul tău este încă aici.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>Ceva nu a funcționat în Parlotype și mesajul nu a fost trimis. Textul tău este încă aici — îl poți trimite de pe site.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Trimiterea din aplicație nu este disponibilă acum. Textul tău este încă aici — trimite-l de pe site.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>parlotype.dev nu a putut prelua mesajul acum. Textul tău este încă aici — încearcă din nou mai târziu sau trimite-l de pe site.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Nu s-a putut contacta parlotype.dev. Textul tău este încă aici — verifică-ți conexiunea și încearcă din nou sau trimite-l de pe site.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Mesajul tău a fost copiat. Lipește-l în pagina care s-a deschis în browser.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Mesajul nu a putut fi copiat. Selectează-l, copiază-l și lipește-l în pagina care s-a deschis în browser.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Browserul nu a putut fi deschis. Accesează manual această adresă: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Trimite de pe site</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Mulțumim</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Mesajul tău a fost trimis — mulțumim că ajuți la îmbunătățirea Parlotype. Referință: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

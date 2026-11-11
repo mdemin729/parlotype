@@ -104,6 +104,16 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — az aktuális felvétel megszakítása</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Visszajelzés és hibajelentés</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Hibát találtál, vagy van egy ötleted? Küldd el innen egyenesen a fejlesztőnek.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Visszajelzés küldése…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Téma</value>
   </data>
@@ -168,6 +178,10 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Beállítások</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Visszajelzés küldése…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Kilépés</value>
@@ -407,12 +421,20 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Bekapcsolva a Parlotype röviddel indítás után, majd utána 6 óránként ellenőriz.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Mit küld el ez</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Mihez kapcsolódik a Parlotype</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Egy névtelen kérést az api.github.com címre a Parlotype nyilvános kiadáslistájáért, valamint a kiadási fájl letöltését. Nincs fiók, nincs géphez kötött azonosító, nincs használati adat. Ez az egyetlen hálózati kérés, amit a Parlotype küld, amíg minden beszédfelismerő motorod helyi.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Magától a Parlotype csak frissítéseket keres: egy névtelen kérés az api.github.com címre a Parlotype nyilvános kiadáslistájáért, majd a kiadási fájl letöltése, ha újabb kiadás érhető el. Nincs fiók, nincs géphez kötött azonosító, nincs használati adat.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>A Beállítások megnyitásakor a Parlotype a Gemma 4 motorhoz a llama.cpp szerver verzióinak listáját is lekéri az api.github.com címről.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Minden más csak akkor történik, ha kéred: egy beszédmodell (huggingface.co) vagy egy llama.cpp szerver (github.com) letöltése, átiratkészítés egy általad beállított felhőalapú motorral, valamint visszajelzés küldése — egyetlen HTTPS-kérés a parlotype.dev címre, amikor megnyomod a Küldés gombot.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Telepített verzió:</value>
@@ -1326,5 +1348,122 @@ A beállításaid és API-kulcsaid megmaradnak. A modellek automatikusan újra l
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Válaszd ki a llama-server mappát</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Visszajelzés küldése</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Írd meg a fejlesztőnek, mi működik, mi nem, vagy mit szeretnél, hogy a Parlotype tudjon.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Típus</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Visszajelzés</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Hibajelentés</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Üzenet</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Írd le az ötletedet vagy a problémát. Hiba esetén: mit csináltál, mire számítottál, és mi történt helyette.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>E-mail (nem kötelező)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Csak ha választ szeretnél.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Ez nem tűnik e-mail-címnek. Javítsd ki, vagy hagyd üresen a mezőt.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Elküldendő adatok</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Alkalmazásverzió: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Operációs rendszer: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Felület nyelve: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Csak a parlotype.dev címre megy, HTTPS-en keresztül, amikor megnyomod a Küldés gombot. Az üzenetedet, az e-mail-címedet (ha megadod) és a bejelölve hagyott adatokat tárolja. Semmi mást nem csatol — se naplót, se hangot, se átiratot —, és az IP-címedet nem tárolja.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Küldés</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Bezárás</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Az ablak bezárása után a szöveged megmarad, amíg ki nem lépsz a Parlotype-ból.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Küldés…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Túl sok üzenet rövid idő alatt. Várj egy percet, majd nyomd meg újra a Küldés gombot — a szöveged megmaradt.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>Hiba történt a Parlotype-ban, és az üzenet nem ment el. A szöveged megmaradt — helyette elküldheted a webhelyről.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Az alkalmazásból való küldés most nem érhető el. A szöveged megmaradt — küldd el inkább a webhelyről.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>A parlotype.dev most nem tudta fogadni az üzenetet. A szöveged megmaradt — próbáld újra később, vagy küldd el a webhelyről.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Nem sikerült elérni a parlotype.dev címet. A szöveged megmaradt — ellenőrizd a kapcsolatot, és próbáld újra, vagy küldd el a webhelyről.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Az üzeneted a vágólapra került. Illeszd be a böngésződben megnyílt oldalra.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Nem sikerült a vágólapra másolni az üzenetedet. Jelöld ki, másold ki, és illeszd be a böngésződben megnyílt oldalra.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Nem sikerült megnyitni a böngészőt. Nyisd meg magad ezt a címet: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Küldés a webhelyről</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Köszönjük</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Az üzeneted elment — köszönjük, hogy segítesz jobbá tenni a Parlotype-ot. Azonosító: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

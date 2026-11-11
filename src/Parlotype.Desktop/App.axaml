@@ -27,6 +27,7 @@
                     <NativeMenu>
                         <NativeMenuItem Header="{Binding TrayOpenLabel}" Command="{Binding OpenCommand}" />
                         <NativeMenuItem Header="{Binding TraySettingsLabel}" Command="{Binding OpenSettingsCommand}" />
+                        <NativeMenuItem Header="{Binding TraySendFeedbackLabel}" Command="{Binding OpenFeedbackCommand}" />
                         <NativeMenuItemSeparator />
                         <NativeMenuItem Header="{Binding TrayExitLabel}" Command="{Binding ExitCommand}" />
                     </NativeMenu>

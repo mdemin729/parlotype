@@ -102,6 +102,16 @@
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — ikkanċella r-reġistrazzjoni attwali</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Feedback u Rapporti ta' Żbalji</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Sibt żball jew għandek idea? Ibgħatha dritt lill-iżviluppatur minn hawn.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Ibgħat Feedback…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Tema</value>
   </data>
@@ -166,6 +176,10 @@
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Settings</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Ibgħat Feedback…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Oħroġ</value>
@@ -405,12 +419,20 @@
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Meta mqabbad, Parlotype tiċċekkja ftit wara t-tnedija u kull 6 sigħat wara dan.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>X'Jintbagħat B'Dan</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Ma' Xiex Tikkonnettja Parlotype</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Talba anonima lil api.github.com għal-lista pubblika tal-ħarġiet ta' Parlotype, u t-tniżżil tal-fajl tal-ħarġa nnifisha. L-ebda kont, l-ebda identifikatur tal-magna, l-ebda data dwar l-użu. Din hija l-unika talba tan-network li tagħmel Parlotype sakemm il-magni tad-diskors tiegħek kollha jkunu lokali.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Waħedha, Parlotype tiċċekkja biss għal aġġornamenti: talba anonima lil api.github.com għall-lista pubblika tal-ħarġiet ta' Parlotype, imbagħad it-tniżżil tal-fajl tal-ħarġa meta jkun hemm waħda aktar ġdida. L-ebda kont, l-ebda identifikatur tal-magna, l-ebda data dwar l-użu.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Meta tiftaħ is-Settings, Parlotype taqra wkoll il-lista tal-builds tas-server llama.cpp minn api.github.com, għall-magna Gemma 4.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Kull ħaġa oħra ssir biss meta titlobha: meta tniżżel mudell tad-diskors (huggingface.co) jew server llama.cpp (github.com), meta tuża għat-traskrizzjoni magna bbażata fuq is-sħaba li kkonfigurajt, u meta tibgħat feedback — talba HTTPS waħda lil parlotype.dev meta tagħfas “Ibgħat”.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Verżjoni Installata:</value>
@@ -1324,5 +1346,122 @@ Is-settings u ċ-ċwievet tal-API tiegħek jinżammu. Il-mudelli jerġgħu jitni
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Agħżel il-Fowlder ta' llama-server</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Ibgħat Feedback</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Għid lill-iżviluppatur x'jaħdem, x'ma jaħdimx, jew x'tixtieq li tagħmel Parlotype.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Tip</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Feedback</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Rapport ta' Żball</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Messaġġ</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Iddeskrivi l-idea jew il-problema tiegħek. Għal żball: x'għamilt, x'kont qed tistenna, u x'ġara minflok.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>Email (Fakultattiv)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Biss jekk tixtieq tweġiba.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Dan ma jidhirx li huwa indirizz tal-email. Ikkoreġih, jew ħalli l-qasam vojt.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Se Jintbagħtu</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Verżjoni tal-App: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Sistema Operattiva: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Lingwa tal-Interfaċċja: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Jintbagħat biss lil parlotype.dev, permezz ta' HTTPS, meta tagħfas “Ibgħat”. Jinżammu l-messaġġ tiegħek, l-email tiegħek jekk tagħtiha, u d-dettalji li tħalli mmarkati. Ma jiġi mehmuż xejn aktar — l-ebda logs, awdjo jew traskrizzjonijiet — u l-indirizz IP tiegħek ma jinħażinx.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Ibgħat</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Agħlaq</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Jekk tagħlaq il-window, it-test tiegħek jibqa' sakemm toħroġ minn Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Qed jintbagħat…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Wisq messaġġi fi ftit ħin. Stenna minuta, imbagħad erġa' agħfas “Ibgħat” — it-test tiegħek għadu hawn.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>Inqala' żball f'Parlotype u l-messaġġ ma ntbagħatx. It-test tiegħek għadu hawn — tista' tibagħtu mis-sit web minflok.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Ma tistax tibgħat mill-app bħalissa. It-test tiegħek għadu hawn — ibagħtu mis-sit web minflok.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>Is-sit parlotype.dev ma setax jilqa' l-messaġġ bħalissa. It-test tiegħek għadu hawn — erġa' pprova aktar tard, jew ibagħtu mis-sit web.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Il-konnessjoni ma' parlotype.dev ma rnexxietx. It-test tiegħek għadu hawn — iċċekkja l-konnessjoni tiegħek u erġa' pprova, jew ibagħtu mis-sit web.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Il-messaġġ tiegħek ġie kkopjat. Waħħlu fil-paġna li nfetħet fil-browser tiegħek.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Il-messaġġ tiegħek ma setax jiġi kkopjat. Agħżlu, ikkopjah, u waħħlu fil-paġna li nfetħet fil-browser tiegħek.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Il-browser tiegħek ma setax jinfetaħ. Mur f'dan l-indirizz int stess: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Ibgħat mis-Sit Web</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Grazzi</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Il-messaġġ tiegħek intbagħat — grazzi talli qed tgħin biex Parlotype issir aħjar. Referenza: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>

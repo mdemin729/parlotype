@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
              x:Class="Parlotype.Desktop.Views.Settings.HelpSettingsView"
              x:DataType="vms:HelpSettingsViewModel"
              x:CompileBindings="True">
@@ -28,5 +29,17 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,8" />
+
+        <TextBlock Text="{loc:Tr Help_FeedbackHeading}"
+                   FontSize="14" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Help_FeedbackBody}"
+                   Opacity="0.7"
+                   TextWrapping="Wrap" />
+        <Button Name="SendFeedbackButton"
+                Content="{loc:Tr Help_SendFeedbackButton}"
+                AutomationProperties.Name="{loc:Tr Help_SendFeedbackButton}"
+                Command="{Binding SendFeedbackCommand}" />
     </StackPanel>
 </UserControl>

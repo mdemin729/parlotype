@@ -104,6 +104,16 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
   <data name="Help_EscCancelLine" xml:space="preserve">
     <value>Esc — atšaukia dabartinį įrašymą</value>
   </data>
+  <data name="Help_FeedbackHeading" xml:space="preserve">
+    <value>Atsiliepimai ir klaidų ataskaitos</value>
+  </data>
+  <data name="Help_FeedbackBody" xml:space="preserve">
+    <value>Radote klaidą ar turite idėją? Nusiųskite ją tiesiai kūrėjui iš čia.</value>
+  </data>
+  <data name="Help_SendFeedbackButton" xml:space="preserve">
+    <value>Siųsti atsiliepimą…</value>
+    <comment>Button that opens the feedback window. Keep it short; the ellipsis says a window follows.</comment>
+  </data>
   <data name="Settings_Theme_Title" xml:space="preserve">
     <value>Apipavidalinimas</value>
   </data>
@@ -168,6 +178,10 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
   </data>
   <data name="Tray_Settings" xml:space="preserve">
     <value>Nustatymai</value>
+  </data>
+  <data name="Tray_SendFeedback" xml:space="preserve">
+    <value>Siųsti atsiliepimą…</value>
+    <comment>Tray menu item under Settings. Opens the feedback window; the ellipsis says a window follows.</comment>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Išeiti</value>
@@ -407,12 +421,20 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
   <data name="Settings_Updates_CadenceNote" xml:space="preserve">
     <value>Kai įjungta, Parlotype patikrina netrukus po paleidimo, o vėliau — kas 6 valandas.</value>
   </data>
-  <data name="Settings_Updates_WhatSendsHeading" xml:space="preserve">
-    <value>Kas siunčiama</value>
+  <data name="Settings_Updates_NetworkHeading" xml:space="preserve">
+    <value>Prie ko jungiasi Parlotype</value>
   </data>
-  <data name="Settings_Updates_WhatSendsBody" xml:space="preserve">
-    <comment>"api.github.com" is a host name — never translated.</comment>
-    <value>Anoniminė užklausa į api.github.com dėl viešo Parlotype laidų sąrašo bei paties laidos failo atsisiuntimas. Jokios paskyros, jokio įrenginio identifikatoriaus, jokių naudojimo duomenų. Tai vienintelė tinklo užklausa, kurią Parlotype atlieka, kol visi jūsų kalbos varikliai yra vietiniai.</value>
+  <data name="Settings_Updates_NetworkAutomaticBody" xml:space="preserve">
+    <value>Savaime Parlotype tik tikrina naujinius: anoniminė užklausa į api.github.com dėl viešo Parlotype laidų sąrašo, o radus naujesnę laidą — jos failo atsisiuntimas. Jokios paskyros, jokio įrenginio identifikatoriaus, jokių naudojimo duomenų.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkSettingsBody" xml:space="preserve">
+    <value>Atidarius langą „Nustatymai“, iš api.github.com taip pat nuskaitomas llama.cpp serverio surinkimų sąrašas Gemma 4 varikliui.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" and "Gemma 4" are product names.</comment>
+  </data>
+  <data name="Settings_Updates_NetworkOnRequestBody" xml:space="preserve">
+    <value>Visa kita vyksta tik jums paprašius: kalbos modelio (huggingface.co) ar llama.cpp serverio (github.com) atsisiuntimas, transkribavimas jūsų nustatytu debesijos varikliu ir atsiliepimo siuntimas — viena HTTPS užklausa į parlotype.dev, kai paspaudžiate „Siųsti“.</value>
+    <comment>Host names (api.github.com, github.com, huggingface.co, parlotype.dev) are never translated. "llama.cpp" is a product name.</comment>
   </data>
   <data name="Settings_Updates_InstalledVersionLabel" xml:space="preserve">
     <value>Įdiegta versija:</value>
@@ -1326,5 +1348,122 @@ Jūsų nustatymai ir API raktai bus išsaugoti. Modeliai vėl automatiškai atsi
   <data name="Settings_LlamaCpp_FolderPickerTitle" xml:space="preserve">
     <value>Pasirinkite llama-server aplanką</value>
     <comment>Title of the OS folder-picker dialog opened by the Browse button on the manual llama-server install.</comment>
+  </data>
+  <data name="Feedback_WindowTitle" xml:space="preserve">
+    <value>Siųsti atsiliepimą</value>
+    <comment>Title bar of the feedback window.</comment>
+  </data>
+  <data name="Feedback_Intro" xml:space="preserve">
+    <value>Papasakokite kūrėjui, kas veikia, kas ne arba ką norėtumėte, kad Parlotype darytų.</value>
+  </data>
+  <data name="Feedback_KindLabel" xml:space="preserve">
+    <value>Tipas</value>
+    <comment>Label above the two choices Feedback / Bug report.</comment>
+  </data>
+  <data name="Feedback_Kind_Feedback" xml:space="preserve">
+    <value>Atsiliepimas</value>
+    <comment>Choice: an idea, question or comment.</comment>
+  </data>
+  <data name="Feedback_Kind_Bug" xml:space="preserve">
+    <value>Klaidos ataskaita</value>
+    <comment>Choice: something that does not work.</comment>
+  </data>
+  <data name="Feedback_MessageLabel" xml:space="preserve">
+    <value>Pranešimas</value>
+  </data>
+  <data name="Feedback_MessagePlaceholder" xml:space="preserve">
+    <value>Aprašykite savo idėją arba problemą. Jei tai klaida: ką darėte, ko tikėjotės ir kas nutiko vietoj to.</value>
+    <comment>Grey hint inside the empty message box.</comment>
+  </data>
+  <data name="Feedback_CharacterCountFormat" xml:space="preserve">
+    <value>{0} / {1}</value>
+    <comment>Character counter under the message box. {0} = characters typed, {1} = the maximum (5000).</comment>
+  </data>
+  <data name="Feedback_EmailLabel" xml:space="preserve">
+    <value>El. paštas (neprivaloma)</value>
+  </data>
+  <data name="Feedback_EmailHint" xml:space="preserve">
+    <value>Tik jei norite gauti atsakymą.</value>
+    <comment>Small note under the email box.</comment>
+  </data>
+  <data name="Feedback_EmailInvalid" xml:space="preserve">
+    <value>Tai neatrodo kaip el. pašto adresas. Pataisykite jį arba palikite lauką tuščią.</value>
+    <comment>Shown under the email box when the address is rejected.</comment>
+  </data>
+  <data name="Feedback_DetailsHeading" xml:space="preserve">
+    <value>Bus išsiųsta</value>
+    <comment>Heading of the list of details attached to the message, each with a check box.</comment>
+  </data>
+  <data name="Feedback_Detail_AppVersionFormat" xml:space="preserve">
+    <value>Programos versija: {0}</value>
+    <comment>Check box label. {0} = a version number such as 0.6.0, shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_OperatingSystemFormat" xml:space="preserve">
+    <value>Operacinė sistema: {0}</value>
+    <comment>Check box label. {0} = e.g. "Windows 11 24H2 (10.0.26100)", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_Detail_UiLanguageFormat" xml:space="preserve">
+    <value>Sąsajos kalba: {0}</value>
+    <comment>Check box label. {0} = a language code such as "de", shown verbatim.</comment>
+  </data>
+  <data name="Feedback_PrivacyNote" xml:space="preserve">
+    <value>Siunčiama tik į parlotype.dev per HTTPS, kai paspaudžiate „Siųsti“. Išsaugomi jūsų pranešimas, el. pašto adresas, jei jį nurodote, ir duomenys, kuriuos paliekate pažymėtus. Nieko daugiau nepridedama — jokių žurnalų, garso įrašų ar transkripcijų — o jūsų IP adresas nesaugomas.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_SendButton" xml:space="preserve">
+    <value>Siųsti</value>
+  </data>
+  <data name="Feedback_CloseButton" xml:space="preserve">
+    <value>Uždaryti</value>
+    <comment>Closes the window. Unsent text is kept until Parlotype quits.</comment>
+  </data>
+  <data name="Feedback_DraftNote" xml:space="preserve">
+    <value>Uždarius langą, jūsų tekstas išlieka, kol išeisite iš Parlotype.</value>
+    <comment>Small note next to the buttons.</comment>
+  </data>
+  <data name="Feedback_Status_Sending" xml:space="preserve">
+    <value>Siunčiama…</value>
+  </data>
+  <data name="Feedback_Status_RateLimited" xml:space="preserve">
+    <value>Per daug pranešimų per trumpą laiką. Palaukite minutę ir dar kartą paspauskite „Siųsti“ — jūsų tekstas vis dar čia.</value>
+  </data>
+  <data name="Feedback_Status_Rejected" xml:space="preserve">
+    <value>Parlotype programoje įvyko klaida ir pranešimas nebuvo išsiųstas. Jūsų tekstas vis dar čia — vietoj to galite jį išsiųsti per svetainę.</value>
+  </data>
+  <data name="Feedback_Status_AppPathClosed" xml:space="preserve">
+    <value>Siuntimas iš programos šiuo metu nepasiekiamas. Jūsų tekstas vis dar čia — išsiųskite jį per svetainę.</value>
+  </data>
+  <data name="Feedback_Status_ServerError" xml:space="preserve">
+    <value>parlotype.dev šiuo metu negali priimti pranešimo. Jūsų tekstas vis dar čia — bandykite vėliau arba išsiųskite jį per svetainę.</value>
+    <comment>"parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Offline" xml:space="preserve">
+    <value>Nepavyko pasiekti parlotype.dev. Jūsų tekstas vis dar čia — patikrinkite ryšį ir bandykite dar kartą arba išsiųskite jį per svetainę.</value>
+    <comment>Shown for no connection and for no answer within 15 seconds. "parlotype.dev" is a host name — never translated.</comment>
+  </data>
+  <data name="Feedback_Status_Copied" xml:space="preserve">
+    <value>Pranešimas nukopijuotas. Įklijuokite jį naršyklėje atsivėrusiame puslapyje.</value>
+  </data>
+  <data name="Feedback_Status_CopyFailed" xml:space="preserve">
+    <value>Nepavyko nukopijuoti pranešimo. Pažymėkite jį, nukopijuokite ir įklijuokite naršyklėje atsivėrusiame puslapyje.</value>
+  </data>
+  <data name="Feedback_Status_BrowserFailedFormat" xml:space="preserve">
+    <value>Nepavyko atidaryti naršyklės. Patys eikite šiuo adresu: {0}</value>
+    <comment>{0} = a web address, shown verbatim. Keep it at the end, after the colon.</comment>
+  </data>
+  <data name="Feedback_Fallback_WebsiteButton" xml:space="preserve">
+    <value>Siųsti per svetainę</value>
+  </data>
+  <data name="Feedback_Fallback_GitHubButton" xml:space="preserve">
+    <value>GitHub Issues</value>
+    <comment>"GitHub Issues" is the name of GitHub's issue tracker; keep it or use the form GitHub uses in your language.</comment>
+  </data>
+  <data name="Feedback_Sent_Title" xml:space="preserve">
+    <value>Ačiū</value>
+    <comment>Title of the confirmation shown after a successful send.</comment>
+  </data>
+  <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
+    <value>Pranešimas išsiųstas — ačiū, kad padedate tobulinti Parlotype. Numeris: #{0}</value>
+    <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
   </data>
 </root>
