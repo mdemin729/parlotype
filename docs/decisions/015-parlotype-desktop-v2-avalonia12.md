@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-12
+amended-by: [018]
 ---
 
 # 015. Parlotype.Desktop.V2 — Avalonia 12 Tray-Based UI
@@ -52,4 +53,4 @@ Introduce a parallel desktop frontend `Parlotype.Desktop.V2` targeting **Avaloni
 - `src/Parlotype.Desktop.V2/Services/HotkeyCoordinator.cs`
 - `src/Parlotype.Desktop.V2/Views/SettingsWindow.axaml` (SplitView nav)
 - `src/Parlotype.Desktop.V2.Tests/Parlotype.Desktop.V2.Tests.csproj` (xunit.v3 + Avalonia.Headless.XUnit 12.0.2)
-- ADR [[010-avalonia-headless-ui-testing]] — supersedes nothing; V2 tests follow the same headless pattern but on xUnit v3.
+- ADR [010-avalonia-headless-ui-testing](010-avalonia-headless-ui-testing.md) — supersedes nothing; V2 tests follow the same headless pattern but on xUnit v3.

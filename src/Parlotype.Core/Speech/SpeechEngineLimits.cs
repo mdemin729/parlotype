@@ -6,7 +6,7 @@ namespace Parlotype.Core.Speech;
 /// <remarks>
 /// <para>
 /// These are not cost guards — for Parakeet the limit is a correctness one. Measured
-/// on the synthetic duration ladder (<c>plans/2026-08-18-hold-scoped-push-to-talk/research.md</c>),
+/// on the synthetic duration ladder (<c>docs/research/2026-08-18-hold-scoped-push-to-talk/research.md</c>),
 /// Parakeet TDT v3 via sherpa-onnx silently drops text as a single decode grows —
 /// 100 % of words at 60 s, 60 % at 120 s, 48 % at 300 s — and then crashes outright
 /// above 400 s with an <c>SEHException</c> out of native ONNX Runtime, where a

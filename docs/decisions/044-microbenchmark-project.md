@@ -8,7 +8,7 @@ date: 2026-07-13
 ## Context
 
 The 2026-07 audio-pipeline performance work
-(plans/2026-07-11-audio-pipeline-perf-security) needed reproducible
+(docs/research/2026-07-11-audio-pipeline-perf-security) needed reproducible
 before/after evidence for allocation claims. The existing
 `Parlotype.Benchmark` project measures *transcription quality* (WER/CER/RTF)
 end-to-end; it is the wrong tool for micro-level questions like "how many

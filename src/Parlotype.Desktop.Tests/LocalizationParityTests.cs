@@ -237,7 +237,7 @@ public class LocalizationParityTests
             Assert.True(
                 predefinedNeutrals.Contains(language.CultureName),
                 $"'{language.CultureName}' is not a language .NET knows. Check it against "
-                + "plans/2026-09-17-twenty-five-ui-languages/research.md — a transposed "
+                + "docs/localization/research.md — a transposed "
                 + "code such as 'ls' for 'sl' is accepted by GetCultureInfo and would "
                 + "otherwise ship a locale nobody's system will ever ask for.");
 

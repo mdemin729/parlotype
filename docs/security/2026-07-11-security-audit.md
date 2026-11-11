@@ -1,7 +1,27 @@
 # Parlotype Security Audit — 2026-07-11
 
+> **Status as of 2026-11-11** (checked against `src/`; the findings below are unchanged).
+>
+> - **Closed:** S1 (file log sink capped at `Information`, `App.axaml.cs`), S2 (SHA-256
+>   verified in `StreamingFileDownloader`; catalog digests now also cover the Gemma 4 GGUF
+>   and mmproj files, not only Whisper and Parakeet), S3 (`CloudBaseUrlValidator`, checked
+>   at save and at recognizer init), S6 (`ArgumentList`), S7 (`AtomicFileWriter`).
+> - **Accepted risks, unchanged in code:** S5 (llama-server still spawned without
+>   `--api-key`), S8 (DPAPI `CurrentUser`; base64 fallback off Windows), S9 (no foreground
+>   re-check at injection time in `Win32TargetWindowTracker`).
+> - **Open:**
+>   - S4: the exclusion formats are set, but the manual Win+V check is still pending. There
+>     is no record that anyone did it.
+>   - S4-adjacent: `ClipboardTextInjectionService` still saves and restores text only, so
+>     an image or file on the clipboard is lost when text is injected. Not fixed.
+>   - Re-audit: this audit's own trigger ("an auto-update mechanism is introduced") fired
+>     when Velopack auto-update shipped ([ADR-053](../decisions/053-velopack-packaging-and-auto-update.md)),
+>     which also added the GitHub Releases update feed as a new download source. No
+>     follow-up audit exists.
+
 Auditor: AI-assisted code review (full `src/` sweep), plan
-[2026-07-11-audio-pipeline-perf-security](../../plans/2026-07-11-audio-pipeline-perf-security/task.md).
+2026-07-11-audio-pipeline-perf-security (its research and benchmarks now live in
+[docs/research/2026-07-11-audio-pipeline-perf-security](../research/2026-07-11-audio-pipeline-perf-security/)).
 Remediations landed 2026-07-13 on the same plan; per-finding disposition below.
 
 ## Threat model

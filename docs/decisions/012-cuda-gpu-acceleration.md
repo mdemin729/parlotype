@@ -1,7 +1,7 @@
 ---
 status: superseded
-superseded-by: 049
 date: 2026-03-16
+superseded-by: [049]
 ---
 
 > **Superseded by [ADR-049](049-drop-whisper-cuda-runtime.md) (2026-07-31).** The CUDA

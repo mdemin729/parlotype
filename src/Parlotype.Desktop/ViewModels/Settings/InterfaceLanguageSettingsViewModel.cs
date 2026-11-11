@@ -80,7 +80,7 @@ public partial class InterfaceLanguageSettingsViewModel : SettingsSectionViewMod
     /// default unless <c>AllowConcurrentExecutions</c> is set), which disables
     /// every button sharing it — all four rows would flash disabled/re-enabled
     /// for the length of the settings write, which is exactly the flicker this
-    /// fixes. See <c>memory/knowledge/asyncrelaycommand-flicker.md</c>.
+    /// fixes. See <c>docs/knowledge/asyncrelaycommand-flicker.md</c>.
     /// </summary>
     [RelayCommand]
     private void SelectLanguage(string settingValue)

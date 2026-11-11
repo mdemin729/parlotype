@@ -14,7 +14,7 @@ namespace Parlotype.Platform.Audio;
 /// </summary>
 /// <remarks>
 /// Three single-threaded stages connected by channels (2026-07 rework, findings
-/// P6/P7 in plans/2026-07-11-audio-pipeline-perf-security):
+/// P6/P7 in docs/research/2026-07-11-audio-pipeline-perf-security):
 /// <list type="number">
 /// <item>the capture callback only publishes the audio level and copies the
 /// chunk into a pooled buffer — VAD inference no longer runs on the audio

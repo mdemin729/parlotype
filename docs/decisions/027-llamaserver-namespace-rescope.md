@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-18
+amends: [025]
 ---
 
 # 027. `LlamaServer` Namespace Rescope (Out of `Speech.*`)
@@ -161,5 +162,5 @@ lifecycle, not a speech-specific one.
   unchanged)
 - `docs/architecture/llamacpp-subsystem.md` (renamed in this ADR;
   was `llamacpp-integration.md`)
-- `plans/2026-05-18-llamaserver-namespace-rescope/` — the 6-phase
+- `plans/2026-05-18-llamaserver-namespace-rescope/` (removed from the tree; see git history) — the 6-phase
   refactor plan

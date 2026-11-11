@@ -23,8 +23,8 @@
 See also: [ADR-025](../decisions/025-gemma4-llamacpp-desktop.md),
 [ADR-026](../decisions/026-managed-llama-server-install.md),
 [ADR-027](../decisions/027-llamaserver-namespace-rescope.md),
-[Audio Pipeline Architecture](./audio-pipeline-review.md),
-[`memory/knowledge/llamacpp-gemma4-integration.md`](../../memory/knowledge/llamacpp-gemma4-integration.md).
+[Audio pipeline](./audio-pipeline.md),
+[`llama-cpp-release-assets`](../knowledge/llama-cpp-release-assets.md).
 
 ---
 
@@ -43,7 +43,7 @@ them unchanged.
 | `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. |
 | `LlamaCppServerInfo` | Platform | Pure probe helper. Hits `/health` then `/props` to classify a port as `Connected`, `Loading`, `Disconnected`, `PortConflict`, or `Error`. Moved to `Parlotype.Platform.LlamaServer` in ADR-027. |
 | `ILlamaCppServerLifecycle` | Core | Stops a running sidecar so the installer can replace its files. **Currently implemented by `LlamaCppSpeechRecognizer`** — ADR-027 flags promoting this to a dedicated `LlamaServerHost` as the trigger when the first post-processor lands. |
-| `StreamingFileDownloader` | Platform (`Speech` namespace, shared) | HTTP → temp → atomic-move helper. Used by `HttpModelDownloadService` and the installer. |
+| `StreamingFileDownloader` | Platform (`Speech` namespace, shared) | HTTP → temp → atomic-move helper with SHA-256 verification. Used by the Whisper, Parakeet and Gemma 4 model download services and the installer. |
 | `LlamaServerInstallDialogService` | Desktop | UI wrapper around `LlamaServerInstaller`; opens the generalized `ModelDownloadDialog` and maps installer phase strings to friendly status text. |
 | `SettingsKeys.LlamaCppActiveInstall` / `LlamaCppServerFolder` / `LlamaCppPort` | Core | Persisted configuration for the server itself (workload-neutral). |
 | `LlamaCppSettingsView` / `LlamaCppSettingsViewModel` | Desktop | UI for browse/install/uninstall/set-active + manual folder picker + port + probe status. |
@@ -53,10 +53,10 @@ them unchanged.
 | Component | Project | Responsibility |
 |-----------|---------|----------------|
 | `DelegatingSpeechRecognizer` | Platform | Registered as the `ISpeechRecognizer` singleton. At `InitializeAsync` time, asks the factory for the concrete recognizer and forwards all calls to it. |
-| `SpeechRecognizerFactory` | Platform | Reads `SettingsKeys.SpeechEngine` and resolves either `WhisperSpeechRecognizer` or `LlamaCppSpeechRecognizer` from DI. |
+| `SpeechRecognizerFactory` | Platform | Reads `SettingsKeys.SpeechEngine` and resolves one of five recognizers from DI: `ParakeetSpeechRecognizer` (default), `WhisperSpeechRecognizer`, `LlamaCppSpeechRecognizer` (Gemma 4), `OpenAiCompatibleSpeechRecognizer`, `XaiGrokSpeechRecognizer`. |
 | `LlamaCppSpeechRecognizer` | Platform (`Speech` namespace) | Owns the `llama-server.exe` sidecar lifecycle as a speech consumer: probes, spawns, health-polls, transcribes via HTTP, and stops the process. Also implements `ILlamaCppServerLifecycle` for the installer. Uses the server-side components via `Parlotype.Core.LlamaServer` + `Parlotype.Platform.LlamaServer`. |
-| `Gemma4ModelInfo` | Core (`Speech` namespace) | Static metadata for Gemma 4: GGUF + mmproj filenames, HuggingFace repo, cache directory under `%LOCALAPPDATA%\parlotype\models\`. Stays in `Speech` — Gemma 4 is the speech model. |
-| `SpeechEngine` (enum) | Core (`Speech` namespace) | `Whisper` (default) \| `Gemma4`. |
+| `Gemma4ModelInfo` | Core (`Speech` namespace) | Catalog of Gemma 4 variants (ADR-029): GGUF + mmproj filenames and SHA-256 digests, HuggingFace repo. Cache directory is `IAppPaths.ModelsDirectory` (`%LOCALAPPDATA%\parlotype-data\models\` on Windows, ADR-053). Stays in `Speech` — Gemma 4 is the speech model. |
+| `SpeechEngine` (enum) | Core (`Speech` namespace) | `Whisper` \| `Gemma4` \| `Parakeet` \| `OpenAiCompatible` \| `XaiGrok`; unset or unparsable ⇒ `Parakeet` (ADR-042). |
 | `SettingsKeys.SpeechEngine` | Core | Selects the speech engine. |
 
 **Future consumer (not yet implemented):** a `LlamaCppPostprocessor` under
@@ -101,7 +101,7 @@ flowchart LR
     DEL["DelegatingSpeechRecognizer<br/>ISpeechRecognizer singleton"]
     FACT["SpeechRecognizerFactory<br/>reads SpeechEngine setting"]
     LC["LlamaCppSpeechRecognizer"]
-    WAV["EncodeWav<br/>float → 16-bit PCM WAV"]
+    WAV["WavEncoder.Encode<br/>float → 16-bit PCM WAV"]
     B64["Convert.ToBase64String"]
     HTTP[/"HTTP POST<br/>/v1/chat/completions"/]
     SRV[("llama-server.exe<br/>sidecar process")]
@@ -129,7 +129,7 @@ transcription:
 1. `DelegatingSpeechRecognizer.InitializeAsync` acquires its `_lock`.
 2. It calls `SpeechRecognizerFactory.GetRecognizerAsync`.
 3. The factory reads `SettingsKeys.SpeechEngine`, parses it as
-   `SpeechEngine` (default `Whisper` on parse failure), and returns the
+   `SpeechEngine` (default `Parakeet` on parse failure), and returns the
    matching singleton (`LlamaCppSpeechRecognizer` for `Gemma4`).
 4. The delegating wrapper caches the chosen `_inner` and forwards
    `InitializeAsync`, `TranscribeAsync`, `UnloadAsync`, and `DisposeAsync`
@@ -158,28 +158,28 @@ consumers; ADR-027 flags promoting that ownership to a dedicated
 stateDiagram-v2
     [*] --> Uninitialized
 
-    Uninitialized --> Probing : InitializeAsync()<br/>LlamaCppServerInfo.ProbeAsync
+    Uninitialized --> Probing : "InitializeAsync()<br/>LlamaCppServerInfo.ProbeAsync"
 
-    Probing --> Adopted : probe = Connected<br/>(/health 200 + /props 200)
-    Probing --> WaitingForLoad : probe = Loading<br/>(/health 503)
-    Probing --> Spawning : probe = Disconnected<br/>(port free)
-    Probing --> Failed_PortConflict : probe = PortConflict<br/>(/health 200 but /props ≠ 200)
+    Probing --> Adopted : "probe = Connected<br/>(/health 200 + /props 200)"
+    Probing --> WaitingForLoad : "probe = Loading<br/>(/health 503)"
+    Probing --> Spawning : "probe = Disconnected<br/>(port free)"
+    Probing --> Failed_PortConflict : "probe = PortConflict<br/>(/health 200 but /props ≠ 200)"
 
-    Spawning --> WaitingForLoad : Process.Start OK<br/>health poll begins
-    Spawning --> Failed_BinaryMissing : llama-server.exe not found
-    Spawning --> Failed_ModelMissing : GGUF or mmproj missing
+    Spawning --> WaitingForLoad : "Process.Start OK<br/>health poll begins"
+    Spawning --> Failed_BinaryMissing : "no server configured, or llama-server.exe not found"
+    Spawning --> Failed_ModelMissing : "GGUF or mmproj missing"
 
-    WaitingForLoad --> Ready : /health = 200
-    WaitingForLoad --> Failed_ExitedEarly : process.HasExited
-    WaitingForLoad --> Failed_Timeout : 120 s elapsed
+    WaitingForLoad --> Ready : "/health = 200"
+    WaitingForLoad --> Failed_ExitedEarly : "process.HasExited"
+    WaitingForLoad --> Failed_Timeout : "120 s elapsed"
 
     Adopted --> Ready
 
-    Ready --> Transcribing : TranscribeAsync()<br/>POST /v1/chat/completions
-    Transcribing --> Ready : HTTP 2xx
-    Transcribing --> Ready : HTTP non-2xx<br/>(throws, state preserved)
+    Ready --> Transcribing : "TranscribeAsync()<br/>POST /v1/chat/completions"
+    Transcribing --> Ready : "HTTP 2xx"
+    Transcribing --> Ready : "HTTP non-2xx<br/>(throws, state preserved)"
 
-    Ready --> Stopped : UnloadAsync() / DisposeAsync()<br/>StopServerAsync
+    Ready --> Stopped : "UnloadAsync() / DisposeAsync()<br/>StopServerAsync"
     note right of Stopped
         Only **spawned** processes are killed.
         Adopted servers are left running
@@ -230,8 +230,10 @@ llama-server.exe
 ```
 
 `--flash-attn on` and `--jinja` are required for audio support; `--mmproj`
-is mandatory or the server returns "audio input is not supported"
-(see [`llamacpp-gemma4-integration.md`](../../memory/knowledge/llamacpp-gemma4-integration.md)).
+is mandatory or the server returns "audio input is not supported".
+GGUF file names on HuggingFace are case-sensitive, and the projector is
+`bf16`, not `f16` (`mmproj-gemma-4-E4B-it-bf16.gguf`); the exact names live
+in `Gemma4ModelInfo`.
 
 **Process options:** `UseShellExecute = false`, `CreateNoWindow = true`,
 stdout and stderr redirected and continuously drained by
@@ -274,7 +276,7 @@ llama-server).
       "role": "user",
       "content": [
         { "type": "text",
-          "text": "Transcribe the following speech segment in English into English text. Use punctuation. Only output the transcription, with no newlines. When transcribing numbers, write the digits." },
+          "text": "<prompt body chosen by BuildPromptTextAsync>" },
         { "type": "input_audio",
           "input_audio": { "data": "<base64 WAV>", "format": "wav" } }
       ]
@@ -283,8 +285,13 @@ llama-server).
 }
 ```
 
-The audio payload is produced by `EncodeWav` — a 16-bit, mono, 16 kHz PCM
-WAV with a 44-byte RIFF/fmt/data header. Float samples are clamped to
+The text part is the active prompt template, resolved per request by
+`BuildPromptTextAsync` from the source/target language matrix with
+`{speech_lang}` / `{text_lang}` substituted (ADR-030, ADR-037).
+
+The audio payload is produced by `WavEncoder.Encode` (a shared internal
+helper, also used by the OpenAI-compatible recognizer; rewritten in ADR-045)
+— a 16-bit, mono, 16 kHz PCM WAV with a 44-byte RIFF/fmt/data header. Float samples are clamped to
 `[-1, 1]` and scaled to `short` before writing.
 
 **Response parsing:** the result text is read from
@@ -319,12 +326,12 @@ terminal across multiple app launches.
 
 | Setting key | Default | Description |
 |-------------|---------|-------------|
-| `SettingsKeys.SpeechEngine` | `"Whisper"` | Selects engine. Set to `"Gemma4"` to route through `LlamaCppSpeechRecognizer`. |
-| `SettingsKeys.LlamaCppActiveInstall` | (empty) | `managed:{id}` selects a managed install (resolved via `ILlamaServerRegistry`); `manual` falls through to `LlamaCppServerFolder`; empty preserves the legacy behaviour (use `LlamaCppServerFolder` or its default). |
-| `SettingsKeys.LlamaCppServerFolder` | `%LOCALAPPDATA%\parlotype\llama-server\` | Folder containing `llama-server.exe`. Used by **manual** mode (or as the fallback when no active selector is set). |
+| `SettingsKeys.SpeechEngine` | (unset ⇒ `Parakeet`) | Selects engine. Set to `"Gemma4"` to route through `LlamaCppSpeechRecognizer`. |
+| `SettingsKeys.LlamaCppActiveInstall` | (empty) | `managed:{id}` selects a managed install (resolved via `ILlamaServerRegistry`); `manual` uses `LlamaCppServerFolder`; empty is treated like `manual`. |
+| `SettingsKeys.LlamaCppServerFolder` | (empty) | Folder containing `llama-server.exe`. Used by **manual** mode and whenever no managed install is active. There is no default folder since ADR-066; the user picks one. A folder inside the Velopack pack folder gets a warning (ADR-065). |
 | `SettingsKeys.LlamaCppPort` | `8321` (`PreferredPort` constant) | TCP port for the sidecar. Parsed as int; out-of-range values silently fall back to the default. |
-| Managed-install root (not a setting) | `%LOCALAPPDATA%\parlotype\llama-servers\` | From `JsonLlamaServerRegistry.DefaultRootDirectory()`. Holds `manifest.json`, `.cache/releases.json`, `.staging/{guid}/`, and one folder per managed install (`{build}-{os}-{backend}-{arch}`). |
-| Model cache (not a setting) | `%LOCALAPPDATA%\parlotype\models\` | From `Gemma4ModelInfo.GetModelCacheDirectory()`. Holds `gemma-4-E4B-it-Q4_K_M.gguf` and `mmproj-gemma-4-E4B-it-bf16.gguf`. |
+| Managed-install root (not a setting) | `%LOCALAPPDATA%\parlotype-data\llama-servers\` | `IAppPaths.LlamaServerInstallsDirectory`, via `JsonLlamaServerRegistry.DefaultRootDirectory()`. Holds `manifest.json`, `.cache/releases.json`, `.staging/{guid}/`, and one folder per managed install (`{build}-{os}-{backend}-{arch}`). |
+| Model cache (not a setting) | `%LOCALAPPDATA%\parlotype-data\models\` | `IAppPaths.ModelsDirectory`, via `Gemma4ModelInfo.GetModelCacheDirectory()`. Holds the GGUF + mmproj of the selected variant (`SettingsKeys.SelectedGemma4Model`, ADR-029); the default is E4B Q4_K_M. |
 
 The host is hard-coded to `127.0.0.1` (`DefaultHost`). The model alias
 sent in HTTP requests is hard-coded to `"gemma-4-e4b"` and is independent
@@ -337,10 +344,9 @@ of `Gemma4ModelInfo.ModelId`.
    absolute path.
 2. Else (selector is `manual`, missing, or a stale managed id whose
    install is no longer in the manifest), read `LlamaCppServerFolder`.
-3. Else, fall back to `%LOCALAPPDATA%\parlotype\llama-server\`.
-
-The fallback chain keeps Phase 1's behaviour (single folder) fully
-backward-compatible — users who never touch the new UI see no change.
+3. If that folder is empty, `GetServerPathAsync` returns null and
+   initialization fails with an actionable "No llama-server is configured"
+   error. There is no implicit fallback folder (ADR-066).
 
 ---
 
@@ -349,6 +355,7 @@ backward-compatible — users who never touch the new UI see no change.
 | Precondition / event | Detected in | Exception |
 |----------------------|-------------|-----------|
 | Port in use by non-llama-server process | Probe | `InvalidOperationException` ("Port X is already in use…") |
+| No server configured (no managed install, empty manual folder) | `InitializeAsync` post-probe | `InvalidOperationException` ("No llama-server is configured…") |
 | `llama-server.exe` not at configured path | `InitializeAsync` post-probe | `InvalidOperationException` ("llama-server not found at…") |
 | GGUF missing in model cache | `InitializeAsync` post-probe | `InvalidOperationException` ("Gemma 4 model not found at…") |
 | mmproj missing in model cache | `InitializeAsync` post-probe | `InvalidOperationException` ("Gemma 4 mmproj not found at…") |
@@ -431,7 +438,7 @@ manual-folder option.
 | `ILlamaServerCatalog` / `GitHubLlamaServerCatalog` | Core / Platform | Fetches `https://api.github.com/repos/ggml-org/llama.cpp/releases`, parses asset names via `LlamaServerAssetParser`, pairs CUDA-Windows variants with their matching `cudart-llama-bin-win-cuda-*.zip` companion, filters to the current OS/arch, caches result + ETag on disk for 1 h. |
 | `ILlamaServerRegistry` / `JsonLlamaServerRegistry` | Core / Platform | Read/write `manifest.json` (list of managed installs). Resolves the active install by reading `LlamaCppActiveInstall` from `ISettingsService` and looking up the matching entry. Manual mode returns a synthetic install pointing at `LlamaCppServerFolder`. |
 | `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. Uninstall stops the active sidecar via `ILlamaCppServerLifecycle` before deleting the folder. |
-| `StreamingFileDownloader` | Platform | Shared HTTP → temp-file → atomic-rename helper. Reused by `HttpModelDownloadService` (Whisper) and the installer. |
+| `StreamingFileDownloader` | Platform | Shared HTTP → temp-file → atomic-rename helper. Reused by the model download services and the installer. |
 | `ILlamaCppServerLifecycle` | Core | Implemented by `LlamaCppSpeechRecognizer`. `StopForReplacementAsync` delegates to `UnloadAsync` so the installer can release the Windows file lock on `llama-server.exe` before deleting it. |
 | `LlamaServerInstallDialogService` | Desktop | Implements `ILlamaServerInstaller`; opens the generalized `ModelDownloadDialog` and maps the installer's phase strings (`downloading`, `downloading-companion`, `verifying`, `extracting`, `finalizing`) to friendly status text. Registered in `App.axaml.cs` as an override of the Platform default. |
 | `LlamaCppSettingsViewModel` / `LlamaCppSettingsView` | Desktop | Sections: Active server, Update banner, Installed (RadioButton + Uninstall per row), Manual install (distinct background + "Not managed by Parlotype" badge), Available builds, port + Save/Reset. |
@@ -459,7 +466,7 @@ flowchart TD
 ### Storage layout
 
 ```
-%LOCALAPPDATA%\parlotype\llama-servers\
+%LOCALAPPDATA%\parlotype-data\llama-servers\
    .staging\{guid}\               # in-progress install (deleted in finally)
       payload\                    # extracted contents; renamed into place on success
       main.zip / companion.zip    # downloaded archives
@@ -551,7 +558,8 @@ will not change. The change planned for that follow-up:
 - [ADR-025: Gemma 4 via llama.cpp Sidecar in Desktop](../decisions/025-gemma4-llamacpp-desktop.md)
 - [ADR-026: Managed llama.cpp Server Installation](../decisions/026-managed-llama-server-install.md)
 - [ADR-027: `LlamaServer` Namespace Rescope](../decisions/027-llamaserver-namespace-rescope.md)
-- [Audio Pipeline Architecture](./audio-pipeline-review.md)
-- [`memory/knowledge/llamacpp-gemma4-integration.md`](../../memory/knowledge/llamacpp-gemma4-integration.md) — `/props` semantics and Gemma 4 GGUF filenames
-- [`memory/knowledge/llama-cpp-release-assets.md`](../../memory/knowledge/llama-cpp-release-assets.md) — asset naming, cudart pairing, build tagging, rate-limit notes
-- [`memory/services/platform.md`](../../memory/services/platform.md) — Platform project service map
+- [ADR-029: Gemma 4 model download UI](../decisions/029-gemma4-model-download-ui.md)
+- [ADR-030: Configurable Gemma 4 prompts](../decisions/030-configurable-gemma4-prompts.md), [ADR-037: source/target prompts](../decisions/037-gemma4-source-target-prompts.md)
+- [ADR-065: manual folder pack-folder warning](../decisions/065-manual-llama-server-pack-folder-warning.md), [ADR-066: drop the vestigial llama-server directory](../decisions/066-drop-the-vestigial-llama-server-directory.md)
+- [Audio pipeline](./audio-pipeline.md)
+- [`llama-cpp-release-assets`](../knowledge/llama-cpp-release-assets.md) — asset naming, cudart pairing, build tagging, rate-limit notes

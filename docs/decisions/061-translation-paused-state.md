@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-09-05
+amends: [033, 036]
 ---
 
 # 061. Translation Paused Is a First-Class UI State

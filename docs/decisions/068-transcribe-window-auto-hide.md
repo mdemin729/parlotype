@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-09-13
+amends: [040]
 ---
 
 # 068. The Transcribe Widget Hides Itself After Dictation
@@ -19,7 +20,7 @@ widget appears; release it, and it sits always-on-top over whatever the user was
 into until they reach for the mouse and click ✕. Nobody asked it to appear; everybody has
 to ask it to leave.
 
-[research.md](../../plans/2026-09-13-transcribe-window-auto-hide/research.md) surveyed
+[research.md](../research/2026-09-13-transcribe-window-auto-hide/research.md) surveyed
 what comparable dictation tools do once a session ends, and the persistent-toolbar model
 turns out to be the outlier, not the norm:
 
@@ -138,7 +139,7 @@ extension's declaring type, `Avalonia.Reactive.Observable`, is `internal` to
 code instead gives `TranscribeAutoHideController` a single `AvaloniaObject.PropertyChanged`
 subscription on the window, filtered on `InputElement.IsPointerOverProperty` (re-evaluate)
 and `Visual.IsVisibleProperty` going false (reset ownership) — one subscription covering
-both signals. See [[../../memory/knowledge/avalonia-getobservable-subscribe-trap]] for the
+both signals. See [avalonia-getobservable-subscribe-trap](../knowledge/avalonia-getobservable-subscribe-trap.md) for the
 full mechanism.
 
 ### Decisions on the four open questions
@@ -241,4 +242,4 @@ compiler or DI error. That risk is real, not hypothetical: testing this controll
 surfaced exactly that shape of bug in the *test* harness itself — disposing it only
 cancels an in-flight countdown, which merely *schedules* the rest of its cleanup onto the
 shared headless test dispatcher rather than running it before `Dispose` returns — see
-[[../../memory/knowledge/avaloniafact-drain-dispatcher-after-dispose]].
+[culture-changing-tests-need-avaloniafact](../knowledge/culture-changing-tests-need-avaloniafact.md).

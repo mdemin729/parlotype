@@ -2,7 +2,7 @@
 status: accepted
 date: 2026-07-31
 supersedes: [012]
-amends: [014, 022, 031]
+amends: [014, 022, 031, 048]
 ---
 
 # 049. Drop the Whisper CUDA Runtime (Vulkan-only GPU Acceleration)
@@ -24,8 +24,8 @@ Three things changed the cost/benefit since ADR-012 was written:
    still had to install the multi-gigabyte NVIDIA CUDA toolkit. Half of the Runtime
    settings page existed to explain that, with a "Download CUDA Toolkit" button.
 3. **Vulkan measured well.** On the LibriSpeech test-other benchmark
-   (`results/comparison-libri-speech-test-other-2026-05-23-cuda.md`, same models, same
-   dataset, warm-up per ADR-031-warmup), CUDA is 8–26% faster by RTF, but `Small` and
+   (`docs/research/2026-05-23-librispeech-cuda-comparison/comparison.md`, same models, same
+   dataset, warm-up per ADR-071), CUDA is 8–26% faster by RTF, but `Small` and
    `Medium` produce **identical WER**, and `LargeV3Turbo` is actually *better* on
    Vulkan (10.15% vs 11.48% WER).
 

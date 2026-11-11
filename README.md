@@ -27,7 +27,7 @@ Parlotype currently runs on **Windows** only. macOS and Linux support are planne
 
 ## Download / Releases
 
-Pre-built Windows binaries are published on the [Releases page](../../releases). Each
+Pre-built Windows binaries are published on the [Releases page](https://github.com/mdemin729/parlotype/releases). Each
 release ships one self-contained `win-x64` build — no .NET runtime install required.
 What changed in each one is in [CHANGELOG.md](CHANGELOG.md).
 
@@ -42,8 +42,8 @@ hand each time.
 Being self-contained it is sizeable (~280 MB installed). Updates after the first install
 are incremental, so a typical update downloads a fraction of that. Parlotype falls back to
 CPU automatically if no Vulkan-capable GPU is found, and the default Parakeet engine needs
-no GPU at all. Builds are currently **unsigned**, so Windows SmartScreen may warn on first
-launch — choose *More info → Run anyway*.
+no GPU at all. The installer and every file it ships are code-signed with Azure Artifact
+Signing, since v0.4.2 ([ADR-058](docs/decisions/058-installer-code-signing.md)).
 
 Speech models are **not** bundled — they download on demand into
 `%LOCALAPPDATA%\parlotype-data\models\` the first time you need them, and survive both
@@ -58,7 +58,7 @@ updates and uninstalls.
 ### Updates
 
 Parlotype checks for new releases automatically, shortly after launch and every six hours
-after that. New versions download in the background and install when you quit Parlotype — or immediately, via *Install and restart now* on that page.
+after that. New versions download in the background and install when you quit Parlotype — or immediately, via *Install and restart now* at **Settings → Application → Updates**.
 
 The check is an **anonymous HTTPS GET** of
 `https://api.github.com/repos/mdemin729/parlotype/releases` — the public list of releases
@@ -123,14 +123,14 @@ See [ADR-041](docs/decisions/041-parakeet-v3-sherpa-onnx.md) and [ADR-042](docs/
 OpenAI Whisper via [Whisper.net](https://github.com/sandrohanea/whisper.net). Widest language coverage and the only engine with GPU acceleration. Pick any GGML model from **Tiny** through **Large v3 Turbo** under **Settings → Speech engine → Whisper model**; models download on demand.
 
 - **~99 languages** with an explicit source-language choice.
-- **Translation to English** via Whisper's `translate` task. Only multilingual models can do this — the English-only models (`*.en`) and Large v3 Turbo cannot, so the toggle is disabled with an explanation and the pipeline gates the flag regardless of UI state ([ADR-033](docs/decisions/033-translation-model-capability.md)). Your preference is preserved and resumes when you pick a capable model.
+- **Translation to English** via Whisper's `translate` task. Only multilingual models can do this — the English-only models (`*.en`) and Large v3 Turbo cannot. With one of those selected, translation shows as **paused**: the toggle stays on and usable, the Language page and the Transcribe widget name the model that is pausing it and offer *Choose a model that translates*, and the pipeline gates the flag regardless of UI state ([ADR-033](docs/decisions/033-translation-model-capability.md), [ADR-061](docs/decisions/061-translation-paused-state.md)). Picking a capable model resumes translation.
 - **Whisper output** settings cover automatic punctuation and profanity filtering.
 
 ### Gemma 4 (llama.cpp sidecar)
 
 Google's multimodal **Gemma 4** model, run through a local [`llama-server`](https://github.com/ggml-org/llama.cpp) process. Parlotype manages the sidecar for you: audio is sent over a loopback HTTP connection, so nothing leaves your machine.
 
-- **Model files** — GGUF weights plus an audio projector (`mmproj`), downloaded from HuggingFace (`ggml-org/gemma-4-E2B-it-GGUF` / `gemma-4-E4B-it-GGUF`) into `%LOCALAPPDATA%\parlotype\models\`. Sizes range from ~5.5 GiB to ~15 GiB depending on variant and quantization; the default is **E4B (Q4_K_M)** (~5.9 GiB).
+- **Model files** — GGUF weights plus an audio projector (`mmproj`), downloaded from HuggingFace (`ggml-org/gemma-4-E2B-it-GGUF` / `gemma-4-E4B-it-GGUF`) into `%LOCALAPPDATA%\parlotype-data\models\`. Sizes range from ~5.5 GiB to ~15 GiB depending on variant and quantization; the default is **E4B (Q4_K_M)** (~5.9 GiB).
 - **Server build** — the `llama-server` binary is installed and managed from the Settings UI (or you can point Parlotype at your own copy).
 - **Translation to any language** in a single call: because it is an LLM, transcription and translation happen together, driven by the prompt ([ADR-034](docs/decisions/034-source-target-language-selection.md), [ADR-037](docs/decisions/037-gemma4-source-target-prompts.md)).
 - **Editable prompts** — **Settings → Speech engine → Prompts**. Prompt bodies substitute `{speech_lang}` (the spoken language) and `{text_lang}` (the output language — the same as the spoken language whenever translation is off); the built-in default carries purpose-specific bodies for transcription, translation, and auto-detect. A collapsible **How prompts work** panel on the page explains both placeholders, the conditions that trigger translation, and how the built-in's three bodies differ from a custom single-body prompt. The legacy `{language}` token is retired.
@@ -151,7 +151,7 @@ The language surface is **capability-driven** — each engine declares what it s
 
 - **Settings → Speech engine → Language** shows one relationship row: `[source] → [target]`. The connector is the master translation toggle; each side opens a searchable floating picker with recently-used languages pinned on top.
 - **Source** can be **Auto-detect**, an explicit language, or **Keyboard layout** — a sentinel that resolves at record time to the language of your current keyboard layout (Windows only; falls back to auto-detect when detection is unavailable or the language isn't supported).
-- **Target** takes the shape the engine supports: a toggle for Whisper (English only), a full picker for Gemma 4, and a disabled card with a note for transcribe-only engines.
+- **Target** takes the shape the engine supports: a toggle for Whisper (English only) and a full picker for Gemma 4.
 - **The whole Language page disappears** for engines with no language choice — Parakeet and both cloud engines. The Transcribe widget's quick-picker strip hides with it and the window compacts from 118 px to 88 px. Your Whisper/Gemma source and translation setup is left untouched, so it survives a round trip through another engine.
 - **Switching engines never loses selections silently** — an invalidated choice falls back (unsupported source → keyboard layout, no-translation form → translation off, etc.) with a short toast explaining what changed.
 
@@ -184,6 +184,7 @@ The Transcribe window is a frameless always-on-top mini card (172 px wide, 88 px
 
 - Drag it by the **grip strip** at the top; the rest of the surface is not draggable.
 - The ✕ button *hides* the widget — recording continues, and the tray icon reopens it. **Esc** hides it too when idle, but **cancels and discards** the take while recording (see [Dictation Hotkeys](#dictation-hotkeys)).
+- A window summoned by a dictation hotkey is transient — it fades out ~1.5 s after the text is typed. A window you opened yourself (tray, second launch, onboarding) is sticky and never auto-hides; clicking or dragging a transient window promotes it to sticky ([ADR-068](docs/decisions/068-transcribe-window-auto-hide.md)).
 - Its position is remembered across restarts in `window-state.json`, and self-heals to centre-screen if the saved spot is off-screen (monitor unplugged, resolution change).
 - The record button carries all state: blue chrome while recording, a waveform while you speak, and a spinner while the model loads. Hover it to be reminded of your gesture — *"Hold Right Ctrl to talk · Esc to cancel"* — or hover the card for the status text.
 - **Model loading** — the spinner appears only if the load outlasts ~200 ms, so warm starts don't flash. Optionally enable **Preload model on startup** under **Settings → Speech engine → Engine** to warm the model in the background at launch (off by default; takes effect on the next launch). See [ADR-038](docs/decisions/038-speech-model-prewarm-and-loading-state.md).
@@ -213,6 +214,7 @@ and uninstalls alike ([ADR-053](docs/decisions/053-velopack-packaging-and-auto-u
 | `window-state.json` | Transient window chrome state (Transcribe widget position) |
 | `secrets.json` | Cloud API keys, DPAPI-encrypted on Windows |
 | `models\` | Downloaded Whisper / Parakeet / Gemma 4 model files |
+| `llama-servers\` | Managed `llama-server` binaries (one subfolder per install) |
 | `logs\` | Rolling log files (`Information` and above; no transcript text), plus `velopack.log` for install/update events |
 
 **Uninstalling keeps this folder by default** — it can hold several GB of models that are
@@ -368,7 +370,7 @@ docs/
 - Engines declare `LanguageCapabilities`, and both the Settings page and the Transcribe widget render from one shared `LanguageRelationshipViewModel` — a new engine gets correct language UI by declaring capabilities, not by touching views
 - The recording path is three single-threaded stages joined by unbounded channels — capture callback (RMS + pooled copy) → segmenter (VAD, sole owner of the sample buffer) → transcription (no polling) — and the capture path allocates nothing in steady state via `ArrayPool<float>` ([ADR-045](docs/decisions/045-audio-pipeline-allocation-threading.md))
 - Configurable Whisper parameters (language, beam size, temperature, thread count) via `WhisperOptions` for benchmarking
-- Architectural decisions are recorded as ADRs in [`docs/decisions/`](docs/decisions/) — Gemma 4 spans ADRs 024–030 and 037, the language UX 034–036 and 042, and the cloud providers 032 and 043
+- Architectural decisions are recorded as ADRs in [`docs/decisions/`](docs/decisions/) — Gemma 4 spans ADRs 024–027, 029, 030 and 037, the language UX 034–036 and 042, and the cloud providers 032 and 043
 
 ## License
 

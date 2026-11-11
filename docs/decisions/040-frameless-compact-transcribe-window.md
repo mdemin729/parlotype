@@ -1,12 +1,14 @@
-# ADR-040: Frameless Compact Transcribe Window
+---
+status: accepted
+date: 2026-07-06
+amended-by: [042, 068]
+---
 
-## Status
-
-Accepted
+# 040. Frameless Compact Transcribe Window
 
 ## Context
 
-The Transcribe window (240×184, system title bar) is a floating always-on-top widget the user keeps over other applications while dictating. The title bar added visual noise and ~30 px of height, the window could only be dragged by that bar, and the overall footprint obscured the application being dictated into. A design exploration ([plans/2026-07-05-transcribe-window-compact-redesign](../../plans/2026-07-05-transcribe-window-compact-redesign/task.md)) produced four HTML prototypes; the user selected **C2 — mini card with a grip strip**, modelled on the Windows Voice Typing (Win+H) widget.
+The Transcribe window (240×184, system title bar) is a floating always-on-top widget the user keeps over other applications while dictating. The title bar added visual noise and ~30 px of height, the window could only be dragged by that bar, and the overall footprint obscured the application being dictated into. A design exploration (plans/2026-07-05-transcribe-window-compact-redesign (removed from the tree; see git history)) produced four HTML prototypes; the user selected **C2 — mini card with a grip strip**, modelled on the Windows Voice Typing (Win+H) widget.
 
 ## Decision
 

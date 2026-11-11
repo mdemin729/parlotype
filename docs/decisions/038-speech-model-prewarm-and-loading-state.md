@@ -1,8 +1,9 @@
-# ADR-038: Speech-Model Prewarm and On-Button Loading State
+---
+status: accepted
+date: 2026-06-27
+---
 
-## Status
-
-Accepted
+# 038. Speech-Model Prewarm and On-Button Loading State
 
 ## Context
 

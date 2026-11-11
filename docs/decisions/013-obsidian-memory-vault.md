@@ -1,7 +1,13 @@
 ---
-status: accepted
+status: superseded
 date: 2026-03-28
+superseded-by: [072]
 ---
+
+> **Superseded by [ADR-072](072-knowledge-base-in-docs.md) (2026-11-11).** The `memory/`
+> vault, the session journal and the `session-management` / `obsidian-markdown` skills no
+> longer exist. Their surviving content lives under `docs/` (decisions, architecture,
+> knowledge, research, localization); see ADR-072 for the layout.
 
 # 013. Obsidian-Based Persistent Memory Vault for AI Agents
 

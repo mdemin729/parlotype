@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-02
+amends: [001]
 ---
 
 # 020. Upgrade SharpHook to 7.1.1 and Switch to SimpleGlobalHook

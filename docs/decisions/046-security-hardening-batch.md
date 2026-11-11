@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-07-13
+amends: [004, 005, 006, 007, 043]
 ---
 
 # 046. Security Hardening Batch (2026-07 Audit)

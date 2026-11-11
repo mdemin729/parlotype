@@ -1,8 +1,10 @@
-# ADR-024: Gemma 4 Speech Recognition via Python Sidecar
+---
+status: superseded
+date: 2026-05-08
+superseded-by: [025]
+---
 
-## Status
-
-Accepted
+# 024. Gemma 4 Speech Recognition via Python Sidecar
 
 ## Context
 

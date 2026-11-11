@@ -1,8 +1,12 @@
-# ADR-041: Parakeet TDT 0.6B v3 via sherpa-onnx
+---
+status: accepted
+date: 2026-07-07
+amended-by: [042]
+last-amended: 2026-07-08
+deciders: [Maksim]
+---
 
-- **Status:** Accepted
-- **Date:** 2026-07-07
-- **Deciders:** Maksim
+# 041. Parakeet TDT 0.6B v3 via sherpa-onnx
 
 ## Context
 
@@ -12,7 +16,7 @@ GPU. NVIDIA's Parakeet TDT 0.6B v3 (FastConformer encoder + Token-and-Duration
 Transducer decoder, CC-BY-4.0) transcribes 25 European languages with native
 punctuation/capitalization at ~6.3 % average WER on the Open ASR Leaderboard —
 while decoding many times faster than real time **on CPU** with an INT8 ONNX
-build. Research: `plans/2026-07-06-parakeet-v3-engine/research.md`.
+build. Research: `docs/research/2026-07-06-parakeet-v3-engine/research.md`.
 
 ## Decision
 
@@ -102,4 +106,4 @@ fp32 is for users who trade disk/RAM for accuracy on accented speech.
 - ADR-025: Gemma 4 via llama.cpp (second-engine precedent)
 - ADR-029: Gemma 4 model download UI (download pattern)
 - ADR-036: Language UX rebuild (`TranslationForm.None` rendering)
-- Plan: `plans/2026-07-06-parakeet-v3-engine/`
+- Plan: `plans/2026-07-06-parakeet-v3-engine/` (removed from the tree; see git history)

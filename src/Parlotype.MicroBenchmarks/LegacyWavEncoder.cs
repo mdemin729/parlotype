@@ -2,10 +2,11 @@ namespace Parlotype.MicroBenchmarks;
 
 /// <summary>
 /// Frozen copy of <c>Parlotype.Platform.Speech.WavEncoder</c> as it stood
-/// before the 2026-07 allocation work (plan 2026-07-11-audio-pipeline-perf-security,
-/// finding P5): MemoryStream + per-sample BinaryWriter writes + a final
-/// ToArray copy. Kept verbatim so before/after appear in one benchmark run.
-/// Do not "fix" this class.
+/// before the 2026-07 allocation work (ADR-045; finding P5 in
+/// docs/research/2026-07-11-audio-pipeline-perf-security/): MemoryStream +
+/// per-sample BinaryWriter writes + a final ToArray copy. Kept verbatim so
+/// before/after appear in one benchmark run. Do not "fix" this class; frozen
+/// copies of rewritten production code belong in this project for that reason.
 /// </summary>
 internal static class LegacyWavEncoder
 {

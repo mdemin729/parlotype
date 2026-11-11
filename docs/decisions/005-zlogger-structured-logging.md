@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-02-19
+amended-by: [046, 053]
 ---
 
 # 005. ZLogger Structured Logging

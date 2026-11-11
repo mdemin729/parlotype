@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-08-06
+amends: [053]
 ---
 
 # 058. Installer code signing with Azure Artifact Signing

@@ -1,6 +1,8 @@
 ---
 status: accepted
 date: 2026-05-17
+amends: [025]
+amended-by: [066]
 ---
 
 # 026. Managed llama.cpp Server Installation
@@ -231,9 +233,9 @@ manifest.json updated; UI refreshes Installed list
   not supersedes — manual folder mode still works)
 - ADR-007: Whisper Model Selection & Download (pattern for
   Platform-impl + Desktop-dialog-wrapper that this ADR reuses)
-- `memory/knowledge/llama-cpp-release-assets.md` — non-derivable asset
+- `docs/knowledge/llama-cpp-release-assets.md` — non-derivable asset
   naming + cudart pairing facts captured during this work
 - `docs/architecture/llamacpp-subsystem.md` (renamed in ADR-027) §8 (Configuration Surface)
   + new §12 (Server Installation Lifecycle)
-- `plans/2026-05-17-llama-server-installer/` — 8-phase implementation
+- `plans/2026-05-17-llama-server-installer/` (removed from the tree; see git history) — 8-phase implementation
   plan and the per-phase task breakdown

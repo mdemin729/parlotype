@@ -50,7 +50,7 @@ future fallback (e.g. for gated or long-tail repos).
   set. All entries pair with the bf16 mmproj projector (small, highest
   quality, matches the known-good config). `BF16` models are offered for
   experimentation despite a known hallucination issue on some GPUs
-  ([[gemma4-cuda-blackwell]]).
+  (gemma4-cuda-blackwell, removed from the tree; see git history).
 - **Selection.** Settings key `SelectedGemma4Model` stores the chosen
   `ModelId`. `LlamaCppSpeechRecognizer` resolves it via `GetById` at init,
   falling back to `Default`.

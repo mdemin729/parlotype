@@ -1,8 +1,11 @@
-# ADR-042: Parakeet as Default Engine & Capability-Driven Language UI Visibility
+---
+status: accepted
+date: 2026-07-07
+amends: [036, 040, 041]
+deciders: [Maksim]
+---
 
-- **Status:** Accepted
-- **Date:** 2026-07-07
-- **Deciders:** Maksim
+# 042. Parakeet as Default Engine & Capability-Driven Language UI Visibility
 
 ## Context
 

@@ -1,8 +1,10 @@
-# ADR-023: Audio-Level Provider and Waveform Visualisation
+---
+status: accepted
+date: 2026-05-06
+last-amended: 2026-09-11
+---
 
-## Status
-
-Accepted
+# 023. Audio-Level Provider and Waveform Visualisation
 
 ## Context
 

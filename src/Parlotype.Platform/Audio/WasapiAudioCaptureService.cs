@@ -113,7 +113,7 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
         // REQUESTED count on every Read — asking for BytesRecorded floats cost
         // ~2.7 MB per 100 ms callback (~27 MB/s while recording), and the pool's
         // bucket rounding made it worse; a right-sized request costs ~0.3 MB
-        // (see memory/knowledge/naudio-resampler-read-cost.md). The estimate is
+        // (see docs/knowledge/naudio-resampler-read-cost.md). The estimate is
         // deterministic (input frames × rate ratio), so the 2× slack means a
         // single read consumes everything the resampler has; any filter-latency
         // remainder simply arrives with the next callback ~10 ms later.

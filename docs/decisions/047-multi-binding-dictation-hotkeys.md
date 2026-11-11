@@ -1,6 +1,8 @@
 ---
 status: accepted
 date: 2026-07-30
+amends: [001]
+amended-by: [057, 060]
 ---
 
 # 047. Multi-Binding Dictation Hotkeys (Hold, Double-Tap, Chord, Cancel)
@@ -13,7 +15,7 @@ single global switch on `IGlobalHotkeyService`, so push-to-talk and toggle could
 not coexist. The shipped default was `Ctrl+Shift+Space`.
 
 Competitive research into how dictation tools actually bind keys (recorded in
-`plans/2026-07-30-dictation-hotkey-bindings/research.md`) surfaced three problems:
+`docs/research/2026-07-30-dictation-hotkey-bindings/research.md`) surfaced three problems:
 
 1. **The default collides with the target audience's tools.** `Ctrl+Shift+Space`
    is Parameter Info in Visual Studio and signature help in VS Code.

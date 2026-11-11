@@ -1,9 +1,8 @@
 ---
 title:
-status: planned
+status: planned          # planned | in_progress
 created:
 started:
-completed:
 ---
 
 # Title

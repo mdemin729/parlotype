@@ -13,7 +13,7 @@ namespace Parlotype.Platform.Speech;
 /// Writes into a single exact-size array — the previous MemoryStream +
 /// per-sample BinaryWriter implementation allocated 2× the WAV size and made a
 /// virtual stream write per sample (finding P5,
-/// plans/2026-07-11-audio-pipeline-perf-security). Output is byte-identical.
+/// docs/research/2026-07-11-audio-pipeline-perf-security). Output is byte-identical.
 /// </remarks>
 internal static class WavEncoder
 {

@@ -1,6 +1,8 @@
 ---
 status: accepted
 date: 2026-07-31
+amends: [022]
+amended-by: [049]
 ---
 
 # 048. Whisper Runtime Latch Detection & Factory Lifetime

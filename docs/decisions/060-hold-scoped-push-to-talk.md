@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-08-18
+amends: [047]
 ---
 
 # 060. Hold-Scoped Push-to-Talk, and Per-Engine Utterance Ceilings
@@ -37,7 +38,7 @@ than 3 s mid-sentence has no setting left to reach for.
 
 The obvious fix — never flush mid-recording — turned out to be unsafe past a point, and
 the point is engine-specific. Full data in
-`plans/2026-08-18-hold-scoped-push-to-talk/research.md`; the two findings that constrain
+`docs/research/2026-08-18-hold-scoped-push-to-talk/research.md`; the two findings that constrain
 this decision:
 
 **Parakeet silently loses text as a single decode grows.** Word retention against a known
@@ -185,7 +186,7 @@ half the user's words, which is worse than crashing.
 
 ## References
 
-- `plans/2026-08-18-hold-scoped-push-to-talk/research.md` — benchmark method and data
+- `docs/research/2026-08-18-hold-scoped-push-to-talk/research.md` — benchmark method and data
 - [ADR-041](041-parakeet-v3-sherpa-onnx.md) — Parakeet via sherpa-onnx
 - [ADR-047](047-multi-binding-dictation-hotkeys.md) — gesture model and `ActivationMode`
 - [ADR-057](057-cancel-dictation-on-command-shortcuts.md) — `CancelAsync` and the discard path
