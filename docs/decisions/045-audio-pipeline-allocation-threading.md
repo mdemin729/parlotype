@@ -1,13 +1,15 @@
 ---
 status: accepted
 date: 2026-07-13
+amends: [003]
+last-amended: 2026-07-14
 ---
 
 # 045. Audio Pipeline Allocation & Threading Rework
 
 ## Context
 
-An allocation review (plans/2026-07-11-audio-pipeline-perf-security,
+An allocation review (docs/research/2026-07-11-audio-pipeline-perf-security,
 research.md) found the recording hot path generating ~1.5 MB/s of garbage,
 much of it Large-Object-Heap sized: the WASAPI callback allocated a fresh
 `float[e.BytesRecorded]` per callback (a *byte* count used as a *float*
@@ -82,4 +84,4 @@ output (`inputFrames × 16000 / nativeRate`, min 1,024) and passes that count �
 never the rented array's `.Length` — to `Read`. Measured: **0.19 MB/callback
 (~1.9 MB/s while recording), ~14× below the pre-rework baseline**, identical
 sample delivery. Reproducible via `ResamplerReadBenchmarks`; details in
-`memory/knowledge/naudio-resampler-read-cost.md`.
+`docs/knowledge/naudio-resampler-read-cost.md`.

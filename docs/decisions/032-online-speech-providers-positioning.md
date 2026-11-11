@@ -7,7 +7,7 @@ date: 2026-05-25
 
 ## Context
 
-Parlotype has always been positioned as a **local-first, privacy-focused** voice-to-text app: all speech recognition runs on-device, and audio never leaves the user's machine. That positioning is repeated across `README.md`, the root `AGENTS.md`, and `memory/AGENTS.md` as an absolute architectural constraint.
+Parlotype has always been positioned as a **local-first, privacy-focused** voice-to-text app: all speech recognition runs on-device, and audio never leaves the user's machine. That positioning is repeated across `README.md`, the root `AGENTS.md`, and `memory/AGENTS.md` (removed from the tree; see git history) as an absolute architectural constraint.
 
 In practice, local Whisper / Gemma 4 models do not deliver acceptable latency on every machine. Users with weaker CPUs, no GPU, or modest VRAM either pay a UX cost (multi-second transcription delays after they stop speaking) or downshift to smaller, less accurate models. Cloud speech providers (e.g. OpenAI Whisper API, Groq, Deepgram, Azure Speech) solve the latency/accuracy problem at the cost of sending audio off-device — a trade-off that some users will reasonably choose to make.
 

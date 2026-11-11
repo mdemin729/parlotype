@@ -1,12 +1,12 @@
 ---
 name: mermaid-diagrams
-description: Use when authoring or editing any Mermaid diagram in architecture docs (docs/architecture/), ADRs (docs/decisions/), or the memory/ vault. Covers the quoting rules and shape syntax that prevent parser errors.
+description: Use when authoring or editing any Mermaid diagram in architecture docs (docs/architecture/) or ADRs (docs/decisions/). Covers the quoting rules and shape syntax that prevent parser errors.
 ---
 
 # Mermaid Diagrams Skill
 
-Mermaid diagrams appear in `docs/architecture/`, ADRs, and (eventually) the
-`memory/` vault. Parser errors silently break the rendered doc. This skill
+Mermaid diagrams appear in `docs/architecture/` and ADRs (`docs/decisions/`).
+Parser errors silently break the rendered doc. This skill
 captures the rules that prevent the most common failures.
 
 ## The one rule that prevents 90 % of errors

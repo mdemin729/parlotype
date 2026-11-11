@@ -275,7 +275,7 @@ public class LocalizationTests : IDisposable
         // fixing the ContentControl-recreation bug above did not make it go
         // away. A plain synchronous RelayCommand never touches IsRunning, so
         // CanExecute — and every bound row's IsEnabled — never changes. See
-        // memory/knowledge/asyncrelaycommand-flicker.md.
+        // docs/knowledge/asyncrelaycommand-flicker.md.
         var vm = new InterfaceLanguageSettingsViewModel(new UiLanguageService(new MockSettingsService()));
 
         Assert.IsNotAssignableFrom<IAsyncRelayCommand>(vm.LanguageOptions[0].SelectCommand);
@@ -413,7 +413,7 @@ public class LocalizationTests : IDisposable
         // LoadAsync has run by the time its constructor returns. An `await` here would
         // resume off the shared headless dispatcher and corrupt the culture of whatever
         // other [AvaloniaFact] is mid-flight — see
-        // memory/knowledge/culture-changing-tests-need-avaloniafact.md, which this test
+        // docs/knowledge/culture-changing-tests-need-avaloniafact.md, which this test
         // was the fifth occurrence of before it was written this way.
         var registry = new MockPromptTemplateRegistry();
         registry.AddOrUpdateAsync(new PromptTemplate(

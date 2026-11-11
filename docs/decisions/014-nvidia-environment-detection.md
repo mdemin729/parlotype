@@ -1,7 +1,7 @@
 ---
 status: accepted
-amended-by: 049
 date: 2026-04-28
+amended-by: [049]
 ---
 
 > **Amended by [ADR-049](049-drop-whisper-cuda-runtime.md) (2026-07-31).** Detection itself

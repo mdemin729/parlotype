@@ -1,56 +1,66 @@
 ---
 name: debug-pipeline
-description: Use when debugging audio capture, VAD, Whisper transcription, text injection, or threading issues in the Parlotype audio pipeline. Provides a layered checklist from microphone input through final keystroke output.
+description: Use when debugging audio capture, VAD, speech recognition (Parakeet, Whisper, Gemma 4, cloud), text injection, or threading issues in the Parlotype audio pipeline. Provides a layered checklist from microphone input through final keystroke output.
 ---
 
 # Debug Audio Pipeline
 
-## Before You Start
+## Before you start
 
-1. Read `memory/architecture/audio-pipeline.md` for the full data flow
-2. Read `memory/services/platform.md` for implementation details
-3. Check `memory/decisions/_index.md` for ADR-003 and ADR-008 design rationale
+1. Read `docs/architecture/audio-pipeline.md` (data flow, threading model, stop/cancel,
+   modes, utterance ceilings).
+2. Skim the ADRs behind it: 003 (pipeline), 008 (incremental VAD), 045 (allocation and
+   threading), 057 (cancel on command shortcuts), 060 (hold-scoped push-to-talk).
+3. Check `docs/knowledge/README.md` for a note on the dependency involved (NAudio/WASAPI,
+   sherpa-onnx, Whisper.net, SharpHook, clipboard).
+4. Logs: `%LOCALAPPDATA%/parlotype-data/logs/`. The file sink is capped at `Information`;
+   run from a console for `Debug`. Recognized text is never logged, only lengths.
 
-## Debugging Steps
+## Work down the layers
 
-### 1. Audio Capture Issues
-- Check `IAudioCaptureService` / `WasapiAudioCaptureService`
-- Verify microphone is selected and accessible
-- **Wrong device used despite a Settings selection**: don't stop at "is `SettingsKeys.SelectedMicrophoneId` persisted?" — trace whether the value is actually *read back* and passed to `_capture.StartAsync(device, ct)` before assuming the enumerator or WASAPI device ID is at fault. A settings value that's written but never consumed downstream looks identical to a device-matching bug from the UI side (see `AudioPipelineService.CacheSettingsAsync` resolving it via `IMicrophoneEnumerator`, fixed 2026-09-12).
-- Check sample rate conversion to 16kHz mono float
-- Look for NAudio exceptions in `%LOCALAPPDATA%/parlotype-data/logs/`
+### 1. Capture (`IAudioCaptureService` / `WasapiAudioCaptureService`, `WasapiMicrophoneEnumerator`)
+- Is the intended device opened? Trace `SettingsKeys.SelectedMicrophoneId` all the way to
+  `_capture.StartAsync(device, ct)` (resolved in `AudioPipelineService.CacheSettingsAsync`).
+  A setting that is written but never read back looks exactly like a device-matching bug.
+- Is the stream converted to 16 kHz mono float?
+- `AudioDataEventArgs.Buffer` may be pooled and is valid only during the event. Copy it if
+  you keep it.
 
-### 2. VAD Issues
-- Check `IVoiceActivityDetector` / `SileroVadService`
-- Verify ONNX runtime is loading correctly
-- Check VAD threshold settings
-- Incremental VAD processes chunks — verify chunk boundaries
+### 2. VAD (`IVadService` / `SileroVadService`, `VadOptions`, `SpeechSegmentExtractor`)
+- Does the Silero ONNX model load? Look for the error at startup.
+- Thresholds and padding: see `docs/knowledge/vad-tuning.md` before changing a default.
+- VAD runs incrementally on new samples only; check chunk boundaries.
 
-### 3. Transcription Issues
-- Check `ISpeechRecognizer` / `WhisperSpeechRecognizer`
-- Verify model is downloaded and loadable
-- Check `WhisperOptions` (beam size, language, temperature)
-- GPU issues: set the runtime to `Cpu` (Settings, or `SettingsKeys.RuntimePreference`) and restart to isolate — Vulkan is the only GPU backend (ADR-049)
-- **Never** load model multiple times in a single run
+### 3. Recognition (`ISpeechRecognizer` → `DelegatingSpeechRecognizer`)
+- First establish **which engine ran**: `SettingsKeys.SpeechEngine` (unset means Parakeet).
+  `SpeechRecognizerFactory` resolves it on each `InitializeAsync`.
+- Model present and loadable? Parakeet and Whisper models live under the data root's
+  `models/`.
+- Whisper GPU trouble: set the runtime to `Cpu` (Settings → Speech engine → Whisper runtime)
+  and restart; Vulkan is the only GPU backend and selection is one-shot per process.
+- Text missing from a long utterance: check the `SpeechEngineLimits` ceiling for the engine
+  (Parakeet loses words past 60 s, so long audio is split on speech boundaries).
+- Never load two Whisper models at once.
 
-### 4. Text Injection Issues
-- Check `ITextInjectionService` implementations
-- Verify `Win32TargetWindowTracker` identifies correct window
-- Clipboard-based: check save/restore cycle
-- SharpHook-based: check key simulation timing
+### 4. Injection (`ITextInjectionService`: `ClipboardTextInjectionService` default, `SharpHookTextInjectionService`)
+- Did `Win32TargetWindowTracker` record the right foreground window?
+- Clipboard path: is the save → paste → restore cycle intact?
+- Key-simulation path: timing and keyboard layout.
 
-### 5. Threading Issues
-- Capture and transcription on separate threads
-- `ConcurrentQueue<float[]>` bridges them
-- UI updates must dispatch to `Dispatcher.UIThread`
+### 5. Threading
+- Three single-threaded stages joined by `System.Threading.Channels`: capture callback (no
+  inference) → segmenter (VAD) → transcription. A stall in one stage shows up as a growing
+  channel, not as an exception.
+- UI state changes must go through `Dispatcher.UIThread`.
 
-## Common Patterns
+## Symptom table
 
-| Symptom | Likely Cause | Check |
-|---------|-------------|-------|
-| No audio captured | Wrong microphone or permission | Device enumeration, OS permissions |
-| VAD never triggers | Threshold too high or ONNX error | VAD settings, ONNX runtime logs |
-| Transcription garbled | Wrong sample rate or model | Audio format, model file integrity |
-| Text appears in wrong window | Window tracker lost focus | `Win32TargetWindowTracker` logic |
-| UI freezes | Background thread updating UI directly | Missing `Dispatcher.UIThread` dispatch |
-
+| Symptom | Likely cause | Check |
+|---|---|---|
+| No audio captured | Wrong device or OS permission | Device enumeration, Windows microphone privacy setting |
+| VAD never triggers | Threshold too high, ONNX load error | `VadOptions`, startup log |
+| Wrong engine's output | Settings select another engine | `SettingsKeys.SpeechEngine` |
+| Garbled transcript | Wrong sample rate or model | Capture format, model file integrity |
+| End of a long dictation missing | Utterance ceiling | `SpeechEngineLimits` |
+| Text in the wrong window | Tracker lost the target | `Win32TargetWindowTracker` |
+| UI freezes | Background thread touching UI | Missing `Dispatcher.UIThread` dispatch |

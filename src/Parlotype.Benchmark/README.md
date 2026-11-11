@@ -1,6 +1,8 @@
 # Parlotype.Benchmark
 
-Console CLI for evaluating Parlotype's transcription quality. Measures Word Error Rate (WER), Character Error Rate (CER), and Real-Time Factor (RTF) across configurable datasets, Whisper models, and decoding parameters.
+Console CLI for evaluating Parlotype's transcription quality. Measures Word Error Rate (WER), Character Error Rate (CER), and Real-Time Factor (RTF) across configurable datasets, engines (Whisper, Gemma 4 via llama.cpp, Parakeet via sherpa-onnx), models and decoding parameters.
+
+Not to be confused with `src/Parlotype.MicroBenchmarks`, which measures allocations and latency of hot paths with BenchmarkDotNet (ADR-044) and is not part of `dotnet test`.
 
 Built with System.CommandLine, Spectre.Console, and SQLite. Results are stored as JSON and auto-indexed into a SQLite database for historical queries and regression detection.
 
@@ -24,7 +26,7 @@ dotnet run --project src/Parlotype.Benchmark -- compare \
 
 ### `run` — Execute a benchmark
 
-Runs all samples in the configured datasets through the Whisper pipeline and computes metrics.
+Runs all samples in the configured datasets through the engine the config selects (see [Configuration](#configuration)) and computes metrics.
 
 | Flag | Required | Default | Description |
 |------|----------|---------|-------------|
@@ -33,7 +35,7 @@ Runs all samples in the configured datasets through the Whisper pipeline and com
 | `--output <dir>` | no | `./results` | Output directory for results |
 | `--tags <string>` | no | — | Comma-separated tags to filter samples (AND logic) |
 | `--samples <string>` | no | — | Comma-separated sample IDs to include |
-| `--gpu <bool>` | no | `true` | Enable GPU acceleration (`--gpu false` for CPU-only) |
+| `--gpu <bool>` | no | `true` | Enable GPU acceleration (`--gpu false` for CPU-only). Whisper only: for `llamaCpp` it prints a warning and is ignored (llama-server controls GPU offload itself), and Parakeet is CPU-only anyway |
 | `--verbose`, `-v` | no | `false` | Enable verbose logging |
 
 ```bash
@@ -58,7 +60,7 @@ Runs a Cartesian product of parameter combinations. Useful for finding optimal m
 | `--config <file>` | yes | — | Path to sweep configuration JSON |
 | `--datasets <dir>` | yes | — | Root directory containing dataset folders |
 | `--output <dir>` | no | `./results` | Output directory for results |
-| `--gpu <bool>` | no | `true` | Enable GPU acceleration |
+| `--gpu <bool>` | no | `true` | Enable GPU acceleration. `--gpu false` rewrites every expanded config as a Whisper config on `Cpu` |
 | `--verbose`, `-v` | no | `false` | Enable verbose logging |
 
 ```bash
@@ -66,6 +68,8 @@ dotnet run --project src/Parlotype.Benchmark -- sweep \
   --config datasets/sweep-config.json \
   --datasets datasets --output results
 ```
+
+> **Caveat:** unlike `run`, `sweep` resolves `ISpeechRecognizer` without pinning the engine, so it benchmarks whatever engine your own `settings.json` selects (Parakeet by default). See [`docs/knowledge/benchmark-memory-and-engine-caveats.md`](../../docs/knowledge/benchmark-memory-and-engine-caveats.md) §4.
 
 ### `list` — List historical runs
 
@@ -166,12 +170,12 @@ dotnet run --project src/Parlotype.Benchmark -- import --output results
 | `temperature` | `0.0` | Sampling temperature |
 | `initialPrompt` | — | Optional prompt to bias transcription |
 | `threads` | — | CPU thread count (omit to use Whisper default) |
-| `runtimePreference` | `Auto` | Runtime: `Auto`, `Cpu`, `Gpu` |
+| `runtimePreference` | `Auto` | Runtime: `Auto` (Vulkan, then CPU), `Vulkan` (strict, fails if unavailable), `Cpu` |
 
 #### Gemma 4 options (alternative engine)
 
 Instead of `"whisper"`, use a `"llamaCpp"` block to run Gemma 4 E2B/E4B via the llama.cpp
-server. The two blocks are mutually exclusive — provide one or the other.
+server. Engine blocks are mutually exclusive — provide one of `whisper`, `llamaCpp`, `parakeet`.
 
 ```json
 {
@@ -188,20 +192,50 @@ server. The two blocks are mutually exclusive — provide one or the other.
 
 | Field | Default | Description |
 |-------|---------|-------------|
-| `modelId` | `gemma-4-E4B-it-Q4_K_M` | Gemma 4 GGUF catalog ID. Valid IDs: `gemma-4-E2B-it-Q8_0`, `gemma-4-E2B-it-BF16`, `gemma-4-E4B-it-Q4_K_M`, `gemma-4-E4B-it-Q8_0`, `gemma-4-E4B-it-BF16` |
+| `modelId` | `gemma-4-E4B-it-Q4_K_M` | Gemma 4 GGUF catalog ID. Valid IDs (case-sensitive): `gemma-4-E2B-it-Q8_0`, `gemma-4-E2B-it-bf16`, `gemma-4-E4B-it-Q4_K_M`, `gemma-4-E4B-it-Q8_0`, `gemma-4-E4B-it-bf16` |
 | `port` | `8321` | Localhost port for the llama-server process |
 | `serverFolder` | auto | Optional path to the folder containing `llama-server.exe`. When omitted, the active managed install from the llama-server registry is used; with no managed install and no `serverFolder`, the run fails with "No llama-server is configured" |
 
 **Prerequisites:**
 1. llama-server installed via **Settings → llama.cpp** in the Parlotype Desktop app
 2. Gemma 4 GGUF model downloaded via **Settings → Gemma 4 model** in the Desktop app
-   (or downloaded manually to `%LOCALAPPDATA%\parlotype\models\`)
+   (or downloaded manually to `%LOCALAPPDATA%\parlotype-data\models\`)
 
 The benchmark adopts an already-running llama-server on the configured port, or spawns
 a new one automatically. Transcription uses the OpenAI-compatible `/v1/chat/completions`
 endpoint with `input_audio` content blocks.
 
 See [ADR-029](../../docs/decisions/029-gemma4-model-download-ui.md) for design rationale.
+
+#### Parakeet options (alternative engine)
+
+A `"parakeet"` block selects NVIDIA Parakeet TDT v3 via sherpa-onnx, the app's default
+engine ([ADR-041](../../docs/decisions/041-parakeet-v3-sherpa-onnx.md)). It is CPU-only and
+always auto-detects the language. Sample config: `datasets/parakeet-smoke-config.json`.
+
+```json
+{
+  "name": "smoke-test-parakeet",
+  "datasets": ["smoke-test"],
+  "parakeet": { "modelId": "parakeet-tdt-0.6b-v3-int8" },
+  "vad": { "enabled": false }
+}
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `modelId` | `parakeet-tdt-0.6b-v3-int8` | Parakeet catalog ID: `parakeet-tdt-0.6b-v3-int8` or `parakeet-tdt-0.6b-v3-fp32` |
+
+The model is downloaded headlessly on first use when it is not already cached.
+
+#### Engine selection and your own settings
+
+`whisper`, `llamaCpp` and `parakeet` are mutually exclusive; with none of them the run uses
+Whisper defaults. `run` never reads the engine or model from your `settings.json`: it
+registers a benchmark-scoped `InMemorySettingsService` holding the config's values and
+resolves the concrete recognizer (`WhisperSpeechRecognizer`, `LlamaCppSpeechRecognizer` or
+`ParakeetSpeechRecognizer`) directly, bypassing `DelegatingSpeechRecognizer`. `sweep` does
+not do this yet (see the caveat under [`sweep`](#sweep--parameter-sweep)).
 
 #### VAD options
 
@@ -333,7 +367,7 @@ Memory metrics are tracked per-sample: peak RAM (MB), average RAM delta, total G
 
 ### Warm-up pass
 
-Every run performs **one throwaway transcription of the first sample** between `InitializeAsync` and the timed loop. This primes CUDA / OS page cache / first-inference paths so the reported per-sample numbers reflect steady-state behaviour rather than cold-start cost. The time spent in warm-up is reported separately as `warmupTimeMs`; the same sample is re-run inside the timed loop. GC counters are reset after warm-up so per-sample GC numbers cover the timed loop only. See [ADR 031](../../docs/decisions/031-benchmark-warmup-pass.md).
+Every run performs **one throwaway transcription of the first sample** between `InitializeAsync` and the timed loop. This primes the GPU runtime / OS page cache / first-inference paths so the reported per-sample numbers reflect steady-state behaviour rather than cold-start cost. The time spent in warm-up is reported separately as `warmupTimeMs`; the same sample is re-run inside the timed loop. GC counters are reset after warm-up so per-sample GC numbers cover the timed loop only. See [ADR-070](../../docs/decisions/070-benchmark-warmup-pass.md).
 
 > **Caveat:** `peakRamMb` is derived from `Process.PeakWorkingSet64`, which is a high-water mark — warm-up RAM may be reflected in peak readings during the timed loop. For Whisper this is a non-issue because the model is already loaded by `InitializeAsync`. For Gemma the model lives in an external `llama-server` process and isn't counted either way.
 
@@ -354,3 +388,10 @@ Parlotype.Benchmark/
   Results/                # Result models, JSON store, SQLite index
   Reporting/              # Console, CSV, Markdown formatters, comparison engine
 ```
+
+## Contributing
+
+- All console output goes through Spectre.Console (`AnsiConsole`), never `Console.WriteLine`. Pass any user- or file-supplied string through `Markup.Escape()` before embedding it in markup.
+- The benchmark is a pure console app: it references Platform and Core, never `Parlotype.Desktop` or Avalonia.
+- Load the model once per run and time model load separately from per-sample transcription.
+- Tests live in `src/Parlotype.Benchmark.Tests` (xUnit v2): metrics, normalization, config deserialization, sweep expansion, comparison, formatters, SQLite index and regression checks.

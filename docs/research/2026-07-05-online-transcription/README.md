@@ -1,7 +1,7 @@
 # Online Speech Transcription Providers — Research Overview
 
 **Date:** 2026-07-05
-**Status:** Research
+**Status:** Snapshot (2026-07-05). Outcome: [ADR-043](../../decisions/043-cloud-speech-providers-v1.md) shipped OpenAI-compatible and xAI Grok; prices and limits here are not maintained.
 **Related:** [ADR-032 — Online Speech Providers: Brand & Positioning](../../decisions/032-online-speech-providers-positioning.md)
 
 ## Purpose

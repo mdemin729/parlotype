@@ -15,7 +15,7 @@ namespace Parlotype.MicroBenchmarks;
 /// ReadCount values: 38,400 = pre-rework behaviour (`new float[BytesRecorded]`,
 /// read `.Length`); 65,536 = the regressed pooled version (ArrayPool bucket
 /// rounding inflated the request); 3,200 = the fix (2× the expected 1,600
-/// resampled output samples). See memory/knowledge/naudio-resampler-read-cost.md.
+/// resampled output samples). See docs/knowledge/naudio-resampler-read-cost.md.
 /// </summary>
 [MemoryDiagnoser]
 [ShortRunJob]

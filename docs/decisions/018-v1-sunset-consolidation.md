@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-01
+amends: [015]
 ---
 
 # 018. Sunset Parlotype.Desktop (V1) — Consolidate on V2

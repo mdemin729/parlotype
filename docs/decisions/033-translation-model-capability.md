@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-25
+amended-by: [036, 061]
 ---
 
 # 033. Translation Capability per Whisper Model

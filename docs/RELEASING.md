@@ -30,7 +30,10 @@ git tag v1.2.0 && git push origin v1.2.0
 
 The `Release` workflow then, per matrix row:
 
-publish → `vpk download` (existing feed, for deltas) → `vpk pack` → `vpk upload github`
+extract release notes → restore → `dotnet test` (gate) → publish → `vpk download`
+(existing feed, for deltas) → Azure login + signing setup (tag builds only) →
+`vpk pack` → verify pack output and signatures → `vpk upload github` → set release
+notes
 
 A tag containing `-` (e.g. `v1.2.0-beta.1`) is published as a GitHub
 **pre-release**. The updater requests stable releases only, so pre-releases are
@@ -82,7 +85,8 @@ Either:
   validates the feed, and uploads the result as a build artifact — no GitHub
   release, no upload to the feed.
 - Open a PR touching `src/Parlotype.Desktop/**`, `src/Parlotype.Core/**`,
-  `src/Parlotype.Platform/**`, or `Directory.Build.*`. The same dry-run path runs
+  `src/Parlotype.Platform/**`, `Directory.Build.*`, or
+  `.github/workflows/release.yml`. The same dry-run path runs
   automatically.
 
 A dry run cannot check the version section — there is no tag yet — so it only

@@ -1,13 +1,14 @@
 ---
 status: accepted
 date: 2026-09-05
+last-amended: 2026-09-07
 ---
 
 # 064. UI Localization Foundation
 
 ## Context
 
-Parlotype's interface is English-only and almost all of its copy is hardcoded. [ADR-056](056-first-run-onboarding-tour.md)
+Parlotype's interface is English-only and almost all of its copy is hardcoded. [ADR-056](056-first-run-onboarding-wizard.md)
 externalized 30 keys for the onboarding tour and the Help section into `Resources/Strings.resx`
 and noted that translations would arrive later "as satellite `Strings.<culture>.resx` files;
 no markup or code changes needed". Nothing else moved: 211 literal attributes across 26
@@ -246,7 +247,7 @@ across repeated full-project runs, invisible when the test (or its class) ran al
 Fixed by removing the delay — `MockSettingsService` completes every `Task`
 already-finished, so the constructor's fire-and-forget initializer has, in practice,
 already run to completion by the time the constructor returns. See
-[[../../memory/knowledge/culture-changing-tests-need-avaloniafact]] for the general rule
+[culture-changing-tests-need-avaloniafact](../knowledge/culture-changing-tests-need-avaloniafact.md) for the general rule
 this is the third occurrence of.
 
 ## Amendment (2026-09-07): the tooltip nobody had wired through yet
@@ -257,7 +258,7 @@ previous amendment's sweep of Core-built sentences (hotkey conflicts, cloud erro
 missed this one because it isn't a conflict or a failure message — `HotkeyHint.Describe`
 (Core) built the whole reminder sentence unconditionally, and both its consumers
 (`HotkeyCoordinator`, feeding the tooltip; `OnboardingStepFactory`'s recap step) had
-always shown it verbatim. `memory/architecture/subsystems.md` had in fact listed
+always shown it verbatim. `memory/architecture/subsystems.md` (removed from the tree; see git history) had in fact listed
 `HotkeyHint` under "still English on purpose" — a real gap, not an oversight in the
 fix, but one this closes.
 

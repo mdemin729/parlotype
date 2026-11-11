@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-02-22
+amended-by: [046]
 ---
 
 # 006. Text Injection — Clipboard vs SharpHook

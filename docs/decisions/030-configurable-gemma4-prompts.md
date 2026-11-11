@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-22
+amended-by: [037]
 ---
 
 # 030. Configurable transcription prompts for the Gemma 4 engine

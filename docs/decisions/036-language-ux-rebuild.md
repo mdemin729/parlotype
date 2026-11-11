@@ -1,6 +1,10 @@
 ---
 status: accepted
 date: 2026-06-11
+supersedes: [035]
+amends: [021, 033]
+amended-by: [042, 061]
+last-amended: 2026-06-18
 ---
 
 # 036. Language UX Rebuild — keyboard source, target forms, shared relationship model
@@ -9,7 +13,7 @@ date: 2026-06-11
 
 ADR-035 unified translation control on the Language page as a
 `[Source] → [Target]` row with inline-expanding pickers. A subsequent hi-fi
-prototype (plans/2026-06-08-language-ux-rebuild, answering the
+prototype (plans/2026-06-08-language-ux-rebuild (removed from the tree; see git history), answering the
 2026-06-01 design brief) pushed the UX further and exposed gaps:
 
 1. **No keyboard-layout source.** Most users speak the language they type; the
@@ -159,4 +163,4 @@ detection still degrades to null off-Windows.
 - ADR-033 — Translation capability per Whisper model
 - ADR-034 — Source & target language selection (data model, unchanged)
 - **ADR-035 — superseded by this ADR** (data model + migration remain)
-- plans/2026-06-08-language-ux-rebuild — spec, requirements, phased plan
+- plans/2026-06-08-language-ux-rebuild (removed from the tree; see git history) — spec, requirements, phased plan

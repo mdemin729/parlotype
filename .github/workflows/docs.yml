@@ -1,0 +1,33 @@
+name: Docs Check
+
+# Keeps the documentation honest without building the solution:
+#   - docs/decisions/README.md and docs/knowledge/README.md are generated from
+#     frontmatter (ADR-071); the check fails if either is stale or an ADR
+#     relation is one-sided.
+#   - every relative Markdown link in the tree must resolve.
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+      - 'scripts/gen-docs-index.ps1'
+      - 'scripts/check-doc-links.ps1'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+jobs:
+  docs:
+    runs-on: windows-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check generated indexes
+        shell: pwsh
+        run: ./scripts/gen-docs-index.ps1 -Check
+
+      - name: Check Markdown links
+        shell: pwsh
+        run: ./scripts/check-doc-links.ps1

@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-03
+amended-by: [034, 036]
 ---
 
 # 021. Whisper Translation to English via Settings

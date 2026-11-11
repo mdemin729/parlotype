@@ -495,7 +495,7 @@ Full rationale for each item is in the linked decision record.
 
 ### Changed
 
-- **The dictation window is a compact, frameless widget** (172×112). Drag it by
+- **The dictation window is a compact, frameless widget** (172×88, or 172×118 while the language strip is shown). Drag it by
   the strip along the top, and ✕ or Escape hides it to the tray. Its position is
   remembered between runs, with a fallback if the screen it was on is gone.
 - Language controls are hidden for Parakeet, which has no language choice to

@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-03-08
+amended-by: [020, 047]
 ---
 
 # 001. Global Hotkey System Using SharpHook TaskPoolGlobalHook

@@ -1,41 +1,47 @@
 ---
 name: implement-feature
-description: Use when adding a new feature to Parlotype that spans Core/Platform/Desktop layers. Walks through the contract-first workflow (Core interface → Platform impl → DI registration → Desktop UI → tests → ADR/docs).
+description: Use when adding a new feature to Parlotype that spans Core/Platform/Desktop layers. Walks through the contract-first workflow (Core interface → Platform impl → DI registration → Desktop UI → localized copy → tests → ADR/docs).
 ---
 
 # Implement Feature
 
-## Before You Start
+The rules themselves (conventions, Definition of Done) are in `AGENTS.md`; this skill is the
+order of work.
 
-1. Read `memory/conventions/_index.md` for coding standards
-2. Read `memory/services/_index.md` to identify affected projects
-3. Check `memory/decisions/_index.md` for relevant design constraints
+## Before you start
 
-## Implementation Workflow
+1. Read the part of `docs/architecture/` that covers the area (`overview.md` maps it).
+2. Find the ADRs that constrain it: `docs/decisions/README.md` lists them all with status.
+3. Check `docs/knowledge/README.md` for gotchas in the dependencies you will touch.
 
-### 1. Define the Contract (Core)
-- Add interface(s) to `src/Parlotype.Core/` in the appropriate subfolder
-- Define models, records, or enums needed
-- Keep Core dependency-free — interfaces and models only
+## Implementation workflow
+
+### 1. Define the contract (Core)
+- Add interface(s), records or enums to `src/Parlotype.Core/` in the matching subfolder.
+- No platform packages. Pure, testable logic may live here too (e.g. `HotkeyGestureMatcher`).
+- Anything the user will read is returned as data (an enum plus arguments); Desktop words it.
 
 ### 2. Implement (Platform)
-- Add implementation class to `src/Parlotype.Platform/` mirroring Core's subfolder
-- Register in `PlatformServiceExtensions.cs` as singleton
-- Use existing platform dependencies (NAudio, Whisper.net, SharpHook, etc.)
+- Add the implementation to `src/Parlotype.Platform/`, mirroring Core's subfolder.
+- Register it in `PlatformServiceExtensions.cs` as a singleton.
 
-### 3. Wire UI (Desktop)
-- Add ViewModel to `src/Parlotype.Desktop/ViewModels/` (must be `partial`)
-- Use `[ObservableProperty]` and `[RelayCommand]`
-- Add View (`.axaml`) to `src/Parlotype.Desktop/Views/`
-- Use `x:CompileBindings="True"` and `x:DataType`
-- Extract reusable UI into UserControls
+### 3. Wire the UI (Desktop)
+- View model in `src/Parlotype.Desktop/ViewModels/` (settings pages: `ViewModels/Settings/`,
+  deriving from `SettingsSectionViewModelBase` and listed in `SettingsWindowViewModel`).
+- View in `src/Parlotype.Desktop/Views/` (settings pages: `Views/Settings/`).
+- Extract reusable UI into UserControls.
 
-### 4. Write Tests
-- Core/Platform tests in `src/Parlotype.Tests/`
-- UI tests in `src/Parlotype.Desktop.Tests/` with `[AvaloniaFact]`
-- Use mocks from `Mocks/` folder for controllable testing
+### 4. Localize the copy
+- Every user-visible string goes into `Strings.resx` and is bound with `{loc:Tr Key}` (AXAML)
+  or read via `Strings.Key` / `Strings.Format_Key(...)` (C#).
+- Follow the `localization` skill to translate it into every language in the same change.
+- Copy composed in C# must be refreshed in `OnCultureChanged()`.
 
-#### Screenshot Tests (for UI features with settings views)
+### 5. Write tests
+- Core/Platform: `src/Parlotype.Tests/`.
+- UI: `src/Parlotype.Desktop.Tests/` with `[AvaloniaFact]` and the mocks in `Mocks/`.
+
+#### Screenshot tests (for new or changed settings views)
 If the feature adds or modifies a settings view, add headless screenshot tests:
 
 1. **Create a fixture** — one `IAsyncLifetime` fixture per test class that collects `Scenario` objects and generates an HTML report on dispose:
@@ -78,41 +84,30 @@ If the feature adds or modifies a settings view, add headless screenshot tests:
 
 See existing examples: `RuntimeSettingsScreenshotTests.cs`, `MicrophoneSettingsScreenshotTests.cs`, `HotkeySettingsScreenshotTests.cs`, `SpeechSettingsScreenshotTests.cs`, `ThemeSettingsScreenshotTests.cs`.
 
-### 5. Verify
+### 6. Verify
 ```bash
-dotnet build Parlotype.slnx          # Zero warnings
-dotnet test                           # All tests pass
-dotnet run --project src/Parlotype.Desktop  # Manual verification
+dotnet build Parlotype.slnx                 # zero warnings
+dotnet test                                 # all tests pass
+pwsh scripts/check-localization.ps1         # if copy changed
+dotnet run --project src/Parlotype.Desktop  # exercise the feature end to end
 ```
 
-### 6. Document
-Documentation is part of the workflow, not a follow-up. Decide each question explicitly:
+### 7. Document
+Go through the Definition of Done in `AGENTS.md` item by item: ADR triggers, correcting any
+statement in `docs/architecture/`, `AGENTS.md`, a skill or a knowledge note that the change
+made false, a `docs/knowledge/` note for a non-derivable fact, then
+`pwsh scripts/gen-docs-index.ps1`. If you want to defer any of it, ask the owner first.
 
-- **Did you add an interface, record, or enum to `Parlotype.Core`?** → Yes ⇒ ADR + `memory/services/core.md` update
-- **Did you add a registration to `PlatformServiceExtensions.cs`?** → Yes ⇒ ADR + `memory/services/platform.md` update
-- **Did you add a `.csproj` dependency or native library?** → Yes ⇒ ADR
-- **Does behaviour now differ by OS or build flag?** → Yes ⇒ ADR
-- **Did you touch audio pipeline / hotkeys / settings / Whisper / text injection?** → Yes ⇒ ADR + relevant subsystems.md section
-- **Did you add a UI surface?** → Yes ⇒ `memory/services/desktop.md` update
-- **Did you learn something non-derivable from code (third-party quirk, env gotcha)?** → Yes ⇒ `memory/knowledge/<topic>.md` + index row
-
-If any answer above is "yes" and you're choosing to defer the docs, **ask the user first** via `ask_user` — do not silently ship.
-
-ADRs go in `docs/decisions/` (use `_template.md`, sequential numbering — check the directory for the highest existing number, do not trust stale "next: NNN" hints in indexes). After writing the ADR, add a row to `memory/decisions/_index.md`.
+ADRs go in `docs/decisions/` from `_template.md`. Take the next number from the highest
+existing file, not from any "next" hint. Keep relations two-way: if the new ADR amends or
+supersedes another, update that ADR's frontmatter too.
 
 ## Checklist
-- [ ] Interface in Core
-- [ ] Implementation in Platform
-- [ ] Registered in `PlatformServiceExtensions.cs`
-- [ ] ViewModel + View in Desktop (if UI)
-- [ ] Tests written and passing
-- [ ] Screenshot tests added for new/modified settings views (if applicable)
+- [ ] Contract in Core, implementation in Platform, registered in `PlatformServiceExtensions.cs`
+- [ ] View model + view in Desktop (if UI)
+- [ ] Copy in resx, every language updated, `check-localization.ps1` passes
+- [ ] Tests written and passing; screenshot tests for new or changed settings views
 - [ ] Zero build warnings
-- [ ] End-to-end behaviour verified (manual run / log line / integration test)
-- [ ] ADR written if any trigger fires (see Step 6)
-- [ ] `memory/services/*.md` updated for new symbols
-- [ ] `memory/decisions/_index.md` updated if new ADR
-- [ ] `memory/architecture/subsystems.md` updated for new subsystems
-- [ ] `memory/knowledge/` entry added for non-derivable facts
-- [ ] If deferring docs, asked the user first
-
+- [ ] Behaviour verified end to end
+- [ ] ADR written if a trigger fires; `gen-docs-index.ps1 -Check` passes
+- [ ] No statement in `docs/` or `AGENTS.md` left false by the change

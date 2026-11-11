@@ -1,6 +1,8 @@
 ---
 status: accepted
 date: 2026-07-09
+amended-by: [046]
+last-amended: 2026-07-10
 ---
 
 # 043. Cloud Speech Providers v1 — OpenAI-Compatible Client + xAI Grok STT

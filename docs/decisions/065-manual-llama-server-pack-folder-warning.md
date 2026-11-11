@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-09-06
+amended-by: [066]
 ---
 
 > **Amended by [ADR-066](066-drop-the-vestigial-llama-server-directory.md).**

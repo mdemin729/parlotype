@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-09-06
+amends: [026, 065]
 ---
 
 # 066. Drop the vestigial `LlamaServerDirectory`; the manual folder starts empty

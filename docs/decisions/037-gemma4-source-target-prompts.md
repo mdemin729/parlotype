@@ -1,6 +1,8 @@
 ---
 status: accepted
 date: 2026-06-27
+amends: [030, 034]
+last-amended: 2026-08-01
 ---
 
 # 037. Source & Target Languages in Gemma 4 Prompts

@@ -1,6 +1,8 @@
 ---
 status: accepted
 date: 2026-08-01
+amends: [004, 005, 007, 025, 031]
+amended-by: [058]
 ---
 
 # 053. Velopack packaging and auto-update

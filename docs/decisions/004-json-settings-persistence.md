@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-02-18
+amended-by: [046, 053]
 ---
 
 # 004. JSON Settings Persistence

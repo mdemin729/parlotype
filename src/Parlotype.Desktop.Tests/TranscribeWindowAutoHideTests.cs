@@ -117,7 +117,7 @@ public class TranscribeWindowAutoHideTests
     /// still queued when the test method returns and can fire during some
     /// later, unrelated test's own dispatcher pump instead — the exact
     /// "leftover work corrupts a later test" hazard class documented in
-    /// memory/knowledge/culture-changing-tests-need-avaloniafact.md, and the
+    /// docs/knowledge/culture-changing-tests-need-avaloniafact.md, and the
     /// mechanism that made the full <c>Parlotype.Desktop.Tests</c> run hang
     /// under real machine contention despite every test disposing its own
     /// controller and closing its own window.

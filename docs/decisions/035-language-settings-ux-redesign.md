@@ -1,6 +1,7 @@
 ---
-status: superseded by ADR-036
+status: superseded
 date: 2026-05-31
+superseded-by: [036]
 ---
 
 # 035. Language Settings UX Redesign

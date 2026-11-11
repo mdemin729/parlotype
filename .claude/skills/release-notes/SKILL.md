@@ -15,7 +15,8 @@ before it starts.
 
 ## Before You Start
 
-- Read `docs/RELEASING.md` — you are producing step 1 of *Cutting a release*.
+- Read `docs/RELEASING.md` — you are producing step 3 of *Cutting a release*
+  (the notes are written and merged before the tag).
 - Read the last two entries in `CHANGELOG.md` for voice and level of detail.
 - The user picks the version number. Ask if it was not given; do not infer it
   from the changes.
@@ -31,11 +32,11 @@ Everything in that range is a candidate. Nothing outside it is.
 
 ## 2. Gather evidence
 
-Commit subjects alone are not enough. About a fifth of them are squash-merged PR
+Commit subjects alone are not enough. About a third of them are squash-merged PR
 titles with no conventional-commit prefix, and those are usually the *most*
 significant changes in the release — `Velopack packaging, auto-update, and app
-data management (ADR-053) (#11)` and `Drop CUDA for Vulkan-only Whisper (#7)`
-both look like noise next to a tidy `fix(desktop):` line.
+data management (ADR-053) (#11)` and `Drop CUDA for Vulkan-only Whisper, and cut
+the release artifact 731 MB → 278 MB (#7)` both look like noise next to a tidy `fix(desktop):` line.
 
 ```bash
 git log --format='===== %s%n%b' <prev>..HEAD    # full bodies, where the detail is
@@ -63,9 +64,9 @@ Squash commits also carry `(#N)`. Pull the PR if the commit body is thin.
 - Privacy and security posture (what is logged, what is verified, what leaves
   the machine)
 
-**Internal** — real work, but invisible from outside: tests, `memory/` vault,
-`plans/`, refactors, benchmark harness, CI, docs, dependency bumps with no
-behavioural effect.
+**Internal** — real work, but invisible from outside: tests, agent and developer
+docs (`AGENTS.md`, `docs/`, skills), `plans/`, refactors, benchmark harness, CI,
+dependency bumps with no behavioural effect.
 
 Every user-facing change gets a bullet. Internal work goes in the collapsed
 **Under the hood** block or nowhere.

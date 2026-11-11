@@ -19,7 +19,8 @@ hardcode a language list anywhere else.
 > `Strings.<culture>.resx`, then regenerating `Strings.cs`.
 
 `pwsh scripts/check-localization.ps1` enforces it, `LocalizationParityTests` enforces it in
-CI, and a `Stop` hook blocks a session that ends with it broken.
+`dotnet test`, and the hooks in `.claude/settings.json` run the same check after every edit
+(`PostToolUse`) and block a session that ends with it broken (`Stop`).
 
 A **typo'd key is silent** — `{loc:Tr Setings_Theme_Title}` compiles, does not throw, and
 renders the raw key name in the window. The check catches it; nothing else does.
@@ -68,7 +69,7 @@ over 25 characters left verbatim in English.
    `-Missing` emits only the keys that locale lacks and `-Merge` applies only what you hand
    it, so a one-string change is one small brief per language rather than a full pass.
 
-   **Read `plans/2026-09-17-twenty-five-ui-languages/glossary-<culture>.md` first.** It
+   **Read `docs/localization/glossaries/glossary-<culture>.md` first.** It
    records the term, register, formality and typography that language already committed
    to. A new string that contradicts its own file is worse than a clumsy one.
 5. **Verify:** `pwsh scripts/check-localization.ps1`.
@@ -237,6 +238,10 @@ Leave these in English — they are developer- or protocol-facing, or they are i
   Translate a word inside those braces and prompt substitution breaks silently — it is not
   a numbered placeholder and not a wholly untranslated string, so for a while nothing
   looked at it. `import-translations.ps1` now rejects a named-token mismatch outright.
+- **dates, numbers and sort order.** Switching the interface language moves
+  `CultureInfo.CurrentUICulture` only; `CurrentCulture` keeps following the user's Windows
+  regional settings (`Localizer.SetCulture`). Format with the current culture as usual and
+  do not "fix" this by setting `CurrentCulture` too.
 
 ### Some strings are legitimately identical to English
 
@@ -373,7 +378,7 @@ automated guard:
   translation twice the length of the English is a bug, not a style. Keys ending `_Title`,
   `_Button` and `_Tooltip` are the tight ones; `_Body` has room.
 - Keep one term per concept across the whole file, and take it from that language's
-  `glossary-<culture>.md` in `plans/2026-09-17-twenty-five-ui-languages/`. Extend the
+  `glossary-<culture>.md` in `docs/localization/glossaries/`. Extend the
   glossary rather than improvising a synonym.
 - Never translate an identifier the user sees verbatim elsewhere (`Parakeet TDT v3`,
   `Vulkan`, `settings.json`, `Esc`). **Declension is not translation.** Finnish and
@@ -404,7 +409,7 @@ automated guard:
 
 ```bash
 pwsh scripts/export-translation-brief.ps1 -Culture de -Out $SCRATCH/de.brief.json
-# one translator does all 389 keys and writes glossary-de.md first
+# one translator does every key and writes glossary-de.md first
 pwsh scripts/import-translations.ps1 -Culture de -In $SCRATCH/de.json
 ```
 
@@ -439,13 +444,18 @@ leaked and that is the bug to fix.
 
 One translator per language, never several sharing the file: terminology splits along
 whatever line you split the work on. Hand them
-`plans/2026-09-17-twenty-five-ui-languages/brief.md` (the do-not-translate register and the
+`docs/localization/brief.md` (the do-not-translate register and the
 core glossary) and require `glossary-<culture>.md` back, written **before** the
 translation, fixing the term for each core concept, the formality register and the
 quotation convention. That file is what makes the next string in that language consistent
-with the last 389.
+with every string before it.
 
-**A translator has an output-token ceiling, and 389 values in one reply can exceed it.**
+The rest of the translator material sits beside the brief in `docs/localization/`:
+`terminology.md` (the original ru/es term sheet), `research.md` (culture codes, endonyms,
+case-marking findings) and `outstanding.md` (open review items and ideas deliberately
+dropped). Read `outstanding.md` before starting new localization work.
+
+**A translator has an output-token ceiling, and the full set of values (several hundred) in one reply can exceed it.**
 Finnish did, and the agent died before writing a single byte. Slice the *brief*, not the
 work:
 

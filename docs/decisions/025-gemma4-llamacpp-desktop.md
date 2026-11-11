@@ -1,8 +1,12 @@
-# ADR-025: Gemma 4 via llama.cpp Sidecar in Desktop
+---
+status: accepted
+date: 2026-05-09
+supersedes: [024]
+amended-by: [026, 027, 053]
+deciders: [Maksim]
+---
 
-- **Status:** Accepted
-- **Date:** 2026-05-09
-- **Deciders:** Maksim
+# 025. Gemma 4 via llama.cpp Sidecar in Desktop
 
 ## Context
 
