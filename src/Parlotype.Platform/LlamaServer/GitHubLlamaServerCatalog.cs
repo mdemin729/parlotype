@@ -23,6 +23,20 @@ public sealed class GitHubLlamaServerCatalog : ILlamaServerCatalog
     internal const string CacheDirName = ".cache";
     internal const string CacheFileName = "releases.json";
 
+    /// <summary>
+    /// Version of the rules that turn a GitHub response into the cached list.
+    /// Bump it whenever those rules change which releases or assets are kept.
+    /// </summary>
+    /// <remarks>
+    /// The cache stores the <em>parsed</em> list next to the response's ETag, so
+    /// a list produced by older rules would otherwise be confirmed forever: the
+    /// conditional GET answers 304 for as long as upstream is unchanged, and the
+    /// stale list is served again. That is how an empty catalog outlived the
+    /// build that produced it. A cache written under another version is ignored
+    /// and fetched afresh.
+    /// </remarks>
+    internal const int CacheVersion = 2;
+
     private static readonly TimeSpan DefaultCacheTtl = TimeSpan.FromHours(1);
 
     private static readonly string DefaultUserAgent =
@@ -158,7 +172,13 @@ public sealed class GitHubLlamaServerCatalog : ILlamaServerCatalog
 
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
             var releases = ParseGitHubBody(body);
+            if (releases.Count == 0)
+                _logger.LogWarning(
+                    "The llama.cpp release list contained no installable build. " +
+                    "Upstream may have changed how it publishes releases.");
+
             var newCache = new CacheFileDto(
+                Version: CacheVersion,
                 FetchedAt: now,
                 ETag: FormatETag(response.Headers.ETag),
                 Releases: releases);
@@ -196,7 +216,13 @@ public sealed class GitHubLlamaServerCatalog : ILlamaServerCatalog
         var groups = new List<CachedReleaseGroupDto>();
         foreach (var release in releases)
         {
-            if (release.Draft || release.Prerelease)
+            // Drafts are unpublished. Pre-releases are NOT skipped: since late
+            // 2026 llama.cpp marks every b{N} build as a pre-release ("nightly")
+            // and keeps the non-pre-release slot for v{X.Y.Z} releases, which
+            // carry no binaries, only a nightly-tag.txt naming a build. Skipping
+            // pre-releases therefore skips every installable asset upstream
+            // publishes. A release with nothing we can install drops out below.
+            if (release.Draft)
                 continue;
             if (string.IsNullOrWhiteSpace(release.TagName))
                 continue;
@@ -279,6 +305,13 @@ public sealed class GitHubLlamaServerCatalog : ILlamaServerCatalog
             var cache = JsonSerializer.Deserialize<CacheFileDto>(json, CacheJsonOptions);
             if (cache?.Releases is null)
                 return null;
+            if (cache.Version != CacheVersion)
+            {
+                _logger.LogInformation(
+                    "Ignoring llama.cpp catalog cache written by parser version {Found} (current: {Current}).",
+                    cache.Version, CacheVersion);
+                return null;
+            }
             return cache;
         }
         catch (Exception ex)
@@ -336,6 +369,7 @@ public sealed class GitHubLlamaServerCatalog : ILlamaServerCatalog
     };
 
     internal sealed record CacheFileDto(
+        int Version,
         DateTimeOffset FetchedAt,
         string? ETag,
         List<CachedReleaseGroupDto> Releases);

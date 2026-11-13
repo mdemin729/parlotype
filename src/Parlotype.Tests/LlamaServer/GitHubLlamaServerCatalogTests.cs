@@ -51,9 +51,10 @@ public sealed class GitHubLlamaServerCatalogTests : IDisposable
         var groups = await catalog.FetchAsync(forceRefresh: false);
 
         Assert.Single(handler.Requests);
-        Assert.Equal(2, groups.Count); // b9198 + b9197; draft + prerelease excluded
+        Assert.Equal(3, groups.Count); // b9198 + b9197 + the pre-release; the draft is excluded
         Assert.Equal("b9198", groups[0].Build);
         Assert.Equal("b9197", groups[1].Build);
+        Assert.Equal("b9195-rc1", groups[2].Build);
     }
 
     [Fact]
@@ -277,7 +278,7 @@ public sealed class GitHubLlamaServerCatalogTests : IDisposable
         var groups = await second.FetchAsync(forceRefresh: false);
 
         Assert.Empty(handler2.Requests);
-        Assert.Equal(2, groups.Count);
+        Assert.Equal(3, groups.Count);
     }
 
     [Fact]
@@ -310,7 +311,7 @@ public sealed class GitHubLlamaServerCatalogTests : IDisposable
     }
 
     [Fact]
-    public async Task DraftAndPrerelease_Excluded()
+    public async Task Drafts_AreExcluded_Prereleases_AreNot()
     {
         var handler = new ScriptedHandler();
         handler.EnqueueOk(_fixtureBody);
@@ -319,7 +320,132 @@ public sealed class GitHubLlamaServerCatalogTests : IDisposable
         var groups = await catalog.FetchAsync(forceRefresh: false);
 
         Assert.DoesNotContain(groups, g => g.Build.Contains("draft"));
-        Assert.DoesNotContain(groups, g => g.Build.Contains("rc"));
+        Assert.Contains(groups, g => g.Build.Contains("rc"));
+    }
+
+    // --- The release scheme llama.cpp switched to in late 2026 ---
+    //
+    // Recorded 2026-11-13 from the live API and trimmed to three releases: the
+    // non-pre-release "v1.0.0", which carries only nightly-tag.txt, and two b{N}
+    // builds, both flagged prerelease. Under the old "skip pre-releases" rule
+    // this response parsed to an empty catalog, which is what users saw.
+
+    private static string ReadNovember2026Fixture() => File.ReadAllText(Path.Combine(
+        AppContext.BaseDirectory, "Fixtures", "llama-cpp-releases-2026-11.json"));
+
+    [Fact]
+    public async Task PrereleaseBuilds_AreListed_AndTheBinarylessStableReleaseIsNot()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture());
+
+        var catalog = NewCatalog(handler);
+        var groups = await catalog.FetchAsync(forceRefresh: false);
+
+        Assert.Equal(["b12360", "b12359"], groups.Select(g => g.Build));
+    }
+
+    [Fact]
+    public async Task PrereleaseBuild_OffersTheWindowsX64Variants_WithCudaCompanions()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture());
+
+        var catalog = NewCatalog(handler);
+        var groups = await catalog.FetchAsync(forceRefresh: false);
+
+        var variants = groups.Single(g => g.Build == "b12360").Variants;
+        Assert.Equal(
+            [
+                "llama-b12360-bin-win-cpu-x64.zip",
+                "llama-b12360-bin-win-cuda-12.4-x64.zip",
+                "llama-b12360-bin-win-cuda-13.5-x64.zip",
+                "llama-b12360-bin-win-rocm-10.0-x64.zip",
+                "llama-b12360-bin-win-sycl-x64.zip",
+                "llama-b12360-bin-win-vulkan-x64.zip",
+            ],
+            variants.Select(v => v.AssetName).Order());
+
+        var cuda13 = variants.Single(v => v.Backend == LlamaServerBackend.Cuda13);
+        Assert.Equal("cudart-llama-bin-win-cuda-13.5-x64.zip", cuda13.CompanionAssetName);
+        Assert.Equal(64, cuda13.Sha256?.Length);
+
+        // The AMD build was renamed from hip-radeon to rocm-{version}.
+        Assert.Equal(LlamaServerBackend.Hip, variants.Single(v => v.AssetName.Contains("rocm")).Backend);
+        Assert.Null(variants.Single(v => v.Backend == LlamaServerBackend.Cpu).CompanionAssetName);
+    }
+
+    [Fact]
+    public async Task PrereleaseBuild_OnWindowsArm64_PairsTheArm64CudaCompanion()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture());
+
+        var catalog = NewCatalog(handler, LlamaServerOs.Windows, LlamaServerArch.Arm64);
+        var groups = await catalog.FetchAsync(forceRefresh: false);
+
+        var cuda = groups[0].Variants.Single(v => v.Backend == LlamaServerBackend.Cuda13);
+        Assert.Equal("llama-b12360-bin-win-cuda-13.5-arm64.zip", cuda.AssetName);
+        Assert.Equal("cudart-llama-bin-win-cuda-13.5-arm64.zip", cuda.CompanionAssetName);
+    }
+
+    // --- Cache versioning ---
+
+    private void WriteCacheFile(string json)
+    {
+        var dir = Path.Combine(_root, GitHubLlamaServerCatalog.CacheDirName);
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, GitHubLlamaServerCatalog.CacheFileName), json);
+    }
+
+    /// <summary>
+    /// The cache holds the parsed list beside the response's ETag. A list written
+    /// by older parsing rules must not be revalidated: upstream would answer 304
+    /// and the stale list (here the empty one the pre-release filter produced)
+    /// would be served again, indefinitely.
+    /// </summary>
+    [Fact]
+    public async Task CacheFromAnOlderParser_IsIgnored_EvenWithinItsTtl()
+    {
+        // What the previous build left on disk: no version field, no releases.
+        WriteCacheFile($$"""
+            {
+              "fetchedAt": "{{_now.AddMinutes(-5):O}}",
+              "eTag": "W/\"old\"",
+              "releases": []
+            }
+            """);
+        var handler = new ScriptedHandler();
+        handler.Enqueue(req =>
+        {
+            Assert.False(req.Headers.Contains("If-None-Match"));
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(ReadNovember2026Fixture()),
+            };
+        });
+
+        var catalog = NewCatalog(handler);
+        var groups = await catalog.FetchAsync(forceRefresh: false);
+
+        Assert.Single(handler.Requests);
+        Assert.Equal(2, groups.Count);
+    }
+
+    [Fact]
+    public async Task CacheIsWrittenWithTheCurrentParserVersion()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(_fixtureBody, etag: "W/\"v1\"");
+
+        await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        var path = Path.Combine(
+            _root, GitHubLlamaServerCatalog.CacheDirName, GitHubLlamaServerCatalog.CacheFileName);
+        using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+        Assert.Equal(
+            GitHubLlamaServerCatalog.CacheVersion,
+            doc.RootElement.GetProperty("version").GetInt32());
     }
 
     private sealed class ScriptedHandler : HttpMessageHandler
