@@ -39,14 +39,14 @@ dependency on speech. Both consumers use them unchanged.
 
 | Component | Project | Responsibility |
 |-----------|---------|----------------|
-| `ILlamaServerCatalog` / `GitHubLlamaServerCatalog` | Core / Platform | Fetches release groups from GitHub, parses asset names, pairs CUDA-Windows variants with their cudart companion, filters to current OS/arch, caches result + ETag on disk for 1 h. |
+| `ILlamaServerCatalog` / `GitHubLlamaServerCatalog` | Core / Platform | Fetches release groups from GitHub, parses asset names, pairs CUDA-Windows variants with their cudart companion, filters to current OS/arch, caches result + ETag on disk for 1 h. Lists the build upstream's newest versioned release names first, marked with that version (ADR-074). |
 | `ILlamaServerRegistry` / `JsonLlamaServerRegistry` | Core / Platform | Reads/writes `manifest.json` (managed installs). Resolves the active install by reading `LlamaCppActiveInstall` from `ISettingsService`. Manual mode returns a synthetic install pointing at `LlamaCppServerFolder`. |
 | `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. |
 | `LlamaCppServerInfo` | Platform | Pure probe helper. Hits `/health` then `/props` to classify a port as `Connected`, `Loading`, `Disconnected`, `PortConflict`, or `Error`. Moved to `Parlotype.Platform.LlamaServer` in ADR-027. |
 | `ILlamaCppServerLifecycle` / `CompositeLlamaServerLifecycle` | Core / Platform | Stops running sidecars so the installer can replace their files. Each consumer implements the interface for its own process; DI hands the installer a composite over both (ADR-073). |
 | `LlamaServerPathResolver` | Platform | The one rule for which `llama-server.exe` to launch: a managed active install, else the manual folder, else none. Used by both consumers. |
 | `LlamaServerProcess` | Platform | One spawned server: start with an argument list, poll `/health`, stop. Used by the cleanup consumer; the Gemma 4 recognizer predates it and keeps its own copy of this logic. |
-| `LlamaServerVariantPicker` | Core | Picks the newest CPU build from the catalog for features that install a server on the user's behalf. |
+| `LlamaServerVariantPicker` | Core | Picks a CPU build for features that install a server on the user's behalf: the released build's when the catalog marks one, otherwise the newest. |
 | `StreamingFileDownloader` | Platform (`Speech` namespace, shared) | HTTP → temp → atomic-move helper with SHA-256 verification. Used by the Whisper, Parakeet and Gemma 4 model download services and the installer. |
 | `LlamaServerInstallDialogService` | Desktop | UI wrapper around `LlamaServerInstaller`; opens the generalized `ModelDownloadDialog` and maps installer phase strings to friendly status text. |
 | `SettingsKeys.LlamaCppActiveInstall` / `LlamaCppServerFolder` / `LlamaCppPort` | Core | Persisted configuration for the server itself (workload-neutral). |
@@ -442,13 +442,13 @@ manual-folder option.
 
 | Component | Project | Responsibility |
 |-----------|---------|----------------|
-| `ILlamaServerCatalog` / `GitHubLlamaServerCatalog` | Core / Platform | Fetches `https://api.github.com/repos/ggml-org/llama.cpp/releases`, parses asset names via `LlamaServerAssetParser`, pairs CUDA-Windows variants with their matching `cudart-llama-bin-win-cuda-*.zip` companion, filters to the current OS/arch, caches result + ETag on disk for 1 h. |
+| `ILlamaServerCatalog` / `GitHubLlamaServerCatalog` | Core / Platform | Fetches `https://api.github.com/repos/ggml-org/llama.cpp/releases` and the release upstream currently names (see [Catalog request semantics](#catalog-request-semantics)), parses asset names via `LlamaServerAssetParser`, pairs CUDA-Windows variants with their matching `cudart-llama-bin-win-cuda-*.zip` companion, filters to the current OS/arch, caches result + ETag on disk for 1 h. |
 | `ILlamaServerRegistry` / `JsonLlamaServerRegistry` | Core / Platform | Read/write `manifest.json` (list of managed installs). Resolves the active install by reading `LlamaCppActiveInstall` from `ISettingsService` and looking up the matching entry. Manual mode returns a synthetic install pointing at `LlamaCppServerFolder`. |
 | `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. Uninstall stops the active sidecar via `ILlamaCppServerLifecycle` before deleting the folder. |
 | `StreamingFileDownloader` | Platform | Shared HTTP → temp-file → atomic-rename helper. Reused by the model download services and the installer. |
 | `ILlamaCppServerLifecycle` | Core | Implemented by both consumers and composed by `CompositeLlamaServerLifecycle`. Each `StopForReplacementAsync` delegates to that consumer's `UnloadAsync`, so the installer releases every Windows file lock on `llama-server.exe` before deleting it. |
 | `LlamaServerInstallDialogService` | Desktop | Implements `ILlamaServerInstaller`; opens the generalized `ModelDownloadDialog` and maps the installer's phase strings (`downloading`, `downloading-companion`, `verifying`, `extracting`, `finalizing`) to friendly status text. Registered in `App.axaml.cs` as an override of the Platform default. |
-| `LlamaCppSettingsViewModel` / `LlamaCppSettingsView` | Desktop | Sections: Active server, Update banner, Installed (RadioButton + Uninstall per row), Manual install (distinct background + "Not managed by Parlotype" badge), Available builds, port + Save/Reset. |
+| `LlamaCppSettingsViewModel` / `LlamaCppSettingsView` | Desktop | Sections: Active server, Update banner, Installed (RadioButton + Uninstall per row), Manual install (distinct background + "Not managed by Parlotype" badge), Available builds, port + Save/Reset. The released build's rows carry upstream's version as a badge, and the banner shows when every installed build is older than the released build; with no released build known it compares against the newest build by tag. |
 
 ### Install flow (success path)
 
@@ -477,7 +477,7 @@ flowchart TD
    .staging\{guid}\               # in-progress install (deleted in finally)
       payload\                    # extracted contents; renamed into place on success
       main.zip / companion.zip    # downloaded archives
-   .cache\releases.json           # GitHub catalog cache: { version, fetchedAt, etag, releases[] }
+   .cache\releases.json           # GitHub catalog cache: { version, fetchedAt, etag, releases[], versionedRelease }
    manifest.json                  # source of truth (folder names not load-bearing)
    b9198-win-cuda-12.4-x64\       # managed install — id = build-os-backend-arch
       llama-server.exe
@@ -524,7 +524,10 @@ Corrupt-read recovery: the registry renames `manifest.json` to
 
 ### Catalog request semantics
 
-- **URL**: `https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=10`.
+- **URLs**: a refresh asks `https://api.github.com/repos/ggml-org/llama.cpp/releases?per_page=10`
+  for the ten newest builds, then `.../releases/latest` for upstream's newest
+  versioned release. A third request, `.../releases/tags/b{N}`, follows only
+  when that release names a build that is neither in the list nor cached.
 - **Headers**: `User-Agent: parlotype/{version}` (required by GitHub),
   `Accept: application/vnd.github+json`, `If-None-Match: {etag}` when a
   cache exists.
@@ -545,7 +548,22 @@ Corrupt-read recovery: the registry renames `manifest.json` to
   `GitHubLlamaServerCatalog.CacheVersion`. A cache written under another
   version is ignored rather than revalidated; otherwise a 304 would keep
   a list produced by older parsing rules alive indefinitely.
-- **Failure with cache**: returns stale snapshot, logs a warning.
+- **The released build** ([ADR-074](../decisions/074-prefer-llama-cpp-release-build.md)):
+  a versioned release (`v1.0.0`) has no binaries, only `nightly-tag.txt`
+  naming a build. The API returns that file's SHA-256 but not its content,
+  so the catalog takes every build tag in the release notes as a candidate
+  and accepts the one whose `sha256(tag + "\n")` equals the digest. That
+  build is returned first with `LlamaServerReleaseGroup.ReleaseVersion` set,
+  followed by the other builds newest first. Its assets are the list's while
+  the build is on the first page; after that they are fetched by tag once and
+  kept in the cache. `/releases/latest` has its own ETag in the cache.
+- **No released build**: when `/releases/latest` fails, has no verifiable
+  pointer, the build cannot be fetched or it has no asset for this machine,
+  the result is the newest builds with none marked. A failure keeps what was
+  known from the last successful refresh. These requests never fail the
+  catalog.
+- **Failure with cache**: returns stale snapshot, logs a warning, and skips
+  the other requests of that refresh.
 - **Failure without cache**: rethrows.
 - **Filtering**: applied at read time (`Project`) so a single cache
   works across users with different machines and across future phases
@@ -606,8 +624,8 @@ throws with the status code only, never the body. Requests time out after
 The Speech cleanup settings page turns the feature on with one switch. It
 downloads the model if missing, then makes sure a server is selected: the
 active install if its executable exists, else a managed install already on
-disk, else the newest CPU build from the catalog
-(`LlamaServerVariantPicker`). Selecting an install writes
+disk, else the CPU build of llama.cpp's current release, or the newest CPU
+build when the catalog marks no release (`LlamaServerVariantPicker`). Selecting an install writes
 `LlamaCppActiveInstall`, the same selector the Gemma 4 engine reads. The
 llama.cpp server page is shown in the navigation while cleanup is on, as
 well as while Gemma 4 is the engine.

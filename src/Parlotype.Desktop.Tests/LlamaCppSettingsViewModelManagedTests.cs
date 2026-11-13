@@ -325,6 +325,87 @@ public sealed class LlamaCppSettingsViewModelManagedTests : IDisposable
         Assert.False(vm.IsUpdateAvailable);
     }
 
+    // --- The released build (ADR-074): the catalog lists it first, marked with
+    //     upstream's version, ahead of newer nightly builds. ---
+
+    private static LlamaServerReleaseGroup[] ReleasedThenNightly(
+        LlamaServerVariant released, LlamaServerVariant nightly) =>
+    [
+        new LlamaServerReleaseGroup(released.Build, new[] { released }, "v1.0.0"),
+        new LlamaServerReleaseGroup(nightly.Build, new[] { nightly }),
+    ];
+
+    [AvaloniaFact]
+    public async Task ReleasedBuild_RowsCarryTheVersion_AndKeepItAfterAnInstall()
+    {
+        var released = SampleVariant(build: "b9100");
+        var nightly = SampleVariant(build: "b9198");
+        _catalog.SetGroups(ReleasedThenNightly(released, nightly));
+
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count >= 2);
+
+        Assert.Equal(["b9100", "b9198"], vm.Available.Select(r => r.Build));
+        Assert.Equal("v1.0.0", vm.Available[0].ReleaseVersion);
+        Assert.True(vm.Available[0].IsRelease);
+        Assert.Null(vm.Available[1].ReleaseVersion);
+        Assert.False(vm.Available[1].IsRelease);
+
+        // Installing rebuilds the rows; the mark must survive that.
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available[1]);
+
+        Assert.Equal("v1.0.0", vm.Available.Single(r => r.Build == "b9100").ReleaseVersion);
+        Assert.True(vm.Available.Single(r => r.Build == "b9198").IsAlreadyInstalled);
+    }
+
+    [AvaloniaFact]
+    public async Task Banner_AnnouncesTheReleasedBuild_WhenOnlyAnOlderBuildIsInstalled()
+    {
+        var older = SampleVariant(build: "b9000");
+        _catalog.SetGroups(new LlamaServerReleaseGroup("b9000", new[] { older }));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count > 0);
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available.Single());
+
+        _catalog.SetGroups(ReleasedThenNightly(SampleVariant(build: "b9100"), SampleVariant(build: "b9198")));
+        await vm.CheckForUpdatesCommand.ExecuteAsync(null);
+
+        Assert.Equal("b9100", vm.LatestAvailableBuild);
+        Assert.True(vm.IsUpdateAvailable);
+    }
+
+    [AvaloniaFact]
+    public async Task Banner_Hidden_WhenANewerNightlyThanTheReleaseIsInstalled()
+    {
+        // Offering b9100 to someone on b9198 would be a downgrade.
+        var released = SampleVariant(build: "b9100");
+        var nightly = SampleVariant(build: "b9198");
+        _catalog.SetGroups(ReleasedThenNightly(released, nightly));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count >= 2);
+
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available.Single(r => r.Build == "b9198"));
+        await vm.CheckForUpdatesCommand.ExecuteAsync(null);
+
+        Assert.Equal("b9100", vm.LatestAvailableBuild);
+        Assert.False(vm.IsUpdateAvailable);
+    }
+
+    [AvaloniaFact]
+    public async Task Banner_Hidden_WhenTheReleasedBuildIsInstalled()
+    {
+        var released = SampleVariant(build: "b9100");
+        var nightly = SampleVariant(build: "b9198");
+        _catalog.SetGroups(ReleasedThenNightly(released, nightly));
+        var vm = NewVm();
+        await WaitForAsync(() => vm.Available.Count >= 2);
+
+        await vm.InstallVariantCommand.ExecuteAsync(vm.Available.Single(r => r.Build == "b9100"));
+        await vm.CheckForUpdatesCommand.ExecuteAsync(null);
+
+        Assert.False(vm.IsUpdateAvailable);
+    }
+
     [AvaloniaFact]
     public async Task InstallingLatestVariant_ClearsBanner_EvenWhenOlderStillActive()
     {

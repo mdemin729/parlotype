@@ -222,6 +222,9 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
     [ObservableProperty]
     private string? _latestAvailableBuild;
 
+    /// <summary>True when <see cref="LatestAvailableBuild"/> is upstream's released build.</summary>
+    private bool _latestAvailableIsRelease;
+
     [ObservableProperty]
     private bool _isInstallInProgress;
 
@@ -618,7 +621,8 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
             foreach (var variant in group.Variants)
             {
                 var id = LlamaServerInstaller.BuildInstallId(variant);
-                rows.Add(new LlamaServerVariantRowVm(variant, alreadyInstalled: installedIds.Contains(id)));
+                rows.Add(new LlamaServerVariantRowVm(
+                    variant, alreadyInstalled: installedIds.Contains(id), group.ReleaseVersion));
             }
         }
 
@@ -635,8 +639,9 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         var installedIds = Installed.Select(i => i.Id).ToHashSet(StringComparer.Ordinal);
         var rebuilt = Available
             .Select(v => new LlamaServerVariantRowVm(
-                v.Variant, alreadyInstalled: installedIds.Contains(
-                    LlamaServerInstaller.BuildInstallId(v.Variant))))
+                v.Variant,
+                alreadyInstalled: installedIds.Contains(LlamaServerInstaller.BuildInstallId(v.Variant)),
+                v.ReleaseVersion))
             .ToList();
 
         await Dispatcher.UIThread.InvokeAsync(() =>
@@ -647,9 +652,15 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         });
     }
 
+    /// <summary>
+    /// The banner announces the build upstream released when the catalog knows
+    /// it (ADR-074), and otherwise the newest build, as it did before.
+    /// </summary>
     private void UpdateUpdateBanner(IReadOnlyList<LlamaServerReleaseGroup> groups)
     {
-        LatestAvailableBuild = groups.FirstOrDefault()?.Build;
+        var released = groups.FirstOrDefault(g => g.ReleaseVersion is not null);
+        _latestAvailableIsRelease = released is not null;
+        LatestAvailableBuild = (released ?? groups.FirstOrDefault())?.Build;
         RefreshUpdateAvailable();
     }
 
@@ -659,6 +670,18 @@ public partial class LlamaCppSettingsViewModel : SettingsSectionViewModelBase
         if (string.IsNullOrEmpty(latest))
         {
             IsUpdateAvailable = false;
+            return;
+        }
+
+        // The released build is usually older than the newest nightly, so an
+        // exact match is the wrong test: someone who installed a later nightly
+        // is not behind, and offering them the release would be a downgrade.
+        if (_latestAvailableIsRelease
+            && LlamaServerReleaseGroup.TryParseBuildNumber(latest, out var releasedNumber))
+        {
+            IsUpdateAvailable = !Installed.Any(i =>
+                LlamaServerReleaseGroup.TryParseBuildNumber(i.Build, out var installedNumber)
+                && installedNumber >= releasedNumber);
             return;
         }
 

@@ -301,6 +301,14 @@
                                 <StackPanel Grid.Column="0" Spacing="2">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                         <TextBlock Text="{Binding Build}" FontSize="13" FontWeight="SemiBold" />
+                                        <!-- Upstream's version tag on the build its newest
+                                             release names (ADR-074). Data, not copy. -->
+                                        <Border BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                                BorderThickness="1" CornerRadius="3" Padding="5,0"
+                                                IsVisible="{Binding IsRelease}">
+                                            <TextBlock Text="{Binding ReleaseVersion}"
+                                                       FontSize="11" FontWeight="SemiBold" />
+                                        </Border>
                                         <Border Background="{StaticResource ManagedAccentBrush}" CornerRadius="3"
                                                 Padding="5,1">
                                             <TextBlock Text="{Binding BackendDisplay}" Foreground="White"

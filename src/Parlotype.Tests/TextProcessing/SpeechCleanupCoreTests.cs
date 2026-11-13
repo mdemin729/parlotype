@@ -249,6 +249,52 @@ public sealed class SpeechCleanupCoreTests
     }
 
     [Fact]
+    public void PickCpuVariant_PrefersTheReleasedBuild_OverANewerOne()
+    {
+        // Wherever the catalog puts it: the mark decides, not the position.
+        IReadOnlyList<LlamaServerReleaseGroup> groups =
+        [
+            new("b200", [Variant("b200", LlamaServerBackend.Cpu)]),
+            new("b150", [Variant("b150", LlamaServerBackend.Vulkan), Variant("b150", LlamaServerBackend.Cpu)], "v1.0.0"),
+            new("b100", [Variant("b100", LlamaServerBackend.Cpu)]),
+        ];
+
+        var picked = LlamaServerVariantPicker.PickCpuVariant(groups);
+
+        Assert.Equal("b150", picked?.Build);
+        Assert.Equal(LlamaServerBackend.Cpu, picked?.Backend);
+    }
+
+    [Fact]
+    public void PickCpuVariant_FallsBackToTheNewestCpuBuild_WhenTheReleasedBuildHasNone()
+    {
+        IReadOnlyList<LlamaServerReleaseGroup> groups =
+        [
+            new("b150", [Variant("b150", LlamaServerBackend.Vulkan)], "v1.0.0"),
+            new("b200", [Variant("b200", LlamaServerBackend.Cpu)]),
+            new("b100", [Variant("b100", LlamaServerBackend.Cpu)]),
+        ];
+
+        Assert.Equal("b200", LlamaServerVariantPicker.PickCpuVariant(groups)?.Build);
+    }
+
+    [Theory]
+    [InlineData("b12359", true, 12359)]
+    [InlineData("b1", true, 1)]
+    [InlineData("b9195-rc1", false, 0)]
+    [InlineData("v1.0.0", false, 0)]
+    [InlineData("b", false, 0)]
+    [InlineData("b-5", false, 0)]
+    [InlineData("b99999999999", false, 0)]
+    [InlineData("", false, 0)]
+    [InlineData(null, false, 0)]
+    public void TryParseBuildNumber_ReadsOnlyPlainBuildTags(string? build, bool expected, int number)
+    {
+        Assert.Equal(expected, LlamaServerReleaseGroup.TryParseBuildNumber(build, out var parsed));
+        Assert.Equal(number, parsed);
+    }
+
+    [Fact]
     public void PickCpuVariant_ReturnsNull_WhenNoReleaseHasACpuBuild()
     {
         IReadOnlyList<LlamaServerReleaseGroup> groups =

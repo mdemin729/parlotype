@@ -1,6 +1,7 @@
 ---
-status: proposed
-date:
+status: accepted
+date: 2026-11-13
+amends: [026, 073]
 ---
 
 # 074. Prefer the llama.cpp build that upstream's versioned release names
@@ -79,7 +80,7 @@ release. All of them go to `api.github.com`; no file is downloaded to find the b
 - On the llama.cpp server page the released build's rows are at the top and carry a badge
   with the version (`v1.0.0`) beside the build number. The badge text is upstream's tag, so
   it needs no translation. A tooltip that explains it would be one new string in every
-  language; whether to add it is left to the owner.
+  language and is not added.
 - The "Update available" banner follows the released build: it shows when a released build
   is known and every installed build has a lower number. Today it compares against the
   newest nightly by exact tag, so it is on nearly all the time, and with the released build
@@ -146,5 +147,5 @@ api.github.com") stays true as written.
   the build, and `nightly-tag.txt` existing. Losing either falls back to today's behaviour,
   and a warning in the log is the only sign.
 - `ILlamaServerCatalog` no longer returns a strictly newest-first list; its contract says so.
-- Tests need a recorded `/releases/latest` answer and a `/releases/tags/b{N}` answer next to
-  the existing fixture, whose `v1.0.0` entry was trimmed of its notes.
+- Tests use a recorded `/releases/latest` answer and a `/releases/tags/b12359` answer next to
+  the existing list fixture.
