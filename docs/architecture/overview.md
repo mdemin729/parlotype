@@ -10,7 +10,7 @@ way, the threading and lifecycle rules, and the flows that cross subsystems.
 | [overview.md](overview.md) | Projects and dependency direction, speech engines, external processes, glossary |
 | [audio-pipeline.md](audio-pipeline.md) | Capture → VAD → recognizer → injection, the three-stage threading model, modes, shutdown and cancel |
 | [subsystems.md](subsystems.md) | Hotkeys, language and translation, Whisper runtime selection, Transcribe window lifetime, packaging, paths and updates, feedback, startup, single instance, development runs |
-| [llamacpp-subsystem.md](llamacpp-subsystem.md) | The managed `llama-server` sidecar used by Gemma 4 |
+| [llamacpp-subsystem.md](llamacpp-subsystem.md) | The managed `llama-server` sidecar used by Gemma 4 and by speech cleanup |
 
 Decisions are recorded as ADRs in [`../decisions/`](../decisions/); this folder links to
 them rather than repeating them. Dated research snapshots live in
@@ -98,8 +98,12 @@ Rules that hold across engines:
   (`secrets.json`, DPAPI-encrypted per value on Windows). A cloud engine with no key fails
   initialization with `CloudProviderNotConfiguredException`, which the record-start flow
   turns into a dialog with "Open settings".
-- **Text post-processing happens once, in the pipeline**, for every engine
-  (`TranscriptionTextProcessor` in `AudioPipelineService`), not inside recognizers.
+- **Text post-processing happens once, in the pipeline**, for every engine, not inside
+  recognizers. `AudioPipelineService` runs two steps in order: the opt-in speech cleanup
+  (`ISpeechCleanupService`, a local model that rewrites the transcript as clean written
+  text, [ADR-073](../decisions/073-speech-cleanup-s1-mini.md)), then
+  `TranscriptionTextProcessor` (punctuation stripping, profanity mask). Cleanup never blocks
+  a dictation: any failure pastes the raw text.
 - **Each engine has an utterance ceiling** (`SpeechEngineLimits`): the longest audio one
   recognizer call may receive. For Parakeet it is a correctness limit, not a cost one. See
   [audio-pipeline.md](audio-pipeline.md#utterance-ceilings).
@@ -112,7 +116,7 @@ Rules that hold across engines:
 
 | Boundary | Purpose | Owner | ADR |
 |---|---|---|---|
-| `llama-server` (llama.cpp) | Gemma 4 inference, for the desktop app and the benchmark | `LlamaCppSpeechRecognizer` spawns or adopts it; installs are managed by the `LlamaServer` subsystem | [025](../decisions/025-gemma4-llamacpp-desktop.md), [026](../decisions/026-managed-llama-server-install.md), [027](../decisions/027-llamaserver-namespace-rescope.md) |
+| `llama-server` (llama.cpp) | Gemma 4 inference, for the desktop app and the benchmark; speech cleanup (S1-mini) in the desktop app | `LlamaCppSpeechRecognizer` spawns or adopts one for Gemma 4; `LlamaServerSpeechCleanupService` spawns its own for cleanup. Installs are managed by the `LlamaServer` subsystem | [025](../decisions/025-gemma4-llamacpp-desktop.md), [026](../decisions/026-managed-llama-server-install.md), [027](../decisions/027-llamaserver-namespace-rescope.md), [073](../decisions/073-speech-cleanup-s1-mini.md) |
 | whisper.cpp natives (Whisper.net) | Whisper inference, Vulkan or CPU | `WhisperSpeechRecognizer`, `WhisperRuntimeBootstrap` | [022](../decisions/022-vulkan-gpu-acceleration.md), [048](../decisions/048-whisper-runtime-latch-and-factory-lifetime.md), [049](../decisions/049-drop-whisper-cuda-runtime.md) |
 | sherpa-onnx natives | Parakeet inference | `ParakeetSpeechRecognizer` | [041](../decisions/041-parakeet-v3-sherpa-onnx.md) |
 | ONNX Runtime (via `SileroVad`) | Voice activity detection | `SileroVadService` | [008](../decisions/008-incremental-vad-processing.md), [050](../decisions/050-drop-onnx-runtime-gpu-providers.md) |
@@ -141,7 +145,8 @@ to load only in an installed build, suspect those filters first.
 | **Runtime preference** | Whisper backend choice: `Auto`, `Vulkan` or `Cpu`. `Vulkan` and `Cpu` are strict ([ADR-022](../decisions/022-vulkan-gpu-acceleration.md), [ADR-048](../decisions/048-whisper-runtime-latch-and-factory-lifetime.md), [ADR-049](../decisions/049-drop-whisper-cuda-runtime.md)). |
 | **Translation form** | What translation an engine offers: `Full` (any target, Gemma 4), `Toggle` (one fixed target, Whisper to English) or `None`. |
 | **BYOK** | Bring your own key: cloud engines use the user's own API key. |
-| **Sidecar** | The `llama-server` child process that serves Gemma 4 on `127.0.0.1`. |
+| **Sidecar** | A `llama-server` child process on `127.0.0.1`: one serves Gemma 4, another serves the speech cleanup model. |
+| **Speech cleanup** | The opt-in pass that rewrites recognized text as clean written text with a local model before it is pasted ([ADR-073](../decisions/073-speech-cleanup-s1-mini.md)). |
 | **Pack folder** | `%LOCALAPPDATA%\Parlotype`, owned by Velopack and deleted on uninstall. Nothing user-owned may live there ([ADR-053](../decisions/053-velopack-packaging-and-auto-update.md)). |
 | **GGML / GGUF** | Model file formats for whisper.cpp and llama.cpp. |
 | **WER / CER / RTF** | Benchmark metrics: word and character error rate, real-time factor. |

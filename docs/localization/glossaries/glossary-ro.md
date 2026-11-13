@@ -209,3 +209,7 @@ Win) are all treated as invariant borrowed tokens, never needing gender agreemen
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Ține apăsat Ctrl dreapta`.**
 
 Side unchanged. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `„{0}” este deja alocat pentru {1}.`
+
+## Speech cleanup (2026-11-13)
+
+- Speech cleanup (Settings page, `Settings_SpeechCleanup_*`) → **Curățarea dictării** — built on the established *dictare*; *curățare* means tidying, never deleting. Toggle: *Curățarea dictării activată / dezactivată*. Writing style → **Stil de scriere** (Relaxat / Semirelaxat / Semiformal / Formal); English contractions → **forme contrase**.

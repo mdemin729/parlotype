@@ -296,6 +296,7 @@ translated value over 25 characters is byte-identical to the English source.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Privzeto (dobesedni prepis)"** — verbatim/word-for-word rendered as *dobesedni (literal)*, paired with the already-established *prepis* for transcription; no new terms introduced.
+- Speech cleanup (`Settings_SpeechCleanup_*`, the local S1-mini rewrite of dictated text) → **urejanje nareka** (nav title "Urejanje nareka", toggles "… vklopljeno/izklopljeno"). Not *čiščenje* (reads as deleting) and not *prepis* (reserved for transcription). "Writing style" → **slog pisanja**; the four styles agree with *slog*: Neformalen, Delno neformalen, Delno formalen, Formalen. Apostrophe → **opuščaj**; English contractions → **skrajšane oblike**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

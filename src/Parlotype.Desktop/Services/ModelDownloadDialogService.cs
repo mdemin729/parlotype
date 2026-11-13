@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.Speech;
+using Parlotype.Desktop.Resources;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.Views;
 using Parlotype.Platform.Speech;
@@ -71,7 +72,7 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
             downloadButton.Click += async (_, _) =>
             {
                 viewModel.IsDownloading = true;
-                viewModel.StatusText = $"Downloading \"{modelInfo.DisplayName}\"...";
+                viewModel.StatusText = Strings.Format_ModelDownload_DownloadingFormat(modelInfo.DisplayName);
 
                 var progress = new Progress<ModelDownloadProgress>(p =>
                 {
@@ -90,7 +91,7 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
                     await _httpDownloader.DownloadModelAsync(modelType, progress, downloadCts.Token);
                     viewModel.IsDownloading = false;
                     viewModel.IsComplete = true;
-                    viewModel.StatusText = $"\"{modelInfo.DisplayName}\" downloaded successfully.";
+                    viewModel.StatusText = Strings.Format_ModelDownload_SucceededFormat(modelInfo.DisplayName);
                     _logger.LogInformation("Model {Model} downloaded successfully", modelType);
                 }
                 catch (OperationCanceledException)
@@ -102,7 +103,7 @@ public sealed class ModelDownloadDialogService : IModelDownloadService
                 {
                     _logger.LogError(ex, "Model download failed");
                     viewModel.IsDownloading = false;
-                    viewModel.StatusText = $"Download failed: {ex.Message}";
+                    viewModel.StatusText = Strings.Format_ModelDownload_FailedFormat(ex.Message);
                 }
             };
         }

@@ -94,6 +94,32 @@ public static class SettingsKeys
     public const string ActivePromptId = "ActivePromptId";
 
     /// <summary>
+    /// Opt-in toggle for speech cleanup (ADR-073): recognized text is rewritten
+    /// by a local model before it is pasted. Stored as a string bool; unset or
+    /// unparsable means off. Read through
+    /// <see cref="TextProcessing.SpeechCleanupSettings"/>, never directly.
+    /// </summary>
+    public const string SpeechCleanupEnabled = "SpeechCleanupEnabled";
+
+    /// <summary>
+    /// A <see cref="TextProcessing.CleanupStyling"/> name. Defaults to
+    /// <see cref="TextProcessing.CleanupStyling.SemiFormal"/>.
+    /// </summary>
+    public const string SpeechCleanupStyling = "SpeechCleanupStyling";
+
+    /// <summary>
+    /// A <see cref="TextProcessing.CleanupStructure"/> name. Defaults to
+    /// <see cref="TextProcessing.CleanupStructure.Prose"/>.
+    /// </summary>
+    public const string SpeechCleanupStructure = "SpeechCleanupStructure";
+
+    /// <summary>
+    /// A <see cref="TextProcessing.CleanupContext"/> name. Defaults to
+    /// <see cref="TextProcessing.CleanupContext.General"/>.
+    /// </summary>
+    public const string SpeechCleanupContext = "SpeechCleanupContext";
+
+    /// <summary>
     /// Base URL for the OpenAI-compatible cloud transcription provider
     /// (<see cref="Speech.SpeechEngine.OpenAiCompatible"/>, ADR-032). Defaults to
     /// <c>https://api.openai.com/v1</c> when unset; pointing this at another host

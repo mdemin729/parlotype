@@ -410,6 +410,24 @@ public static class Strings
     /// <summary>Download</summary>
     public static string ModelDownload_DownloadButton => Localizer.Lookup(nameof(ModelDownload_DownloadButton));
 
+    /// <summary>Downloading "{0}"…</summary>
+    public static string ModelDownload_DownloadingFormat => Localizer.Lookup(nameof(ModelDownload_DownloadingFormat));
+    /// <summary>Downloading "{0}"…</summary>
+    public static string Format_ModelDownload_DownloadingFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, ModelDownload_DownloadingFormat, arg0);
+
+    /// <summary>Download failed: {0}</summary>
+    public static string ModelDownload_FailedFormat => Localizer.Lookup(nameof(ModelDownload_FailedFormat));
+    /// <summary>Download failed: {0}</summary>
+    public static string Format_ModelDownload_FailedFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, ModelDownload_FailedFormat, arg0);
+
+    /// <summary>"{0}" downloaded successfully.</summary>
+    public static string ModelDownload_SucceededFormat => Localizer.Lookup(nameof(ModelDownload_SucceededFormat));
+    /// <summary>"{0}" downloaded successfully.</summary>
+    public static string Format_ModelDownload_SucceededFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, ModelDownload_SucceededFormat, arg0);
+
     /// <summary>Model Download</summary>
     public static string ModelDownload_Title => Localizer.Lookup(nameof(ModelDownload_Title));
 
@@ -884,7 +902,7 @@ public static class Strings
     /// <summary>+ CUDA runtime</summary>
     public static string Settings_LlamaCpp_CudaRuntimeBadge => Localizer.Lookup(nameof(Settings_LlamaCpp_CudaRuntimeBadge));
 
-    /// <summary>Browse, install, and manage llama-server builds. The active install powers Gemma 4 transcription.</summary>
+    /// <summary>Browse, install, and manage llama-server builds. The active install powers Gemma 4 transcription and speech cleanup.</summary>
     public static string Settings_LlamaCpp_Description => Localizer.Lookup(nameof(Settings_LlamaCpp_Description));
 
     /// <summary>Select llama-server folder</summary>
@@ -1195,6 +1213,78 @@ public static class Strings
     /// <summary>{0} ({1}s)</summary>
     public static string Format_Settings_SilenceTimeout_WaitFormat(object? arg0, object? arg1) =>
         string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_SilenceTimeout_WaitFormat, arg0, arg1);
+
+    /// <summary>Rewrites what you dictated as clean written text before it is pasted: filler words and false starts are removed, self...</summary>
+    public static string Settings_SpeechCleanup_Description => Localizer.Lookup(nameof(Settings_SpeechCleanup_Description));
+
+    /// <summary>Plain layout, no e-mail formatting</summary>
+    public static string Settings_SpeechCleanup_EmailOff => Localizer.Lookup(nameof(Settings_SpeechCleanup_EmailOff));
+
+    /// <summary>E-mail layout: greeting, body and sign-off on separate lines</summary>
+    public static string Settings_SpeechCleanup_EmailOn => Localizer.Lookup(nameof(Settings_SpeechCleanup_EmailOn));
+
+    /// <summary>Works with English only. Turn it off when you dictate in another language.</summary>
+    public static string Settings_SpeechCleanup_EnglishOnlyNote => Localizer.Lookup(nameof(Settings_SpeechCleanup_EnglishOnlyNote));
+
+    /// <summary>Spoken lists stay as sentences</summary>
+    public static string Settings_SpeechCleanup_ListsOff => Localizer.Lookup(nameof(Settings_SpeechCleanup_ListsOff));
+
+    /// <summary>Spoken lists become bullet points</summary>
+    public static string Settings_SpeechCleanup_ListsOn => Localizer.Lookup(nameof(Settings_SpeechCleanup_ListsOn));
+
+    /// <summary>Model</summary>
+    public static string Settings_SpeechCleanup_ModelHeading => Localizer.Lookup(nameof(Settings_SpeechCleanup_ModelHeading));
+
+    /// <summary>Not working: the model or the llama.cpp server is missing. Turn the switch off and on again to reinstall.</summary>
+    public static string Settings_SpeechCleanup_Status_Broken => Localizer.Lookup(nameof(Settings_SpeechCleanup_Status_Broken));
+
+    /// <summary>Turning this on downloads the model ({0}) and, if none is installed, a llama.cpp server. Each download asks first.</summary>
+    public static string Settings_SpeechCleanup_Status_NotSetUpFormat => Localizer.Lookup(nameof(Settings_SpeechCleanup_Status_NotSetUpFormat));
+    /// <summary>Turning this on downloads the model ({0}) and, if none is installed, a llama.cpp server. Each download asks first.</summary>
+    public static string Format_Settings_SpeechCleanup_Status_NotSetUpFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_SpeechCleanup_Status_NotSetUpFormat, arg0);
+
+    /// <summary>Ready: the model and a llama.cpp server are installed.</summary>
+    public static string Settings_SpeechCleanup_Status_Ready => Localizer.Lookup(nameof(Settings_SpeechCleanup_Status_Ready));
+
+    /// <summary>Setup did not finish, so speech cleanup stays off.</summary>
+    public static string Settings_SpeechCleanup_Status_SetupFailed => Localizer.Lookup(nameof(Settings_SpeechCleanup_Status_SetupFailed));
+
+    /// <summary>Casual</summary>
+    public static string Settings_SpeechCleanup_Style_Casual => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_Casual));
+
+    /// <summary>All lowercase, no apostrophes, wording kept as spoken.</summary>
+    public static string Settings_SpeechCleanup_Style_Casual_Description => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_Casual_Description));
+
+    /// <summary>Formal</summary>
+    public static string Settings_SpeechCleanup_Style_Formal => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_Formal));
+
+    /// <summary>Standard written English with contractions spelled out.</summary>
+    public static string Settings_SpeechCleanup_Style_Formal_Description => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_Formal_Description));
+
+    /// <summary>Semi-casual</summary>
+    public static string Settings_SpeechCleanup_Style_SemiCasual => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_SemiCasual));
+
+    /// <summary>Wording kept as spoken; apostrophes added and “I” capitalized.</summary>
+    public static string Settings_SpeechCleanup_Style_SemiCasual_Description => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_SemiCasual_Description));
+
+    /// <summary>Semi-formal</summary>
+    public static string Settings_SpeechCleanup_Style_SemiFormal => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_SemiFormal));
+
+    /// <summary>Standard written English. Contractions stay, slang is smoothed out. Recommended.</summary>
+    public static string Settings_SpeechCleanup_Style_SemiFormal_Description => Localizer.Lookup(nameof(Settings_SpeechCleanup_Style_SemiFormal_Description));
+
+    /// <summary>Writing style</summary>
+    public static string Settings_SpeechCleanup_StyleHeading => Localizer.Lookup(nameof(Settings_SpeechCleanup_StyleHeading));
+
+    /// <summary>Speech cleanup</summary>
+    public static string Settings_SpeechCleanup_Title => Localizer.Lookup(nameof(Settings_SpeechCleanup_Title));
+
+    /// <summary>Speech cleanup off</summary>
+    public static string Settings_SpeechCleanup_ToggleOff => Localizer.Lookup(nameof(Settings_SpeechCleanup_ToggleOff));
+
+    /// <summary>Speech cleanup on</summary>
+    public static string Settings_SpeechCleanup_ToggleOn => Localizer.Lookup(nameof(Settings_SpeechCleanup_ToggleOn));
 
     /// <summary>Open Task Manager, go to the Startup apps tab, select Parlotype and choose Enable. Windows keeps that decision separa...</summary>
     public static string Settings_Startup_BlockedBody => Localizer.Lookup(nameof(Settings_Startup_BlockedBody));

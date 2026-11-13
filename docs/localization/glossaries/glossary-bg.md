@@ -258,6 +258,7 @@ English word standing next to them.
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"По подразбиране (дословно транскрибиране)"** — verbatim/word-for-word rendered as *дословно (word-for-word)*, paired with the already-established *транскрибиране* for transcription; no new terms introduced.
 - **Fix:** `Settings_Hotkeys_Recorder_Idle` was in the formal 2pl imperative (`Запишете комбинация…`), breaking the button-label carve-out documented above — corrected to the 2sg imperative **`Запиши комбинация…`**, matching `Запази`/`Изтрий`/`Добави`/`Провери`.
+- `Settings_SpeechCleanup_Title` ("Speech cleanup") → **"Редактиране на текста"** — *редактиране* (editing) rather than *изчистване*, which reads as deleting data; used in every speech-cleanup string, including `Settings_LlamaCpp_Description`. "Writing style" → **"Стил на текста"**, styles as masculine adjectives agreeing with *стил*: Разговорен / Полуразговорен / Полуофициален / Официален. English "contractions" → *съкращения като „I'm“*; bullet points → *водещи символи* (the Office term).
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

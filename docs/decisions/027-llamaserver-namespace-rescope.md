@@ -2,6 +2,7 @@
 status: accepted
 date: 2026-05-18
 amends: [025]
+amended-by: [073]
 ---
 
 # 027. `LlamaServer` Namespace Rescope (Out of `Speech.*`)

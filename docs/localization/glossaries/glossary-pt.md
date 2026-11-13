@@ -148,6 +148,7 @@ translated from description rather than a screenshot.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predefinição (transcrição literal)"** — verbatim/word-for-word rendered as *literal*, paired with the already-established *transcrição* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`) → **polimento do ditado** (masc.: "Polimento do ditado ativado"); chosen over *limpeza*, which can read as deleting. **writing style** → **estilo de escrita**; the four styles are **Informal / Semi-informal / Semiformal / Formal** (AO90 hyphenation).
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

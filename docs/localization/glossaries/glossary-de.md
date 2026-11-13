@@ -176,3 +176,4 @@ English source byte-for-byte.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standard (wörtliche Transkription)"** — verbatim/word-for-word rendered as *wörtliche (literal/word-for-word)*, paired with the already-established *Transkription* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`, a local model rewriting dictated text as clean written English) → **"Textaufbereitung"** — not *Bereinigung*, which Windows uses for deleting data (*Datenträgerbereinigung*). **writing style** → **"Schreibstil"**; the four styles are *Locker / Eher locker / Eher formell / Formell*. English contractions → **Kurzformen**.

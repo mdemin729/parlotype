@@ -11,6 +11,9 @@ local mode audio never leaves the machine.
 - Local engines: **Parakeet TDT v3 via sherpa-onnx (default**, CPU-only, 25 European
   languages, always auto-detected, [ADR-041](docs/decisions/041-parakeet-v3-sherpa-onnx.md)/[042](docs/decisions/042-parakeet-default-language-ux.md)),
   Whisper.net (~99 languages, translate-to-English) and Gemma 4 via a managed `llama-server`.
+- Opt-in speech cleanup: after any engine, a local model (S1-mini via its own
+  `llama-server` process, English only) rewrites the recognized text before it is pasted.
+  Any failure pastes the raw text ([ADR-073](docs/decisions/073-speech-cleanup-s1-mini.md)).
 - Opt-in cloud engines: OpenAI-compatible and xAI Grok, bring-your-own-key, never the
   default, with a persistent Cloud badge while active ([ADR-032](docs/decisions/032-online-speech-providers-positioning.md), [ADR-043](docs/decisions/043-cloud-speech-providers-v1.md)).
   API keys go through `ISecretStore` (DPAPI), never into `settings.json`.

@@ -194,3 +194,7 @@ this was not machine-checked and is the area most worth a native-speaker pass.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Κράτημα δεξιού Ctrl`.**
 
 Side is now **genitive**, lowercase: `δεξιού {0}` / `αριστερού {0}`. "Κράτημα" and "Διπλό πάτημα" are nouns and govern the genitive; the earlier note that the neuter nominative agrees with an implied "πλήκτρο" was wrong for these frames. `Conflict_AlreadyBoundFormat` is now `Το «{0}» είναι ήδη συνδεδεμένο με {1}.` — the gesture starts with a capital and sat after the article.
+
+## Speech cleanup (2026-11-13)
+
+- Speech cleanup (Settings page, `Settings_SpeechCleanup_*`) → **Καθαρισμός υπαγόρευσης** (masculine; toggle *ενεργός / ανενεργός*) — built on the established *υπαγόρευση*. Writing style → **Ύφος γραφής** (neuter styles: Χαλαρό / Ημιχαλαρό / Ημιεπίσημο / Επίσημο); English contractions → **συντετμημένοι τύποι**.

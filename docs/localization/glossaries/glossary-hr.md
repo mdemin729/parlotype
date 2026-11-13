@@ -224,6 +224,7 @@ no translated value over 25 characters is byte-identical to the English source.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Zadano (doslovno prepisivanje)"** — verbatim/word-for-word rendered as *doslovno (word-for-word)*, paired with the already-established *prepisivanje* for transcription; no new terms introduced.
+- Speech cleanup (`Settings_SpeechCleanup_*`, the local S1-mini rewrite of dictated text) → **uređivanje diktata** (nav title "Uređivanje diktata", toggles "… uključeno/isključeno"). Not *čišćenje* (reads as deleting) and not *prepisivanje* (reserved for transcription). "Writing style" → **stil pisanja**; the four styles agree with *stil*: Neformalan, Poluneformalan, Poluformalan, Formalan. English contractions → **skraćeni oblici**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

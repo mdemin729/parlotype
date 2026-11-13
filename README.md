@@ -10,7 +10,7 @@ Parlotype is a **local-by-default** voice-to-text desktop application: on-device
 - **Avalonia UI 12** — Cross-platform desktop UI (tray-based)
 - **sherpa-onnx** (`org.k2fsa.sherpa.onnx`) — Parakeet TDT v3 speech recognition, in-process on CPU
 - **Whisper.net** — On-device speech recognition (OpenAI Whisper), Vulkan / CPU
-- **llama.cpp (`llama-server`)** — Gemma 4 speech recognition sidecar
+- **llama.cpp (`llama-server`)** — sidecar for Gemma 4 speech recognition and for speech cleanup (S1-mini)
 - **Silero VAD** — Voice activity detection
 - **NAudio** — Windows audio capture (WASAPI)
 - **CommunityToolkit.Mvvm** — MVVM framework
@@ -74,9 +74,10 @@ at all.
 Everything else follows something you do:
 
 - **Opening Settings** reads the list of llama.cpp server builds from `api.github.com`
-  (for the Gemma 4 engine), at most once an hour.
-- **Downloads you start or confirm**: speech models from `huggingface.co`, llama.cpp
-  servers from `github.com`.
+  (for the Gemma 4 engine and speech cleanup), at most once an hour.
+- **Downloads you start or confirm**: speech models and the speech cleanup model from
+  `huggingface.co`, llama.cpp servers from `github.com`. Turning speech cleanup on asks
+  before each one.
 - **Cloud engines**, when you select one, send each recording to the provider you set up.
 - **Send feedback** (tray menu, or Settings → Help) sends one HTTPS request to
   `parlotype.dev` when you press *Send*: your message, your email if you give one, and the
@@ -144,6 +145,29 @@ Both cloud engines are bring-your-own-key and configured under **Settings → Sp
 - **xAI Grok** — `POST {base URL}/stt`. Defaults to `https://api.x.ai/v1` with `grok-stt`.
 
 Both always auto-detect the language (Parlotype sends no language-forcing parameter) and are transcribe-only, so the Language UI hides while they are active. Base URLs must be HTTPS unless the host is loopback, which keeps LM Studio / llama.cpp self-hosting working. Failures surface as dialogs rather than silent no-ops: a missing or rejected key offers an **Open settings** deep link; quota, rate-limit, and provider-outage errors show an informational message and recording keeps running.
+
+## Speech Cleanup (opt-in)
+
+Recognizers type what you said, including the "um", the false start and "Friday, no wait,
+Thursday". **Settings → Speech engine → Speech cleanup** adds a pass that rewrites the
+recognized text as clean written text before it is pasted: fillers and false starts are
+removed, self-corrections are resolved, and numbers, dates and e-mail addresses are written
+out properly. It works after any engine, including the default CPU-only Parakeet.
+
+- **Local.** The work is done by **S1-mini by Superwhisper**, a 462 MB model built for this
+  one task, running in a `llama-server` process on your machine. No text leaves it.
+- **One switch.** Turning it on downloads the model and, if none is installed, a CPU build of
+  `llama-server`, asking before each. If you decline, it stays off.
+- **Fast.** On a desktop CPU a typical dictation is cleaned in 0.2–0.6 s
+  ([measurements](docs/research/2026-11-13-gemma4-engine-review/s1-mini-measurements.md)).
+- **Style options.** Four writing styles from casual to formal, optional bullet lists, and an
+  e-mail layout.
+- **English only.** Text in another alphabet is left untouched; for other languages written
+  in Latin letters, turn cleanup off.
+- **It never costs you the dictation.** If the model is unavailable, slow, or returns
+  something implausible, the text is pasted as recognized.
+
+See [ADR-073](docs/decisions/073-speech-cleanup-s1-mini.md).
 
 ## Languages & Translation
 
@@ -213,7 +237,7 @@ and uninstalls alike ([ADR-053](docs/decisions/053-velopack-packaging-and-auto-u
 | `settings.json` | User-configured settings (microphone, engine, model, hotkeys, languages, theme) |
 | `window-state.json` | Transient window chrome state (Transcribe widget position) |
 | `secrets.json` | Cloud API keys, DPAPI-encrypted on Windows |
-| `models\` | Downloaded Whisper / Parakeet / Gemma 4 model files |
+| `models\` | Downloaded Whisper / Parakeet / Gemma 4 model files and the speech cleanup model |
 | `llama-servers\` | Managed `llama-server` binaries (one subfolder per install) |
 | `logs\` | Rolling log files (`Information` and above; no transcript text), plus `velopack.log` for install/update events |
 

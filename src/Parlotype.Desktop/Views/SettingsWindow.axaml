@@ -48,6 +48,9 @@
         <DataTemplate DataType="vms:LlamaCppSettingsViewModel">
             <v:LlamaCppSettingsView />
         </DataTemplate>
+        <DataTemplate DataType="vms:SpeechCleanupSettingsViewModel">
+            <v:SpeechCleanupSettingsView />
+        </DataTemplate>
         <DataTemplate DataType="vms:HotkeySettingsViewModel">
             <v:HotkeySettingsView />
         </DataTemplate>

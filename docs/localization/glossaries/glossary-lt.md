@@ -199,6 +199,7 @@ Used real Lithuanian Windows 10/11 UI wording rather than literal translations f
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Numatytoji (pažodinė transkripcija)"** — verbatim/word-for-word rendered as *pažodinė (word-for-word)*, paired with the already-established *transkripcija* for transcription; no new terms introduced.
+- "Speech cleanup" (the local model that tidies dictated text) → **"teksto tvarkymas"** — *teksto*, not *kalbos*, because *kalbos* already means both "speech" and "language" here (`kalbos atpažinimas`) and "kalbos tvarkymas" would read as language editing; *tvarkymas* (tidying), not *valymas*, so it cannot read as deleting. Toggles follow `įjungtas` / `išjungtas`. "Writing style" → **rašymo stilius**; the four styles → *Laisvas*, *Pusiau laisvas*, *Pusiau formalus*, *Formalus*; English contractions → *sutrumpintos formos*.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

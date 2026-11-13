@@ -211,6 +211,7 @@ no translated value over 25 characters is byte-identical to the English source.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Výchozí (doslovný přepis)"** — verbatim/word-for-word rendered as *doslovný (literal)*, paired with the already-established *přepis* for transcription; no new terms introduced.
+- Speech cleanup (`Settings_SpeechCleanup_*`, the local S1-mini rewrite of dictated text) → **úprava diktátu** ("tidying of the dictated text"; nav title "Úprava diktátu", toggles "… zapnuta/vypnuta"). Not *čištění* (reads as deleting) and not *přepis* (reserved for transcription). "Writing style" → **styl psaní**; the four styles are soft adjectives agreeing with *styl*: Neformální, Spíše neformální, Spíše formální, Formální. English contractions → **stažené tvary**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

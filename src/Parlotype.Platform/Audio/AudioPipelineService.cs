@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Core.TextProcessing;
 using Parlotype.Platform.Speech;
 
 namespace Parlotype.Platform.Audio;
@@ -38,6 +39,9 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     private readonly IKeyboardLayoutService _keyboardLayout;
     private readonly IMicrophoneEnumerator _microphoneEnumerator;
     private readonly ILogger<AudioPipelineService> _logger;
+
+    /// <summary>Null in hosts that never clean text (the benchmark, most tests).</summary>
+    private readonly ISpeechCleanupService? _cleanup;
 
     private PipelineMode _mode;
 
@@ -124,6 +128,12 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     /// <summary>Post-processor for transcription text, built at pipeline start from settings.</summary>
     private TranscriptionTextProcessor? _textProcessor;
 
+    /// <summary>
+    /// Speech cleanup choices, cached at pipeline start (ADR-073). Null when the
+    /// feature is off or no cleanup service is registered.
+    /// </summary>
+    private SpeechCleanupOptions? _cleanupOptions;
+
     /// <summary>Whisper options built from settings, cached at pipeline start.</summary>
     private WhisperOptions? _whisperOptions;
 
@@ -153,8 +163,10 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         ISettingsService settings,
         IKeyboardLayoutService keyboardLayout,
         IMicrophoneEnumerator microphoneEnumerator,
-        ILogger<AudioPipelineService> logger)
+        ILogger<AudioPipelineService> logger,
+        ISpeechCleanupService? cleanup = null)
     {
+        _cleanup = cleanup;
         _capture = capture;
         _vad = vad;
         _recognizer = recognizer;
@@ -248,11 +260,37 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
             // disagreement a conservative one — a ceiling lower than this engine could
             // take — instead of handing Parakeet a Whisper-sized 300 s utterance.
             await CacheUtteranceCeilingAsync(cancellationToken);
+
+            WarmCleanupModel();
         }
         finally
         {
             _initLock.Release();
         }
+    }
+
+    /// <summary>
+    /// Starts loading the cleanup model without waiting for it, so it comes up
+    /// while the user is still speaking. A failure here is not the recording's
+    /// problem: it is logged, and <see cref="CleanOrKeepAsync"/> falls back to
+    /// the raw text if the model is still unavailable when it is needed.
+    /// </summary>
+    private void WarmCleanupModel()
+    {
+        if (_cleanupOptions is null || _cleanup is not { } cleanup)
+            return;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await cleanup.PrepareAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Speech cleanup model could not be started");
+            }
+        });
     }
 
     public Task StopAsync(CancellationToken cancellationToken = default) =>
@@ -755,6 +793,17 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                     continue;
                 }
 
+                // Cleanup first, the Whisper output options after it: stripping
+                // punctuation or masking profanity is the user's last word on the
+                // text, and the cleanup model would put the punctuation back.
+                result = result with { Text = await CleanOrKeepAsync(result.Text, cancellationToken) };
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogDebug("Cleanup finished after cancellation; discarding the result");
+                    continue;
+                }
+
                 if (_textProcessor is not null)
                     result = result with { Text = _textProcessor.Process(result.Text) };
 
@@ -786,6 +835,51 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                 // subscribers surface the failure to the user (ADR-043 amendment).
                 TranscriptionFailed?.Invoke(this, new TranscriptionErrorEventArgs { Exception = ex });
             }
+        }
+    }
+
+    /// <summary>
+    /// Runs the speech cleanup pass when it is on (ADR-073), and returns
+    /// <paramref name="text"/> untouched in every other case: the feature is off,
+    /// the text is not something the model handles, the model failed or timed
+    /// out, or what it returned is not a believable rewrite. Cleanup can cost the
+    /// user polish; it must never cost them the dictation.
+    /// </summary>
+    private async Task<string> CleanOrKeepAsync(string text, CancellationToken cancellationToken)
+    {
+        if (_cleanupOptions is not { } options || _cleanup is null)
+            return text;
+
+        if (!SpeechCleanupGate.ShouldClean(text))
+        {
+            _logger.LogDebug("Speech cleanup skipped: {Length} chars not eligible", text.Length);
+            return text;
+        }
+
+        try
+        {
+            var cleaned = await _cleanup.CleanAsync(text, options, cancellationToken);
+            if (!SpeechCleanupGate.IsPlausibleResult(text, cleaned))
+            {
+                _logger.LogWarning(
+                    "Speech cleanup result rejected: {RawLength} chars became {CleanLength}; keeping the raw text",
+                    text.Length, cleaned.Length);
+                return text;
+            }
+
+            _logger.LogDebug("Speech cleanup: {RawLength} chars became {CleanLength}",
+                text.Length, cleaned.Length);
+            return cleaned;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The user discarded the recording; the caller drops the result.
+            return text;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Speech cleanup failed; keeping the raw text");
+            return text;
         }
     }
 
@@ -843,6 +937,10 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         _textProcessor = needsProcessor
             ? new TranscriptionTextProcessor(stripPunctuation: !punctuationEnabled, filterProfanity: profanityEnabled)
             : null;
+
+        var cleanup = _cleanup is null ? null : await SpeechCleanupSettings.LoadAsync(_settings, ct);
+        _cleanupOptions = cleanup is { Enabled: true } ? cleanup.Options : null;
+        _logger.LogInformation("Speech cleanup: {State}", _cleanupOptions is null ? "off" : "on");
 
         // Build WhisperOptions from settings for recognizer initialization
         var savedModel = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel, ct);

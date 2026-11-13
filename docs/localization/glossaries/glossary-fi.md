@@ -245,6 +245,7 @@ Used real Finnish Windows 10/11 UI wording rather than literal translations for:
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Oletus (sanatarkka litterointi)"** — verbatim/word-for-word rendered as *sanatarkka (word-accurate)*, paired with the already-established *litterointi* for transcription; no new terms introduced.
+- "Speech cleanup" (the local model that tidies dictated text) → **"sanelun siistiminen"** (*siistiä*, tidy up — never *poistaa*, so it cannot read as deleting), built on the core term *sanelu*. Toggles follow the existing `käytössä` / `pois käytöstä` pattern. "Writing style" → **kirjoitustyyli**; the four styles → *Rento*, *Puolirento*, *Puolimuodollinen*, *Muodollinen*; English contractions → *lyhennetyt muodot*.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

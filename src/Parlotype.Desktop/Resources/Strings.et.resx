@@ -866,7 +866,7 @@ Sinu seaded ja API-võtmed säilivad. Mudelid laaditakse järgmisel dikteerimise
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Sirvi, paigalda ja halda llama-server'i väljalaskeid. Aktiivne paigaldus käitab Gemma 4 transkriptsiooni.</value>
+    <value>Sirvi, paigalda ja halda llama-server'i väljalaskeid. Aktiivne paigaldus käitab Gemma 4 transkriptsiooni ja kõne korrastamist.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1465,5 +1465,98 @@ Sinu seaded ja API-võtmed säilivad. Mudelid laaditakse järgmisel dikteerimise
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Sinu sõnum saadeti — aitäh, et aitad Parlotype'i paremaks muuta. Viide: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>Laaditakse alla „{0}“…</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>„{0}“ on edukalt alla laaditud.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>Allalaadimine ebaõnnestus: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Kõne korrastamine</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Kirjutab dikteeritu enne kleepimist ümber korrektseks kirjalikuks tekstiks: täitesõnad ja valestardid eemaldatakse, enda parandused võetakse arvesse ning numbrid, kuupäevad ja e-posti aadressid kirjutatakse õigesti. Seda teeb väike mudel sinu arvutis; tekst arvutist ei lahku.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Kõne korrastamine sees</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Kõne korrastamine väljas</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Töötab ainult inglise keelega. Lülita see välja, kui dikteerid mõnes muus keeles.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Sisselülitamisel laaditakse alla mudel ({0}) ja llama.cpp server, kui serverit pole veel paigaldatud. Iga allalaadimise eel küsitakse luba.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Valmis: mudel ja llama.cpp server on paigaldatud.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Ei tööta: mudel või llama.cpp server puudub. Uuesti paigaldamiseks lülita lüliti välja ja uuesti sisse.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Seadistamine ei lõppenud, seega jääb kõne korrastamine välja.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Mudel</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Kirjutamisstiil</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Vaba</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Pigem vaba</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Pigem ametlik</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Ametlik</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Kõik väiketähtedega, ilma apostroofideta, sõnastus nagu räägitud.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Sõnastus nagu räägitud; apostroofid lisatakse ja „I“ kirjutatakse suure tähega.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Tavaline kirjalik inglise keel. Lühivormid jäävad, släng silutakse. Soovitatav.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Tavaline kirjalik inglise keel, lühivormid kirjutatakse välja.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Öeldud loendid muutuvad täpploenditeks</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Öeldud loendid jäävad lauseteks</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>E-kirja paigutus: tervitus, sisu ja lõputervitus eraldi ridadel</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Lihtne paigutus, ilma e-kirja vorminguta</value>
   </data>
 </root>

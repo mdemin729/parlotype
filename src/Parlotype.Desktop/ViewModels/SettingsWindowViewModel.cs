@@ -35,6 +35,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public CloudProviderSettingsViewModel CloudProviders { get; }
     public PromptSettingsViewModel Prompts { get; }
     public LlamaCppSettingsViewModel LlamaCpp { get; }
+    public SpeechCleanupSettingsViewModel SpeechCleanup { get; }
     public HotkeySettingsViewModel Hotkey { get; }
     public ThemeSettingsViewModel Theme { get; }
     public InterfaceLanguageSettingsViewModel InterfaceLanguage { get; }
@@ -56,6 +57,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         CloudProviderSettingsViewModel cloudProviders,
         PromptSettingsViewModel prompts,
         LlamaCppSettingsViewModel llamaCpp,
+        SpeechCleanupSettingsViewModel speechCleanup,
         HotkeySettingsViewModel hotkey,
         ThemeSettingsViewModel theme,
         InterfaceLanguageSettingsViewModel interfaceLanguage,
@@ -76,6 +78,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         CloudProviders = cloudProviders;
         Prompts = prompts;
         LlamaCpp = llamaCpp;
+        SpeechCleanup = speechCleanup;
         Hotkey = hotkey;
         Theme = theme;
         InterfaceLanguage = interfaceLanguage;
@@ -99,6 +102,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             parakeetModel,
             cloudProviders,
             prompts,
+            speechCleanup,
             llamaCpp,
             hotkey,
             theme,
@@ -113,6 +117,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             section.NavigationRequested += (_, target) => NavigateTo(target);
 
         speechEngine.PropertyChanged += OnSpeechEnginePropertyChanged;
+        speechCleanup.PropertyChanged += OnSpeechCleanupPropertyChanged;
         whisperModel.PropertyChanged += OnWhisperModelPropertyChanged;
         language.UpdateForEngine(speechEngine.SelectedEngine);
         language.UpdateTranslationAvailability(whisperModel.SelectedModel);
@@ -135,6 +140,16 @@ public partial class SettingsWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// The llama.cpp server page appears and disappears with speech cleanup
+    /// (see <see cref="RebuildNavItems"/>), so the switch has to rebuild the list.
+    /// </summary>
+    private void OnSpeechCleanupPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(SpeechCleanupSettingsViewModel.IsEnabled))
+            RebuildNavItems();
+    }
+
     private void OnWhisperModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(WhisperModelSettingsViewModel.SelectedModel))
@@ -146,8 +161,13 @@ public partial class SettingsWindowViewModel : ViewModelBase
         var activeEngine = SpeechEngine.SelectedEngine;
         var previousSection = SelectedNavItem?.Section;
 
+        // The llama.cpp server page belongs to whoever runs a llama-server: the
+        // Gemma 4 engine, and speech cleanup once it is on (ADR-073). Cleanup
+        // sets its server up by itself, so the page stays out of the way until
+        // then; after that it is where a different build is chosen.
         var visible = _allSections
-            .Where(s => s.IsVisibleFor(activeEngine))
+            .Where(s => s.IsVisibleFor(activeEngine)
+                        || (ReferenceEquals(s, LlamaCpp) && SpeechCleanup.IsEnabled))
             .ToList();
 
         var newItems = new List<SettingsNavItem>();
@@ -200,6 +220,10 @@ public partial class SettingsWindowViewModel : ViewModelBase
         {
             llamaCpp.RefreshServerInfoCommand.Execute(null);
         }
+
+        // The model or the server may have been removed from another page.
+        if (value?.Section is SpeechCleanupSettingsViewModel speechCleanup)
+            _ = speechCleanup.RefreshAsync();
     }
 
     /// <summary>

@@ -12,7 +12,9 @@ using Parlotype.Platform.Hotkeys;
 using Parlotype.Platform.Settings;
 using Parlotype.Platform.Speech;
 using Parlotype.Platform.LlamaServer;
+using Parlotype.Core.TextProcessing;
 using Parlotype.Platform.Startup;
+using Parlotype.Platform.TextProcessing;
 using Parlotype.Platform.Updates;
 
 namespace Parlotype.Platform;
@@ -38,10 +40,17 @@ public static class PlatformServiceExtensions
         // resolves the one matching the configured SpeechEngine setting.
         services.AddSingleton<OpenAiCompatibleSpeechRecognizer>();
         services.AddSingleton<XaiGrokSpeechRecognizer>();
-        // The recognizer also surfaces ILlamaCppServerLifecycle so the
-        // installer can stop the sidecar before deleting its files
-        // (Windows file-lock release on uninstall/switch).
-        services.AddSingleton<ILlamaCppServerLifecycle>(sp => sp.GetRequiredService<LlamaCppSpeechRecognizer>());
+        // Speech cleanup (ADR-073): a local model rewrites recognized text
+        // before it is pasted. Opt-in; nothing starts until the user turns it on.
+        services.AddSingleton<SpeechCleanupModelDownloadService>();
+        services.AddSingleton<LlamaServerSpeechCleanupService>();
+        services.AddSingleton<ISpeechCleanupService>(sp => sp.GetRequiredService<LlamaServerSpeechCleanupService>());
+        // Both llama-server consumers run their own process from the same
+        // installed binary, so the installer has to stop both before deleting
+        // its files (Windows file-lock release on uninstall/switch).
+        services.AddSingleton<ILlamaCppServerLifecycle>(sp => new CompositeLlamaServerLifecycle(
+            sp.GetRequiredService<LlamaCppSpeechRecognizer>(),
+            sp.GetRequiredService<LlamaServerSpeechCleanupService>()));
         services.AddSingleton<ILlamaServerRegistry, JsonLlamaServerRegistry>();
         services.AddSingleton<IPromptTemplateRegistry, JsonPromptTemplateRegistry>();
         services.AddSingleton<SpeechRecognizerFactory>();

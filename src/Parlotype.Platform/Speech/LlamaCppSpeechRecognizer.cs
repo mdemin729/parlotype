@@ -340,30 +340,18 @@ public sealed class LlamaCppSpeechRecognizer : ISpeechRecognizer, ILlamaCppServe
         _initLock.Dispose();
     }
 
-    private const string ServerExeName = "llama-server.exe";
-
     /// <summary>
     /// Resolves the absolute path to <c>llama-server.exe</c>, or <c>null</c> when
-    /// no server is configured at all. Consults the active-install selector first:
-    /// a managed install wins; manual mode (or a missing managed selector) falls
-    /// through to the <see cref="SettingsKeys.LlamaCppServerFolder"/> setting.
+    /// no server is configured at all. The rule lives in
+    /// <see cref="LlamaServerPathResolver"/>, shared with speech cleanup.
     ///
     /// <para>There is deliberately no default folder to fall back on (ADR-066).
     /// The old one pointed at a directory nothing ever created, so an unconfigured
     /// app reported a missing file at a path the user had never chosen. <c>null</c>
     /// lets the caller say what is actually wrong.</para>
     /// </summary>
-    internal async Task<string?> GetServerPathAsync(CancellationToken cancellationToken)
-    {
-        var active = await _registry.GetActiveAsync(cancellationToken);
-        if (active is { Source: LlamaServerSource.Managed })
-            return Path.Combine(active.AbsolutePath, ServerExeName);
-
-        var folder = await _settings.GetAsync<string>(SettingsKeys.LlamaCppServerFolder);
-        return string.IsNullOrWhiteSpace(folder)
-            ? null
-            : Path.Combine(folder.Trim(), ServerExeName);
-    }
+    internal Task<string?> GetServerPathAsync(CancellationToken cancellationToken) =>
+        LlamaServerPathResolver.ResolveExecutableAsync(_registry, _settings, cancellationToken);
 
     private async Task<int> GetConfiguredPortAsync(CancellationToken cancellationToken)
     {

@@ -33,6 +33,7 @@ public static class SettingsWindowViewModelFactory
         var cloudProviders = new CloudProviderSettingsViewModel(settings, new MockSecretStore());
         var prompts = new PromptSettingsViewModel(new MockPromptTemplateRegistry());
         var llamaCpp = new LlamaCppSettingsViewModel(settings);
+        var speechCleanup = new SpeechCleanupSettingsViewModel(settings);
         var hotkey = new HotkeySettingsViewModel(hotkeyService: null, settings);
         var theme = new ThemeSettingsViewModel(settings);
         var interfaceLanguage = new InterfaceLanguageSettingsViewModel(new UiLanguageService(settings));
@@ -46,6 +47,6 @@ public static class SettingsWindowViewModelFactory
 
         return new SettingsWindowViewModel(
             engine, mic, silence, model, runtime, whisperOutput, language, gemma4Model, parakeetModel,
-            cloudProviders, prompts, llamaCpp, hotkey, theme, interfaceLanguage, startup, updates, data, help);
+            cloudProviders, prompts, llamaCpp, speechCleanup, hotkey, theme, interfaceLanguage, startup, updates, data, help);
     }
 }

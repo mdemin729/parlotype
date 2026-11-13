@@ -183,6 +183,7 @@ verbatim, and no value over 25 characters matches the English source byte-for-by
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standard (ordagrann transkribering)"** — verbatim/word-for-word rendered as *ordagrann (word-for-word)*, paired with the already-established *transkribering* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`, a local model rewriting dictated text as clean written English) → **"textputsning"** (en) — not *rensning*/*städning*, which Windows uses for deleting data (*Diskrensning*). **writing style** → **"skrivstil"**; the four styles are *Ledig / Halvledig / Halvformell / Formell*. English contractions → **sammandragningar**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)
