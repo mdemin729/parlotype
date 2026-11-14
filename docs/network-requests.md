@@ -18,7 +18,7 @@ outbound request is a product decision and needs an ADR (see ADR-053 and ADR-070
 
 | What | Host | When | What is sent |
 |---|---|---|---|
-| llama.cpp release list (Gemma 4 engine and speech cleanup) | `api.github.com` (`/repos/ggml-org/llama.cpp/releases`) | The first time the Settings window opens in a session, at most once an hour (the answer is cached on disk). The same cached list is read when you turn speech cleanup on and no llama.cpp server is installed. | An anonymous GET with `User-Agent: parlotype/<assembly version>`. |
+| llama.cpp release list (Gemma 4 engine and speech cleanup) | `api.github.com`: `/repos/ggml-org/llama.cpp/releases` for the newest builds, then `/releases/latest` for the build llama.cpp currently calls its release, and `/releases/tags/b{N}` for that build's files when the first answer no longer lists it, about once per llama.cpp release ([ADR-074](decisions/074-prefer-llama-cpp-release-build.md)) | The first time the Settings window opens in a session, at most once an hour (the answers are cached on disk), and when you press **Check for updates** on the llama.cpp server page. The same cached list is read when you turn speech cleanup on and no llama.cpp server is installed; it is fetched then only if the cache is more than an hour old. | Two or three anonymous GETs with `User-Agent: parlotype/<assembly version>`. The build number in the third path comes from GitHub's own answer. |
 
 ## Only when you ask for it
 

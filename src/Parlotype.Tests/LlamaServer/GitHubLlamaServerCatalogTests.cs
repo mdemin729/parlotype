@@ -261,6 +261,8 @@ public sealed class GitHubLlamaServerCatalogTests : IDisposable
         await catalog.FetchAsync(forceRefresh: false);
 
         var req = handler.Requests.Single();
+        Assert.StartsWith(
+            "https://api.github.com/repos/ggml-org/llama.cpp/releases?", req.RequestUri!.AbsoluteUri);
         Assert.Contains(req.Headers.UserAgent, ua => ua.Product?.Name == "parlotype");
         Assert.Contains(req.Headers.Accept, a => a.MediaType == "application/vnd.github+json");
     }
@@ -448,11 +450,352 @@ public sealed class GitHubLlamaServerCatalogTests : IDisposable
             doc.RootElement.GetProperty("version").GetInt32());
     }
 
+    // --- The released build (ADR-074) ---
+    //
+    // Upstream's newest versioned release names one build. The catalog asks
+    // /releases/latest for it after the list, proves the build tag in the notes
+    // against the digest of nightly-tag.txt, and puts that build first. Both
+    // fixtures below are the live answers of 2026-11-13, trimmed to the fields
+    // the catalog reads (the notes keep their first changelog lines).
+
+    private static string ReadFixture(string name) =>
+        File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fixtures", name));
+
+    private static string LatestReleaseFixture() => ReadFixture("llama-cpp-release-latest-2026-11.json");
+
+    private static string ReleasedBuildFixture() => ReadFixture("llama-cpp-release-b12359-2026-11.json");
+
+    private static HttpResponseMessage Ok(string body, string? etag = null)
+    {
+        var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(body) };
+        if (etag is not null)
+            response.Headers.TryAddWithoutValidation("ETag", etag);
+        return response;
+    }
+
+    [Fact]
+    public async Task ReleasedBuild_OnTheFirstPage_ComesFirst_MarkedWithTheVersion()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture());
+        handler.Latest = _ => Ok(LatestReleaseFixture());
+
+        var groups = await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        // b12360 is newer, but v1.0.0 names b12359.
+        Assert.Equal(["b12359", "b12360"], groups.Select(g => g.Build));
+        Assert.Equal("v1.0.0", groups[0].ReleaseVersion);
+        Assert.Null(groups[1].ReleaseVersion);
+        Assert.Contains(groups[0].Variants, v => v.AssetName == "llama-b12359-bin-win-cpu-x64.zip");
+
+        // The list already had the build's assets: no request by tag.
+        Assert.Single(handler.LatestRequests);
+        Assert.Empty(handler.TagRequests);
+    }
+
+    [Fact]
+    public async Task ReleasedBuild_OffTheFirstPage_IsFetchedByTag_AndListedOnce()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(_fixtureBody); // b9198 and older: b12359 is not among them
+        handler.Latest = _ => Ok(LatestReleaseFixture());
+        handler.Tag = _ => Ok(ReleasedBuildFixture());
+
+        var groups = await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        Assert.Equal(["b12359", "b9198", "b9197", "b9195-rc1"], groups.Select(g => g.Build));
+        Assert.Equal("v1.0.0", groups[0].ReleaseVersion);
+        Assert.All(groups.Skip(1), g => Assert.Null(g.ReleaseVersion));
+
+        var cuda = groups[0].Variants.Single(v => v.Backend == LlamaServerBackend.Cuda13);
+        Assert.Equal("cudart-llama-bin-win-cuda-13.5-x64.zip", cuda.CompanionAssetName);
+
+        var byTag = Assert.Single(handler.TagRequests);
+        Assert.EndsWith("/repos/ggml-org/llama.cpp/releases/tags/b12359", byTag.RequestUri!.AbsoluteUri);
+    }
+
+    [Fact]
+    public async Task ReleasedBuild_FetchedByTag_IsCached_AndTheReleaseRevalidatedByItsOwnETag()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(_fixtureBody, etag: "W/\"list\"");
+        handler.Enqueue(_ => new HttpResponseMessage(HttpStatusCode.NotModified));
+        handler.Latest = req => req.Headers.TryGetValues("If-None-Match", out var sent)
+            ? sent.Single() == "W/\"latest\""
+                ? new HttpResponseMessage(HttpStatusCode.NotModified)
+                : throw new InvalidOperationException("The list's ETag was sent for the release.")
+            : Ok(LatestReleaseFixture(), etag: "W/\"latest\"");
+        handler.Tag = _ => Ok(ReleasedBuildFixture());
+
+        var catalog = NewCatalog(handler);
+        await catalog.FetchAsync(forceRefresh: false);
+
+        _now = _now.AddHours(2);
+        var refreshed = await catalog.FetchAsync(forceRefresh: false);
+
+        // Second refresh: the list and the release, both answered 304. The
+        // build's assets were kept, so it costs no third request.
+        Assert.Equal(2, handler.Requests.Count);
+        Assert.Equal(2, handler.LatestRequests.Count);
+        Assert.Single(handler.TagRequests);
+        Assert.Equal("b12359", refreshed[0].Build);
+        Assert.Equal("v1.0.0", refreshed[0].ReleaseVersion);
+    }
+
+    [Fact]
+    public async Task ReleasedBuild_SurvivesARestart_WithoutAnyRequest()
+    {
+        var handler1 = new ScriptedHandler();
+        handler1.EnqueueOk(_fixtureBody);
+        handler1.Latest = _ => Ok(LatestReleaseFixture());
+        handler1.Tag = _ => Ok(ReleasedBuildFixture());
+        await NewCatalog(handler1).FetchAsync(forceRefresh: false);
+
+        var handler2 = new ScriptedHandler();
+        var groups = await NewCatalog(handler2).FetchAsync(forceRefresh: false);
+
+        Assert.Empty(handler2.Requests);
+        Assert.Empty(handler2.LatestRequests);
+        Assert.Empty(handler2.TagRequests);
+        Assert.Equal("b12359", groups[0].Build);
+        Assert.Equal("v1.0.0", groups[0].ReleaseVersion);
+    }
+
+    [Fact]
+    public async Task ReleasedBuild_WithNoAssetForThisMachine_IsNotMarked()
+    {
+        // The released build as it would be if upstream had published no
+        // Windows archive for it.
+        var release = System.Text.Json.Nodes.JsonNode.Parse(ReleasedBuildFixture())!.AsObject();
+        var assets = release["assets"]!.AsArray();
+        for (var i = assets.Count - 1; i >= 0; i--)
+        {
+            if (assets[i]!["name"]!.GetValue<string>().Contains("-win-", StringComparison.Ordinal))
+                assets.RemoveAt(i);
+        }
+
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(_fixtureBody);
+        handler.Latest = _ => Ok(LatestReleaseFixture());
+        handler.Tag = _ => Ok(release.ToJsonString());
+
+        var groups = await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        Assert.Equal(["b9198", "b9197", "b9195-rc1"], groups.Select(g => g.Build));
+        Assert.All(groups, g => Assert.Null(g.ReleaseVersion));
+    }
+
+    [Fact]
+    public async Task NoVersionedRelease_ListsTheNewestBuildsUnmarked()
+    {
+        var handler = new ScriptedHandler(); // /releases/latest answers 404 by default
+        handler.EnqueueOk(ReadNovember2026Fixture());
+
+        var groups = await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        Assert.Equal(["b12360", "b12359"], groups.Select(g => g.Build));
+        Assert.All(groups, g => Assert.Null(g.ReleaseVersion));
+        Assert.Single(handler.LatestRequests);
+    }
+
+    [Theory]
+    [InlineData("network")]
+    [InlineData("timeout")]
+    [InlineData("rate-limited")]
+    [InlineData("not-json")]
+    public async Task LatestReleaseRequestFails_ListsTheNewestBuildsUnmarked(string failure)
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture());
+        handler.Latest = _ => failure switch
+        {
+            "network" => throw new HttpRequestException("simulated network drop"),
+            "timeout" => throw new TaskCanceledException("simulated timeout"),
+            "rate-limited" => new HttpResponseMessage(HttpStatusCode.Forbidden),
+            _ => Ok("<html>not what we asked for</html>"),
+        };
+
+        var groups = await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        Assert.Equal(["b12360", "b12359"], groups.Select(g => g.Build));
+        Assert.All(groups, g => Assert.Null(g.ReleaseVersion));
+    }
+
+    [Fact]
+    public async Task LatestReleaseRequestFails_KeepsTheReleasedBuildKnownFromLastTime()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture(), etag: "W/\"list\"");
+        handler.Enqueue(_ => new HttpResponseMessage(HttpStatusCode.NotModified));
+        handler.Latest = _ => Ok(LatestReleaseFixture(), etag: "W/\"latest\"");
+
+        var catalog = NewCatalog(handler);
+        await catalog.FetchAsync(forceRefresh: false);
+
+        handler.Latest = _ => new HttpResponseMessage(HttpStatusCode.Forbidden);
+        _now = _now.AddHours(2);
+        var groups = await catalog.FetchAsync(forceRefresh: false);
+
+        Assert.Equal("b12359", groups[0].Build);
+        Assert.Equal("v1.0.0", groups[0].ReleaseVersion);
+    }
+
+    [Fact]
+    public async Task CallerCancelling_IsNotSwallowedAsAFailedRequest()
+    {
+        using var cts = new CancellationTokenSource();
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture());
+        handler.Latest = _ =>
+        {
+            cts.Cancel();
+            throw new OperationCanceledException(cts.Token);
+        };
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => NewCatalog(handler).FetchAsync(forceRefresh: false, cts.Token));
+    }
+
+    [Theory]
+    [InlineData("digest-of-another-build")]
+    [InlineData("no-pointer-file")]
+    [InlineData("no-digest")]
+    [InlineData("notes-do-not-name-the-build")]
+    [InlineData("no-notes")]
+    public async Task VersionedRelease_WhoseBuildCannotBeVerified_MarksNothing_AndAsksForNoBuild(string defect)
+    {
+        var release = System.Text.Json.Nodes.JsonNode.Parse(LatestReleaseFixture())!.AsObject();
+        var pointer = release["assets"]!.AsArray()[0]!.AsObject();
+        switch (defect)
+        {
+            case "digest-of-another-build":
+                // sha256("b12360\n"): the notes still say b12359.
+                pointer["digest"] = "sha256:" + Convert.ToHexStringLower(
+                    System.Security.Cryptography.SHA256.HashData("b12360\n"u8));
+                break;
+            case "no-pointer-file":
+                release["assets"]!.AsArray().Clear();
+                break;
+            case "no-digest":
+                pointer["digest"] = null;
+                break;
+            case "notes-do-not-name-the-build":
+                release["body"] = "## Overview\r\n\r\nNew version has been released.\r\n\r\nb1b770d90 examples : cleanup\r\n";
+                break;
+            case "no-notes":
+                release["body"] = null;
+                break;
+        }
+
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(_fixtureBody);
+        handler.Latest = _ => Ok(release.ToJsonString());
+
+        var groups = await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        Assert.Equal(["b9198", "b9197", "b9195-rc1"], groups.Select(g => g.Build));
+        Assert.All(groups, g => Assert.Null(g.ReleaseVersion));
+        Assert.Empty(handler.TagRequests);
+    }
+
+    [Fact]
+    public void ReadPointedBuild_TakesTheTagTheDigestConfirms_NotTheFirstOneInTheNotes()
+    {
+        var release = System.Text.Json.JsonSerializer.Deserialize<GitHubLlamaServerCatalog.GitHubReleaseDto>(
+            LatestReleaseFixture(),
+            new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower,
+            })!;
+
+        Assert.Equal("b12359", GitHubLlamaServerCatalog.ReadPointedBuild(release));
+
+        // Notes that mention an earlier build first, as a changelog might.
+        var reworded = release with { Body = "Since b12110 a lot changed.\n\nBuild: b12359\n" };
+        Assert.Equal("b12359", GitHubLlamaServerCatalog.ReadPointedBuild(reworded));
+    }
+
+    [Fact]
+    public async Task BuildByTagFails_MarksNothing_AndIsTriedAgainOnTheNextRefresh()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(_fixtureBody, etag: "W/\"list\"");
+        handler.Enqueue(_ => new HttpResponseMessage(HttpStatusCode.NotModified));
+        handler.Latest = _ => Ok(LatestReleaseFixture());
+        handler.Tag = _ => new HttpResponseMessage(HttpStatusCode.NotFound);
+
+        var catalog = NewCatalog(handler);
+        var first = await catalog.FetchAsync(forceRefresh: false);
+        Assert.All(first, g => Assert.Null(g.ReleaseVersion));
+
+        handler.Tag = _ => Ok(ReleasedBuildFixture());
+        _now = _now.AddHours(2);
+        var second = await catalog.FetchAsync(forceRefresh: false);
+
+        Assert.Equal(2, handler.TagRequests.Count);
+        Assert.Equal("b12359", second[0].Build);
+        Assert.Equal("v1.0.0", second[0].ReleaseVersion);
+    }
+
+    [Fact]
+    public async Task ListRequestFails_WithCache_MakesNoFurtherRequest()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(ReadNovember2026Fixture());
+        handler.Enqueue(_ => new HttpResponseMessage(HttpStatusCode.Forbidden)); // rate-limited
+        handler.Latest = _ => Ok(LatestReleaseFixture());
+
+        var catalog = NewCatalog(handler);
+        await catalog.FetchAsync(forceRefresh: false);
+
+        _now = _now.AddHours(2);
+        var groups = await catalog.FetchAsync(forceRefresh: false);
+
+        // GitHub refused the list: the cache answers, and the release is not asked for.
+        Assert.Single(handler.LatestRequests);
+        Assert.Equal("b12359", groups[0].Build);
+        Assert.Equal("v1.0.0", groups[0].ReleaseVersion);
+    }
+
+    [Fact]
+    public async Task ReleaseRequests_CarryTheSameHeadersAsTheList()
+    {
+        var handler = new ScriptedHandler();
+        handler.EnqueueOk(_fixtureBody);
+        handler.Latest = _ => Ok(LatestReleaseFixture());
+        handler.Tag = _ => Ok(ReleasedBuildFixture());
+
+        await NewCatalog(handler).FetchAsync(forceRefresh: false);
+
+        var latest = Assert.Single(handler.LatestRequests);
+        Assert.EndsWith("/repos/ggml-org/llama.cpp/releases/latest", latest.RequestUri!.AbsoluteUri);
+        foreach (var req in handler.LatestRequests.Concat(handler.TagRequests))
+        {
+            Assert.Equal("api.github.com", req.RequestUri!.Host);
+            Assert.Contains(req.Headers.UserAgent, ua => ua.Product?.Name == "parlotype");
+            Assert.Contains(req.Headers.Accept, a => a.MediaType == "application/vnd.github+json");
+        }
+    }
+
+    /// <summary>
+    /// Answers the three requests the catalog makes. The build list is a
+    /// scripted queue and <see cref="Requests"/> counts only those; the newest
+    /// versioned release and a build by tag have one responder each, and answer
+    /// 404 unless a test sets them, which is "no versioned release".
+    /// </summary>
     private sealed class ScriptedHandler : HttpMessageHandler
     {
         private readonly Queue<Func<HttpRequestMessage, HttpResponseMessage>> _responders = new();
 
         public List<HttpRequestMessage> Requests { get; } = new();
+        public List<HttpRequestMessage> LatestRequests { get; } = new();
+        public List<HttpRequestMessage> TagRequests { get; } = new();
+
+        public Func<HttpRequestMessage, HttpResponseMessage> Latest { get; set; } =
+            _ => new HttpResponseMessage(HttpStatusCode.NotFound);
+
+        public Func<HttpRequestMessage, HttpResponseMessage> Tag { get; set; } =
+            _ => new HttpResponseMessage(HttpStatusCode.NotFound);
 
         public void Enqueue(Func<HttpRequestMessage, HttpResponseMessage> responder)
             => _responders.Enqueue(responder);
@@ -475,14 +818,31 @@ public sealed class GitHubLlamaServerCatalogTests : IDisposable
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            Requests.Add(request);
-            if (_responders.Count == 0)
-                throw new InvalidOperationException("No scripted response left.");
+            var path = request.RequestUri!.AbsolutePath;
+            Func<HttpRequestMessage, HttpResponseMessage> responder;
+            if (path.EndsWith("/releases/latest", StringComparison.Ordinal))
+            {
+                LatestRequests.Add(request);
+                responder = Latest;
+            }
+            else if (path.Contains("/releases/tags/", StringComparison.Ordinal))
+            {
+                TagRequests.Add(request);
+                responder = Tag;
+            }
+            else
+            {
+                Requests.Add(request);
+                if (_responders.Count == 0)
+                    throw new InvalidOperationException("No scripted response left.");
+                responder = _responders.Dequeue();
+            }
+
             try
             {
-                return Task.FromResult(_responders.Dequeue()(request));
+                return Task.FromResult(responder(request));
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException)
             {
                 return Task.FromException<HttpResponseMessage>(ex);
             }

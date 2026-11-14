@@ -37,11 +37,38 @@ Consequences:
   on 2026-11-13. Skip drafts only.
 - `GET /releases/latest` now answers with the versioned release
   (`v1.0.0`), which is useless for finding a download.
-- The build a versioned release names drops off the first page of
-  `/releases` within hours. Offering "the stable build" means reading
-  `nightly-tag.txt` (or the release notes) and then fetching
-  `/releases/tags/b{N}`: two more requests, which Parlotype does not make.
-  It lists the newest builds, as it always has.
+- The versioned release and the build it names both drop off the first
+  page of `/releases` in about a day (the list is ordered by creation time;
+  `v0.9.0` of 2026-11-04 and its `b12110` are long gone from it). Offering
+  "the released build" means `GET /releases/latest` for the pointer and then
+  `GET /releases/tags/b{N}` for the assets. Parlotype makes both and lists
+  that build first
+  ([ADR-074](../decisions/074-prefer-llama-cpp-release-build.md)).
+
+### Reading the pointer of a versioned release
+
+- `nightly-tag.txt` holds the build tag and a newline (`b12359\n`). The API
+  does not return the content, but the asset's `digest` is its SHA-256, and
+  the release notes carry `**Nightly build:** [b12359](…/releases/tag/b12359)`.
+  `sha256("b12359\n")` equals the digest, so a tag found in the notes can be
+  checked against the pointer file without downloading it. This is how
+  `GitHubLlamaServerCatalog.ReadPointedBuild` finds the build.
+- Without the API,
+  `https://github.com/ggml-org/llama.cpp/releases/latest/download/nightly-tag.txt`
+  redirects twice (to the versioned release, then to
+  `release-assets.githubusercontent.com`) and returns the file.
+- Neither is guaranteed. Upstream's `make-release.yml` skips the file with a
+  warning when the release commit has no nightly tag, and the notes template
+  is marked `# TODO: enrich the body`.
+- A versioned release is started by a maintainer by hand and runs an API/ABI
+  compatibility check against the previous release. It is not a separately
+  built or separately tested binary. Observed cadence: nine days between
+  `v0.9.0` and `v1.0.0`; upstream says "slow-paced, steady", no schedule.
+- A new build is listed a few minutes before its assets finish uploading:
+  `b12359` was published at 10:21:06 UTC and its assets were uploaded between
+  10:22 and 10:24. A list fetched in that window has a partial asset set.
+- `b12110` still had all 38 assets nine days after it was built. Upstream
+  states no retention period for nightly builds.
 
 ## Asset naming pattern (main archives)
 
@@ -118,11 +145,15 @@ PAT, so this limit applies. Mitigations in `GitHubLlamaServerCatalog`:
 - **1 h on-disk cache** (`.cache/releases.json`): within TTL, no HTTP
   is issued.
 - **ETag (`If-None-Match`)**: stale TTL triggers a conditional GET; 304
-  Not Modified extends the cache `fetchedAt` and costs 0 against the
-  rate limit *only* on responses without bodies (304 still counts as 1
-  request, but the cost amortizes since the body is reused).
+  Not Modified extends the cache `fetchedAt` and saves the 676 KB body.
+  It still costs one request: measured on 2026-11-13, a 304 lowered
+  `X-RateLimit-Remaining` by one. GitHub exempts 304s from the limit only
+  for authenticated requests.
 - **No background polling**: the catalog is refreshed only on settings-
   page open and on the explicit "Check for updates" button click.
+- **Two requests per refresh**, both conditional: the list and
+  `/releases/latest`. A third, `/releases/tags/b{N}`, about once per
+  upstream release. If the list request fails, the others are not sent.
 
 > **Note: ETag preservation.** `HttpHeaders.ETag.Tag` strips the `W/` weak-validator prefix. Sending
 > a stripped ETag back violates RFC 7232's byte-exact echo requirement,
@@ -163,4 +194,8 @@ For completeness — what the parser recognises today:
 - Recorded API responses (test fixtures):
   [`llama-cpp-releases.json`](../../src/Parlotype.Tests/Fixtures/llama-cpp-releases.json) (hand-built, the old scheme) and
   [`llama-cpp-releases-2026-11.json`](../../src/Parlotype.Tests/Fixtures/llama-cpp-releases-2026-11.json)
-  (the live response of 2026-11-13, trimmed to `v1.0.0` and two builds)
+  (the live response of 2026-11-13, trimmed to `v1.0.0` and two builds),
+  [`llama-cpp-release-latest-2026-11.json`](../../src/Parlotype.Tests/Fixtures/llama-cpp-release-latest-2026-11.json)
+  (`/releases/latest`, the notes cut after the first changelog lines) and
+  [`llama-cpp-release-b12359-2026-11.json`](../../src/Parlotype.Tests/Fixtures/llama-cpp-release-b12359-2026-11.json)
+  (`/releases/tags/b12359`)

@@ -14,8 +14,19 @@ public sealed class LlamaServerVariantRowVm
     public bool HasCompanion => Variant.CompanionDownloadUrl is not null;
     public bool IsAlreadyInstalled { get; }
 
-    public LlamaServerVariantRowVm(LlamaServerVariant variant, bool alreadyInstalled)
+    /// <summary>
+    /// Upstream's version (e.g. <c>v1.0.0</c>) when this build is the one its
+    /// newest versioned release names, otherwise null (ADR-074). Shown as a
+    /// badge as it is: a version tag is not translated.
+    /// </summary>
+    public string? ReleaseVersion { get; }
+
+    public bool IsRelease => ReleaseVersion is not null;
+
+    public LlamaServerVariantRowVm(
+        LlamaServerVariant variant, bool alreadyInstalled, string? releaseVersion = null)
     {
+        ReleaseVersion = releaseVersion;
         Variant = variant;
         BackendDisplay = LlamaServerBackendFormatter.Display(variant.Backend);
         SizeDisplay = LlamaServerBackendFormatter.FormatBytes(

@@ -2,7 +2,7 @@
 status: accepted
 date: 2026-05-17
 amends: [025]
-amended-by: [066]
+amended-by: [066, 074]
 ---
 
 # 026. Managed llama.cpp Server Installation
