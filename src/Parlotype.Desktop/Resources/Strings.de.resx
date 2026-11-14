@@ -1491,8 +1491,41 @@ Deine Einstellungen und API-Schlüssel bleiben erhalten. Modelle werden beim nä
   <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
     <value>Textaufbereitung aus</value>
   </data>
-  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
-    <value>Funktioniert nur mit Englisch. Schalte sie aus, wenn du in einer anderen Sprache diktierst.</value>
+  <data name="Settings_SpeechCleanup_LanguageNote" xml:space="preserve">
+    <value>Funktioniert nur mit Englisch. Diktate in anderen Sprachen werden unverändert eingefügt.</value>
+    <comment>Shown under the speech cleanup switch. "Pasted as spoken" means the recognized text is inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_PausedNoteFormat" xml:space="preserve">
+    <value>Pausiert: Die Textaufbereitung funktioniert nur mit Englisch. Diktiersprache: {0}.</value>
+    <comment>Shown under the speech cleanup switch while it is on but cannot run. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Off" xml:space="preserve">
+    <value>Textaufbereitung ist aus. Klicke, um sie einzuschalten.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_On" xml:space="preserve">
+    <value>Textaufbereitung ist für englischen Text an. Klicke, um sie auszuschalten.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_PausedFormat" xml:space="preserve">
+    <value>Textaufbereitung pausiert, da nur Englisch unterstützt wird. Diktiersprache: {0}.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedNotEnglish" xml:space="preserve">
+    <value>Das letzte Diktat war nicht auf Englisch und wurde daher unverändert eingefügt.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedTooLong" xml:space="preserve">
+    <value>Das letzte Diktat war zu lang für die Textaufbereitung und wurde daher unverändert eingefügt.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Failed" xml:space="preserve">
+    <value>Die Textaufbereitung ist beim letzten Diktat fehlgeschlagen; es wurde unverändert eingefügt.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Broken" xml:space="preserve">
+    <value>Textaufbereitung funktioniert nicht. Klicke, um die Einstellungen zu öffnen.</value>
+    <comment>Tooltip of a small icon button on the dictation widget, shown when the cleanup model or its server is missing.</comment>
   </data>
   <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
     <value>Beim Einschalten werden das Modell ({0}) und, falls keiner installiert ist, ein llama.cpp-Server heruntergeladen. Vor jedem Download wird nachgefragt.</value>

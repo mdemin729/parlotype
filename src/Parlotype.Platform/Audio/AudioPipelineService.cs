@@ -130,9 +130,22 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
     /// <summary>
     /// Speech cleanup choices, cached at pipeline start (ADR-073). Null when the
-    /// feature is off or no cleanup service is registered.
+    /// feature is off, no cleanup service is registered, or the settings say the
+    /// text will not be English (<see cref="_cleanupPausedForLanguage"/>).
     /// </summary>
     private SpeechCleanupOptions? _cleanupOptions;
+
+    /// <summary>
+    /// What the settings say about the language of the text, cached at pipeline
+    /// start (ADR-075). Unknown is narrowed per utterance in <see cref="CleanOrKeepAsync"/>.
+    /// </summary>
+    private CleanupLanguage _cleanupLanguage = CleanupLanguage.Unknown;
+
+    /// <summary>
+    /// Cleanup is switched on but this session's text will not be English, so
+    /// the English-only model is neither loaded nor asked (ADR-075).
+    /// </summary>
+    private bool _cleanupPausedForLanguage;
 
     /// <summary>Whisper options built from settings, cached at pipeline start.</summary>
     private WhisperOptions? _whisperOptions;
@@ -796,7 +809,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                 // Cleanup first, the Whisper output options after it: stripping
                 // punctuation or masking profanity is the user's last word on the
                 // text, and the cleanup model would put the punctuation back.
-                result = result with { Text = await CleanOrKeepAsync(result.Text, cancellationToken) };
+                result = await CleanOrKeepAsync(result, cancellationToken);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -840,20 +853,37 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
 
     /// <summary>
     /// Runs the speech cleanup pass when it is on (ADR-073), and returns
-    /// <paramref name="text"/> untouched in every other case: the feature is off,
-    /// the text is not something the model handles, the model failed or timed
-    /// out, or what it returned is not a believable rewrite. Cleanup can cost the
-    /// user polish; it must never cost them the dictation.
+    /// <paramref name="result"/> with its text untouched in every other case: the
+    /// feature is off, the text is not English or too long, the model failed or
+    /// timed out, or what it returned is not a believable rewrite. Cleanup can
+    /// cost the user polish; it must never cost them the dictation. The reason
+    /// travels on <see cref="TranscriptionResult.CleanupOutcome"/> (ADR-075).
     /// </summary>
-    private async Task<string> CleanOrKeepAsync(string text, CancellationToken cancellationToken)
+    private async Task<TranscriptionResult> CleanOrKeepAsync(
+        TranscriptionResult result, CancellationToken cancellationToken)
     {
-        if (_cleanupOptions is not { } options || _cleanup is null)
-            return text;
+        var text = result.Text;
 
-        if (!SpeechCleanupGate.ShouldClean(text))
+        if (_cleanupPausedForLanguage)
         {
-            _logger.LogDebug("Speech cleanup skipped: {Length} chars not eligible", text.Length);
-            return text;
+            return result with
+            {
+                CleanupOutcome = string.IsNullOrWhiteSpace(text)
+                    ? SpeechCleanupOutcome.NotRun
+                    : SpeechCleanupOutcome.SkippedNotEnglish,
+            };
+        }
+
+        if (_cleanupOptions is not { } options || _cleanup is null)
+            return result;
+
+        // The recognizer's own verdict, when it gives one (Whisper), beats
+        // guessing from the text.
+        var language = CleanupLanguagePolicy.Refine(_cleanupLanguage, result.DetectedLanguage);
+        if (SpeechCleanupGate.Evaluate(text, language) is { } skipped)
+        {
+            _logger.LogDebug("Speech cleanup skipped ({Outcome}): {Length} chars", skipped, text.Length);
+            return result with { CleanupOutcome = skipped };
         }
 
         try
@@ -864,22 +894,22 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
                 _logger.LogWarning(
                     "Speech cleanup result rejected: {RawLength} chars became {CleanLength}; keeping the raw text",
                     text.Length, cleaned.Length);
-                return text;
+                return result with { CleanupOutcome = SpeechCleanupOutcome.Failed };
             }
 
             _logger.LogDebug("Speech cleanup: {RawLength} chars became {CleanLength}",
                 text.Length, cleaned.Length);
-            return cleaned;
+            return result with { Text = cleaned, CleanupOutcome = SpeechCleanupOutcome.Cleaned };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // The user discarded the recording; the caller drops the result.
-            return text;
+            return result;
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Speech cleanup failed; keeping the raw text");
-            return text;
+            return result with { CleanupOutcome = SpeechCleanupOutcome.Failed };
         }
     }
 
@@ -938,10 +968,6 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
             ? new TranscriptionTextProcessor(stripPunctuation: !punctuationEnabled, filterProfanity: profanityEnabled)
             : null;
 
-        var cleanup = _cleanup is null ? null : await SpeechCleanupSettings.LoadAsync(_settings, ct);
-        _cleanupOptions = cleanup is { Enabled: true } ? cleanup.Options : null;
-        _logger.LogInformation("Speech cleanup: {State}", _cleanupOptions is null ? "off" : "on");
-
         // Build WhisperOptions from settings for recognizer initialization
         var savedModel = await _settings.GetAsync<string>(SettingsKeys.SelectedWhisperModel, ct);
         var modelType = Enum.TryParse<WhisperModelType>(savedModel, out var mt) ? mt : WhisperModelType.Base;
@@ -983,6 +1009,24 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         _logger.LogInformation(
             "Whisper options: Model={Model}, Language={Language}, Translate={Translate}, Runtime={Runtime}",
             _whisperOptions.Model, _whisperOptions.Language, _whisperOptions.TranslateToEnglish, _whisperOptions.RuntimePreference);
+
+        // Speech cleanup last: whether the English-only model runs depends on
+        // the language settings read above (ADR-075).
+        var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine, ct);
+        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var se)
+            ? se
+            : SpeechEngine.Parakeet;
+
+        var cleanup = _cleanup is null ? null : await SpeechCleanupSettings.LoadAsync(_settings, ct);
+        var cleanupOn = cleanup is { Enabled: true };
+        _cleanupLanguage = CleanupLanguagePolicy.Resolve(
+            engine, modelType, sourceLang, detectedLayout, translationEnabled, targetCode);
+        _cleanupPausedForLanguage = cleanupOn && _cleanupLanguage.Kind == CleanupLanguageKind.NotEnglish;
+        _cleanupOptions = cleanupOn && !_cleanupPausedForLanguage ? cleanup!.Options : null;
+        _logger.LogInformation(
+            "Speech cleanup: {State} (output language: {Language})",
+            !cleanupOn ? "off" : _cleanupPausedForLanguage ? "paused" : "on",
+            _cleanupLanguage.Kind == CleanupLanguageKind.NotEnglish ? _cleanupLanguage.Code : _cleanupLanguage.Kind);
     }
 
     public async ValueTask DisposeAsync()

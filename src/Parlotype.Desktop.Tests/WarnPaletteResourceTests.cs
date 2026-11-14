@@ -42,6 +42,11 @@ public class WarnPaletteResourceTests
 
     [AvaloniaTheory]
     [MemberData(nameof(WarnKeys))]
+    public void SpeechCleanupPage_ExposesTheWarnPalette(string key) =>
+        AssertResolves(new SpeechCleanupSettingsView(), key);
+
+    [AvaloniaTheory]
+    [MemberData(nameof(WarnKeys))]
     public void TranscribeWindow_ExposesTheWarnPalette(string key) =>
         AssertResolves(new TranscribeWindow(), key);
 }

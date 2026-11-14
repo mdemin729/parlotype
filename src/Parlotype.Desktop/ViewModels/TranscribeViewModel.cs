@@ -56,6 +56,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private readonly LanguageRelationshipViewModel? _relationship;
     private readonly ISettingsService? _settings;
     private readonly IUserDialogService? _dialogService;
+    private readonly SpeechCleanupStateViewModel? _cleanupState;
     private readonly ILogger<TranscribeViewModel> _logger;
     private readonly object _activeEngineLock = new();
     private bool _hasLiveActiveEngine;
@@ -314,7 +315,8 @@ public partial class TranscribeViewModel : ViewModelBase
         LanguageRelationshipViewModel? relationship = null,
         ISettingsService? settings = null,
         IUserDialogService? dialogService = null,
-        ILogger<TranscribeViewModel>? logger = null)
+        ILogger<TranscribeViewModel>? logger = null,
+        SpeechCleanupStateViewModel? cleanupState = null)
     {
         _windowManager = windowManager;
         _pipeline = pipeline;
@@ -323,7 +325,17 @@ public partial class TranscribeViewModel : ViewModelBase
         _relationship = relationship;
         _settings = settings;
         _dialogService = dialogService;
+        _cleanupState = cleanupState;
         _logger = logger ?? NullLogger<TranscribeViewModel>.Instance;
+
+        if (_cleanupState is not null)
+        {
+            _cleanupState.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(SpeechCleanupStateViewModel.IsIndicatorVisible))
+                    OnPropertyChanged(nameof(HasCleanupIndicator));
+            };
+        }
 
         // This VM is not a settings section, so it has no OnCultureChanged hook
         // to override — subscribe directly, matching TranscribeViewModel's
@@ -502,6 +514,46 @@ public partial class TranscribeViewModel : ViewModelBase
         }
     }
 
+    // ----- Speech cleanup indicator (ADR-075) --------------------------------
+
+    /// <summary>The shared cleanup state; null in designer and legacy-test contexts.</summary>
+    public SpeechCleanupStateViewModel? CleanupState => _cleanupState;
+
+    /// <summary>
+    /// The indicator renders only once cleanup has been set up, so the widget
+    /// gains nothing for someone who never turned the feature on.
+    /// </summary>
+    public bool HasCleanupIndicator => _cleanupState is { IsIndicatorVisible: true };
+
+    /// <summary>
+    /// The indicator is also the switch. A click flips cleanup; when the model
+    /// or the server has gone missing a click cannot fix that, so it opens the
+    /// page that can. A recording in flight is stopped first, as for any other
+    /// settings change: the pipeline snapshots its settings at start.
+    /// </summary>
+    [RelayCommand]
+    private async Task ToggleCleanupAsync()
+    {
+        if (_cleanupState is not { } state)
+            return;
+
+        if (state.State == CleanupIndicatorState.Broken)
+        {
+            _windowManager.ShowSettings(SettingsSection.SpeechCleanup);
+            return;
+        }
+
+        try
+        {
+            if (await state.SetEnabledAsync(!state.IsEnabled))
+                await StopRecordingAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to toggle speech cleanup");
+        }
+    }
+
     [RelayCommand]
     private async Task TogglePlayAsync()
     {
@@ -570,6 +622,14 @@ public partial class TranscribeViewModel : ViewModelBase
     {
         try
         {
+            // The verdict on the previous recording's text does not carry over,
+            // and the model may have been deleted since the widget last looked.
+            if (_cleanupState is not null)
+            {
+                _cleanupState.ClearOutcome();
+                _ = _cleanupState.RefreshAsync();
+            }
+
             pipeline.TranscriptionAvailable += OnTranscriptionAvailable;
             pipeline.TranscriptionFailed += OnTranscriptionFailed;
             if (_audioLevelProvider is not null)
@@ -801,6 +861,14 @@ public partial class TranscribeViewModel : ViewModelBase
 
     private async void OnTranscriptionAvailable(object? sender, TranscriptionEventArgs e)
     {
+        // Why this text was or was not cleaned, for the widget's indicator
+        // (ADR-075). Posted: this handler runs on the pipeline's task.
+        if (_cleanupState is { } cleanupState)
+        {
+            var outcome = e.Result.CleanupOutcome;
+            Dispatcher.UIThread.Post(() => cleanupState.ReportOutcome(outcome));
+        }
+
         if (_textInjectionService is null || string.IsNullOrWhiteSpace(e.Result.Text))
             return;
 

@@ -1491,8 +1491,41 @@ Vaše nastavitve in ključi API ostanejo. Modeli se ob naslednjem narekovanju sa
   <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
     <value>Urejanje nareka izklopljeno</value>
   </data>
-  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
-    <value>Deluje samo z angleščino. Ko narekujete v drugem jeziku, ga izklopite.</value>
+  <data name="Settings_SpeechCleanup_LanguageNote" xml:space="preserve">
+    <value>Deluje samo z angleščino. Narek v drugem jeziku se vtipka brez sprememb.</value>
+    <comment>Shown under the speech cleanup switch. "Pasted as spoken" means the recognized text is inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_PausedNoteFormat" xml:space="preserve">
+    <value>Začasno ustavljeno: urejanje nareka deluje samo z angleščino. Jezik nareka: {0}.</value>
+    <comment>Shown under the speech cleanup switch while it is on but cannot run. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Off" xml:space="preserve">
+    <value>Urejanje nareka je izklopljeno. Kliknite, da ga vklopite.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_On" xml:space="preserve">
+    <value>Urejanje nareka je vklopljeno za angleško besedilo. Kliknite, da ga izklopite.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_PausedFormat" xml:space="preserve">
+    <value>Urejanje nareka je začasno ustavljeno: deluje samo z angleščino. Jezik nareka: {0}.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedNotEnglish" xml:space="preserve">
+    <value>Zadnji narek ni bil v angleščini, zato je bil vtipkan brez sprememb.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedTooLong" xml:space="preserve">
+    <value>Zadnji narek je bil za urejanje predolg, zato je bil vtipkan brez sprememb.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Failed" xml:space="preserve">
+    <value>Urejanje zadnjega nareka ni uspelo, zato je bil vtipkan brez sprememb.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Broken" xml:space="preserve">
+    <value>Urejanje nareka ne deluje. Kliknite, da odprete njegove nastavitve.</value>
+    <comment>Tooltip of a small icon button on the dictation widget, shown when the cleanup model or its server is missing.</comment>
   </data>
   <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
     <value>Vklop prenese model ({0}) in, če ni nameščen noben, strežnik llama.cpp. Pred vsakim prenosom boste vprašani.</value>

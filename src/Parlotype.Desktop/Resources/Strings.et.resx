@@ -1491,8 +1491,41 @@ Sinu seaded ja API-võtmed säilivad. Mudelid laaditakse järgmisel dikteerimise
   <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
     <value>Kõne korrastamine väljas</value>
   </data>
-  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
-    <value>Töötab ainult inglise keelega. Lülita see välja, kui dikteerid mõnes muus keeles.</value>
+  <data name="Settings_SpeechCleanup_LanguageNote" xml:space="preserve">
+    <value>Töötab ainult inglise keelega. Muus keeles dikteeritu kleebitakse muutmata kujul.</value>
+    <comment>Shown under the speech cleanup switch. "Pasted as spoken" means the recognized text is inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_PausedNoteFormat" xml:space="preserve">
+    <value>Peatatud: kõne korrastamine töötab ainult inglise keelega. Dikteerimise keel: {0}.</value>
+    <comment>Shown under the speech cleanup switch while it is on but cannot run. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Off" xml:space="preserve">
+    <value>Kõne korrastamine on väljas. Klõpsa, et see sisse lülitada.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_On" xml:space="preserve">
+    <value>Kõne korrastamine on ingliskeelse teksti jaoks sees. Klõpsa, et see välja lülitada.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_PausedFormat" xml:space="preserve">
+    <value>Kõne korrastamine on peatatud: see töötab ainult inglise keelega. Dikteerimise keel: {0}.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedNotEnglish" xml:space="preserve">
+    <value>Viimane dikteering polnud inglise keeles, seega kleebiti see muutmata kujul.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedTooLong" xml:space="preserve">
+    <value>Viimane dikteering oli kõne korrastamiseks liiga pikk, seega kleebiti see muutmata kujul.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Failed" xml:space="preserve">
+    <value>Kõne korrastamine ebaõnnestus viimase dikteeringu puhul, seega kleebiti see muutmata kujul.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Broken" xml:space="preserve">
+    <value>Kõne korrastamine ei tööta. Klõpsa, et avada selle seaded.</value>
+    <comment>Tooltip of a small icon button on the dictation widget, shown when the cleanup model or its server is missing.</comment>
   </data>
   <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
     <value>Sisselülitamisel laaditakse alla mudel ({0}) ja llama.cpp server, kui serverit pole veel paigaldatud. Iga allalaadimise eel küsitakse luba.</value>

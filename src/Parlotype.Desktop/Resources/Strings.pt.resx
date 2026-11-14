@@ -1491,8 +1491,41 @@ As definições e chaves de API são mantidas. Os modelos voltam a ser transferi
   <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
     <value>Polimento do ditado desativado</value>
   </data>
-  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
-    <value>Funciona apenas com inglês. Desative-o quando ditar noutro idioma.</value>
+  <data name="Settings_SpeechCleanup_LanguageNote" xml:space="preserve">
+    <value>Funciona apenas com inglês. O ditado noutro idioma é colado tal como foi dito.</value>
+    <comment>Shown under the speech cleanup switch. "Pasted as spoken" means the recognized text is inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_PausedNoteFormat" xml:space="preserve">
+    <value>Em pausa: o polimento do ditado funciona apenas com inglês. Idioma do ditado: {0}.</value>
+    <comment>Shown under the speech cleanup switch while it is on but cannot run. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Off" xml:space="preserve">
+    <value>O polimento do ditado está desativado. Clique para o ativar.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_On" xml:space="preserve">
+    <value>O polimento do ditado está ativado para texto em inglês. Clique para o desativar.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_PausedFormat" xml:space="preserve">
+    <value>O polimento do ditado está em pausa: funciona apenas com inglês. Idioma do ditado: {0}.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedNotEnglish" xml:space="preserve">
+    <value>O último ditado não estava em inglês, pelo que foi colado tal como foi dito.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedTooLong" xml:space="preserve">
+    <value>O último ditado era demasiado longo para o polimento do ditado, pelo que foi colado tal como foi dito.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Failed" xml:space="preserve">
+    <value>O polimento do ditado falhou da última vez, pelo que o texto foi colado tal como foi dito.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Broken" xml:space="preserve">
+    <value>O polimento do ditado não está a funcionar. Clique para abrir as definições.</value>
+    <comment>Tooltip of a small icon button on the dictation widget, shown when the cleanup model or its server is missing.</comment>
   </data>
   <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
     <value>Ativar esta opção transfere o modelo ({0}) e, se não houver nenhum instalado, um servidor llama.cpp. Cada transferência pede confirmação primeiro.</value>

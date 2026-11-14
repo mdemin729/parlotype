@@ -2,7 +2,9 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Styling;
 using Parlotype.Core.Settings;
+using Parlotype.Core.LlamaServer;
 using Parlotype.Core.Speech;
+using Parlotype.Core.TextProcessing;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.Views;
@@ -137,6 +139,84 @@ public class TranscribeWindowScreenshotTests : IClassFixture<TranscribeScreensho
             "Translation is on but the Whisper model can't translate: the connector turns amber " +
             "at \"=\" and the target chip mirrors the source, so the strip never advertises a " +
             "translation that will not happen (ADR-061).");
+    }
+
+    /// <summary>
+    /// A widget whose cleanup model and server are installed, so the indicator
+    /// shows (ADR-075). Returns the shared state for the scenario to drive.
+    /// </summary>
+    private static async Task<(TranscribeViewModel Vm, SpeechCleanupStateViewModel State)> CreateCleanupVmAsync(
+        SpeechEngine engine, bool enabled)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechEngine, engine.ToString(), ct);
+        await settings.SetAsync(SettingsKeys.SpeechCleanupEnabled, enabled.ToString(), ct);
+
+        var model = new MockSpeechCleanupModelInstaller { Installed = true };
+        var registry = new MockLlamaServerRegistry();
+        registry.AddManaged("b200-win-cpu-x64");
+        await registry.SetActiveAsync("b200-win-cpu-x64", LlamaServerSource.Managed, ct);
+
+        var relationship = new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService());
+        await relationship.InitializeAsync(ct);
+        var state = new SpeechCleanupStateViewModel(
+            settings, new MockSpeechCleanupService(model, registry), relationship);
+        await state.Initialization;
+
+        var vm = new TranscribeViewModel(
+            new MockWindowManager(), relationship: relationship, cleanupState: state);
+        return (vm, state);
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_Cleanup_On()
+    {
+        var (vm, state) = await CreateCleanupVmAsync(SpeechEngine.Parakeet, enabled: true);
+
+        Assert.Equal(CleanupIndicatorState.On, state.State);
+        await AddBothThemesAsync(vm,
+            "Transcribe — Speech cleanup on",
+            "Cleanup is set up and on: an accent sparkle sits between the grip and the close button. " +
+            "The compact Parakeet widget keeps its height.");
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_Cleanup_Off()
+    {
+        var (vm, state) = await CreateCleanupVmAsync(SpeechEngine.Parakeet, enabled: false);
+
+        Assert.Equal(CleanupIndicatorState.Off, state.State);
+        await AddBothThemesAsync(vm,
+            "Transcribe — Speech cleanup off",
+            "Set up but switched off: the sparkle is dimmed. One click turns cleanup back on.");
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_Cleanup_PausedForLanguage()
+    {
+        var (vm, state) = await CreateCleanupVmAsync(SpeechEngine.Whisper, enabled: true);
+        vm.Relationship!.SelectSource("ru");
+
+        Assert.Equal(CleanupIndicatorState.Paused, state.State);
+        await AddBothThemesAsync(vm,
+            "Transcribe — Speech cleanup paused",
+            "The dictation language is Russian, so the English-only cleanup will not run: the sparkle " +
+            "turns amber, the same signal a paused translation gives on the strip below (ADR-075).");
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_Cleanup_LastDictationSkipped_WithCloudBadge()
+    {
+        var (vm, state) = await CreateCleanupVmAsync(SpeechEngine.OpenAiCompatible, enabled: true);
+        vm.SetActiveEngine(SpeechEngine.OpenAiCompatible);
+        state.ReportOutcome(SpeechCleanupOutcome.SkippedNotEnglish);
+
+        Assert.Equal(CleanupIndicatorState.Skipped, state.State);
+        await AddBothThemesAsync(vm,
+            "Transcribe — Last dictation pasted as spoken, cloud engine",
+            "The header at its fullest: Cloud badge on the left, grip, amber sparkle and close button. " +
+            "The last dictation was not English and went in unchanged.");
     }
 
     [AvaloniaFact]

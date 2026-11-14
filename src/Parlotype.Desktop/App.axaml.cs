@@ -396,6 +396,8 @@ public class App : Application
         services.AddSingleton<CloudProviderSettingsViewModel>();
         services.AddSingleton<PromptSettingsViewModel>();
         services.AddSingleton<LlamaCppSettingsViewModel>();
+        // Shared by the Speech cleanup page and the Transcribe widget's indicator (ADR-075).
+        services.AddSingleton<SpeechCleanupStateViewModel>();
         services.AddSingleton<SpeechCleanupSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();

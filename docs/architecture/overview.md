@@ -103,7 +103,8 @@ Rules that hold across engines:
   (`ISpeechCleanupService`, a local model that rewrites the transcript as clean written
   text, [ADR-073](../decisions/073-speech-cleanup-s1-mini.md)), then
   `TranscriptionTextProcessor` (punctuation stripping, profanity mask). Cleanup never blocks
-  a dictation: any failure pastes the raw text.
+  a dictation: any failure pastes the raw text. It is paused while the output language is
+  not English ([ADR-075](../decisions/075-language-aware-speech-cleanup.md)).
 - **Each engine has an utterance ceiling** (`SpeechEngineLimits`): the longest audio one
   recognizer call may receive. For Parakeet it is a correctness limit, not a cost one. See
   [audio-pipeline.md](audio-pipeline.md#utterance-ceilings).

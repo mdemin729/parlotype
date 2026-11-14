@@ -3,6 +3,7 @@ using Parlotype.Core.LlamaServer;
 using Parlotype.Core.Settings;
 using Parlotype.Core.TextProcessing;
 using Parlotype.Desktop.Tests.Mocks;
+using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.ViewModels.Settings;
 using Parlotype.Desktop.Views.Settings;
 using Xunit;
@@ -102,6 +103,46 @@ public class SpeechCleanupScreenshotTests : IClassFixture<SpeechCleanupScreensho
                 new ScenarioStep(
                     "Switch off. Status names the model size and the llama.cpp server. The model row " +
                     "shows 'S1-mini by Superwhisper', 462 MB and a Download button. Semi-formal is selected.",
+                    screenshot),
+            ]));
+    }
+
+    [AvaloniaFact]
+    public async Task Scenario_PausedForTheDictationLanguage()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechCleanupEnabled, bool.TrueString, ct);
+        await settings.SetAsync(SettingsKeys.SpeechEngine, "Whisper", ct);
+        await settings.SetAsync(SettingsKeys.SelectedSourceLanguage, "ru", ct);
+
+        var model = new MockSpeechCleanupModelInstaller { Installed = true };
+        var registry = new MockLlamaServerRegistry();
+        registry.AddManaged("b200-win-cpu-x64");
+        await registry.SetActiveAsync("b200-win-cpu-x64", LlamaServerSource.Managed, ct);
+        var cleanup = new MockSpeechCleanupService(model, registry);
+
+        var relationship = new LanguageRelationshipViewModel(settings, new MockKeyboardLayoutService());
+        await relationship.InitializeAsync(ct);
+        var state = new SpeechCleanupStateViewModel(settings, cleanup, relationship);
+        await state.Initialization;
+        var vm = new SpeechCleanupSettingsViewModel(settings, cleanup, model, registry, state: state);
+        await vm.Initialization;
+        await SettleAsync();
+
+        var view = new SpeechCleanupSettingsView();
+        var screenshot = await ScreenshotHelper.CaptureBase64Async(view, vm);
+
+        Assert.True(vm.IsEnabled);
+        Assert.True(vm.IsPausedForLanguage);
+        _report.AddScenario(new Scenario(
+            "On, paused for the dictation language",
+            "Whisper is set to Russian. The switch stays on; the note under it turns amber and says " +
+            "cleanup is paused and which language caused it (ADR-075).",
+            [
+                new ScenarioStep(
+                    "Switch on, status 'Ready', and an amber line: 'Paused: speech cleanup works with " +
+                    "English only. Dictation language: Russian.'",
                     screenshot),
             ]));
     }

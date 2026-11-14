@@ -45,9 +45,14 @@ flowchart LR
 4. **Recognition.** The speech-only samples go to the active recognizer (see
    [overview.md](overview.md#speech-engines)). When speech cleanup is on
    ([ADR-073](../decisions/073-speech-cleanup-s1-mini.md)) the text is then rewritten by a
-   local model; the model starts loading when the recording starts, and any failure,
-   timeout, non-English text or implausible result leaves the raw text in place. Last comes
-   the shared text post-processor.
+   local, English-only model. `CleanupLanguagePolicy` works out the output language from
+   the engine and the language settings when the recording starts
+   ([ADR-075](../decisions/075-language-aware-speech-cleanup.md)): if it is not English the
+   session is paused and the model is not loaded; if it is unknown, each utterance is
+   judged by the language the recognizer reports or, failing that, by the text. Any
+   failure, timeout, non-English text or implausible result leaves the raw text in place,
+   and `TranscriptionResult.CleanupOutcome` says which. Last comes the shared text
+   post-processor.
 5. **Injection.** `TranscribeViewModel` handles `TranscriptionAvailable` and calls
    `ITextInjectionService`. The default `ClipboardTextInjectionService` saves the
    clipboard text, sets the transcript with the Windows clipboard-history exclusion

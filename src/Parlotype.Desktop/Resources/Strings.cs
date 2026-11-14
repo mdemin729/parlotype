@@ -1223,8 +1223,8 @@ public static class Strings
     /// <summary>E-mail layout: greeting, body and sign-off on separate lines</summary>
     public static string Settings_SpeechCleanup_EmailOn => Localizer.Lookup(nameof(Settings_SpeechCleanup_EmailOn));
 
-    /// <summary>Works with English only. Turn it off when you dictate in another language.</summary>
-    public static string Settings_SpeechCleanup_EnglishOnlyNote => Localizer.Lookup(nameof(Settings_SpeechCleanup_EnglishOnlyNote));
+    /// <summary>Works with English only. Dictation in another language is pasted as spoken.</summary>
+    public static string Settings_SpeechCleanup_LanguageNote => Localizer.Lookup(nameof(Settings_SpeechCleanup_LanguageNote));
 
     /// <summary>Spoken lists stay as sentences</summary>
     public static string Settings_SpeechCleanup_ListsOff => Localizer.Lookup(nameof(Settings_SpeechCleanup_ListsOff));
@@ -1234,6 +1234,12 @@ public static class Strings
 
     /// <summary>Model</summary>
     public static string Settings_SpeechCleanup_ModelHeading => Localizer.Lookup(nameof(Settings_SpeechCleanup_ModelHeading));
+
+    /// <summary>Paused: speech cleanup works with English only. Dictation language: {0}.</summary>
+    public static string Settings_SpeechCleanup_PausedNoteFormat => Localizer.Lookup(nameof(Settings_SpeechCleanup_PausedNoteFormat));
+    /// <summary>Paused: speech cleanup works with English only. Dictation language: {0}.</summary>
+    public static string Format_Settings_SpeechCleanup_PausedNoteFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_SpeechCleanup_PausedNoteFormat, arg0);
 
     /// <summary>Not working: the model or the llama.cpp server is missing. Turn the switch off and on again to reinstall.</summary>
     public static string Settings_SpeechCleanup_Status_Broken => Localizer.Lookup(nameof(Settings_SpeechCleanup_Status_Broken));
@@ -1462,6 +1468,30 @@ public static class Strings
 
     /// <summary>Parlotype — Settings</summary>
     public static string Settings_WindowTitle => Localizer.Lookup(nameof(Settings_WindowTitle));
+
+    /// <summary>Speech cleanup is not working. Click to open its settings.</summary>
+    public static string Transcribe_Cleanup_Tooltip_Broken => Localizer.Lookup(nameof(Transcribe_Cleanup_Tooltip_Broken));
+
+    /// <summary>Speech cleanup failed on the last dictation, so it was pasted as spoken.</summary>
+    public static string Transcribe_Cleanup_Tooltip_Failed => Localizer.Lookup(nameof(Transcribe_Cleanup_Tooltip_Failed));
+
+    /// <summary>Speech cleanup is off. Click to turn it on.</summary>
+    public static string Transcribe_Cleanup_Tooltip_Off => Localizer.Lookup(nameof(Transcribe_Cleanup_Tooltip_Off));
+
+    /// <summary>Speech cleanup is on for English text. Click to turn it off.</summary>
+    public static string Transcribe_Cleanup_Tooltip_On => Localizer.Lookup(nameof(Transcribe_Cleanup_Tooltip_On));
+
+    /// <summary>Speech cleanup is paused: it works with English only. Dictation language: {0}.</summary>
+    public static string Transcribe_Cleanup_Tooltip_PausedFormat => Localizer.Lookup(nameof(Transcribe_Cleanup_Tooltip_PausedFormat));
+    /// <summary>Speech cleanup is paused: it works with English only. Dictation language: {0}.</summary>
+    public static string Format_Transcribe_Cleanup_Tooltip_PausedFormat(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Transcribe_Cleanup_Tooltip_PausedFormat, arg0);
+
+    /// <summary>The last dictation was not in English, so it was pasted as spoken.</summary>
+    public static string Transcribe_Cleanup_Tooltip_SkippedNotEnglish => Localizer.Lookup(nameof(Transcribe_Cleanup_Tooltip_SkippedNotEnglish));
+
+    /// <summary>The last dictation was too long for speech cleanup, so it was pasted as spoken.</summary>
+    public static string Transcribe_Cleanup_Tooltip_SkippedTooLong => Localizer.Lookup(nameof(Transcribe_Cleanup_Tooltip_SkippedTooLong));
 
     /// <summary>Cloud</summary>
     public static string Transcribe_CloudBadge => Localizer.Lookup(nameof(Transcribe_CloudBadge));

@@ -69,8 +69,10 @@ although the model card shows it as bullets.
 
 German typed without umlauts came back with a sentence break in the wrong place. The model
 does not detect that the input is outside its training; the caller has to keep such text
-away from it (`SpeechCleanupGate.IsLikelyEnglish`, a script test that Latin-script languages
-with few diacritics get past).
+away from it. `CleanupLanguagePolicy` does that from the language settings and the
+recognizer's detected language; where neither says, `SpeechCleanupGate.IsLikelyEnglish`
+judges the text by script and function words, which a short phrase in another Latin-script
+language can still get past ([ADR-075](../decisions/075-language-aware-speech-cleanup.md)).
 
 ## Licence
 
