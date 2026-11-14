@@ -168,3 +168,4 @@ Used the actual Polish Windows 10/11 UI wording rather than literal translations
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Domyślny (dosłowna transkrypcja)"** — verbatim/word-for-word rendered as *dosłowna (literal)*, paired with the already-established *transkrypcja* for transcription; no new terms introduced.
+- `Settings_SpeechCleanup_Title` ("Speech cleanup") → **"Redakcja tekstu"** — *redakcja* (editing) rather than *czyszczenie*, which reads as deleting data; used in every speech-cleanup string, including `Settings_LlamaCpp_Description`. "Writing style" → **"Styl tekstu"**, styles as masculine adjectives agreeing with *styl*: Swobodny / Półswobodny / Półformalny / Formalny. English "contractions" → *formy skrócone jak „I'm”*.

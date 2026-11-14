@@ -203,6 +203,7 @@ inside `Settings_Prompts_Help_BuiltInBody` are preserved verbatim, and no value 
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standaard (woordelijke transcriptie)"** — verbatim/word-for-word rendered as *woordelijke (word-for-word)*, paired with the already-established *transcriptie* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`, a local model rewriting dictated text as clean written English) → **"tekstopschoning"** (de) — not *opruimen*, which Windows uses for deleting data (*Schijfopruiming*). **writing style** → **"schrijfstijl"**; the four styles are *Informeel / Licht informeel / Licht formeel / Formeel*. English contractions → **samentrekkingen**; bullet points → **opsommingstekens**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

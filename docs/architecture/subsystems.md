@@ -259,8 +259,8 @@ cannot ask. The user records the choice in advance at Settings → Application �
 (`SettingsKeys.UninstallRemovesUserData`, default false), and the hook executes it. The
 hook parses `settings.json` itself, since there is no DI; anything ambiguous reads as
 false, so data is deleted only on an unambiguous opt-in. "Delete downloaded models…"
-first unloads the recognizer and stops `llama-server`, because Windows locks loaded model
-files. Windows only; macOS and Linux have no uninstall hooks.
+first unloads the recognizer and stops every `llama-server` the app started (the Gemma 4
+sidecar and the speech cleanup one), because Windows locks loaded model files. Windows only; macOS and Linux have no uninstall hooks.
 
 ### Updates
 
@@ -272,7 +272,8 @@ README and on Settings → Application → Updates, and can be turned off there.
 portable builds are not installed, so the service no-ops for them.
 
 Every other request follows a user action: opening Settings (the llama.cpp release list),
-a model or `llama-server` download, a cloud engine, or Send in the feedback window.
+a model or `llama-server` download (including the ones turning speech cleanup on asks for),
+a cloud engine, or Send in the feedback window.
 [`../network-requests.md`](../network-requests.md) is the full list. It, the README's
 Updates section and Settings → Updates must say the same thing, and a new outbound request
 needs an ADR.

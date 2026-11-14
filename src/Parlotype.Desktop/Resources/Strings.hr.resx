@@ -866,7 +866,7 @@ Vaše postavke i API ključevi zadržavaju se. Modeli se ponovno preuzimaju auto
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Pregledajte, instalirajte i upravljajte inačicama llama-servera. Aktivna instalacija pokreće prepisivanje modulom Gemma 4.</value>
+    <value>Pregledajte, instalirajte i upravljajte inačicama llama-servera. Aktivna instalacija pokreće prepisivanje modulom Gemma 4 i uređivanje diktata.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1465,5 +1465,98 @@ Vaše postavke i API ključevi zadržavaju se. Modeli se ponovno preuzimaju auto
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Vaša je poruka poslana – hvala što pomažete poboljšati Parlotype. Referentni broj: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>Preuzimanje „{0}”…</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>Model „{0}” uspješno je preuzet.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>Preuzimanje nije uspjelo: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Uređivanje diktata</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Prije upisivanja preoblikuje izdiktirani tekst u uredan pisani tekst: uklanja poštapalice i prekinute početke, razrješava mjesta na kojima ste se ispravili te ispravno zapisuje brojeve, datume i adrese e-pošte. To radi mali model na vašem računalu; nijedan tekst ga ne napušta.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Uređivanje diktata uključeno</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Uređivanje diktata isključeno</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Radi samo s engleskim. Isključite ga kad diktirate na drugom jeziku.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Uključivanjem se preuzima model ({0}) i, ako nijedan nije instaliran, llama.cpp poslužitelj. Za svako preuzimanje najprije se traži potvrda.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Spremno: model i llama.cpp poslužitelj su instalirani.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Ne radi: nedostaje model ili llama.cpp poslužitelj. Za ponovnu instalaciju isključite pa ponovno uključite prekidač.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Postavljanje nije dovršeno pa uređivanje diktata ostaje isključeno.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Stil pisanja</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Neformalan</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Poluneformalan</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Poluformalan</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Formalan</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Sve malim slovima, bez apostrofa, formulacije kao u govoru.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Formulacije kao u govoru; dodani apostrofi i veliko „I”.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Standardni pisani engleski. Skraćeni oblici ostaju, sleng se ublažava. Preporučeno.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Standardni pisani engleski, skraćeni oblici ispisani u cijelosti.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Izgovoreni popisi postaju natuknice</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Izgovoreni popisi ostaju u rečenicama</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>Izgled e-pošte: pozdrav, sadržaj i potpis u zasebnim recima</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Običan izgled, bez oblikovanja e-pošte</value>
   </data>
 </root>

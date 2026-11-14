@@ -866,7 +866,7 @@ Deine Einstellungen und API-Schlüssel bleiben erhalten. Modelle werden beim nä
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Durchsuche, installiere und verwalte llama-server-Builds. Die aktive Installation betreibt die Gemma-4-Transkription.</value>
+    <value>Durchsuche, installiere und verwalte llama-server-Builds. Die aktive Installation betreibt die Gemma-4-Transkription und die Textaufbereitung.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1465,5 +1465,98 @@ Deine Einstellungen und API-Schlüssel bleiben erhalten. Modelle werden beim nä
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Deine Nachricht wurde gesendet – danke, dass du hilfst, Parlotype besser zu machen. Referenz: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>„{0}“ wird heruntergeladen …</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>„{0}“ erfolgreich heruntergeladen.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>Download fehlgeschlagen: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Textaufbereitung</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Schreibt dein Diktat vor dem Einfügen in sauberen Schrifttext um: Füllwörter und Fehlstarts werden entfernt, Selbstkorrekturen aufgelöst und Zahlen, Datumsangaben und E-Mail-Adressen korrekt geschrieben. Das erledigt ein kleines Modell auf deinem Computer; kein Text verlässt ihn.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Textaufbereitung an</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Textaufbereitung aus</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Funktioniert nur mit Englisch. Schalte sie aus, wenn du in einer anderen Sprache diktierst.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Beim Einschalten werden das Modell ({0}) und, falls keiner installiert ist, ein llama.cpp-Server heruntergeladen. Vor jedem Download wird nachgefragt.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Bereit: Das Modell und ein llama.cpp-Server sind installiert.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Funktioniert nicht: Das Modell oder der llama.cpp-Server fehlt. Schalte den Schalter aus und wieder ein, um neu zu installieren.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Die Einrichtung wurde nicht abgeschlossen, daher bleibt die Textaufbereitung aus.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Modell</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Schreibstil</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Locker</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Eher locker</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Eher formell</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Formell</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Alles kleingeschrieben, keine Apostrophe, Wortlaut wie gesprochen.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Wortlaut wie gesprochen; Apostrophe ergänzt und „I“ großgeschrieben.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Englische Standardschriftsprache. Kurzformen bleiben, Slang wird geglättet. Empfohlen.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Englische Standardschriftsprache mit ausgeschriebenen Kurzformen.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Gesprochene Aufzählungen werden zu Stichpunkten</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Gesprochene Aufzählungen bleiben Sätze</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>E-Mail-Layout: Anrede, Text und Grußformel in eigenen Zeilen</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Einfaches Layout, keine E-Mail-Formatierung</value>
   </data>
 </root>

@@ -237,6 +237,7 @@ Used real Estonian Windows 10/11 UI wording rather than literal translations for
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Vaikimisi (sõnasõnaline transkriptsioon)"** — verbatim/word-for-word rendered as *sõnasõnaline (word-for-word)*, paired with the already-established *transkriptsioon* for transcription; no new terms introduced.
+- "Speech cleanup" (the local model that tidies dictated text) → **"kõne korrastamine"** (*korrastama*, put in order — not *puhastama*, which could suggest deleting). Toggles follow the existing `sees` / `väljas` pattern. "Writing style" → **kirjutamisstiil**; the four styles → *Vaba*, *Pigem vaba*, *Pigem ametlik*, *Ametlik*; English contractions → *lühivormid*.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

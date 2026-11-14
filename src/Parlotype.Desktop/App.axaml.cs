@@ -10,6 +10,7 @@ using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
 using Parlotype.Core.LlamaServer;
 using Parlotype.Core.TextInjection;
+using Parlotype.Core.TextProcessing;
 using Parlotype.Core.Updates;
 using Parlotype.Desktop.Onboarding;
 using Parlotype.Desktop.Services;
@@ -106,6 +107,12 @@ public class App : Application
             var dataSettings = _services.GetService<DataSettingsViewModel>();
             if (dataSettings is not null)
                 await dataSettings.PendingWrite;
+
+            // Stop the speech cleanup server first: it is a quick kill, and it
+            // must not be left running if the recognizer teardown below stalls.
+            var cleanup = _services.GetService<ISpeechCleanupService>();
+            if (cleanup is not null)
+                await cleanup.UnloadAsync();
 
             // Stop the llama-server sidecar (if running) before exiting
             var recognizer = _services.GetService<ISpeechRecognizer>();
@@ -366,6 +373,7 @@ public class App : Application
             services.AddSingleton<ITextInjectionService, ClipboardTextInjectionService>();
 
         services.AddSingleton<Gemma4ModelDownloadDialogService>();
+        services.AddSingleton<ISpeechCleanupModelInstaller, SpeechCleanupModelDownloadDialogService>();
         services.AddSingleton<ParakeetModelDownloadDialogService>();
         // Override Platform's headless IParakeetModelProvider with the dialog
         // wrapper (last registration wins) so the recognizer's first-use model
@@ -388,6 +396,7 @@ public class App : Application
         services.AddSingleton<CloudProviderSettingsViewModel>();
         services.AddSingleton<PromptSettingsViewModel>();
         services.AddSingleton<LlamaCppSettingsViewModel>();
+        services.AddSingleton<SpeechCleanupSettingsViewModel>();
         services.AddSingleton<HotkeySettingsViewModel>();
         services.AddSingleton<ThemeSettingsViewModel>();
         services.AddSingleton<InterfaceLanguageSettingsViewModel>();

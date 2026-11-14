@@ -866,7 +866,7 @@ Jūsu iestatījumi un API atslēgas tiks saglabāti. Modeļi tiks lejupielādēt
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Pārlūkojiet, instalējiet un pārvaldiet llama-server versijas. Aktīvā instalācija darbina Gemma 4 transkripciju.</value>
+    <value>Pārlūkojiet, instalējiet un pārvaldiet llama-server versijas. Aktīvā instalācija darbina Gemma 4 transkripciju un teksta sakopšanu.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1465,5 +1465,98 @@ Jūsu iestatījumi un API atslēgas tiks saglabāti. Modeļi tiks lejupielādēt
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Jūsu ziņa ir nosūtīta — paldies, ka palīdzat uzlabot Parlotype. Numurs: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>Lejupielādē „{0}”…</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>Modelis „{0}” veiksmīgi lejupielādēts.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>Lejupielāde neizdevās: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Teksta sakopšana</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Pirms ielīmēšanas pārraksta diktēto kārtīgā rakstītā tekstā: tiek izņemti pildvārdi un nepabeigtas frāzes, ņemti vērā runas laikā izdarītie labojumi, un skaitļi, datumi un e-pasta adreses tiek uzrakstīti pareizi. To veic neliels modelis jūsu datorā; neviens teksts to neatstāj.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Teksta sakopšana ieslēgta</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Teksta sakopšana izslēgta</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Darbojas tikai ar angļu valodu. Izslēdziet, kad diktējat citā valodā.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Ieslēdzot tiek lejupielādēts modelis ({0}) un llama.cpp serveris, ja tas vēl nav instalēts. Pirms katras lejupielādes tiek jautāts.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Gatavs: modelis un llama.cpp serveris ir instalēti.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Nedarbojas: trūkst modeļa vai llama.cpp servera. Lai instalētu atkārtoti, izslēdziet un vēlreiz ieslēdziet slēdzi.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Iestatīšana netika pabeigta, tāpēc teksta sakopšana paliek izslēgta.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Modelis</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Rakstības stils</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Brīvs</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Daļēji brīvs</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Daļēji formāls</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Formāls</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Tikai mazie burti, bez apostrofiem, formulējums kā runāts.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Formulējums kā runāts; pievienoti apostrofi, „I” ar lielo burtu.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Standarta rakstu angļu valoda. Saīsinātās formas paliek, slengs tiek nogludināts. Ieteicams.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Standarta rakstu angļu valoda bez saīsinātajām formām.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Diktēti saraksti kļūst par aizzīmju sarakstiem</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Diktēti saraksti paliek kā teikumi</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>E-pasta izkārtojums: sveiciens, pamatteksts un nobeigums atsevišķās rindās</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Vienkāršs izkārtojums bez e-pasta formatējuma</value>
   </data>
 </root>

@@ -866,7 +866,7 @@ Vaše nastavení a klíče API zůstanou zachovány. Modely se při dalším dik
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Procházejte, instalujte a spravujte sestavení llama-server. Aktivní instalace pohání přepis Gemma 4.</value>
+    <value>Procházejte, instalujte a spravujte sestavení llama-server. Aktivní instalace pohání přepis Gemma 4 a úpravu diktátu.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1465,5 +1465,98 @@ Vaše nastavení a klíče API zůstanou zachovány. Modely se při dalším dik
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Zpráva byla odeslána – děkujeme, že pomáháte Parlotype vylepšovat. Číslo zprávy: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>Stahuje se „{0}“…</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>Model „{0}“ byl úspěšně stažen.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>Stažení selhalo: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Úprava diktátu</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Upraví nadiktovaný text do čisté psané podoby, než se napíše: odstraní výplňová slova a přerušené začátky, vyřeší místa, kde jste se opravili, a čísla, data a e-mailové adresy zapíše správně. Dělá to malý model ve vašem počítači; žádný text ho neopustí.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Úprava diktátu zapnuta</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Úprava diktátu vypnuta</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Funguje jen s angličtinou. Když diktujete v jiném jazyce, vypněte ji.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Zapnutím se stáhne model ({0}) a, není-li žádný nainstalován, také server llama.cpp. Každé stažení se nejprve potvrzuje.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Připraveno: model i server llama.cpp jsou nainstalovány.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Nefunguje: chybí model nebo server llama.cpp. Pro přeinstalaci přepínač vypněte a znovu zapněte.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Instalace nebyla dokončena, úprava diktátu proto zůstává vypnutá.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Styl psaní</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Neformální</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Spíše neformální</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Spíše formální</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Formální</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Vše malými písmeny, bez apostrofů, formulace jako v řeči.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Formulace jako v řeči; doplněné apostrofy a velké „I“.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Spisovná psaná angličtina. Stažené tvary zůstanou, slang se uhladí. Doporučeno.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Spisovná psaná angličtina, stažené tvary se rozepíší.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Mluvené výčty se převedou na odrážky</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Mluvené výčty zůstanou ve větách</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>Formát e-mailu: oslovení, text a podpis na samostatných řádcích</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Prostý formát bez úprav pro e-mail</value>
   </data>
 </root>

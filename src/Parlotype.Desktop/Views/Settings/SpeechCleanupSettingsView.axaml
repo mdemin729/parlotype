@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Parlotype.Desktop.ViewModels"
+             xmlns:vms="using:Parlotype.Desktop.ViewModels.Settings"
+             xmlns:loc="using:Parlotype.Desktop.Markup"
+             x:Class="Parlotype.Desktop.Views.Settings.SpeechCleanupSettingsView"
+             x:DataType="vms:SpeechCleanupSettingsViewModel"
+             x:CompileBindings="True">
+    <StackPanel Spacing="16">
+        <TextBlock Text="{loc:Tr Settings_SpeechCleanup_Title}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{loc:Tr Settings_SpeechCleanup_Description}"
+                   Opacity="0.7" TextWrapping="Wrap" />
+
+        <!-- The switch is the whole setup: it fetches what is missing, then turns on. -->
+        <StackPanel Spacing="4">
+            <ToggleSwitch IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                          IsEnabled="{Binding CanChange}"
+                          OnContent="{loc:Tr Settings_SpeechCleanup_ToggleOn}"
+                          OffContent="{loc:Tr Settings_SpeechCleanup_ToggleOff}" />
+            <TextBlock Text="{Binding StatusText}"
+                       Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding ErrorDetail}"
+                       IsVisible="{Binding ErrorDetail, Converter={x:Static ObjectConverters.IsNotNull}}"
+                       Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+            <TextBlock Text="{loc:Tr Settings_SpeechCleanup_EnglishOnlyNote}"
+                       Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Model -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="{loc:Tr Settings_SpeechCleanup_ModelHeading}"
+                       FontWeight="SemiBold" FontSize="14" />
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="{Binding ModelName}"
+                               FontSize="14" VerticalAlignment="Center" />
+                    <TextBlock Text="{loc:Tr Settings_Model_Installed}"
+                               FontSize="12"
+                               Foreground="{DynamicResource SystemAccentColor}"
+                               VerticalAlignment="Center"
+                               IsVisible="{Binding IsModelInstalled}" />
+                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding ModelSize}"
+                           FontSize="13" Opacity="0.5"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0" />
+                <Button Grid.Column="2"
+                        Content="{loc:Tr Settings_Model_DownloadButton}"
+                        Margin="12,0,0,0"
+                        VerticalAlignment="Center"
+                        Command="{Binding DownloadModelCommand}"
+                        IsEnabled="{Binding CanChange}"
+                        IsVisible="{Binding !IsModelInstalled}" />
+                <Button Grid.Column="3"
+                        Content="{loc:Tr Settings_Model_DeleteButton}"
+                        Margin="12,0,0,0"
+                        VerticalAlignment="Center"
+                        Command="{Binding DeleteModelCommand}"
+                        IsEnabled="{Binding CanChange}"
+                        IsVisible="{Binding IsModelInstalled}" />
+            </Grid>
+        </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <!-- Writing style -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="{loc:Tr Settings_SpeechCleanup_StyleHeading}"
+                       FontWeight="SemiBold" FontSize="14" />
+            <ItemsControl ItemsSource="{Binding StylingOptions}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CleanupStylingDisplayItem">
+                        <Button HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Background="Transparent"
+                                Padding="12,8"
+                                Margin="0,2"
+                                Command="{Binding SelectCommand}"
+                                CommandParameter="{Binding Styling}">
+                            <Grid ColumnDefinitions="11,*" RowDefinitions="Auto,Auto">
+                                <Border Grid.Column="0" Grid.RowSpan="2"
+                                        Width="3" Height="16" CornerRadius="1.5"
+                                        Background="{DynamicResource SystemAccentColor}"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Margin="0,4,0,0"
+                                        IsVisible="{Binding IsSelected}" />
+                                <TextBlock Grid.Column="1" Grid.Row="0"
+                                           Text="{Binding DisplayName}"
+                                           FontSize="14" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Grid.Row="1"
+                                           Text="{Binding Description}"
+                                           FontSize="12" Opacity="0.6"
+                                           TextWrapping="Wrap"
+                                           Margin="0,2,0,0" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+
+        <ToggleSwitch IsChecked="{Binding ListsEnabled, Mode=TwoWay}"
+                      OnContent="{loc:Tr Settings_SpeechCleanup_ListsOn}"
+                      OffContent="{loc:Tr Settings_SpeechCleanup_ListsOff}" />
+
+        <ToggleSwitch IsChecked="{Binding EmailLayoutEnabled, Mode=TwoWay}"
+                      OnContent="{loc:Tr Settings_SpeechCleanup_EmailOn}"
+                      OffContent="{loc:Tr Settings_SpeechCleanup_EmailOff}" />
+    </StackPanel>
+</UserControl>

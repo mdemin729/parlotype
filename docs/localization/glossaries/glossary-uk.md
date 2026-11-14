@@ -193,3 +193,4 @@ mixed-script regex scan) beyond the intended never-translate identifiers.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"За замовчуванням (дослівне розпізнавання)"** — verbatim/word-for-word rendered as *дослівне (literal)*, paired with the already-established *розпізнавання* for transcription; no new terms introduced.
+- `Settings_SpeechCleanup_Title` ("Speech cleanup") → **"Редагування тексту"** — *редагування* (editing) rather than *очищення*, which reads as deleting data; used in every speech-cleanup string, including `Settings_LlamaCpp_Description`. "Writing style" → **"Стиль тексту"**, styles as masculine adjectives agreeing with *стиль*: Розмовний / Напіврозмовний / Напівофіційний / Офіційний. English "contractions" → *скорочення на кшталт «I'm»* (example added for clarity).

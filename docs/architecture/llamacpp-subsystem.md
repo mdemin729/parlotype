@@ -1,28 +1,30 @@
 # llama.cpp Subsystem Architecture
 
 > **Scope:** This document describes the managed `llama-server` subsystem
-> and its consumers. Today there is one consumer
-> (`LlamaCppSpeechRecognizer` for Gemma 4 transcription); a future
-> post-processing consumer (translation, stylisation, grammar correction,
-> summarisation on a non-Gemma local LLM) will share the same installed
-> binary, settings, and lifecycle.
+> and its two consumers: `LlamaCppSpeechRecognizer` (Gemma 4
+> transcription) and `LlamaServerSpeechCleanupService` (speech cleanup
+> with S1-mini, ADR-073). They share the installed binary and the
+> active-install selection. Each runs its **own** server process, because
+> a `llama-server` hosts one model and they need different ones.
 >
 > The server-side components (catalog, installer, registry, lifecycle,
 > settings) live under `Parlotype.Core.LlamaServer` /
 > `Parlotype.Platform.LlamaServer` and are deliberately
 > workload-agnostic — they were moved out of `Speech.*` in ADR-027 so a
-> second consumer can plug in cleanly. The speech consumer
-> (`LlamaCppSpeechRecognizer`) stays in `Parlotype.Platform.Speech`.
+> second consumer could plug in cleanly. The speech consumer stays in
+> `Parlotype.Platform.Speech`; the cleanup consumer lives in
+> `Parlotype.Platform.TextProcessing`.
 >
-> This document covers component layout (split into **Server-side** and
-> **Consumers**), engine selection, the lifecycle of the spawned/adopted
-> server process, the HTTP request contract for the speech consumer,
-> configuration surface, and failure modes. The final two sections cover
-> server-installation lifecycle (ADR-026) and neutral observations.
+> Sections 2 to 11 describe the **speech** consumer: engine selection, the
+> lifecycle of its spawned/adopted server process, its HTTP request
+> contract, configuration surface, and failure modes. Section 12 covers
+> server-installation lifecycle (ADR-026) and section 13 the speech
+> cleanup consumer.
 
 See also: [ADR-025](../decisions/025-gemma4-llamacpp-desktop.md),
 [ADR-026](../decisions/026-managed-llama-server-install.md),
 [ADR-027](../decisions/027-llamaserver-namespace-rescope.md),
+[ADR-073](../decisions/073-speech-cleanup-s1-mini.md),
 [Audio pipeline](./audio-pipeline.md),
 [`llama-cpp-release-assets`](../knowledge/llama-cpp-release-assets.md).
 
@@ -33,8 +35,7 @@ See also: [ADR-025](../decisions/025-gemma4-llamacpp-desktop.md),
 ### Server-side (workload-agnostic)
 
 These live under `Parlotype.*.LlamaServer` (post-ADR-027) and have no
-dependency on speech. The future post-processing consumer will share
-them unchanged.
+dependency on speech. Both consumers use them unchanged.
 
 | Component | Project | Responsibility |
 |-----------|---------|----------------|
@@ -42,13 +43,16 @@ them unchanged.
 | `ILlamaServerRegistry` / `JsonLlamaServerRegistry` | Core / Platform | Reads/writes `manifest.json` (managed installs). Resolves the active install by reading `LlamaCppActiveInstall` from `ISettingsService`. Manual mode returns a synthetic install pointing at `LlamaCppServerFolder`. |
 | `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. |
 | `LlamaCppServerInfo` | Platform | Pure probe helper. Hits `/health` then `/props` to classify a port as `Connected`, `Loading`, `Disconnected`, `PortConflict`, or `Error`. Moved to `Parlotype.Platform.LlamaServer` in ADR-027. |
-| `ILlamaCppServerLifecycle` | Core | Stops a running sidecar so the installer can replace its files. **Currently implemented by `LlamaCppSpeechRecognizer`** — ADR-027 flags promoting this to a dedicated `LlamaServerHost` as the trigger when the first post-processor lands. |
+| `ILlamaCppServerLifecycle` / `CompositeLlamaServerLifecycle` | Core / Platform | Stops running sidecars so the installer can replace their files. Each consumer implements the interface for its own process; DI hands the installer a composite over both (ADR-073). |
+| `LlamaServerPathResolver` | Platform | The one rule for which `llama-server.exe` to launch: a managed active install, else the manual folder, else none. Used by both consumers. |
+| `LlamaServerProcess` | Platform | One spawned server: start with an argument list, poll `/health`, stop. Used by the cleanup consumer; the Gemma 4 recognizer predates it and keeps its own copy of this logic. |
+| `LlamaServerVariantPicker` | Core | Picks the newest CPU build from the catalog for features that install a server on the user's behalf. |
 | `StreamingFileDownloader` | Platform (`Speech` namespace, shared) | HTTP → temp → atomic-move helper with SHA-256 verification. Used by the Whisper, Parakeet and Gemma 4 model download services and the installer. |
 | `LlamaServerInstallDialogService` | Desktop | UI wrapper around `LlamaServerInstaller`; opens the generalized `ModelDownloadDialog` and maps installer phase strings to friendly status text. |
 | `SettingsKeys.LlamaCppActiveInstall` / `LlamaCppServerFolder` / `LlamaCppPort` | Core | Persisted configuration for the server itself (workload-neutral). |
 | `LlamaCppSettingsView` / `LlamaCppSettingsViewModel` | Desktop | UI for browse/install/uninstall/set-active + manual folder picker + port + probe status. |
 
-### Consumers (workload-specific, today: speech only)
+### Consumers (workload-specific)
 
 | Component | Project | Responsibility |
 |-----------|---------|----------------|
@@ -59,12 +63,8 @@ them unchanged.
 | `SpeechEngine` (enum) | Core (`Speech` namespace) | `Whisper` \| `Gemma4` \| `Parakeet` \| `OpenAiCompatible` \| `XaiGrok`; unset or unparsable ⇒ `Parakeet` (ADR-042). |
 | `SettingsKeys.SpeechEngine` | Core | Selects the speech engine. |
 
-**Future consumer (not yet implemented):** a `LlamaCppPostprocessor` under
-`Parlotype.Platform.Postprocessing` (namespace TBD) running translation /
-stylisation / grammar / summarisation against a non-Gemma local LLM
-hosted by the *same* `llama-server` process. Lifecycle and settings will
-be shared with the speech consumer; the implementation is tracked in a
-follow-up plan.
+The second consumer, speech cleanup, is described in
+[section 13](#13-speech-cleanup-consumer).
 
 ### DI registration
 
@@ -79,9 +79,18 @@ services.AddSingleton<ILlamaServerInstaller>(sp => sp.GetRequiredService<LlamaSe
 
 // Speech consumer
 services.AddSingleton<LlamaCppSpeechRecognizer>();
-services.AddSingleton<ILlamaCppServerLifecycle>(sp => sp.GetRequiredService<LlamaCppSpeechRecognizer>());
 services.AddSingleton<SpeechRecognizerFactory>();
 services.AddSingleton<ISpeechRecognizer, DelegatingSpeechRecognizer>();
+
+// Speech cleanup consumer
+services.AddSingleton<SpeechCleanupModelDownloadService>();
+services.AddSingleton<LlamaServerSpeechCleanupService>();
+services.AddSingleton<ISpeechCleanupService>(sp => sp.GetRequiredService<LlamaServerSpeechCleanupService>());
+
+// One lifecycle over both, for the installer
+services.AddSingleton<ILlamaCppServerLifecycle>(sp => new CompositeLlamaServerLifecycle(
+    sp.GetRequiredService<LlamaCppSpeechRecognizer>(),
+    sp.GetRequiredService<LlamaServerSpeechCleanupService>()));
 ```
 
 [`App.axaml.cs`](../../src/Parlotype.Desktop/App.axaml.cs) overrides the
@@ -146,13 +155,11 @@ Llama path (it is not surfaced to `LlamaCppSpeechRecognizer.InitializeAsync`).
 ## 4 `llama-server` Lifecycle
 
 The heart of this integration is the lifecycle of the sidecar process
-itself. The state machine below describes the **server** lifecycle, not
-a speech-specific one — a future post-processing consumer will see the
-same Ready → Stopped transitions, just driven by a different request
-path. `LlamaCppSpeechRecognizer` is the consumer that currently owns
-the spawned process (probes / spawns / kills) on behalf of all
-consumers; ADR-027 flags promoting that ownership to a dedicated
-`LlamaServerHost` as the trigger when the first post-processor lands.
+itself. The state machine below is the one `LlamaCppSpeechRecognizer`
+runs for the Gemma 4 server it owns (probes / spawns / kills). The
+speech cleanup consumer owns a separate process with a simpler
+lifecycle, with no probing and no adoption; see
+[section 13](#13-speech-cleanup-consumer).
 
 ```mermaid
 stateDiagram-v2
@@ -337,7 +344,7 @@ The host is hard-coded to `127.0.0.1` (`DefaultHost`). The model alias
 sent in HTTP requests is hard-coded to `"gemma-4-e4b"` and is independent
 of `Gemma4ModelInfo.ModelId`.
 
-**Server-path resolution order** (in `LlamaCppSpeechRecognizer.GetServerPathAsync`):
+**Server-path resolution order** (in `LlamaServerPathResolver`, which both consumers call):
 
 1. Read `LlamaCppActiveInstall`. If it starts with `managed:`, ask
    `ILlamaServerRegistry.GetActiveAsync()` and use that install's
@@ -439,7 +446,7 @@ manual-folder option.
 | `ILlamaServerRegistry` / `JsonLlamaServerRegistry` | Core / Platform | Read/write `manifest.json` (list of managed installs). Resolves the active install by reading `LlamaCppActiveInstall` from `ISettingsService` and looking up the matching entry. Manual mode returns a synthetic install pointing at `LlamaCppServerFolder`. |
 | `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. Uninstall stops the active sidecar via `ILlamaCppServerLifecycle` before deleting the folder. |
 | `StreamingFileDownloader` | Platform | Shared HTTP → temp-file → atomic-rename helper. Reused by the model download services and the installer. |
-| `ILlamaCppServerLifecycle` | Core | Implemented by `LlamaCppSpeechRecognizer`. `StopForReplacementAsync` delegates to `UnloadAsync` so the installer can release the Windows file lock on `llama-server.exe` before deleting it. |
+| `ILlamaCppServerLifecycle` | Core | Implemented by both consumers and composed by `CompositeLlamaServerLifecycle`. Each `StopForReplacementAsync` delegates to that consumer's `UnloadAsync`, so the installer releases every Windows file lock on `llama-server.exe` before deleting it. |
 | `LlamaServerInstallDialogService` | Desktop | Implements `ILlamaServerInstaller`; opens the generalized `ModelDownloadDialog` and maps the installer's phase strings (`downloading`, `downloading-companion`, `verifying`, `extracting`, `finalizing`) to friendly status text. Registered in `App.axaml.cs` as an override of the Platform default. |
 | `LlamaCppSettingsViewModel` / `LlamaCppSettingsView` | Desktop | Sections: Active server, Update banner, Installed (RadioButton + Uninstall per row), Manual install (distinct background + "Not managed by Parlotype" badge), Available builds, port + Save/Reset. |
 
@@ -470,7 +477,7 @@ flowchart TD
    .staging\{guid}\               # in-progress install (deleted in finally)
       payload\                    # extracted contents; renamed into place on success
       main.zip / companion.zip    # downloaded archives
-   .cache\releases.json           # GitHub catalog cache: { fetchedAt, etag, releases[] }
+   .cache\releases.json           # GitHub catalog cache: { version, fetchedAt, etag, releases[] }
    manifest.json                  # source of truth (folder names not load-bearing)
    b9198-win-cuda-12.4-x64\       # managed install — id = build-os-backend-arch
       llama-server.exe
@@ -528,38 +535,94 @@ Corrupt-read recovery: the registry renames `manifest.json` to
   remain offline. `EntityTagHeaderValue.IsWeak` is preserved on
   round-trip via a small `FormatETag` helper (RFC 7232 requires byte-
   exact echo).
+- **Which releases are kept**: drafts are skipped; pre-releases are
+  **not**. Upstream flags every `b{N}` build as a pre-release and its
+  `v{X.Y.Z}` releases carry no binaries, so filtering on the flag leaves
+  nothing to install (see
+  [`llama-cpp-release-assets`](../knowledge/llama-cpp-release-assets.md)).
+  A release with no asset we can install drops out on its own.
+- **Cache version**: the file stores the parsed list, so it carries
+  `GitHubLlamaServerCatalog.CacheVersion`. A cache written under another
+  version is ignored rather than revalidated; otherwise a 304 would keep
+  a list produced by older parsing rules alive indefinitely.
 - **Failure with cache**: returns stale snapshot, logs a warning.
 - **Failure without cache**: rethrows.
 - **Filtering**: applied at read time (`Project`) so a single cache
   works across users with different machines and across future phases
   that add macOS/Linux without invalidating Windows users.
 
-### Forward-pointer: post-processing consumer
+## 13 Speech Cleanup Consumer
 
-The installed `llama-server.exe` is a generic LLM runtime. A planned
-follow-up adds a **post-processing** consumer (translation, stylisation,
-grammar correction, summarisation) that will run a non-Gemma local LLM
-on the *same* installed binary, share the same `LlamaCppActiveInstall`
-selector, and the same spawned process. The pieces ADR-026 introduced
-(catalog, registry, installer, settings UI) are workload-agnostic and
-will not change. The change planned for that follow-up:
+Added in ADR-073. `LlamaServerSpeechCleanupService` rewrites recognized text
+as clean written text with **S1-mini by Superwhisper**, a 462 MB text model.
+It is opt-in (`SettingsKeys.SpeechCleanupEnabled`) and runs after any speech
+engine; `AudioPipelineService` calls it in the transcription stage (see
+[Audio pipeline](./audio-pipeline.md)).
 
-- A dedicated `LlamaServerHost` (currently the recognizer's role)
-  owns the process so both consumers can share it without one tearing
-  it down on the other.
-- New Core contract for the post-processing call (likely an
-  `ILlmPostprocessor` or similar) — out of scope for this document
-  until the implementation lands.
+### How it differs from the speech consumer
+
+| | Gemma 4 recognizer | Speech cleanup |
+|---|---|---|
+| Model | Gemma 4 GGUF + mmproj | `s1-mini-q4_k_m.gguf` |
+| Port | `SettingsKeys.LlamaCppPort`, default 8321 | A free loopback port asked from the OS at each launch; not a setting |
+| Adopts a running server | Yes, if `/props` answers on the port | Never |
+| Started | At recording start, blocking | At recording start, in the background; `CleanAsync` waits for it if needed |
+| Stopped | Engine switch, model change, exit | Cleanup switched off, model deleted, exit |
+| On failure | The recording does not start | The raw text is pasted |
+
+### Spawn command
+
+```text
+llama-server.exe
+  -m "<models>/s1-mini-q4_k_m.gguf"
+  --host 127.0.0.1
+  --port <free port>
+  -c 4096
+  -np 1
+  --jinja
+  --chat-template-kwargs {"enable_thinking":false}
+  --temp 0
+  --no-webui
+```
+
+None of the last five is a free choice; the reasons are in
+[`s1-mini-quirks`](../knowledge/s1-mini-quirks.md). The server's output is
+copied to the app log until `/health` answers and discarded after that,
+because from then on requests carry dictated text.
+
+### HTTP contract
+
+`POST /v1/chat/completions` with the published system prompt
+(`S1MiniPrompt.SystemPrompt`), a user message that is the control line, a
+newline, and the transcript, plus `temperature: 0`, a `max_tokens` cap of
+half the transcript's character count plus 64, and
+`chat_template_kwargs: {"enable_thinking": false}`. The reply is
+`choices[0].message.content`, trimmed; empty is valid. A non-2xx status
+throws with the status code only, never the body. Requests time out after
+20 s.
+
+### Setup
+
+The Speech cleanup settings page turns the feature on with one switch. It
+downloads the model if missing, then makes sure a server is selected: the
+active install if its executable exists, else a managed install already on
+disk, else the newest CPU build from the catalog
+(`LlamaServerVariantPicker`). Selecting an install writes
+`LlamaCppActiveInstall`, the same selector the Gemma 4 engine reads. The
+llama.cpp server page is shown in the navigation while cleanup is on, as
+well as while Gemma 4 is the engine.
 
 ---
 
-## 13 Related Documents
+## 14 Related Documents
 
 - [ADR-025: Gemma 4 via llama.cpp Sidecar in Desktop](../decisions/025-gemma4-llamacpp-desktop.md)
 - [ADR-026: Managed llama.cpp Server Installation](../decisions/026-managed-llama-server-install.md)
 - [ADR-027: `LlamaServer` Namespace Rescope](../decisions/027-llamaserver-namespace-rescope.md)
 - [ADR-029: Gemma 4 model download UI](../decisions/029-gemma4-model-download-ui.md)
 - [ADR-030: Configurable Gemma 4 prompts](../decisions/030-configurable-gemma4-prompts.md), [ADR-037: source/target prompts](../decisions/037-gemma4-source-target-prompts.md)
+- [ADR-073: speech cleanup with a local model (S1-mini)](../decisions/073-speech-cleanup-s1-mini.md)
 - [ADR-065: manual folder pack-folder warning](../decisions/065-manual-llama-server-pack-folder-warning.md), [ADR-066: drop the vestigial llama-server directory](../decisions/066-drop-the-vestigial-llama-server-directory.md)
 - [Audio pipeline](./audio-pipeline.md)
 - [`llama-cpp-release-assets`](../knowledge/llama-cpp-release-assets.md) — asset naming, cudart pairing, build tagging, rate-limit notes
+- [`s1-mini-quirks`](../knowledge/s1-mini-quirks.md) — the cleanup model's input format and the server flags it needs

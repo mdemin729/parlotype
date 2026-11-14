@@ -12,6 +12,7 @@ public sealed class LlamaServerAssetParserTests
     [InlineData("llama-b9198-bin-win-vulkan-x64.zip",    "b9198", LlamaServerBackend.Vulkan, LlamaServerArch.X64)]
     [InlineData("llama-b9198-bin-win-sycl-x64.zip",      "b9198", LlamaServerBackend.Sycl,   LlamaServerArch.X64)]
     [InlineData("llama-b9198-bin-win-hip-radeon-x64.zip","b9198", LlamaServerBackend.Hip,    LlamaServerArch.X64)]
+    [InlineData("llama-b12360-bin-win-rocm-10.0-x64.zip","b12360", LlamaServerBackend.Hip,   LlamaServerArch.X64)]
     public void Windows_BasicBackends_Parse(string name, string build, LlamaServerBackend backend, LlamaServerArch arch)
     {
         Assert.True(LlamaServerAssetParser.TryParse(name, out var d));

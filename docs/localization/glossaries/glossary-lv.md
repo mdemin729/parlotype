@@ -201,6 +201,7 @@ Used real Latvian Windows 10/11 UI wording rather than literal translations for:
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Noklusējuma (burtiska transkripcija)"** — verbatim/word-for-word rendered as *burtiska (literal)*, paired with the already-established *transkripcija* for transcription; no new terms introduced.
+- "Speech cleanup" (the local model that tidies dictated text) → **"teksta sakopšana"** (*sakopt*, tidy up — never *dzēst*/*tīrīt*, so it cannot read as deleting); *teksta* rather than *runas*, since what gets tidied is the written result. Toggles follow `ieslēgta` / `izslēgta`. "Writing style" → **rakstības stils**; the four styles → *Brīvs*, *Daļēji brīvs*, *Daļēji formāls*, *Formāls*; English contractions → *saīsinātās formas*.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

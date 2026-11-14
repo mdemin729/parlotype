@@ -33,6 +33,7 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Whisper model"),
             n => AssertSection(n, "Whisper runtime"),
             n => AssertSection(n, "Whisper output"),
+            n => AssertSection(n, "Speech cleanup"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
@@ -65,6 +66,7 @@ public class SettingsWindowViewModelTests
             n => AssertSection(n, "Language"),
             n => AssertSection(n, "Gemma 4 model"),
             n => AssertSection(n, "Prompts"),
+            n => AssertSection(n, "Speech cleanup"),
             n => AssertSection(n, "llama.cpp server"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
@@ -93,6 +95,7 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Speech engine"),
             n => AssertSection(n, "Engine"),
             n => AssertSection(n, "Parakeet model"),
+            n => AssertSection(n, "Speech cleanup"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
@@ -121,6 +124,7 @@ public class SettingsWindowViewModelTests
             n => AssertHeader(n, "Speech engine"),
             n => AssertSection(n, "Engine"),
             n => AssertSection(n, "Cloud providers"),
+            n => AssertSection(n, "Speech cleanup"),
             n => AssertHeader(n, "Input"),
             n => AssertSection(n, "Hotkeys"),
             n => AssertHeader(n, "Appearance"),
@@ -149,6 +153,37 @@ public class SettingsWindowViewModelTests
         var vm = BuildViewModel();
 
         Assert.DoesNotContain(vm.NavItems, n => n.Section is CloudProviderSettingsViewModel);
+    }
+
+    /// <summary>
+    /// The llama.cpp server page belongs to whoever runs a llama-server. Speech
+    /// cleanup sets its server up by itself, so the page only joins the list
+    /// once cleanup is on, whatever the engine (ADR-073).
+    /// </summary>
+    [Fact]
+    public async Task NavItems_ShowLlamaCppServer_OnceSpeechCleanupIsOn()
+    {
+        var settings = new MockSettingsService();
+        await settings.SetAsync(SettingsKeys.SpeechCleanupEnabled, "True", TestContext.Current.CancellationToken);
+
+        var vm = BuildViewModel(settings);
+        await vm.SpeechCleanup.Initialization;
+
+        Assert.Equal(SpeechEngine.Parakeet, vm.SpeechEngine.SelectedEngine);
+        var titles = vm.NavItems.Where(n => !n.IsHeader).Select(n => n.Label).ToList();
+        var cleanupIndex = titles.IndexOf("Speech cleanup");
+        Assert.True(cleanupIndex >= 0);
+        Assert.Equal("llama.cpp server", titles[cleanupIndex + 1]);
+    }
+
+    [Fact]
+    public async Task NavItems_HideLlamaCppServer_WhenSpeechCleanupIsOff_AndTheEngineIsNotGemma()
+    {
+        var vm = BuildViewModel();
+        await vm.SpeechCleanup.Initialization;
+
+        Assert.DoesNotContain(vm.NavItems, n => n.Section is LlamaCppSettingsViewModel);
+        Assert.Contains(vm.NavItems, n => n.Section is SpeechCleanupSettingsViewModel);
     }
 
     [Fact]

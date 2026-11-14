@@ -108,4 +108,12 @@ public partial class ModelDownloadViewModel : ViewModelBase
             itemName: modelName,
             itemSize: modelSize,
             statusText: Strings.Format_ModelDownload_ConfirmFormat(modelName, modelSize));
+
+    /// <summary>Adapter for the speech cleanup model download (one GGUF file, ADR-073).</summary>
+    public static ModelDownloadViewModel ForSpeechCleanupModel(string modelName, string modelSize) =>
+        new(
+            title: Strings.ModelDownload_Title,
+            itemName: modelName,
+            itemSize: modelSize,
+            statusText: Strings.Format_ModelDownload_ConfirmFormat(modelName, modelSize));
 }

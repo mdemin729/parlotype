@@ -864,7 +864,7 @@ Is-settings u ċ-ċwievet tal-API tiegħek jinżammu. Il-mudelli jerġgħu jitni
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Fittex, installa, u immaniġġja verżjonijiet ta' llama-server. L-installazzjoni attiva tagħti l-enerġija lit-traskrizzjoni ta' Gemma 4.</value>
+    <value>Fittex, installa, u immaniġġja verżjonijiet ta' llama-server. L-installazzjoni attiva tagħti l-enerġija lit-traskrizzjoni ta' Gemma 4 u lit-tindif tad-dettatura.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1463,5 +1463,98 @@ Is-settings u ċ-ċwievet tal-API tiegħek jinżammu. Il-mudelli jerġgħu jitni
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Il-messaġġ tiegħek intbagħat — grazzi talli qed tgħin biex Parlotype issir aħjar. Referenza: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>Qed jitniżżel “{0}”…</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>“{0}” tniżżel b'suċċess.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>It-tniżżil ma rnexxiex: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Tindif tad-dettatura</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Jikteb mill-ġdid dak li ddettajt bħala test miktub nadif qabel ma jitwaħħal: il-kliem ta' mili u l-bidu falz jitneħħew, il-korrezzjonijiet li tagħmel waqt li titkellem jiġu applikati, u n-numri, id-dati u l-indirizzi tal-email jinkitbu kif suppost. Mudell żgħir jagħmel dan fuq il-kompjuter tiegħek; l-ebda test ma joħroġ minnu.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Tindif tad-dettatura mixgħul</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Tindif tad-dettatura mitfi</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Jaħdem bl-Ingliż biss. Itfih meta tiddetta b'lingwa oħra.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Meta tixgħel dan, jitniżżel il-mudell ({0}) u, jekk m'hemmx wieħed installat, server llama.cpp. Kull tniżżil jistaqsik l-ewwel.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Lest: il-mudell u server llama.cpp huma installati.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Mhux qed jaħdem: il-mudell jew is-server llama.cpp nieqes. Itfi s-swiċċ u erġa' ixgħlu biex jiġi installat mill-ġdid.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Il-konfigurazzjoni ma tlestietx, għalhekk it-tindif tad-dettatura jibqa' mitfi.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Mudell</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Stil tal-kitba</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Każwali</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Semi-każwali</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Semi-formali</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Formali</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Kollox b'ittri żgħar, bla appostrofi, il-kliem kif intqal.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Il-kliem kif intqal; jiżdiedu l-appostrofi u “I” b'ittra kbira.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Ingliż standard miktub. Il-kontrazzjonijiet jibqgħu, is-slang jittaffa. Rakkomandat.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Ingliż standard miktub, bil-kontrazzjonijiet miktuba sħaħ.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Il-listi mitkellma jsiru punti f'lista</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Il-listi mitkellma jibqgħu sentenzi</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>Tqassim tal-email: tislima, korp u għeluq f'linji separati</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Tqassim sempliċi, bla formattjar tal-email</value>
   </data>
 </root>

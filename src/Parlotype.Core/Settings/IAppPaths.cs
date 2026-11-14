@@ -32,7 +32,7 @@ public interface IAppPaths
     /// </summary>
     string SettingsDirectory { get; }
 
-    /// <summary>Speech-model cache — Whisper GGML, Parakeet, and Gemma 4 files.</summary>
+    /// <summary>Model cache — Whisper GGML, Parakeet and Gemma 4 files, and the speech cleanup model.</summary>
     string ModelsDirectory { get; }
 
     /// <summary>Rolling log files.</summary>

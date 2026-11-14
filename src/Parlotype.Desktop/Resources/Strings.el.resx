@@ -866,7 +866,7 @@
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Περιηγηθείτε, εγκαταστήστε και διαχειριστείτε εκδόσεις του llama-server. Η ενεργή εγκατάσταση τροφοδοτεί τη μεταγραφή Gemma 4.</value>
+    <value>Περιηγηθείτε, εγκαταστήστε και διαχειριστείτε εκδόσεις του llama-server. Η ενεργή εγκατάσταση τροφοδοτεί τη μεταγραφή Gemma 4 και τον καθαρισμό υπαγόρευσης.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1465,5 +1465,98 @@
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Το μήνυμά σας στάλθηκε — ευχαριστούμε που βοηθάτε να γίνει καλύτερο το Parlotype. Κωδικός αναφοράς: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>Λήψη του «{0}»…</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>Η λήψη του «{0}» ολοκληρώθηκε με επιτυχία.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>Η λήψη απέτυχε: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Καθαρισμός υπαγόρευσης</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Ξαναγράφει όσα υπαγορεύσατε ως καθαρό γραπτό κείμενο πριν από την επικόλληση: οι λέξεις-γεμίσματα και τα λανθασμένα ξεκινήματα αφαιρούνται, οι αυτοδιορθώσεις εφαρμόζονται και οι αριθμοί, οι ημερομηνίες και οι διευθύνσεις e-mail γράφονται σωστά. Το κάνει ένα μικρό μοντέλο στον υπολογιστή σας· κανένα κείμενο δεν φεύγει από αυτόν.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Καθαρισμός υπαγόρευσης ενεργός</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Καθαρισμός υπαγόρευσης ανενεργός</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Λειτουργεί μόνο με Αγγλικά. Απενεργοποιήστε τον όταν υπαγορεύετε σε άλλη γλώσσα.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Με την ενεργοποίηση γίνεται λήψη του μοντέλου ({0}) και, αν δεν υπάρχει εγκατεστημένος, ενός διακομιστή llama.cpp. Κάθε λήψη ζητά πρώτα επιβεβαίωση.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Έτοιμο: το μοντέλο και ένας διακομιστής llama.cpp είναι εγκατεστημένα.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Δεν λειτουργεί: λείπει το μοντέλο ή ο διακομιστής llama.cpp. Απενεργοποιήστε και ενεργοποιήστε ξανά τον διακόπτη για επανεγκατάσταση.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Η ρύθμιση δεν ολοκληρώθηκε, οπότε ο καθαρισμός υπαγόρευσης παραμένει ανενεργός.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Μοντέλο</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Ύφος γραφής</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Χαλαρό</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Ημιχαλαρό</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Ημιεπίσημο</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Επίσημο</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Μόνο πεζά, χωρίς αποστρόφους, διατύπωση όπως ειπώθηκε.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Διατύπωση όπως ειπώθηκε· προστίθενται απόστροφοι και το «I» γράφεται κεφαλαίο.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Τυπικά γραπτά Αγγλικά. Οι συντετμημένοι τύποι μένουν, η αργκό εξομαλύνεται. Συνιστάται.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Τυπικά γραπτά Αγγλικά, με τους συντετμημένους τύπους γραμμένους πλήρως.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Οι προφορικές λίστες γίνονται κουκκίδες</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Οι προφορικές λίστες μένουν προτάσεις</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>Διάταξη e-mail: χαιρετισμός, κείμενο και κλείσιμο σε ξεχωριστές γραμμές</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Απλή διάταξη, χωρίς μορφοποίηση e-mail</value>
   </data>
 </root>

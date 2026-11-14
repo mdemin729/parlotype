@@ -5,3 +5,4 @@ No per-language glossary file was created for this culture during the original 2
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predeterminado (transcripción literal)"** — verbatim/word-for-word rendered as *literal*, paired with the already-established *transcripción* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`) → **pulido del dictado** (masc.: "Pulido del dictado activado"); chosen over *limpieza*, which can read as deleting. **writing style** → **estilo de redacción**; the four styles are **Informal / Semiinformal / Semiformal / Formal** (RAE: *semi-* is written joined).

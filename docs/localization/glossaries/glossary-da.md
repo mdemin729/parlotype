@@ -145,6 +145,7 @@ not surface in this batch.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standard (ordret transskribering)"** — verbatim/word-for-word rendered as *ordret (word-for-word)*, paired with the already-established *transskribering* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`, a local model rewriting dictated text as clean written English) → **"tekstpolering"** (en) — not *oprydning*, which Windows uses for deleting data (*Diskoprydning*). **writing style** → **"skrivestil"**; the four styles are *Afslappet / Let afslappet / Let formel / Formel*. English contractions → **sammentrækninger**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

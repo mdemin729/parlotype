@@ -23,3 +23,4 @@ no double extensions.
 | [2026-07-30-dictation-hotkey-bindings](2026-07-30-dictation-hotkey-bindings/) | Hold, double-tap and chord gestures for dictation | [ADR-047](../decisions/047-multi-binding-dictation-hotkeys.md) |
 | [2026-08-18-hold-scoped-push-to-talk](2026-08-18-hold-scoped-push-to-talk/) | Per-engine long-utterance measurements | [ADR-060](../decisions/060-hold-scoped-push-to-talk.md) |
 | [2026-09-13-transcribe-window-auto-hide](2026-09-13-transcribe-window-auto-hide/) | When the dictation widget should hide itself | [ADR-068](../decisions/068-transcribe-window-auto-hide.md) |
+| [2026-11-13-gemma4-engine-review](2026-11-13-gemma4-engine-review/) | Review of the experimental Gemma 4 engine and the uses of a local model in a dictation app | [ADR-073](../decisions/073-speech-cleanup-s1-mini.md) |

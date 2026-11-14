@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Parlotype.Core.LlamaServer;
+using Parlotype.Core.TextProcessing;
 using Parlotype.Platform;
+using Parlotype.Platform.LlamaServer;
 using Parlotype.Platform.Speech;
 using Xunit;
 
@@ -46,13 +48,24 @@ public sealed class LlamaServerDiCompositionTests
         Assert.NotNull(provider.GetRequiredService<ILlamaServerInstaller>());
     }
 
+    /// <summary>
+    /// Both consumers run their own llama-server from the same installed binary
+    /// (ADR-073), so the lifecycle the installer gets must stop both, and must
+    /// reach the same instances the app actually uses.
+    /// </summary>
     [Fact]
-    public async Task LifecycleAndRecognizer_ResolveToSameInstance()
+    public async Task Lifecycle_StopsBothTheRecognizerAndSpeechCleanup()
     {
         var provider = BuildPlatformProvider();
         await using var _ = provider;
         var recognizer = provider.GetRequiredService<LlamaCppSpeechRecognizer>();
-        var lifecycle = provider.GetRequiredService<ILlamaCppServerLifecycle>();
-        Assert.Same(recognizer, lifecycle);
+        var cleanup = provider.GetRequiredService<ISpeechCleanupService>();
+
+        var lifecycle = Assert.IsType<CompositeLlamaServerLifecycle>(
+            provider.GetRequiredService<ILlamaCppServerLifecycle>());
+
+        Assert.Equal(2, lifecycle.Members.Count);
+        Assert.Contains(lifecycle.Members, m => ReferenceEquals(m, recognizer));
+        Assert.Contains(lifecycle.Members, m => ReferenceEquals(m, cleanup));
     }
 }

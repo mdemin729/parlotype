@@ -866,7 +866,7 @@ Jūsų nustatymai ir API raktai bus išsaugoti. Modeliai vėl automatiškai atsi
   </data>
   <data name="Settings_LlamaCpp_Description" xml:space="preserve">
     <comment>"llama-server" and "Gemma 4" are identifiers — never translated.</comment>
-    <value>Naršykite, diekite ir tvarkykite llama-server surinkimus. Aktyvus diegimas maitina Gemma 4 transkribavimą.</value>
+    <value>Naršykite, diekite ir tvarkykite llama-server surinkimus. Aktyvus diegimas maitina Gemma 4 transkribavimą ir teksto tvarkymą.</value>
   </data>
   <data name="Settings_LlamaCpp_ManagedBadge" xml:space="preserve">
     <comment>Badge: this install was downloaded and is maintained by Parlotype.</comment>
@@ -1465,5 +1465,98 @@ Jūsų nustatymai ir API raktai bus išsaugoti. Modeliai vėl automatiškai atsi
   <data name="Feedback_Sent_MessageFormat" xml:space="preserve">
     <value>Pranešimas išsiųstas — ačiū, kad padedate tobulinti Parlotype. Numeris: #{0}</value>
     <comment>{0} = the submission number, e.g. 42. Keep the "#".</comment>
+  </data>
+  <data name="ModelDownload_DownloadingFormat" xml:space="preserve">
+    <value>Atsisiunčiama „{0}“…</value>
+    <comment>{0} is the model name. Shown under the progress bar while the download runs.</comment>
+  </data>
+  <data name="ModelDownload_SucceededFormat" xml:space="preserve">
+    <value>Modelis „{0}“ sėkmingai atsisiųstas.</value>
+    <comment>{0} is the model name.</comment>
+  </data>
+  <data name="ModelDownload_FailedFormat" xml:space="preserve">
+    <value>Atsisiųsti nepavyko: {0}</value>
+    <comment>{0} is the error text from the system or the network, shown as it arrived. Keep it after the colon.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Title" xml:space="preserve">
+    <value>Teksto tvarkymas</value>
+    <comment>Navigation label and page heading. "Cleanup" means tidying up dictated text, not deleting anything. Keep it short.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Description" xml:space="preserve">
+    <value>Prieš įklijuojant perrašo tai, ką padiktavote, į tvarkingą rašytinį tekstą: pašalinami žodžiai parazitai ir nebaigtos frazės, atsižvelgiama į pasitaisymus, o skaičiai, datos ir el. pašto adresai užrašomi taisyklingai. Tai atlieka nedidelis modelis jūsų kompiuteryje; joks tekstas jo nepalieka.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOn" xml:space="preserve">
+    <value>Teksto tvarkymas įjungtas</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
+    <value>Teksto tvarkymas išjungtas</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
+    <value>Veikia tik su anglų kalba. Išjunkite, kai diktuojate kita kalba.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
+    <value>Įjungus atsisiunčiamas modelis ({0}) ir llama.cpp serveris, jei jis dar neįdiegtas. Prieš kiekvieną atsisiuntimą bus paklausta.</value>
+    <comment>{0} is the download size, e.g. "462 MB". "llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Ready" xml:space="preserve">
+    <value>Parengta: modelis ir llama.cpp serveris įdiegti.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_Broken" xml:space="preserve">
+    <value>Neveikia: trūksta modelio arba llama.cpp serverio. Norėdami įdiegti iš naujo, išjunkite ir vėl įjunkite jungiklį.</value>
+    <comment>"llama.cpp" is a project name — never translated, and keep the lower case.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Status_SetupFailed" xml:space="preserve">
+    <value>Sąranka nebaigta, todėl teksto tvarkymas lieka išjungtas.</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ModelHeading" xml:space="preserve">
+    <value>Modelis</value>
+  </data>
+  <data name="Settings_SpeechCleanup_StyleHeading" xml:space="preserve">
+    <value>Rašymo stilius</value>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual" xml:space="preserve">
+    <value>Laisvas</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual" xml:space="preserve">
+    <value>Pusiau laisvas</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal" xml:space="preserve">
+    <value>Pusiau formalus</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal" xml:space="preserve">
+    <value>Formalus</value>
+    <comment>One of four writing styles in a drop-down, from least to most formal: Casual, Semi-casual, Semi-formal, Formal.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Casual_Description" xml:space="preserve">
+    <value>Tik mažosios raidės, be apostrofų, formuluotės kaip pasakyta.</value>
+    <comment>Describes the English text the model writes in this style; the output itself is always English.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiCasual_Description" xml:space="preserve">
+    <value>Formuluotės kaip pasakyta; pridedami apostrofai, „I“ rašoma didžiąja raide.</value>
+    <comment>Describes the English text the model writes in this style. “I” is the English pronoun — keep it as the letter I in quotation marks.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_SemiFormal_Description" xml:space="preserve">
+    <value>Standartinė rašytinė anglų kalba. Sutrumpintos formos lieka, žargonas sušvelninamas. Rekomenduojama.</value>
+    <comment>Describes the English text the model writes in this style. A contraction is a form like "I'm" or "can't".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_Style_Formal_Description" xml:space="preserve">
+    <value>Standartinė rašytinė anglų kalba be sutrumpintų formų.</value>
+    <comment>Describes the English text the model writes in this style. Spelling out a contraction turns "can't" into "cannot".</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOn" xml:space="preserve">
+    <value>Padiktuoti sąrašai tampa sąrašais su ženkleliais</value>
+  </data>
+  <data name="Settings_SpeechCleanup_ListsOff" xml:space="preserve">
+    <value>Padiktuoti sąrašai lieka sakiniais</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOn" xml:space="preserve">
+    <value>El. laiško išdėstymas: pasisveikinimas, tekstas ir atsisveikinimas atskirose eilutėse</value>
+  </data>
+  <data name="Settings_SpeechCleanup_EmailOff" xml:space="preserve">
+    <value>Paprastas išdėstymas, be el. laiško formato</value>
   </data>
 </root>

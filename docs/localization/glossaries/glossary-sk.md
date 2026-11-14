@@ -199,6 +199,7 @@ Used the actual Slovak Windows 10/11 UI wording rather than literal translations
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predvolené (doslovný prepis)"** — verbatim/word-for-word rendered as *doslovný (literal)*, paired with the already-established *prepis* for transcription; no new terms introduced.
+- Speech cleanup (`Settings_SpeechCleanup_*`, the local S1-mini rewrite of dictated text) → **úprava diktátu** (nav title "Úprava diktátu", toggles "… zapnutá/vypnutá"). Not *čistenie* (reads as deleting) and not *prepis* (reserved for transcription). "Writing style" → **štýl písania**; the four styles agree with *štýl*: Neformálny, Skôr neformálny, Skôr formálny, Formálny. English contractions → **stiahnuté tvary**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

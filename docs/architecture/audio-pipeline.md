@@ -19,12 +19,13 @@ flowchart LR
     CAP["WasapiAudioCaptureService<br/>resample to 16 kHz mono float"]
     SEG["Segmenter<br/>Silero VAD via IVadService"]
     REC["ISpeechRecognizer<br/>DelegatingSpeechRecognizer"]
+    CLEAN["ISpeechCleanupService<br/>opt-in, local model"]
     POST["TranscriptionTextProcessor"]
     VM["TranscribeViewModel<br/>TranscriptionAvailable"]
     INJ["ITextInjectionService<br/>clipboard paste or keystrokes"]
     WIN["Target window"]
 
-    MIC --> CAP --> SEG -- "speech-only samples" --> REC --> POST --> VM --> INJ --> WIN
+    MIC --> CAP --> SEG -- "speech-only samples" --> REC --> CLEAN --> POST --> VM --> INJ --> WIN
 ```
 
 1. **Capture.** `WasapiAudioCaptureService` captures from the selected microphone
@@ -42,8 +43,11 @@ flowchart LR
    `SpeechSegmentExtractor` concatenates only the speech runs, with a short silence
    between them, and drops the gaps.
 4. **Recognition.** The speech-only samples go to the active recognizer (see
-   [overview.md](overview.md#speech-engines)), then through the shared text
-   post-processor.
+   [overview.md](overview.md#speech-engines)). When speech cleanup is on
+   ([ADR-073](../decisions/073-speech-cleanup-s1-mini.md)) the text is then rewritten by a
+   local model; the model starts loading when the recording starts, and any failure,
+   timeout, non-English text or implausible result leaves the raw text in place. Last comes
+   the shared text post-processor.
 5. **Injection.** `TranscribeViewModel` handles `TranscriptionAvailable` and calls
    `ITextInjectionService`. The default `ClipboardTextInjectionService` saves the
    clipboard text, sets the transcript with the Windows clipboard-history exclusion

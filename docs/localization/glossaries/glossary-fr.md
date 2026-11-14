@@ -162,6 +162,7 @@ over 25 characters matches the English source byte-for-byte.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Par défaut (transcription mot à mot)"** — verbatim/word-for-word rendered as *mot à mot (word-for-word)*, paired with the already-established *transcription* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`) → **mise au propre** (fem.: "Mise au propre activée"), the French idiom for turning a rough draft into a clean copy; chosen over *nettoyage*, which can read as deleting. **writing style** → **style d’écriture**; the four styles are **Informel / Semi-informel / Semi-formel / Formel**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

@@ -219,3 +219,7 @@ Used real Windows 10/11 Hungarian UI wording rather than literal translations fo
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Tartsd lenyomva: jobb Ctrl`.**
 
 Side is now lowercase after the colon: `jobb {0}` / `bal {0}`. `Conflict_AlreadyBoundFormat` quotes the gesture.
+
+## Speech cleanup (2026-11-13)
+
+- Speech cleanup (Settings page, `Settings_SpeechCleanup_*`) → **Szövegtisztítás** — tidying the dictated text, never deleting. Toggle: *Szövegtisztítás bekapcsolva / kikapcsolva*. Writing style → **Írásstílus** (Laza / Félig laza / Félig hivatalos / Hivatalos); English contractions → **összevont alakok**.

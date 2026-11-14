@@ -1,26 +1,47 @@
 ---
 title: "llama.cpp GitHub Release Asset Conventions"
 area: "speech-engines"
-summary: "llama.cpp releases are b{N} tags with no latest alias, Windows CUDA builds need a matching cudart zip, and unauthenticated GitHub API calls cap at 60/h."
-verified: 2026-11-11
+summary: "llama.cpp binaries live in b{N} releases that are now flagged pre-release, v{X.Y.Z} releases carry only a pointer file, Windows CUDA builds need a matching cudart zip, and unauthenticated GitHub API calls cap at 60/h."
+verified: 2026-11-13
 ---
 
 # llama.cpp GitHub Release Asset Conventions
 
-These are stable, non-derivable facts about how the
+These are non-derivable facts about how the
 [`ggml-org/llama.cpp`](https://github.com/ggml-org/llama.cpp) project
 publishes binary releases. They underpin
 [ADR-026](../decisions/026-managed-llama-server-install.md) (managed llama-server install)
 and the parser in
 [`LlamaServerAssetParser.cs`](../../src/Parlotype.Platform/LlamaServer/LlamaServerAssetParser.cs).
 
-## Versioning: `b{N}` tags, no "latest" alias
+## Versioning: `b{N}` builds are pre-releases, `v{X.Y.Z}` has no binaries
 
-llama.cpp releases are tagged `b{N}` where `N` is the master commit
-count at the time of release. Example: `b9198`. Several releases land
-per week. There is **no `latest` alias** — consumers must query
-`/repos/ggml-org/llama.cpp/releases` (newest-first by `published_at`)
-and pick the head.
+Binaries are published in releases tagged `b{N}`, where `N` is the master
+commit count. Example: `b12360`. Ten to twenty land per day.
+
+**The `prerelease` flag changed meaning in late 2026.** `b10330` (August
+2026) is a normal release; `b12000` (30 October 2026) and everything after
+it is flagged `prerelease: true`. Upstream now calls the `b{N}` builds
+nightlies and uses the non-pre-release slot for versioned releases:
+`v1.0.0` was published on 2026-11-13 (after a `v0.9.0`). A versioned
+release has **no binaries**. Its single asset is `nightly-tag.txt`, seven
+bytes naming the build it corresponds to (`b12359` for `v1.0.0`), and its
+notes link the same build. Upstream's explanation is in
+[ggml discussion 1579](https://github.com/ggml-org/ggml/discussions/1579).
+
+Consequences:
+
+- **Do not filter on `prerelease`.** A catalog that skips pre-releases sees
+  no installable asset at all. Parlotype's did, and showed an empty
+  "Available builds" list from the day the flag changed until it was fixed
+  on 2026-11-13. Skip drafts only.
+- `GET /releases/latest` now answers with the versioned release
+  (`v1.0.0`), which is useless for finding a download.
+- The build a versioned release names drops off the first page of
+  `/releases` within hours. Offering "the stable build" means reading
+  `nightly-tag.txt` (or the release notes) and then fetching
+  `/releases/tags/b{N}`: two more requests, which Parlotype does not make.
+  It lists the newest builds, as it always has.
 
 ## Asset naming pattern (main archives)
 
@@ -30,7 +51,7 @@ and pick the head.
 |-------|----------|
 | `build` | `b9198` |
 | `platform` | `win`, `macos`, `ubuntu`, `android`, `310p`, `910b` |
-| `backend` | `cpu`, `cuda`, `vulkan`, `sycl`, `hip` (+ `radeon` variant), `rocm`, `openvino`, `kleidiai` |
+| `backend` | `cpu`, `cuda`, `vulkan`, `sycl`, `hip` (+ `radeon` variant, older builds), `rocm`, `openvino`, `opencl-adreno`, `kleidiai` |
 | `arch` | `x64`, `arm64`, `aarch64`, `x86`, `s390x` |
 | `ext` | `.zip` (Windows), `.tar.gz` (everything else) |
 
@@ -109,13 +130,27 @@ PAT, so this limit applies. Mitigations in `GitHubLlamaServerCatalog`:
 > when the validator was weak. Without that, servers may return 200
 > with a full body instead of 304.
 
-## All supported backends per platform (as of b9198)
+## The cache stores parsed results, so parser changes must invalidate it
+
+`.cache/releases.json` holds the list *after* parsing, next to the response's
+ETag. If the parsing rules change, the old list would be revalidated with
+`If-None-Match`, answered with 304, and served again for as long as upstream
+is unchanged. `GitHubLlamaServerCatalog.CacheVersion` is written into the
+file and a cache with another version is ignored. Bump it whenever a change
+alters which releases or assets are kept.
+
+Newer builds also publish assets the parser rejects as not being server
+archives, which is correct: `llama-b{N}-ui.tar.gz`, `llama-b{N}-xcframework.zip`,
+and Linux CUDA runtime archives named `cudart-llama-b{N}-bin-ubuntu-cuda-…tar.gz`
+(unlike the Windows companion, these carry the build number).
+
+## All supported backends per platform (as of b12360)
 
 For completeness — what the parser recognises today:
 
 | Platform | Backends |
 |----------|----------|
-| Windows | `cpu` (x64, arm64), `cuda-{version}` (x64), `vulkan` (x64), `sycl` (x64), `hip-radeon` (x64) |
+| Windows | `cpu` (x64, arm64), `cuda-{version}` (x64, arm64), `vulkan` (x64, arm64), `sycl` (x64), `rocm-{version}` (x64; `hip-radeon` before the rename, both map to `Hip`). `openvino-{version}` and `opencl-adreno` parse as `Unknown` and are hidden. |
 | macOS | `arm64` (Metal), `arm64-kleidiai` (KleidiAI CPU), `x64` (CPU) |
 | Ubuntu/Linux | bare arch (CPU), `vulkan`, `rocm-{version}`, `sycl-fp32`/`-fp16`, `openvino-{version}` |
 | Android | `arm64` (CPU only) — recognised as `LlamaServerOs.Unknown` and filtered out |
@@ -125,5 +160,7 @@ For completeness — what the parser recognises today:
 
 - Release workflow: [`.github/workflows/release.yml`](https://github.com/ggml-org/llama.cpp/blob/master/.github/workflows/release.yml)
 - Build-number action: [`.github/actions/get-tag-name/action.yml`](https://github.com/ggml-org/llama.cpp/blob/master/.github/actions/get-tag-name/action.yml)
-- Recorded API response (test fixture):
-  [`src/Parlotype.Tests/Fixtures/llama-cpp-releases.json`](../../src/Parlotype.Tests/Fixtures/llama-cpp-releases.json)
+- Recorded API responses (test fixtures):
+  [`llama-cpp-releases.json`](../../src/Parlotype.Tests/Fixtures/llama-cpp-releases.json) (hand-built, the old scheme) and
+  [`llama-cpp-releases-2026-11.json`](../../src/Parlotype.Tests/Fixtures/llama-cpp-releases-2026-11.json)
+  (the live response of 2026-11-13, trimmed to `v1.0.0` and two builds)

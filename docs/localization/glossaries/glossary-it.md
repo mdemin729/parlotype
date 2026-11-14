@@ -146,6 +146,7 @@ gender differently, this format would need to change.
 ## Later additions
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Predefinito (trascrizione letterale)"** — verbatim/word-for-word rendered as *letterale*, paired with the already-established *trascrizione* for transcription; no new terms introduced.
+- **speech cleanup** (`Settings_SpeechCleanup_*`) → **rifinitura del testo** (fem.: "Rifinitura del testo attivata"); chosen over *pulizia*, which can read as deleting. **writing style** → **stile di scrittura**; the four styles are **Informale / Semi-informale / Semi-formale / Formale**.
 
 
 ## Hotkey gesture grammar (correction 2026-10-03)

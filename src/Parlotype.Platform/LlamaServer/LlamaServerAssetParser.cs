@@ -92,7 +92,9 @@ internal static class LlamaServerAssetParser
                 descriptor = new(build, CudaBackendFromVersion(tail[1]), LlamaServerOs.Windows, ParseArch(tail[2]), tail[1], false);
                 return true;
             case "hip":
-                // hip-radeon-x64 or hip-x64 (future-proof)
+            case "rocm":
+                // hip-radeon-x64 or hip-x64 on older builds; rocm-{version}-x64
+                // since upstream renamed the AMD build to match Linux.
                 var arch = tail.Length >= 3 ? ParseArch(tail[^1]) : ParseArch(tail[1]);
                 descriptor = new(build, LlamaServerBackend.Hip, LlamaServerOs.Windows, arch, null, false);
                 return true;
