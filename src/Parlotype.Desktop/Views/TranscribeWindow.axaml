@@ -91,6 +91,31 @@
         <Style Selector="Border.cloudBadge">
             <Setter Property="Background" Value="#378ADD" />
         </Style>
+
+        <!-- Speech cleanup indicator and switch in one (ADR-075). The glyph
+             carries the state: accent while cleanup will run, dim while it is
+             switched off, amber while it is on but not running, as a paused
+             translation is (ADR-061). Scoped to the glyph's own class for the
+             same reason as the connector above. -->
+        <Style Selector="Button.cleanupToggle">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="5" />
+        </Style>
+        <Style Selector="Button.cleanupToggle PathIcon.cleanupGlyph">
+            <Setter Property="Opacity" Value="0.7" />
+        </Style>
+        <Style Selector="Button.cleanupToggle.on PathIcon.cleanupGlyph">
+            <Setter Property="Foreground" Value="#378ADD" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="Button.cleanupToggle.off PathIcon.cleanupGlyph">
+            <Setter Property="Opacity" Value="0.35" />
+        </Style>
+        <Style Selector="Button.cleanupToggle.warn PathIcon.cleanupGlyph">
+            <Setter Property="Foreground" Value="{DynamicResource WarnForegroundBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
     </Window.Styles>
 
     <Design.DataContext>
@@ -150,6 +175,30 @@
                     ToolTip.Tip="{Binding CloudProviderLabel}">
                 <TextBlock Text="{loc:Tr Transcribe_CloudBadge}" FontSize="10" FontWeight="SemiBold" Foreground="White" />
             </Border>
+
+            <!-- Speech cleanup: shown only once the feature has been set up, so
+                 the widget is unchanged for everyone else. Sits between the grip
+                 and the close button; the left of the row belongs to the Cloud
+                 badge. -->
+            <Button Name="CleanupToggle"
+                    Grid.Row="0"
+                    Classes="cleanupToggle"
+                    Classes.on="{Binding CleanupState.IsOn}"
+                    Classes.off="{Binding CleanupState.IsOff}"
+                    Classes.warn="{Binding CleanupState.IsWarning}"
+                    IsVisible="{Binding HasCleanupIndicator}"
+                    Width="22" Height="22"
+                    Margin="0,2,28,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Command="{Binding ToggleCleanupCommand}"
+                    ToolTip.Tip="{Binding CleanupState.Tooltip}">
+                <PathIcon Classes="cleanupGlyph"
+                          Width="13" Height="13"
+                          Data="M12 2 L13.8 8.6 Q14.2 9.8 15.4 10.2 L22 12 L15.4 13.8 Q14.2 14.2 13.8 15.4 L12 22 L10.2 15.4 Q9.8 14.2 8.6 13.8 L2 12 L8.6 10.2 Q9.8 9.8 10.2 8.6 Z" />
+            </Button>
 
             <Button Name="CloseButton"
                     Grid.Row="0"

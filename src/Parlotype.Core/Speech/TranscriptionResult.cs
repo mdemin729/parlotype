@@ -11,4 +11,10 @@ public sealed record TranscriptionResult
 
     /// <summary>Language detected by the model, if available.</summary>
     public string? DetectedLanguage { get; init; }
+
+    /// <summary>
+    /// What speech cleanup did with <see cref="Text"/> (ADR-075). Set by the
+    /// audio pipeline, not by recognizers.
+    /// </summary>
+    public TextProcessing.SpeechCleanupOutcome CleanupOutcome { get; init; }
 }

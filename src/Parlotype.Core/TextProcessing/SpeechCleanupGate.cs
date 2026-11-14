@@ -18,23 +18,67 @@ public static class SpeechCleanupGate
     /// </summary>
     public const int MaxTranscriptChars = 6000;
 
-    /// <summary>Share of non-ASCII letters above which text is not treated as English.</summary>
-    private const double MaxNonAsciiLetterShare = 0.03;
+    /// <summary>
+    /// Share of non-ASCII letters that English text stays under without help:
+    /// the odd "café" in a long sentence.
+    /// </summary>
+    private const double PlainNonAsciiLetterShare = 0.03;
 
     /// <summary>
-    /// True when <paramref name="transcript"/> is worth sending: non-empty, short
-    /// enough, and plausibly English.
+    /// Share of non-ASCII letters tolerated when the words themselves say the
+    /// text is English: a short sentence around a name like "Müller". Above it
+    /// the text is in another script or another language.
+    /// </summary>
+    private const double MaxNonAsciiLetterShare = 0.10;
+
+    /// <summary>
+    /// True when <paramref name="transcript"/> is worth sending and nothing but
+    /// the text is known about its language: non-empty, short enough, and
+    /// plausibly English.
     /// </summary>
     public static bool ShouldClean(string? transcript) =>
-        !string.IsNullOrWhiteSpace(transcript)
-        && transcript.Length <= MaxTranscriptChars
-        && IsLikelyEnglish(transcript);
+        Evaluate(transcript, CleanupLanguage.Unknown) is null;
 
     /// <summary>
-    /// A cheap script test, not language identification. English is written in
-    /// unaccented Latin letters, so text in another script (Cyrillic, Greek) or
-    /// dense with diacritics (most other European languages) fails it. A Latin
-    /// sentence that happens to carry no diacritics passes, whatever its language.
+    /// Decides whether <paramref name="transcript"/> goes to the model, given
+    /// what is known about its language (ADR-075). Returns null to send it, or
+    /// the outcome to report for leaving it as spoken.
+    /// </summary>
+    /// <param name="transcript">The recognized text.</param>
+    /// <param name="language">
+    /// The output language from <see cref="CleanupLanguagePolicy"/>. Known
+    /// English is trusted and the text is not second-guessed; a known other
+    /// language is skipped; only when it is unknown is the text itself examined.
+    /// </param>
+    public static SpeechCleanupOutcome? Evaluate(string? transcript, CleanupLanguage language)
+    {
+        if (string.IsNullOrWhiteSpace(transcript))
+            return SpeechCleanupOutcome.NotRun;
+
+        if (language.Kind == CleanupLanguageKind.NotEnglish)
+            return SpeechCleanupOutcome.SkippedNotEnglish;
+
+        if (transcript.Length > MaxTranscriptChars)
+            return SpeechCleanupOutcome.SkippedTooLong;
+
+        if (language.Kind == CleanupLanguageKind.Unknown && !IsLikelyEnglish(transcript))
+        {
+            // Digits and punctuation alone: nothing was skipped, there is nothing to clean.
+            return transcript.Any(char.IsLetter)
+                ? SpeechCleanupOutcome.SkippedNotEnglish
+                : SpeechCleanupOutcome.NotRun;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// A cheap test on the text alone, not language identification. It rejects
+    /// text in another script (Cyrillic, Greek), text dense with diacritics, and
+    /// text whose function words belong to another language at least as much as
+    /// to English (<see cref="EnglishTextEvidence"/>). It errs towards English
+    /// when there is no evidence either way: a short reply in another
+    /// Latin-script language with no diacritics still passes.
     /// </summary>
     public static bool IsLikelyEnglish(string text)
     {
@@ -52,7 +96,18 @@ public static class SpeechCleanupGate
                 nonAscii++;
         }
 
-        return letters > 0 && nonAscii <= letters * MaxNonAsciiLetterShare;
+        if (letters == 0 || nonAscii > letters * MaxNonAsciiLetterShare)
+            return false;
+
+        var (english, foreign) = EnglishTextEvidence.Score(text);
+        if (foreign > 0 && foreign >= english)
+            return false;
+
+        // Accented letters beyond the odd one need the words to vouch for them.
+        if (nonAscii > letters * PlainNonAsciiLetterShare)
+            return english > 0 && foreign == 0;
+
+        return true;
     }
 
     /// <summary>

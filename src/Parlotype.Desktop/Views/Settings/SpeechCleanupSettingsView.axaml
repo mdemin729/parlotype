@@ -6,6 +6,35 @@
              x:Class="Parlotype.Desktop.Views.Settings.SpeechCleanupSettingsView"
              x:DataType="vms:SpeechCleanupSettingsViewModel"
              x:CompileBindings="True">
+    <UserControl.Resources>
+        <!-- Same tokens as LanguageSelectionSettingsView; see the note there on
+             why they live with the view and not in App.axaml. -->
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="WarnForegroundBrush" Color="#E0A23A" />
+                    <SolidColorBrush x:Key="WarnBackgroundBrush" Color="#24E0A23A" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="WarnForegroundBrush" Color="#B9791B" />
+                    <SolidColorBrush x:Key="WarnBackgroundBrush" Color="#24E0A23A" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.languageNote">
+            <Setter Property="Opacity" Value="0.6" />
+        </Style>
+        <!-- Paused for the dictation language (ADR-075): amber, as a paused
+             translation is on the Language page (ADR-061). -->
+        <Style Selector="TextBlock.languageNote.paused">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="Foreground" Value="{DynamicResource WarnForegroundBrush}" />
+        </Style>
+    </UserControl.Styles>
+
     <StackPanel Spacing="16">
         <TextBlock Text="{loc:Tr Settings_SpeechCleanup_Title}" FontSize="20" FontWeight="SemiBold" />
         <TextBlock Text="{loc:Tr Settings_SpeechCleanup_Description}"
@@ -22,8 +51,11 @@
             <TextBlock Text="{Binding ErrorDetail}"
                        IsVisible="{Binding ErrorDetail, Converter={x:Static ObjectConverters.IsNotNull}}"
                        Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
-            <TextBlock Text="{loc:Tr Settings_SpeechCleanup_EnglishOnlyNote}"
-                       Opacity="0.6" FontSize="12" TextWrapping="Wrap" />
+            <TextBlock Name="LanguageNote"
+                       Classes="languageNote"
+                       Classes.paused="{Binding IsPausedForLanguage}"
+                       Text="{Binding LanguageNote}"
+                       FontSize="12" TextWrapping="Wrap" />
         </StackPanel>
 
         <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />

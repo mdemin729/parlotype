@@ -30,6 +30,7 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
     private readonly ILlamaServerCatalog? _catalog;
     private readonly ILlamaServerInstaller? _serverInstaller;
     private readonly TranscribeViewModel? _transcribeViewModel;
+    private readonly SpeechCleanupStateViewModel? _state;
     private readonly ILogger<SpeechCleanupSettingsViewModel> _logger;
 
     /// <summary>
@@ -90,6 +91,15 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
     [ObservableProperty]
     private bool _isModelInstalled;
 
+    /// <summary>
+    /// The line under the switch: that cleanup is English-only, or, while the
+    /// dictation language is something else, that it is paused and why (ADR-075).
+    /// </summary>
+    public string LanguageNote => _state?.LanguageNote ?? Strings.Settings_SpeechCleanup_LanguageNote;
+
+    /// <summary>The switch is on but the dictation language keeps cleanup from running.</summary>
+    public bool IsPausedForLanguage => _state?.IsPausedForLanguage ?? false;
+
     [ObservableProperty]
     private CleanupStyling _selectedStyling = SpeechCleanupOptions.Default.Styling;
 
@@ -107,7 +117,8 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
         ILlamaServerCatalog? catalog = null,
         ILlamaServerInstaller? serverInstaller = null,
         TranscribeViewModel? transcribeViewModel = null,
-        ILogger<SpeechCleanupSettingsViewModel>? logger = null)
+        ILogger<SpeechCleanupSettingsViewModel>? logger = null,
+        SpeechCleanupStateViewModel? state = null)
     {
         _settings = settings;
         _cleanup = cleanup;
@@ -116,7 +127,11 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
         _catalog = catalog;
         _serverInstaller = serverInstaller;
         _transcribeViewModel = transcribeViewModel;
+        _state = state;
         _logger = logger ?? NullLogger<SpeechCleanupSettingsViewModel>.Instance;
+
+        if (_state is not null)
+            _state.PropertyChanged += OnStateChanged;
 
         StylingOptions = Enum.GetValues<CleanupStyling>()
             .Select(s => new CleanupStylingDisplayItem(s, SelectStylingCommand))
@@ -183,6 +198,44 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
         return IsEnabled ? StatusLabel.Broken : StatusLabel.NotSetUp;
     }
 
+    /// <summary>
+    /// Follows the shared state: the note under the switch, and the switch
+    /// itself when it was flipped from the Transcribe widget (ADR-075).
+    /// </summary>
+    private void OnStateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(SpeechCleanupStateViewModel.LanguageNote):
+                OnPropertyChanged(nameof(LanguageNote));
+                break;
+
+            case nameof(SpeechCleanupStateViewModel.IsPausedForLanguage):
+                OnPropertyChanged(nameof(IsPausedForLanguage));
+                break;
+
+            case nameof(SpeechCleanupStateViewModel.IsEnabled)
+                when !IsBusy && _state is not null && _state.IsEnabled != IsEnabled:
+                _suppressChangeHandlers = true;
+                try
+                {
+                    IsEnabled = _state.IsEnabled;
+                }
+                finally
+                {
+                    _suppressChangeHandlers = false;
+                }
+
+                ErrorDetail = null;
+                _statusLabel = StatusLabel.NotSetUp;
+                _ = RefreshAsync();
+                break;
+        }
+    }
+
+    /// <summary>Tells the shared state that the switch or the disk changed here.</summary>
+    private Task SyncStateAsync() => _state?.RefreshAsync() ?? Task.CompletedTask;
+
     partial void OnIsEnabledChanged(bool value)
     {
         if (_suppressChangeHandlers)
@@ -241,6 +294,7 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
         {
             IsModelInstalled = _modelInstaller?.IsInstalled(Model) ?? false;
             IsBusy = false;
+            await SyncStateAsync();
         }
     }
 
@@ -255,6 +309,7 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
             await _cleanup.UnloadAsync();
 
         SetStatus(await ReadStatusAsync());
+        await SyncStateAsync();
         await StopRecordingAsync();
     }
 
@@ -346,6 +401,7 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
         ErrorDetail = null;
         IsModelInstalled = _modelInstaller?.IsInstalled(Model) ?? false;
         SetStatus(await ReadStatusAsync());
+        await SyncStateAsync();
     }
 
     [RelayCommand]
@@ -436,6 +492,7 @@ public partial class SpeechCleanupSettingsViewModel : SettingsSectionViewModelBa
     {
         base.OnCultureChanged();
         StatusText = Describe(_statusLabel);
+        OnPropertyChanged(nameof(LanguageNote));
         foreach (var item in StylingOptions)
             item.RefreshText();
     }

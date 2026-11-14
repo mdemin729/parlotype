@@ -74,7 +74,7 @@ public sealed class AudioPipelineSpeechCleanupTests
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
-    private sealed class FixedTextRecognizer(string text) : ISpeechRecognizer
+    private sealed class FixedTextRecognizer(string text, string? detectedLanguage = null) : ISpeechRecognizer
     {
         public bool IsReady => true;
 
@@ -82,7 +82,7 @@ public sealed class AudioPipelineSpeechCleanupTests
 
         public Task<TranscriptionResult> TranscribeAsync(
             ReadOnlyMemory<float> samples, CancellationToken cancellationToken = default)
-            => Task.FromResult(new TranscriptionResult { Text = text });
+            => Task.FromResult(new TranscriptionResult { Text = text, DetectedLanguage = detectedLanguage });
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
@@ -148,9 +148,20 @@ public sealed class AudioPipelineSpeechCleanupTests
         ISpeechCleanupService? cleanup,
         Action<FakeSettingsService>? configure = null)
     {
+        var (result, logger) = await DictateForResultAsync(recognizedText, cleanup, configure);
+        return (result?.Text, logger);
+    }
+
+    /// <summary>As <see cref="DictateAsync"/>, with the whole emitted result.</summary>
+    private static async Task<(TranscriptionResult? Result, CapturingLogger<AudioPipelineService> Log)> DictateForResultAsync(
+        string recognizedText,
+        ISpeechCleanupService? cleanup,
+        Action<FakeSettingsService>? configure = null,
+        string? detectedLanguage = null)
+    {
         var capture = new TestAudioCaptureService();
         await using var vad = new SpanVadService();
-        await using var recognizer = new FixedTextRecognizer(recognizedText);
+        await using var recognizer = new FixedTextRecognizer(recognizedText, detectedLanguage);
         var settings = new FakeSettingsService();
         configure?.Invoke(settings);
         var logger = new CapturingLogger<AudioPipelineService>();
@@ -159,8 +170,8 @@ public sealed class AudioPipelineSpeechCleanupTests
             capture, vad, recognizer, settings,
             new FakeKeyboardLayoutService(), new FakeMicrophoneEnumerator(), logger, cleanup);
 
-        var emitted = new TaskCompletionSource<string>();
-        pipeline.TranscriptionAvailable += (_, e) => emitted.TrySetResult(e.Result.Text);
+        var emitted = new TaskCompletionSource<TranscriptionResult>();
+        pipeline.TranscriptionAvailable += (_, e) => emitted.TrySetResult(e.Result);
 
         await pipeline.StartAsync(PipelineMode.SingleUtterance);
         capture.SimulateAudioData(Speech(1000));
@@ -172,6 +183,21 @@ public sealed class AudioPipelineSpeechCleanupTests
 
     private static void Enable(FakeSettingsService settings) =>
         settings.SetAsync(SettingsKeys.SpeechCleanupEnabled, "True").GetAwaiter().GetResult();
+
+    private static void Set(FakeSettingsService settings, string key, string value) =>
+        settings.SetAsync(key, value).GetAwaiter().GetResult();
+
+    /// <summary>Cleanup on, Whisper selected, with the given language settings.</summary>
+    private static Action<FakeSettingsService> Whisper(
+        string source, bool translate = false, string model = "Base") => s =>
+    {
+        Enable(s);
+        Set(s, SettingsKeys.SpeechEngine, "Whisper");
+        Set(s, SettingsKeys.SelectedWhisperModel, model);
+        Set(s, SettingsKeys.SelectedSourceLanguage, source);
+        Set(s, SettingsKeys.TranslationEnabled, translate.ToString());
+        Set(s, SettingsKeys.SelectedTargetLanguage, "en");
+    };
 
     [Fact]
     public async Task Enabled_EmitsTheCleanedText()
@@ -330,5 +356,109 @@ public sealed class AudioPipelineSpeechCleanupTests
             Assert.DoesNotContain(logger.Messages, m => m.Contains("report"));
             Assert.Contains(logger.Messages, m => m.Contains("Speech cleanup"));
         }
+    }
+
+    // --- Output language (ADR-075) ---
+
+    [Fact]
+    public async Task OutputLanguageNotEnglish_PausesCleanup_AndNeverLoadsTheModel()
+    {
+        var cleanup = new FakeCleanupService();
+
+        // English-looking text on purpose: the setting decides, not the text.
+        var (result, _) = await DictateForResultAsync(RawText, cleanup, Whisper(source: "ru"));
+
+        Assert.Equal(RawText, result?.Text);
+        Assert.Equal(SpeechCleanupOutcome.SkippedNotEnglish, result?.CleanupOutcome);
+        Assert.Empty(cleanup.Calls);
+        await Task.Delay(100);
+        Assert.Equal(0, Volatile.Read(ref cleanup.PrepareCalls));
+    }
+
+    [Fact]
+    public async Task TranslatingToEnglish_Cleans_WhateverIsSpoken()
+    {
+        var cleanup = new FakeCleanupService();
+
+        // Whisper reports the spoken language; the text is the English translation.
+        var (result, _) = await DictateForResultAsync(
+            RawText, cleanup, Whisper(source: "ru", translate: true), detectedLanguage: "ru");
+
+        Assert.Equal(CleanText, result?.Text);
+        Assert.Equal(SpeechCleanupOutcome.Cleaned, result?.CleanupOutcome);
+    }
+
+    [Fact]
+    public async Task EnglishOnlyWhisperModel_Cleans_WhateverSourceIsStored()
+    {
+        var cleanup = new FakeCleanupService();
+
+        var (result, _) = await DictateForResultAsync(
+            RawText, cleanup, Whisper(source: "ru", model: "BaseEn"));
+
+        Assert.Equal(CleanText, result?.Text);
+    }
+
+    [Fact]
+    public async Task AutoDetect_RecognizerSaysAnotherLanguage_IsNotSentToTheModel()
+    {
+        var cleanup = new FakeCleanupService();
+
+        var (result, _) = await DictateForResultAsync(
+            RawText, cleanup, Whisper(source: "auto"), detectedLanguage: "de");
+
+        Assert.Equal(RawText, result?.Text);
+        Assert.Equal(SpeechCleanupOutcome.SkippedNotEnglish, result?.CleanupOutcome);
+        Assert.Empty(cleanup.Calls);
+    }
+
+    [Fact]
+    public async Task AutoDetect_RecognizerSaysEnglish_Cleans()
+    {
+        var cleanup = new FakeCleanupService();
+
+        var (result, _) = await DictateForResultAsync(
+            RawText, cleanup, Whisper(source: "auto"), detectedLanguage: "en");
+
+        Assert.Equal(CleanText, result?.Text);
+    }
+
+    [Fact]
+    public async Task Parakeet_IgnoresLanguageSettingsLeftOverFromWhisper()
+    {
+        var cleanup = new FakeCleanupService();
+
+        var (result, _) = await DictateForResultAsync(RawText, cleanup, s =>
+        {
+            Whisper(source: "ru")(s);
+            Set(s, SettingsKeys.SpeechEngine, "Parakeet");
+        });
+
+        Assert.Equal(CleanText, result?.Text);
+        Assert.Equal(SpeechCleanupOutcome.Cleaned, result?.CleanupOutcome);
+    }
+
+    [Fact]
+    public async Task UnknownLanguage_ForeignSentenceWithoutDiacritics_IsNotSentToTheModel()
+    {
+        const string italian = "domani devo mandare il rapporto a Marco e poi andiamo a casa";
+        var cleanup = new FakeCleanupService();
+
+        var (result, _) = await DictateForResultAsync(italian, cleanup, Enable);
+
+        Assert.Equal(italian, result?.Text);
+        Assert.Equal(SpeechCleanupOutcome.SkippedNotEnglish, result?.CleanupOutcome);
+        Assert.Empty(cleanup.Calls);
+    }
+
+    [Fact]
+    public async Task Outcome_Off_IsNotRun_AndFailure_IsFailed()
+    {
+        var (off, _) = await DictateForResultAsync(RawText, new FakeCleanupService());
+        Assert.Equal(SpeechCleanupOutcome.NotRun, off?.CleanupOutcome);
+
+        var failing = new FakeCleanupService { Reply = _ => throw new TimeoutException() };
+        var (failed, _) = await DictateForResultAsync(RawText, failing, Enable);
+        Assert.Equal(SpeechCleanupOutcome.Failed, failed?.CleanupOutcome);
     }
 }

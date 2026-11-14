@@ -1489,8 +1489,41 @@ Is-settings u ċ-ċwievet tal-API tiegħek jinżammu. Il-mudelli jerġgħu jitni
   <data name="Settings_SpeechCleanup_ToggleOff" xml:space="preserve">
     <value>Tindif tad-dettatura mitfi</value>
   </data>
-  <data name="Settings_SpeechCleanup_EnglishOnlyNote" xml:space="preserve">
-    <value>Jaħdem bl-Ingliż biss. Itfih meta tiddetta b'lingwa oħra.</value>
+  <data name="Settings_SpeechCleanup_LanguageNote" xml:space="preserve">
+    <value>Jaħdem bl-Ingliż biss. Dettatura b'lingwa oħra titwaħħal kif intqalet.</value>
+    <comment>Shown under the speech cleanup switch. "Pasted as spoken" means the recognized text is inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Settings_SpeechCleanup_PausedNoteFormat" xml:space="preserve">
+    <value>Mwaqqaf: it-tindif tad-dettatura jaħdem bl-Ingliż biss. Lingwa tad-dettatura: {0}.</value>
+    <comment>Shown under the speech cleanup switch while it is on but cannot run. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Off" xml:space="preserve">
+    <value>It-tindif tad-dettatura mitfi. Ikklikkja biex tixgħlu.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_On" xml:space="preserve">
+    <value>It-tindif tad-dettatura mixgħul għat-test bl-Ingliż. Ikklikkja biex titfih.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. "Speech cleanup" is the feature named by Settings_SpeechCleanup_Title — use the same term.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_PausedFormat" xml:space="preserve">
+    <value>It-tindif tad-dettatura mwaqqaf: jaħdem bl-Ingliż biss. Lingwa tad-dettatura: {0}.</value>
+    <comment>Tooltip of a small icon button on the dictation widget. {0} is a language name such as "Russian", inserted as is — keep it after the colon so it needs no grammatical case.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedNotEnglish" xml:space="preserve">
+    <value>L-aħħar dettatura ma kinitx bl-Ingliż, għalhekk twaħħlet kif intqalet.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_SkippedTooLong" xml:space="preserve">
+    <value>L-aħħar dettatura kienet twila wisq għat-tindif, għalhekk twaħħlet kif intqalet.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Failed" xml:space="preserve">
+    <value>It-tindif tad-dettatura falla fl-aħħar dettatura, għalhekk twaħħlet kif intqalet.</value>
+    <comment>Tooltip on the dictation widget. "Pasted as spoken" means the recognized text was inserted unchanged, without the cleanup rewrite.</comment>
+  </data>
+  <data name="Transcribe_Cleanup_Tooltip_Broken" xml:space="preserve">
+    <value>It-tindif tad-dettatura mhux qed jaħdem. Ikklikkja biex tiftaħ is-Settings tiegħu.</value>
+    <comment>Tooltip of a small icon button on the dictation widget, shown when the cleanup model or its server is missing.</comment>
   </data>
   <data name="Settings_SpeechCleanup_Status_NotSetUpFormat" xml:space="preserve">
     <value>Meta tixgħel dan, jitniżżel il-mudell ({0}) u, jekk m'hemmx wieħed installat, server llama.cpp. Kull tniżżil jistaqsik l-ewwel.</value>

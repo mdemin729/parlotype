@@ -27,4 +27,7 @@ public enum SettingsSection
 
     /// <summary>The Help section (hotkey reference + onboarding tour, ADR-056).</summary>
     Help,
+
+    /// <summary>The Speech cleanup section (ADR-073), reached from the widget's indicator (ADR-075).</summary>
+    SpeechCleanup,
 }

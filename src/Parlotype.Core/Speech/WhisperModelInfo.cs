@@ -14,6 +14,15 @@ public sealed record WhisperModelInfo(
     string Sha256,
     bool SupportsTranslation)
 {
+    /// <summary>
+    /// True for the models trained on English audio only. Their output is
+    /// always English, which <see cref="SupportsTranslation"/> cannot say: it is
+    /// false for these and for Large v3 Turbo alike.
+    /// </summary>
+    public bool IsEnglishOnly => Type
+        is WhisperModelType.TinyEn or WhisperModelType.BaseEn
+        or WhisperModelType.SmallEn or WhisperModelType.MediumEn;
+
     // SupportsTranslation is false for English-only models (trained on English audio
     // only) and for Large v3 Turbo (a distilled, transcription-only model).
     private static readonly WhisperModelInfo[] All =

@@ -88,6 +88,12 @@ One shared model answers "what does the user speak, and what should be typed"
   fallbacks for both the settings page and the widget. When an engine switch invalidates a
   choice, it falls back and says so in a toast rather than changing it silently. A change
   to the relationship stops an active recording.
+- **Speech cleanup reads the same relationship.** `SpeechCleanupStateViewModel` (a
+  singleton) derives from it, through Core's `CleanupLanguagePolicy`, whether the
+  English-only cleanup will run, and is the one state behind the Speech cleanup page and
+  the widget's cleanup icon. The audio pipeline calls the same policy, so what the UI shows
+  is what the pipeline does
+  ([ADR-075](../decisions/075-language-aware-speech-cleanup.md)).
 - **Sentinels.** Source can be `auto`, an explicit language, or `keyboard`, which resolves
   at record time to the foreground window's keyboard layout (layouts are per thread on
   Windows; `Win32KeyboardLayoutService`), falling back to auto-detect. A blank source

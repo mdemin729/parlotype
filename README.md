@@ -162,12 +162,16 @@ out properly. It works after any engine, including the default CPU-only Parakeet
   ([measurements](docs/research/2026-11-13-gemma4-engine-review/s1-mini-measurements.md)).
 - **Style options.** Four writing styles from casual to formal, optional bullet lists, and an
   e-mail layout.
-- **English only.** Text in another alphabet is left untouched; for other languages written
-  in Latin letters, turn cleanup off.
+- **English only, and it knows.** When Whisper or Gemma 4 is set to another language,
+  cleanup pauses by itself and resumes when the output is English again, including when you
+  translate into English. With engines that detect the language on their own, text that is
+  not English is pasted as spoken. A sparkle icon on the dictation widget shows the state
+  and switches cleanup on and off.
 - **It never costs you the dictation.** If the model is unavailable, slow, or returns
   something implausible, the text is pasted as recognized.
 
-See [ADR-073](docs/decisions/073-speech-cleanup-s1-mini.md).
+See [ADR-073](docs/decisions/073-speech-cleanup-s1-mini.md) and
+[ADR-075](docs/decisions/075-language-aware-speech-cleanup.md).
 
 ## Languages & Translation
 

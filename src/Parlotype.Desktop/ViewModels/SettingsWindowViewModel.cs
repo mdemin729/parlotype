@@ -241,6 +241,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             SettingsSection.Engine => SpeechEngine,
             SettingsSection.EngineModel => ModelSectionForActiveEngine(),
             SettingsSection.Help => Help,
+            SettingsSection.SpeechCleanup => SpeechCleanup,
             _ => null,
         };
         if (target is null)

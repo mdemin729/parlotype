@@ -57,10 +57,12 @@ public sealed class MockAudioPipeline : IAudioPipeline
         return Task.CompletedTask;
     }
 
-    public void RaiseTranscriptionAvailable(string text) =>
+    public void RaiseTranscriptionAvailable(
+        string text,
+        Parlotype.Core.TextProcessing.SpeechCleanupOutcome cleanupOutcome = default) =>
         TranscriptionAvailable?.Invoke(this, new TranscriptionEventArgs
         {
-            Result = new TranscriptionResult { Text = text }
+            Result = new TranscriptionResult { Text = text, CleanupOutcome = cleanupOutcome }
         });
 
     public void RaiseTranscriptionFailed(Exception exception) =>

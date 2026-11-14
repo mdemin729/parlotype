@@ -2,7 +2,7 @@
 status: accepted
 date: 2026-11-13
 amends: [027]
-amended-by: [074]
+amended-by: [074, 075]
 ---
 
 # 073. Speech cleanup with a local model (S1-mini)
