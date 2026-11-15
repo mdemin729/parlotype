@@ -64,7 +64,7 @@ public sealed class ParakeetModelDownloadService : IParakeetModelProvider
             var totalKnown = true;
             foreach (var fileName in pending)
             {
-                var size = await GetContentLengthAsync(BuildUrl(model.HuggingFaceRepo, fileName), cancellationToken);
+                var size = await GetContentLengthAsync(model.GetDownloadUrl(fileName), cancellationToken);
                 if (size is > 0)
                     grandTotal += size.Value;
                 else
@@ -76,7 +76,7 @@ public sealed class ParakeetModelDownloadService : IParakeetModelProvider
             {
                 _logger.LogInformation("Downloading Parakeet file: {FileName}", fileName);
                 var fileBytes = await DownloadFileAsync(
-                    model.HuggingFaceRepo, fileName, GetFilePath(model, fileName), progress,
+                    model.GetDownloadUrl(fileName), fileName, GetFilePath(model, fileName), progress,
                     expectedSha256: model.GetSha256(fileName),
                     cumulativeOffset: completedBytes,
                     grandTotal: totalKnown ? grandTotal : null,
@@ -116,9 +116,6 @@ public sealed class ParakeetModelDownloadService : IParakeetModelProvider
         }
     }
 
-    private static string BuildUrl(string repo, string fileName) =>
-        $"https://huggingface.co/{repo}/resolve/main/{fileName}";
-
     private async Task<long?> GetContentLengthAsync(string url, CancellationToken cancellationToken)
     {
         try
@@ -144,7 +141,7 @@ public sealed class ParakeetModelDownloadService : IParakeetModelProvider
     /// Returns the number of bytes downloaded for this file.
     /// </summary>
     private async Task<long> DownloadFileAsync(
-        string repo,
+        string url,
         string fileName,
         string targetPath,
         IProgress<ModelDownloadProgress>? progress,
@@ -153,7 +150,6 @@ public sealed class ParakeetModelDownloadService : IParakeetModelProvider
         long? grandTotal,
         CancellationToken cancellationToken)
     {
-        var url = BuildUrl(repo, fileName);
         var tempPath = targetPath + ".tmp";
 
         if (expectedSha256 is null)

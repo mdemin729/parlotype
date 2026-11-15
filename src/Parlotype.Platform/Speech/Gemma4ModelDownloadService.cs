@@ -65,7 +65,7 @@ public sealed class Gemma4ModelDownloadService
             var totalKnown = true;
             foreach (var (fileName, _, _) in pending)
             {
-                var size = await GetContentLengthAsync(BuildUrl(model.HuggingFaceRepo, fileName), cancellationToken);
+                var size = await GetContentLengthAsync(model.GetDownloadUrl(fileName), cancellationToken);
                 if (size is > 0)
                     grandTotal += size.Value;
                 else
@@ -77,7 +77,7 @@ public sealed class Gemma4ModelDownloadService
             {
                 _logger.LogInformation("Downloading Gemma 4 {Label}: {FileName}", label, fileName);
                 var fileBytes = await DownloadFileAsync(
-                    model.HuggingFaceRepo, fileName, targetPath, progress, label,
+                    model.GetDownloadUrl(fileName), fileName, targetPath, progress, label,
                     expectedSha256: model.GetSha256(fileName),
                     cumulativeOffset: completedBytes,
                     grandTotal: totalKnown ? grandTotal : null,
@@ -90,9 +90,6 @@ public sealed class Gemma4ModelDownloadService
             DownloadLock.Release();
         }
     }
-
-    private static string BuildUrl(string repo, string fileName) =>
-        $"https://huggingface.co/{repo}/resolve/main/{fileName}";
 
     private async Task<long?> GetContentLengthAsync(string url, CancellationToken cancellationToken)
     {
@@ -140,7 +137,7 @@ public sealed class Gemma4ModelDownloadService
     /// Returns the number of bytes downloaded for this file.
     /// </summary>
     private async Task<long> DownloadFileAsync(
-        string repo,
+        string url,
         string fileName,
         string targetPath,
         IProgress<ModelDownloadProgress>? progress,
@@ -150,7 +147,6 @@ public sealed class Gemma4ModelDownloadService
         long? grandTotal,
         CancellationToken cancellationToken)
     {
-        var url = BuildUrl(repo, fileName);
         var tempPath = targetPath + ".tmp";
 
         if (expectedSha256 is null)

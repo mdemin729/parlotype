@@ -47,7 +47,7 @@ public sealed class SpeechCleanupModelDownloadService
             if (IsModelCached(model))
                 return;
 
-            var url = $"https://huggingface.co/{model.HuggingFaceRepo}/resolve/main/{model.GgufFileName}";
+            var url = model.DownloadUrl;
             _logger.LogInformation("Downloading speech cleanup model {ModelId}", model.ModelId);
 
             var streamProgress = progress is null

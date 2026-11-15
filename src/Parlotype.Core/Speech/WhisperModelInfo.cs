@@ -3,9 +3,9 @@ namespace Parlotype.Core.Speech;
 /// <summary>Static metadata for a Whisper GGML model.</summary>
 /// <param name="Sha256">
 /// SHA-256 digest of the GGML file, verified after download (security audit
-/// 2026-07-11, S2). Values sourced from the HuggingFace LFS metadata of the
-/// exact repo/revision the downloader uses
-/// (<c>sandrohanea/whisper.net</c>, revision <c>v3</c>, <c>classic/</c>).
+/// 2026-07-11, S2). Values sourced from the HuggingFace LFS metadata of
+/// <see cref="HuggingFaceRepo"/> at <see cref="HuggingFaceRevision"/>, under
+/// <c>classic/</c>.
 /// </param>
 public sealed record WhisperModelInfo(
     WhisperModelType Type,
@@ -14,6 +14,16 @@ public sealed record WhisperModelInfo(
     string Sha256,
     bool SupportsTranslation)
 {
+    /// <summary>The Hugging Face repo every GGML file is downloaded from.</summary>
+    public const string HuggingFaceRepo = "sandrohanea/whisper.net";
+
+    /// <summary>
+    /// The commit of <see cref="HuggingFaceRepo"/> the files are downloaded from:
+    /// the head of its <c>v3</c> branch, pinned as a full SHA because a branch
+    /// can move (ADR-076). It and every <see cref="Sha256"/> change together.
+    /// </summary>
+    public const string HuggingFaceRevision = "a28c1f379c0359332f8d101184249cba28b1ff53";
+
     /// <summary>
     /// True for the models trained on English audio only. Their output is
     /// always English, which <see cref="SupportsTranslation"/> cannot say: it is

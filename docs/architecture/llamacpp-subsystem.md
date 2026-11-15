@@ -59,7 +59,7 @@ dependency on speech. Both consumers use them unchanged.
 | `DelegatingSpeechRecognizer` | Platform | Registered as the `ISpeechRecognizer` singleton. At `InitializeAsync` time, asks the factory for the concrete recognizer and forwards all calls to it. |
 | `SpeechRecognizerFactory` | Platform | Reads `SettingsKeys.SpeechEngine` and resolves one of five recognizers from DI: `ParakeetSpeechRecognizer` (default), `WhisperSpeechRecognizer`, `LlamaCppSpeechRecognizer` (Gemma 4), `OpenAiCompatibleSpeechRecognizer`, `XaiGrokSpeechRecognizer`. |
 | `LlamaCppSpeechRecognizer` | Platform (`Speech` namespace) | Owns the `llama-server.exe` sidecar lifecycle as a speech consumer: probes, spawns, health-polls, transcribes via HTTP, and stops the process. Also implements `ILlamaCppServerLifecycle` for the installer. Uses the server-side components via `Parlotype.Core.LlamaServer` + `Parlotype.Platform.LlamaServer`. |
-| `Gemma4ModelInfo` | Core (`Speech` namespace) | Catalog of Gemma 4 variants (ADR-029): GGUF + mmproj filenames and SHA-256 digests, HuggingFace repo. Cache directory is `IAppPaths.ModelsDirectory` (`%LOCALAPPDATA%\parlotype-data\models\` on Windows, ADR-053). Stays in `Speech` — Gemma 4 is the speech model. |
+| `Gemma4ModelInfo` | Core (`Speech` namespace) | Catalog of Gemma 4 variants (ADR-029): GGUF + mmproj filenames and SHA-256 digests, HuggingFace repo and the commit they are downloaded from (ADR-076). Cache directory is `IAppPaths.ModelsDirectory` (`%LOCALAPPDATA%\parlotype-data\models\` on Windows, ADR-053). Stays in `Speech` — Gemma 4 is the speech model. |
 | `SpeechEngine` (enum) | Core (`Speech` namespace) | `Whisper` \| `Gemma4` \| `Parakeet` \| `OpenAiCompatible` \| `XaiGrok`; unset or unparsable ⇒ `Parakeet` (ADR-042). |
 | `SettingsKeys.SpeechEngine` | Core | Selects the speech engine. |
 
@@ -240,7 +240,8 @@ llama-server.exe
 is mandatory or the server returns "audio input is not supported".
 GGUF file names on HuggingFace are case-sensitive, and the projector is
 `bf16`, not `f16` (`mmproj-gemma-4-E4B-it-bf16.gguf`); the exact names live
-in `Gemma4ModelInfo`.
+in `Gemma4ModelInfo` and are the names at the commit pinned there, not the
+ones on upstream's `main` (ADR-076).
 
 **Process options:** `UseShellExecute = false`, `CreateNoWindow = true`,
 stdout and stderr redirected and continuously drained by

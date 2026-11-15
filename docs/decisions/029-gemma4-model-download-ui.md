@@ -1,6 +1,7 @@
 ---
 status: accepted
 date: 2026-05-19
+amended-by: [076]
 ---
 
 # 029. Gemma 4 model download UI (E2B + E4B)

@@ -11,17 +11,26 @@ namespace Parlotype.Core.Speech;
 /// outside the graph). Must live next to the encoder file — onnxruntime
 /// resolves it by relative path; null when the encoder is self-contained.
 /// </param>
+/// <param name="HuggingFaceRevision">
+/// The commit of <paramref name="HuggingFaceRepo"/> the files are downloaded
+/// from (full SHA, never a branch). Upstream re-exports these files in place
+/// on <c>main</c>, so the commit and <paramref name="FileSha256"/> are one
+/// pair: change them together or the download fails its integrity check
+/// (ADR-076).
+/// </param>
 /// <param name="FileSha256">
 /// Per-file SHA-256 digests (lowercase hex), keyed by file name, verified
 /// after download (security audit 2026-07-11, S2). Sourced from the
 /// HuggingFace LFS metadata of <paramref name="HuggingFaceRepo"/> at
-/// <c>main</c>; <c>tokens.txt</c> is a non-LFS blob hashed directly.
-/// A file missing from the map downloads unverified (with a warning).
+/// <paramref name="HuggingFaceRevision"/>; <c>tokens.txt</c> is a non-LFS
+/// blob hashed directly. A file missing from the map downloads unverified
+/// (with a warning).
 /// </param>
 public sealed record ParakeetModelInfo(
     string ModelId,
     string DisplayName,
     string HuggingFaceRepo,
+    string HuggingFaceRevision,
     string EncoderFileName,
     string DecoderFileName,
     string JoinerFileName,
@@ -38,6 +47,7 @@ public sealed record ParakeetModelInfo(
         ModelId: "parakeet-tdt-0.6b-v3-int8",
         DisplayName: "Parakeet TDT 0.6B v3 (INT8)",
         HuggingFaceRepo: "csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8",
+        HuggingFaceRevision: "2bda32ec70b097a55adaa07d9a7173915b43cc78",
         EncoderFileName: "encoder.int8.onnx",
         DecoderFileName: "decoder.int8.onnx",
         JoinerFileName: "joiner.int8.onnx",
@@ -60,6 +70,7 @@ public sealed record ParakeetModelInfo(
         ModelId: "parakeet-tdt-0.6b-v3-fp32",
         DisplayName: "Parakeet TDT 0.6B v3 (Full precision)",
         HuggingFaceRepo: "csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3",
+        HuggingFaceRevision: "1a468a35cbba69418f126de829e75261dea4a4e4",
         EncoderFileName: "encoder.onnx",
         DecoderFileName: "decoder.onnx",
         JoinerFileName: "joiner.onnx",
@@ -78,6 +89,12 @@ public sealed record ParakeetModelInfo(
     /// <summary>Expected SHA-256 for one of this model's files, or null when unknown.</summary>
     public string? GetSha256(string fileName) =>
         FileSha256 is not null && FileSha256.TryGetValue(fileName, out var sha) ? sha : null;
+
+    /// <summary>
+    /// Download URL of one of this model's files, at <see cref="HuggingFaceRevision"/>.
+    /// </summary>
+    public string GetDownloadUrl(string fileName) =>
+        HuggingFaceUrl.Resolve(HuggingFaceRepo, HuggingFaceRevision, fileName);
 
     /// <summary>The default model when no selection is persisted.</summary>
     public static ParakeetModelInfo Default => TdtV3Int8;

@@ -1,7 +1,7 @@
 ---
 status: accepted
 date: 2026-02-22
-amended-by: [046, 053]
+amended-by: [046, 053, 076]
 ---
 
 # 007. Whisper Model Selection and Download

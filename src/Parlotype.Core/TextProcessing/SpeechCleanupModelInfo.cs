@@ -10,10 +10,15 @@ namespace Parlotype.Core.TextProcessing;
 /// wording and capitalization wherever the model is used, so it is never
 /// translated or restyled.
 /// </param>
+/// <param name="HuggingFaceRevision">
+/// The commit of <paramref name="HuggingFaceRepo"/> the file is downloaded
+/// from (full SHA, never a branch), so a later upstream release cannot replace
+/// the bytes behind <paramref name="GgufSha256"/> (ADR-076).
+/// </param>
 /// <param name="GgufSha256">
 /// SHA-256 of the GGUF file (lowercase hex), verified after download. Sourced
 /// from the HuggingFace LFS metadata of <paramref name="HuggingFaceRepo"/> at
-/// <c>main</c>.
+/// <paramref name="HuggingFaceRevision"/>.
 /// </param>
 /// <param name="ContextTokens">
 /// Context window the server is started with. Far below what the model
@@ -26,6 +31,7 @@ public sealed record SpeechCleanupModelInfo(
     string GgufFileName,
     string DiskSize,
     string HuggingFaceRepo,
+    string HuggingFaceRevision,
     string GgufSha256,
     int ContextTokens)
 {
@@ -40,8 +46,13 @@ public sealed record SpeechCleanupModelInfo(
         GgufFileName: "s1-mini-q4_k_m.gguf",
         DiskSize: "462 MB",
         HuggingFaceRepo: "superwhisper/s1-mini-GGUF",
+        HuggingFaceRevision: "34add00a48a2e5d24e5a4ee5405a99620a3a240c",
         GgufSha256: "3b41ebe2502cbd03e811d5d16b022f5ab551eda58d62597d152f89535003c634",
         ContextTokens: 4096);
+
+    /// <summary>Download URL of the GGUF file, at <see cref="HuggingFaceRevision"/>.</summary>
+    public string DownloadUrl =>
+        Speech.HuggingFaceUrl.Resolve(HuggingFaceRepo, HuggingFaceRevision, GgufFileName);
 
     /// <summary>The model used when nothing else is selected.</summary>
     public static SpeechCleanupModelInfo Default => S1Mini;
