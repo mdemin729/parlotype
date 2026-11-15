@@ -69,11 +69,15 @@ public sealed class HttpModelDownloadService
         }
     }
 
-    private static string GetDownloadUrl(WhisperModelType modelType)
-    {
-        var modelFileName = GetModelFileName(modelType);
-        return $"https://huggingface.co/sandrohanea/whisper.net/resolve/v3/classic/{modelFileName}.bin";
-    }
+    /// <summary>
+    /// Download URL of a model's GGML file, at the pinned commit of the
+    /// Whisper.net model repo (ADR-076).
+    /// </summary>
+    public static string GetDownloadUrl(WhisperModelType modelType) =>
+        HuggingFaceUrl.Resolve(
+            WhisperModelInfo.HuggingFaceRepo,
+            WhisperModelInfo.HuggingFaceRevision,
+            $"classic/{GetModelFileName(modelType)}.bin");
 
     private static string GetModelFileName(WhisperModelType modelType) => modelType switch
     {

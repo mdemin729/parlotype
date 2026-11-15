@@ -32,6 +32,14 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   contacts on its own (only the update check) and what happens only when you
   ask for it, including feedback.
 
+### Fixed
+
+- **Speech model downloads work again.** The first download of the default
+  Parakeet model, and of any Gemma 4 model, failed with an integrity error or a
+  "not found" error after the files were replaced on Hugging Face. Parlotype now
+  downloads the exact version of each model it was tested with, so a change on
+  their side can no longer break it. Models you already have are not affected.
+
 ## [0.6.0] — 2026-10-03
 
 ### Added
