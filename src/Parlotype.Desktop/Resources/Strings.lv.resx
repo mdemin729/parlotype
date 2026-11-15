@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Šis nelielais, vienmēr virspusē redzamais logs ir jūsu diktēšanas vadīklas. Lielā poga sāk un aptur ierakstīšanu; turiet peles kursoru virs kartītes, lai redzētu pašreizējo statusu. Velciet satveršanas joslu augšpusē, lai pārvietotu logu, bet poga ✕ paslēpj to paziņojumu apgabalā. Dzinēji, kas piedāvā valodas izvēli, apakšā rāda valodu joslu.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Šis nelielais, vienmēr virspusē redzamais logs ir jūsu diktēšanas vadīklas. Lielā poga sāk un aptur ierakstīšanu; turiet peles kursoru virs kartītes, lai redzētu pašreizējo statusu. Velciet satveršanas joslu augšpusē, lai pārvietotu logu, bet poga ✕ paslēpj to izvēlņu joslā. Dzinēji, kas piedāvā valodas izvēli, apakšā rāda valodu joslu.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Izvēlieties runas dzini</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype darbojas paziņojumu apgabalā</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype darbojas izvēlņu joslā</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Sīklietotnes paslēpšana vai aizvēršana neaizver Parlotype — tā turpina gaidīt jūsu īsinājumtaustiņus no sistēmas paziņojumu apgabala. Noklikšķiniet uz ikonas paziņojumu apgabalā, lai atgrieztu sīklietotni. Lai izietu pilnībā, ar peles labo pogu noklikšķiniet uz ikonas un izvēlieties Iziet.
 
 Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype startējas kopā ar Windows un gaida paziņojumu apgabalā — logs neatveras. To jebkurā brīdī var izslēgt sadaļā Iestatījumi → Lietotne → Startēšana.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Sīklietotnes paslēpšana vai aizvēršana neaizver Parlotype — tā turpina gaidīt jūsu īsinājumtaustiņus no izvēlņu joslas. Noklikšķiniet tur uz Parlotype ikonas un izvēlieties Atvērt, lai atgrieztu sīklietotni. Lai izietu pilnībā, tajā pašā izvēlnē izvēlieties Iziet.
+
+Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype startējas kopā ar macOS un gaida izvēlņu joslā — logs neatveras. To jebkurā brīdī var izslēgt sadaļā Iestatījumi → Lietotne → Startēšana.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Viss ir gatavs</value>
@@ -142,8 +156,16 @@ Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype start
     <value>Seko Windows iestatījumam — pašlaik {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Seko macOS iestatījumam — pašlaik {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Seko Windows iestatījumam — vēl nav tulkots, tāpēc tiek izmantota angļu valoda</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Seko macOS iestatījumam — vēl nav tulkots, tāpēc tiek izmantota angļu valoda</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Vidējs</value>
@@ -172,6 +194,14 @@ Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype start
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Atvērt iestatījumus</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Atvērt System Settings</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Ne tagad</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Atvērt</value>
@@ -268,6 +298,26 @@ Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype start
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Mākoņpakalpojumu sniedzējs nav konfigurēts</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype nepieciešama „Accessibility” atļauja</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS lūdz jūsu atļauju, pirms lietotne var noteikt globālu īsinājumtaustiņu vai ielīmēt tekstu citās lietotnēs. Atveriet System Settings → Privacy &amp; Security → Accessibility un ieslēdziet Parlotype. Īsinājumtaustiņš sāks darboties uzreiz — restarts nav nepieciešams.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Jūsu teksts ir starpliktuvē – nospiediet Cmd+V, lai to ielīmētu.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Piekļuve mikrofonam ir izslēgta</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS neļauj Parlotype izmantot mikrofonu. Atveriet System Settings → Privacy &amp; Security → Microphone un ieslēdziet Parlotype, pēc tam sāciet diktēšanu vēlreiz.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Mākoņa transkripcija neizdevās</value>
@@ -376,8 +426,16 @@ Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype start
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype gaida diktēšanas īsinājumtaustiņu no sistēmas paziņojumu apgabala, tāpēc tam jau jādarbojas, pirms varat diktēt.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype gaida diktēšanas īsinājumtaustiņu no izvēlņu joslas, tāpēc tam jau jādarbojas, pirms varat diktēt.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Startēt Parlotype, kad piesakos Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Startēt Parlotype, kad piesakos macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Nestartēt Parlotype automātiski</value>
@@ -396,15 +454,27 @@ Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype start
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Viens ieraksts jūsu paša lietotāja kontā (HKCU Run), kas norāda uz Parlotype. Nekāda pakalpojuma, nekāda plānotā uzdevuma, nekādu administratora tiesību, nekā ierīces mērogā. To varat pats apskatīt un noņemt sadaļā Uzdevumu pārvaldnieks → Startēšanas lietotnes.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Viens startēšanas aģents jūsu paša lietotāja kontā (~/Library/LaunchAgents), kas norāda uz Parlotype. Nekādas palīglietotnes, nekādu administratora tiesību, nekā ierīces mērogā. To varat pats apskatīt un izslēgt sadaļā System Settings → General → Login Items.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Šī versija nevar startēties pieteikšanās brīdī — tā nav instalēta, izmantojot Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Šī kopija nevar startēties pieteikšanās brīdī — vispirms pārvietojiet Parlotype uz mapi „Applications”.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows ir izslēdzis Parlotype sadaļā Uzdevumu pārvaldnieks → Startēšanas lietotnes. Iespējojiet to tur no jauna, lai šis iestatījums stātos spēkā.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype startējas kopā ar Windows un gaida paziņojumu apgabalā — logs neatveras.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype startējas kopā ar macOS un gaida izvēlņu joslā — logs neatveras.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype darbojas tikai tad, kad to startējat pats.</value>
@@ -454,6 +524,10 @@ Lai īsinājumtaustiņš darbotos jau no pieteikšanās brīža, Parlotype start
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Šī versija nevar sevi atjaunināt — tā nav instalēta, izmantojot Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Šī kopija nevar sevi atjaunināt — tā nav instalēta no Parlotype laidiena.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Notiek atjauninājumu pārbaude…</value>

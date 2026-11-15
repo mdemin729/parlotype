@@ -24,7 +24,22 @@ public partial class ConfirmationDialog : Window
             cancel.Click += OnCancelClick;
     }
 
-    private void OnConfirmClick(object? sender, RoutedEventArgs e) => Close(true);
+    /// <summary>
+    /// The user's answer, or null when the window was closed without one.
+    /// <see cref="Window.Close(object?)"/> hands its argument only to a caller
+    /// of <c>ShowDialog</c>; a dialog shown without an owner has to be asked.
+    /// </summary>
+    public bool? Result { get; private set; }
 
-    private void OnCancelClick(object? sender, RoutedEventArgs e) => Close(false);
+    private void OnConfirmClick(object? sender, RoutedEventArgs e)
+    {
+        Result = true;
+        Close(true);
+    }
+
+    private void OnCancelClick(object? sender, RoutedEventArgs e)
+    {
+        Result = false;
+        Close(false);
+    }
 }

@@ -80,7 +80,7 @@ public sealed class LlamaServerSpeechCleanupServiceTests : IDisposable
     {
         var folder = Path.Combine(_root, "manual-server");
         Directory.CreateDirectory(folder);
-        File.WriteAllText(Path.Combine(folder, "llama-server.exe"), "not a real executable");
+        File.WriteAllText(Path.Combine(folder, LlamaServerPathResolver.ExecutableName), "not a real executable");
         await _settings.SetAsync(SettingsKeys.LlamaCppServerFolder, folder);
         await _registry.SetActiveAsync(installId: null, LlamaServerSource.Manual);
     }

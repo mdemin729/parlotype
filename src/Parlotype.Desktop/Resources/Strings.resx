@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>This small always-on-top window is your dictation control. The big button starts and stops recording; hover the card to see the current status. Drag the grip strip at the top to move it anywhere, and the ✕ button hides it to the tray. Engines that offer a language choice show a language strip along the bottom.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>This small always-on-top window is your dictation control. The big button starts and stops recording; hover the card to see the current status. Drag the grip strip at the top to move it anywhere, and the ✕ button hides it to the menu bar. Engines that offer a language choice show a language strip along the bottom.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Choose a speech engine</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype lives in the tray</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype lives in the menu bar</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Hiding or closing the widget does not quit Parlotype — it keeps listening for your hotkeys from the system tray. Click the tray icon to bring the widget back. To exit completely, right-click the tray icon and choose Exit.
 
 So your hotkey works from the moment you sign in, Parlotype starts with Windows and waits in the tray — no window opens. Turn that off any time in Settings → Application → Startup.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Hiding or closing the widget does not quit Parlotype — it keeps listening for your hotkeys from the menu bar. Click the Parlotype icon there and choose Open to bring the widget back. To exit completely, choose Exit from the same menu.
+
+So your hotkey works from the moment you log in, Parlotype starts with macOS and waits in the menu bar — no window opens. Turn that off any time in Settings → Application → Startup.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>You're all set</value>
@@ -142,8 +156,16 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
     <value>Follows Windows — currently {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Follows macOS — currently {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Follows Windows — not translated yet, so English is used</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Follows macOS — not translated yet, so English is used</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Medium</value>
@@ -172,6 +194,14 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Open settings</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Open System Settings</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Not now</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Open</value>
@@ -268,6 +298,26 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Cloud provider not configured</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype needs Accessibility access</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS asks for your permission before an app can detect a global hotkey or paste text into other apps. Open System Settings → Privacy &amp; Security → Accessibility and switch Parlotype on. The hotkey starts working as soon as you do — no restart needed.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Your text is on the clipboard — press Cmd+V to paste it.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Microphone access is switched off</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS is not letting Parlotype use the microphone. Open System Settings → Privacy &amp; Security → Microphone and switch Parlotype on, then start dictation again.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Cloud transcription failed</value>
@@ -376,8 +426,16 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype listens for your dictation hotkey from the system tray, so it has to be running before you can dictate.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype listens for your dictation hotkey from the menu bar, so it has to be running before you can dictate.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Start Parlotype when I sign in to Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Start Parlotype when I log in to macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Do not start Parlotype automatically</value>
@@ -396,15 +454,27 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>A single entry under your own user account (HKCU Run), pointing at Parlotype. No service, no scheduled task, no administrator rights, nothing machine-wide. You can see and remove it yourself in Task Manager → Startup apps.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>A single launch agent under your own user account (~/Library/LaunchAgents), pointing at Parlotype. No helper app, no administrator rights, nothing machine-wide. You can see it and switch it off yourself in System Settings → General → Login Items.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>This build cannot start itself at sign-in — it was not installed from Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>This copy cannot start itself at login — move Parlotype to the Applications folder first.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows has Parlotype switched off in Task Manager → Startup apps. Re-enable it there to let this setting take effect.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype starts with Windows and waits in the tray — no window opens.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype starts with macOS and waits in the menu bar — no window opens.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype only runs when you start it yourself.</value>
@@ -454,6 +524,10 @@ So your hotkey works from the moment you sign in, Parlotype starts with Windows 
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>This build cannot update itself — it was not installed from Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>This copy cannot update itself — it was not installed from a Parlotype release.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Checking for updates…</value>

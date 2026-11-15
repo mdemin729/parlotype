@@ -132,9 +132,7 @@ public partial class SpeechEngineSettingsViewModel : SettingsSectionViewModelBas
     private async Task InitializeAsync()
     {
         var saved = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);
-        var engine = Enum.TryParse<SpeechEngine>(saved, ignoreCase: true, out var parsed)
-            ? parsed
-            : SpeechEngine.Parakeet;
+        var engine = SpeechEngineDefaults.Parse(saved);
         Apply(engine);
 
         var savedPrewarm = await _settings.GetAsync<string>(SettingsKeys.PrewarmModelOnStartup);

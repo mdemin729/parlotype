@@ -170,3 +170,23 @@ over 25 characters matches the English source byte-for-byte.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Maintenir Ctrl droit`.**
 
 Side unchanged. `Conflict_AlreadyBoundFormat` is now `{0} est déjà associé au mode {1}.` — `associé à bascule` lacked an article.
+
+## macOS terms
+
+The `*_Mac` keys are the macOS wording of the key with the same name; they start from that translation and change only the OS-specific words. macOS UI names are the ones macOS shows in French, checked against Apple's fr-FR support pages. Same typography as the rest of the file (`’`, U+202F before `;`).
+
+| English | French | Notes |
+|---|---|---|
+| menu bar | **barre des menus** | Replaces *zone de notification* in every `_Mac` key. |
+| System Settings | **Réglages Système** | The macOS app, without an article as Apple writes it ("Ouvrez Réglages Système"); Parlotype's own settings stay *Paramètres*. Button: "Ouvrir Réglages Système". |
+| Privacy & Security | **Confidentialité et sécurité** | |
+| Accessibility | **Accessibilité** | |
+| Microphone | **Microphone** | |
+| General | **Général** | |
+| Login Items | **Ouverture** | macOS 15 and later label the pane "Ouverture et extensions"; the shorter name mirrors the English. |
+| Applications folder | **dossier Applications** | |
+| log in | **ouverture de session** | Same wording as the Windows "sign in" strings; it is also what macOS says. |
+| launch agent | **agent de lancement** | Apple's own French term; `~/Library/LaunchAgents` stays verbatim. |
+| switch (an app) on | **activer** | "activez Parlotype", as macOS says "Activez ou désactivez…". |
+| this copy (of the app) | **cette copie** | The Windows strings say *cette version* ("this build"). |
+| Not now | **Pas maintenant** | |

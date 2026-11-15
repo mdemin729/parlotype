@@ -44,13 +44,16 @@
                    IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
                    TextWrapping="Wrap" FontSize="12" Opacity="0.8" />
 
-        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4" />
+        <Border Height="1" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,4"
+                IsVisible="{Binding HasUninstallChoice}" />
 
         <!--
             Velopack's uninstall hook cannot show UI, so this toggle is where the
             user consents in advance; the hook only executes the recorded choice.
+            Hidden where no uninstaller runs (macOS, Linux): removing the app there
+            is deleting it, and a recorded choice would never be read (ADR-077).
         -->
-        <StackPanel Spacing="4">
+        <StackPanel Spacing="4" IsVisible="{Binding HasUninstallChoice}">
             <ToggleSwitch IsChecked="{Binding UninstallRemovesData, Mode=TwoWay}"
                           OnContent="{loc:Tr Settings_Data_UninstallToggleOn}"
                           OffContent="{loc:Tr Settings_Data_UninstallToggleOff}" />

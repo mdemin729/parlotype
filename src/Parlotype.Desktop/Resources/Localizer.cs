@@ -65,6 +65,28 @@ public sealed class Localizer
 
     private readonly ConcurrentDictionary<string, LocalizedString> _entries = new(StringComparer.Ordinal);
 
+    /// <summary>Suffix of a key that replaces its base key on macOS. See <see cref="Lookup"/>.</summary>
+    public const string MacVariantSuffix = "_Mac";
+
+    /// <summary>The server binary's name as the Windows-worded copy spells it, and as other systems ship it.</summary>
+    private const string WindowsServerExecutable = "llama-server.exe";
+    private const string UnixServerExecutable = "llama-server";
+
+    /// <summary>Which keys have a macOS variant. Asked once per key; the set of keys never changes at run time.</summary>
+    private static readonly ConcurrentDictionary<string, bool> HasMacVariant = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Whether lookups prefer macOS wording. Follows the operating system;
+    /// settable so a test can read either wording on any machine.
+    /// </summary>
+    internal static bool UseMacVariants { get; set; } = OperatingSystem.IsMacOS();
+
+    /// <summary>
+    /// Whether file names in copy are spelled the Windows way. Follows the
+    /// operating system; settable for the same reason as <see cref="UseMacVariants"/>.
+    /// </summary>
+    internal static bool UseWindowsFileNames { get; set; } = OperatingSystem.IsWindows();
+
     public static Localizer Instance { get; } = new();
 
     private Localizer()
@@ -100,18 +122,54 @@ public sealed class Localizer
     /// A missing key answers with the key itself rather than throwing (the
     /// behaviour ADR-056 established): a stale resx should show an obviously wrong
     /// label, never take the window down.
+    /// <para>
+    /// <b>Platform wording (ADR-077).</b> Most copy is the same on every
+    /// operating system. Where it is not — "tray" against "menu bar", Task
+    /// Manager against System Settings — the neutral key keeps its Windows
+    /// wording and a sibling key ending in <see cref="MacVariantSuffix"/> holds
+    /// the macOS one. On macOS the sibling is returned whenever it exists, so
+    /// markup and view models keep asking for the one base key and never branch
+    /// on the platform. A variant is an ordinary key to every localization
+    /// check: it has to exist in every language like any other.
+    /// </para>
+    /// <para>
+    /// One difference is too small for a variant: off Windows the llama.cpp
+    /// server binary has no <c>.exe</c> extension. File names are never
+    /// translated, so the token is identical in every language and is rewritten
+    /// here.
+    /// </para>
     /// </remarks>
-    public static string Lookup(string key)
+    public static string Lookup(string key) => Lookup(key, UseMacVariants, UseWindowsFileNames);
+
+    /// <summary>
+    /// <see cref="Lookup(string)"/> with the platform wording chosen by the
+    /// caller instead of by the operating system, so each wording can be read
+    /// on any machine without touching process-wide state.
+    /// </summary>
+    internal static string Lookup(string key, bool macVariants, bool windowsFileNames)
     {
         try
         {
-            return Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+            var value = macVariants && MacVariantExists(key)
+                ? Manager.GetString(key + MacVariantSuffix, CultureInfo.CurrentUICulture)
+                : null;
+
+            value ??= Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+
+            return windowsFileNames
+                ? value
+                : value.Replace(WindowsServerExecutable, UnixServerExecutable, StringComparison.Ordinal);
         }
         catch (MissingManifestResourceException)
         {
             return key;
         }
     }
+
+    private static bool MacVariantExists(string key) =>
+        HasMacVariant.GetOrAdd(key, static k =>
+            !k.EndsWith(MacVariantSuffix, StringComparison.Ordinal) &&
+            Manager.GetString(k + MacVariantSuffix, CultureInfo.InvariantCulture) is not null);
 
     /// <summary>
     /// Switches the interface to <paramref name="culture"/> and refreshes every

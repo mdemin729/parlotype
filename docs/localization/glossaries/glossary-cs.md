@@ -219,3 +219,26 @@ no translated value over 25 characters is byte-identical to the English source.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Podržet pravý Ctrl`.**
 
 Side is now `pravý {0}` / `levý {0}`, lowercase (accusative of a masculine inanimate adjective equals the nominative). `Conflict_AlreadyBoundFormat` unchanged — the infinitive "Podržet …" is a fine subject.
+
+
+## macOS terms
+
+Used the names Czech macOS itself shows (checked against the system's own Czech resources
+and Apple's Czech macOS User Guide), the same way the Windows keys use the Czech Windows
+names. The `_Mac` keys are the base key's translation with only these terms swapped.
+
+| English | Czech | Notes |
+|---|---|---|
+| menu bar | **řádek nabídek** | replaces *oznamovací oblast* in every `_Mac` key; "v řádku nabídek", "do řádku nabídek" |
+| System Settings | **Nastavení systému** | capitalised as the app's name; `Common_OpenSystemSettings` → "Otevřít Nastavení systému" |
+| Privacy & Security | **Soukromí a zabezpečení** | |
+| Accessibility | **Zpřístupnění** | the permission is "oprávnění Zpřístupnění" |
+| Microphone | **Mikrofon** | as a Settings pane name; lowercase *mikrofon* in prose |
+| General | **Obecné** | |
+| Login Items | **Aktivace položek a rozšíření při přihlášení** | the pane's name under *Obecné* since macOS 15 (English: Login Items & Extensions); macOS 13 and 14 call it **Přihlášení** |
+| Applications (folder) | **složka Aplikace** | |
+| log in | **přihlásit se** / **přihlášení** | same word the Windows keys use for "sign in" |
+| launch agent | **spouštěcí agent** | the path `~/Library/LaunchAgents` beside it stays verbatim |
+| this copy (of the app) | **tato kopie** | the Windows keys say *tato verze* for "this build" |
+| a Parlotype release | **vydaná verze Parlotype** | *verze* is the established word for a release |
+| Not now (button) | **Teď ne** | |

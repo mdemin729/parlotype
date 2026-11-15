@@ -359,7 +359,7 @@ public sealed partial class LanguageRelationshipViewModel : ObservableObject
         RefreshKeyboardLayout();
 
         var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine, ct);
-        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var e) ? e : SpeechEngine.Parakeet;
+        var engine = SpeechEngineDefaults.Parse(engineStr);
 
         _suppressToasts = true;
         try

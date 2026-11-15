@@ -198,3 +198,28 @@ Side is now **genitive**, lowercase: `δεξιού {0}` / `αριστερού {0
 ## Speech cleanup (2026-11-13)
 
 - Speech cleanup (Settings page, `Settings_SpeechCleanup_*`) → **Καθαρισμός υπαγόρευσης** (masculine; toggle *ενεργός / ανενεργός*) — built on the established *υπαγόρευση*. Writing style → **Ύφος γραφής** (neuter styles: Χαλαρό / Ημιχαλαρό / Ημιεπίσημο / Επίσημο); English contractions → **συντετμημένοι τύποι**.
+
+## macOS terms (2026-11-14)
+
+The `_Mac` keys are the macOS wording of the key with the same name; they keep that key's
+translation and change only the OS-specific words. macOS UI names are the ones Greek macOS
+itself shows, written without guillemets inside a `→` path like the app's own
+*Ρυθμίσεις → Εφαρμογή → Εκκίνηση*. `macOS` is neuter singular (**το macOS**, *στο macOS*),
+unlike the plural *τα Windows*.
+
+| English term | Greek | Notes |
+|---|---|---|
+| menu bar | **γραμμή μενού** | Replaces *περιοχή ειδοποιήσεων* in every `_Mac` key. |
+| System Settings | **Ρυθμίσεις συστήματος** | The macOS app. Parlotype's own Settings stays **Ρυθμίσεις**. Button: *Άνοιγμα Ρυθμίσεων συστήματος*. |
+| Privacy & Security | **Απόρρητο και ασφάλεια** | |
+| Accessibility | **Προσβασιμότητα** | Dialog title says *άδεια Προσβασιμότητας* ("Accessibility permission"), avoiding *πρόσβαση στην Προσβασιμότητα*. |
+| Microphone (privacy pane) | **Μικρόφωνο** | |
+| General | **Γενικά** | |
+| Login Items | **Στοιχεία σύνδεσης** | |
+| Applications folder | **φάκελος Εφαρμογές** | |
+| log in (to macOS) | **σύνδεση** / συνδέεστε (*κατά τη σύνδεση στο macOS*) | Same word as the Windows "sign in" keys. |
+| launch agent | **πράκτορας εκκίνησης** | Literal rendering; the folder path beside it identifies the mechanism. Worth a native check. |
+| helper app | **βοηθητική εφαρμογή** | |
+| this copy (of the app) | **αυτό το αντίγραφο** | The Windows keys say *αυτή η έκδοση* ("this build"). |
+| Parlotype release | **επίσημη έκδοση του Parlotype** | *έκδοση* is the file's word for a release; *επίσημη* separates a published release from a local build. |
+| Not now (button) | **Όχι τώρα** | |

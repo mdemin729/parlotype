@@ -66,6 +66,10 @@ public static class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            // Parlotype is a menu bar app on macOS (ADR-077): no Dock icon and no
+            // application menu, the counterpart of living in the Windows tray
+            // with no taskbar button. Ignored on every other platform.
+            .With(new MacOSPlatformOptions { ShowInDock = false })
             .WithInterFont()
             .LogToTrace();
 

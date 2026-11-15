@@ -13,6 +13,7 @@ path itself see [audio-pipeline.md](audio-pipeline.md); for engines and projects
 - [Packaging, app paths and updates](#packaging-app-paths-and-updates)
 - [Feedback](#feedback)
 - [Launch at sign-in](#launch-at-sign-in)
+- [macOS permissions](#macos-permissions)
 - [Onboarding tour](#onboarding-tour)
 - [Localization](#localization)
 - [Single instance and activation](#single-instance-and-activation)
@@ -29,8 +30,11 @@ Users configure a list of gestures, not one chord
   is a chord, a held modifier or a double-tapped modifier; modifiers carry a side (Left,
   Right, Either). The kind constrains the mode: holds are push-to-talk only, double-taps
   are toggle only, chords can be either.
-- **Defaults** (`DictationHotkeyDefaults`): hold Right Ctrl (push-to-talk), double-tap
-  Ctrl (toggle), Ctrl+Alt+Space (toggle). Escape cancels and is not configurable.
+- **Defaults** (`DictationHotkeyDefaults.ForCurrentPlatform`). Windows and Linux: hold
+  Right Ctrl (push-to-talk), double-tap Ctrl (toggle), Ctrl+Alt+Space (toggle). macOS:
+  hold Right Command (push-to-talk) and double-tap Ctrl (toggle); a MacBook has no Right
+  Ctrl, and Ctrl+Option+Space is the system's input-source switch
+  ([ADR-077](../decisions/077-macos-support.md)). Escape cancels and is not configurable.
 - **Recognition is pure Core logic.** `HotkeyGestureMatcher` turns timestamped key events
   into Start / Stop / Cancel plus a suppression decision, so all gesture timing is
   testable without a keyboard. Thresholds are in `HotkeyGestureTiming`. A tap counts only
@@ -42,7 +46,9 @@ Users configure a list of gestures, not one chord
 - **Platform adapter.** `SharpHookHotkeyService` wraps `SimpleGlobalHook`, which is
   required for event suppression to work
   ([ADR-020](../decisions/020-sharphook7-simple-global-hook.md)). It owns a timer for
-  deferred holds, so the matcher is reached from two threads and is lock-guarded.
+  deferred holds, so the matcher is reached from two threads and is lock-guarded. On
+  macOS it installs the hook only once Accessibility is granted, and waits for that
+  rather than failing; see [macOS permissions](#macos-permissions).
 - **Suppression.** Chords are suppressed on key down and key up. Bare modifiers are never
   suppressed: that would break every Ctrl shortcut. Escape is suppressed only while
   dictation is active.
@@ -53,7 +59,11 @@ Users configure a list of gestures, not one chord
   A keystroke during a hold means the user reached for a shortcut, so the recording is
   discarded. Under Ctrl and Alt this applies to any keystroke at any time, because nothing
   typed under a command modifier can be text. Shift and Meta holds abort only within a
-  short grace window after the hold starts, since users do type while dictating. Toggle
+  short grace window after the hold starts, since users do type while dictating. On macOS
+  the roles are different: Ctrl and Command are the command modifiers, and Option, which
+  types characters there, keeps the grace window like Shift. The matcher is told which
+  set applies, so both are tested on any machine
+  ([ADR-077](../decisions/077-macos-support.md)). Toggle
   dictation is unaffected: Ctrl+S during it saves the file and keeps recording. The
   shortcut itself still reaches the target app.
 - **Hold-scoped sessions.** A gesture that ends on key release starts the pipeline in
@@ -61,8 +71,9 @@ Users configure a list of gestures, not one chord
 - **Validation.** `HotkeyConflictDetector` blocks OS-reserved chords and duplicates and
   warns about chords that collide in practice (Ctrl+Shift+Space for IDE parameter hints,
   Ctrl+Alt+letter for AltGr). It returns the reason as data; Desktop's `HotkeyText` words
-  it and formats every gesture for display. Core's `DisplayString` is the invariant form
-  used in logs.
+  it and formats every gesture for display, with the key names the keyboard prints:
+  Option and Cmd on a Mac, Alt and Win on a PC. Core's `DisplayString` is the invariant
+  form used in logs, and says Alt and Win on every machine.
 - **Persistence.** `SettingsKeys.HotkeyBindings` holds a readable string list encoded by
   `HotkeyBindingCodec` (for example `hold|Ctrl|Right|PushToTalk`). The pre-ADR-047 single
   chord is migrated once by `HotkeySettingsMigrator`. Modifier sides are resolved from
@@ -95,8 +106,10 @@ One shared model answers "what does the user speak, and what should be typed"
   is what the pipeline does
   ([ADR-075](../decisions/075-language-aware-speech-cleanup.md)).
 - **Sentinels.** Source can be `auto`, an explicit language, or `keyboard`, which resolves
-  at record time to the foreground window's keyboard layout (layouts are per thread on
-  Windows; `Win32KeyboardLayoutService`), falling back to auto-detect. A blank source
+  at record time to the keyboard layout in use, falling back to auto-detect. On Windows
+  layouts are per thread, so `Win32KeyboardLayoutService` reads the focused control's; on
+  macOS `MacOsKeyboardLayoutService` reads the current input source, on the main thread,
+  because Text Input Sources abort the process when called from any other. A blank source
   means auto, never keyboard.
 - **Paused, not disabled.** With Whisper, translation to English needs a multilingual
   model. If the selected model cannot translate, translation is shown as paused: the toggle
@@ -211,12 +224,18 @@ stateDiagram-v2
 
 - **Three files, on purpose.** `settings.json` (`JsonSettingsService`) holds preferences;
   `secrets.json` (`DpapiSecretStore`) holds cloud API keys, DPAPI-encrypted per value on
-  Windows and base64 with a one-time warning elsewhere
+  Windows and base64 with a one-time warning on Linux
   ([ADR-043](../decisions/043-cloud-speech-providers-v1.md)); `window-state.json` holds
   widget position, kept separate so frequent window-drag saves never contend with or risk
   user settings. All three are written atomically through `AtomicFileWriter`
   ([ADR-046](../decisions/046-security-hardening-batch.md)): a crash used to leave a
   truncated file that loaded as empty, silently losing keys.
+- **On macOS the keys are not in a file.** `KeychainSecretStore` keeps them as
+  generic-password items in the login keychain under the service "Parlotype", where the
+  user can see and delete them in Keychain Access. The keychain ties an item to the
+  signature of the app that stored it, so a development build, re-signed on every
+  compile, is asked for permission to read what the previous build wrote
+  ([ADR-077](../decisions/077-macos-support.md)).
 - **Readers are defensive.** Settings values are parsed with `TryParse` and a default, so
   a malformed file cannot crash startup, and an unknown enum value degrades to the default
   (for example, an unknown engine means Parakeet).
@@ -334,6 +353,46 @@ Installed builds start at sign-in, on by default
 - `LaunchAtLoginCoordinator` owns the default-on policy: an absent preference means on, so
   upgrades adopt it too. It writes only when preference and OS state differ. `App`
   reconciles once at startup, off the UI thread, and the first-run tour discloses it.
+- **macOS** ([ADR-077](../decisions/077-macos-support.md)).
+  `MacOsLaunchAgentLaunchAtLoginService` writes a property list with `RunAtLoad` to
+  `~/Library/LaunchAgents`; `launchd` picks it up at the next login, and it is listed
+  under System Settings → General → Login Items. Only a copy in `/Applications` or
+  `~/Applications` registers: anything else is `Unsupported`, for the reason a
+  `dotnet run` build is on Windows. There is no blocked state; the user's own switch in
+  Login Items is not readable without private APIs.
+
+## macOS permissions
+
+macOS gates two things behind per-application grants, and neither fails loudly when it is
+missing ([ADR-077](../decisions/077-macos-support.md)). `ISystemPermissionService` reads
+and requests them; on other platforms it is a no-op that answers "granted".
+
+- **Accessibility** is needed to install the keyboard hook and to post Cmd+V. Without it
+  the hook cannot be created and a posted key is silently dropped. `App` asks before the
+  first-run tour (the tour tells the user to try their hotkey) and on every launch until
+  it is granted, then opens System Settings on the right pane. `SharpHookHotkeyService`
+  polls and installs its hook when the grant appears, so no restart is needed.
+- **Dictating without it still has to end somewhere.** The widget's record button needs
+  no hotkey, so recognition can finish with nowhere to paste.
+  `MacOsClipboardTextInjectionService` then leaves the text on the clipboard (it does not
+  restore the previous contents over it) and throws `TextInjectionNotPermittedException`,
+  and `TranscribeViewModel` shows a dialog that says so and leads to the switch. Any other
+  injection failure is still only logged.
+- **Microphone.** `CoreAudioCaptureService` requests access before starting and throws
+  `MicrophoneAccessDeniedException` when refused; `TranscribeViewModel` shows a dialog
+  with a button to the Settings pane. Without that check a refused microphone delivers
+  silence and looks like "the app heard nothing".
+- **The first CoreAudio call may block on the prompt.** It is never made on the UI
+  thread: the device list starts empty and arrives through `DevicesChanged`
+  ([`coreaudio-first-call-can-block`](../knowledge/coreaudio-first-call-can-block.md)).
+- **The grants belong to the bundle.** They are filed under the bundle identifier
+  `dev.parlotype.Parlotype` and the build's signature, so a `dotnet run` build uses the
+  launching terminal's grants and an ad-hoc signed bundle is a new application after
+  every rebuild
+  ([`macos-app-bundle-and-privacy-identity`](../knowledge/macos-app-bundle-and-privacy-identity.md)).
+- **A startup question has no window to belong to.** Parlotype starts with none, so
+  `UserDialogService` shows a dialog without an owner on its own, topmost and activated,
+  instead of modally.
 
 ## Onboarding tour
 
@@ -359,6 +418,11 @@ what stays English) live in the `localization` skill
 - Switching is live because `{loc:Tr Key}` compiles to a binding on a per-key
   `LocalizedString` object, not a reflection binding. Copy composed in C# is a snapshot
   and must be rebuilt on culture change; keep the input, not the finished string.
+- **Platform wording is resolved in one place.** Copy that names Windows things (the
+  tray, Task Manager, `Setup.exe`) keeps its key, and a sibling key ending in `_Mac`
+  holds the macOS wording. `Localizer.Lookup`, which both `{loc:Tr}` and the generated
+  `Strings` accessor go through, returns the sibling on macOS when one exists, so no view
+  or view model branches on the OS ([ADR-077](../decisions/077-macos-support.md)).
 - `CurrentUICulture` follows the chosen interface language; `CurrentCulture` does not, so
   dates and numbers keep following the user's Windows regional settings.
 
@@ -379,7 +443,10 @@ One instance per logon session ([ADR-055](../decisions/055-single-instance-guard
 - **Fail-open.** An abandoned mutex (killed instance) counts as acquired; any other
   failure is logged to `velopack.log` and treated as primary. Not starting is worse than
   starting twice.
-- Named events throw on Unix, so on macOS and Linux a second launch just exits.
+- Named events throw on Unix, so on macOS and Linux a second launch just exits. On macOS
+  that case is rare anyway: opening an application that is already running starts no
+  second process, the system sends the running one a "reopen", and `App` answers it by
+  showing the Transcribe window.
 
 ## Running in development
 
@@ -387,8 +454,12 @@ One instance per logon session ([ADR-055](../decisions/055-single-instance-guard
 dotnet run --project src/Parlotype.Desktop
 ```
 
-- The app starts hidden: only the tray icon shows. A dictation hotkey opens the Transcribe
-  window and starts recording.
+- The app starts hidden: only the tray icon (on macOS, the menu bar icon) shows. A
+  dictation hotkey opens the Transcribe window and starts recording.
+- **On macOS, test anything that involves a permission with the bundle**, not with
+  `dotnet run`: `scripts/build-macos-app.sh`, then `open artifacts/macos/<arch>/Parlotype.app`.
+  A process started from a terminal borrows the terminal's microphone and Accessibility
+  grants, so it shows neither the prompts nor the waiting states a user gets.
 - **Quit the installed app first.** Because of the single-instance guard, a `dotnet run`
   build otherwise defers to the installed one and exits.
 - **A dev build exits with its launcher** ([ADR-062](../decisions/062-dev-parent-process-watchdog.md)).

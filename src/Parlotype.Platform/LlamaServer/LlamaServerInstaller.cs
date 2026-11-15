@@ -1,3 +1,4 @@
+using System.Formats.Tar;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
@@ -272,11 +273,52 @@ public sealed class LlamaServerInstaller : ILlamaServerInstaller
                 break;
             case LlamaServerOs.MacOs:
             case LlamaServerOs.Linux:
-                throw new NotSupportedException(
-                    $"tar.gz extraction for {os} is not yet implemented (phase-1 is Windows-only).");
+                ExtractTarGz(archivePath, destination);
+                break;
             default:
                 throw new NotSupportedException($"Unsupported OS for extraction: {os}.");
         }
+    }
+
+    /// <summary>
+    /// Unpacks a macOS or Linux release archive so the server binary ends up
+    /// directly in <paramref name="destination"/>, where the Windows zip puts it.
+    /// </summary>
+    /// <remarks>
+    /// Upstream's tarballs wrap everything in one <c>llama-b{N}/</c> folder and
+    /// rely on two things a zip does not carry: the executable bit, and the
+    /// version symlinks between the shared libraries
+    /// (<c>libllama.dylib → libllama.1.dylib → libllama.1.0.0.dylib</c>).
+    /// <see cref="TarFile"/> restores both and refuses entries that would land
+    /// outside the destination.
+    /// </remarks>
+    private static void ExtractTarGz(string archivePath, string destination)
+    {
+        using (var file = File.OpenRead(archivePath))
+        using (var gzip = new GZipStream(file, CompressionMode.Decompress))
+        {
+            TarFile.ExtractToDirectory(gzip, destination, overwriteFiles: true);
+        }
+
+        // Lift the contents of a single wrapping folder up one level.
+        var entries = Directory.GetFileSystemEntries(destination);
+        if (entries.Length != 1 || !Directory.Exists(entries[0]) || new FileInfo(entries[0]).LinkTarget is not null)
+            return;
+
+        var wrapper = entries[0];
+        foreach (var entry in Directory.GetFileSystemEntries(wrapper))
+        {
+            var target = Path.Combine(destination, Path.GetFileName(entry));
+
+            // File.Move relocates a symlink itself, not what it points at, and
+            // the links are relative to their own folder, so they stay valid.
+            if (Directory.Exists(entry) && new FileInfo(entry).LinkTarget is null)
+                Directory.Move(entry, target);
+            else
+                File.Move(entry, target);
+        }
+
+        Directory.Delete(wrapper);
     }
 
     private static void CommitInstallFolder(string payloadDir, string finalPath)

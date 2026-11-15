@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Это небольшое окно поверх остальных — ваш пульт управления диктовкой. Большая кнопка запускает и останавливает запись; наведите указатель на карточку, чтобы увидеть текущее состояние. Перетаскивайте виджет за полоску сверху, а кнопка ✕ убирает его в трей. Движки, у которых есть выбор языка, показывают языковую полоску снизу.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Это небольшое окно поверх остальных — ваш пульт управления диктовкой. Большая кнопка запускает и останавливает запись; наведите указатель на карточку, чтобы увидеть текущее состояние. Перетаскивайте виджет за полоску сверху, а кнопка ✕ убирает его в строку меню. Движки, у которых есть выбор языка, показывают языковую полоску снизу.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Выберите движок распознавания</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype живёт в трее</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype живёт в строке меню</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Если скрыть или закрыть виджет, Parlotype не завершится — он продолжит ждать ваши горячие клавиши в системном трее. Нажмите значок в трее, чтобы вернуть виджет. Чтобы выйти полностью, нажмите на значок правой кнопкой и выберите «Выход».
 
 Чтобы горячая клавиша работала сразу после входа в систему, Parlotype запускается вместе с Windows и ждёт в трее — окно при этом не открывается. Это можно отключить в любой момент в разделе «Настройки → Приложение → Запуск».</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Если скрыть или закрыть виджет, Parlotype не завершится — он продолжит ждать ваши горячие клавиши в строке меню. Нажмите там значок Parlotype и выберите «Открыть», чтобы вернуть виджет. Чтобы выйти полностью, выберите «Выход» в том же меню.
+
+Чтобы горячая клавиша работала сразу после входа в систему, Parlotype запускается вместе с macOS и ждёт в строке меню — окно при этом не открывается. Это можно отключить в любой момент в разделе «Настройки → Приложение → Запуск».</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Всё готово</value>
@@ -142,8 +156,16 @@
     <value>Как в Windows — сейчас {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Как в macOS — сейчас {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Как в Windows — перевода пока нет, используется английский</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Как в macOS — перевода пока нет, используется английский</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Средняя</value>
@@ -172,6 +194,14 @@
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Открыть настройки</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Открыть Системные настройки</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Не сейчас</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Открыть</value>
@@ -268,6 +298,26 @@
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Облачный провайдер не настроен</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype нужен «Универсальный доступ»</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS запрашивает ваше разрешение, прежде чем приложение сможет отслеживать глобальную горячую клавишу или вставлять текст в другие приложения. Откройте «Системные настройки → Конфиденциальность и безопасность → Универсальный доступ» и включите Parlotype. Горячая клавиша заработает сразу — перезапуск не нужен.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Ваш текст в буфере обмена — нажмите Cmd+V, чтобы вставить его.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Доступ к микрофону отключён</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS не даёт Parlotype использовать микрофон. Откройте «Системные настройки → Конфиденциальность и безопасность → Микрофон» и включите Parlotype, затем начните диктовку заново.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Не удалось распознать в облаке</value>
@@ -376,8 +426,16 @@
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype ждёт горячую клавишу диктовки из системного трея, поэтому он должен быть запущен, прежде чем вы сможете диктовать.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype ждёт горячую клавишу диктовки из строки меню, поэтому он должен быть запущен, прежде чем вы сможете диктовать.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Запускать Parlotype при входе в Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Запускать Parlotype при входе в macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Не запускать Parlotype автоматически</value>
@@ -396,15 +454,27 @@
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Одна запись в вашей учётной записи (HKCU Run), указывающая на Parlotype. Никаких служб, заданий планировщика, прав администратора и изменений для всего компьютера. Вы можете сами увидеть и удалить её в диспетчере задач → «Автозагрузка приложений».</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Один агент запуска в вашей учётной записи (~/Library/LaunchAgents), указывающий на Parlotype. Никаких вспомогательных приложений, прав администратора и изменений для всего компьютера. Вы можете сами увидеть и отключить его в разделе «Системные настройки → Основные → Объекты входа».</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Эта сборка не может запускаться при входе — она установлена не через Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Эта копия не может запускаться при входе — сначала переместите Parlotype в папку «Программы».</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows отключил Parlotype в диспетчере задач → «Автозагрузка приложений». Включите его там, чтобы эта настройка заработала.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype запускается вместе с Windows и ждёт в трее — окно не открывается.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype запускается вместе с macOS и ждёт в строке меню — окно не открывается.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype работает, только когда вы запускаете его сами.</value>
@@ -454,6 +524,10 @@
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Эта сборка не может обновлять себя — она установлена не через Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Эта копия не может обновлять себя — она установлена не из выпуска Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Проверка обновлений…</value>

@@ -213,3 +213,27 @@ Side unchanged. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `�
 ## Speech cleanup (2026-11-13)
 
 - Speech cleanup (Settings page, `Settings_SpeechCleanup_*`) → **Curățarea dictării** — built on the established *dictare*; *curățare* means tidying, never deleting. Toggle: *Curățarea dictării activată / dezactivată*. Writing style → **Stil de scriere** (Relaxat / Semirelaxat / Semiformal / Formal); English contractions → **forme contrase**.
+
+## macOS terms (2026-11-14)
+
+The `_Mac` keys are the macOS wording of the key with the same name; they keep that key's
+translation and change only the OS-specific words. macOS UI names are the ones Romanian
+macOS itself shows, written without quotes inside a `→` path like the app's own
+*Setări → Aplicație → Pornire*.
+
+| Term | Romanian | Notes |
+|---|---|---|
+| menu bar | **bara de meniu** | Replaces *zona de notificare* in every `_Mac` key. |
+| System Settings | **Configurări sistem** | The macOS app. Parlotype's own Settings stays **Setări**. |
+| Privacy & Security | **Intimitate și securitate** | |
+| Accessibility | **Accesibilitate** | |
+| Microphone (privacy pane) | **Microfon** | |
+| General | **General** | |
+| Login Items | **Elemente de login** | |
+| Applications folder | **folderul Aplicații** | *Aplicații* is the name Finder shows; *folder* (not Finder's *dosar*) because the rest of the file already says *folder*. |
+| log in (to macOS) | **autentificare** (*la autentificarea în macOS*) | Same word as the Windows "sign in" keys; Romanian does not distinguish the two. |
+| launch agent | **agent de lansare** | |
+| helper app | **aplicație ajutătoare** | |
+| this copy (of the app) | **această copie** | The Windows keys say *această versiune* ("this build"). |
+| Parlotype release | **versiune oficială Parlotype** | *versiune* is the file's word for a release; *oficială* separates a published release from a local build. |
+| Not now (button) | **Nu acum** | |

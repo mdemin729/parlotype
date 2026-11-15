@@ -61,7 +61,7 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
         var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
         Assert.Equal(
-            Path.Combine(_root, "b9198-win-vulkan-x64", "llama-server.exe"),
+            Path.Combine(_root, "b9198-win-vulkan-x64", LlamaServerPathResolver.ExecutableName),
             path);
     }
 
@@ -76,7 +76,7 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
         var recognizer = NewRecognizer();
         var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
-        Assert.Equal(Path.Combine(manualFolder, "llama-server.exe"), path);
+        Assert.Equal(Path.Combine(manualFolder, LlamaServerPathResolver.ExecutableName), path);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
         var recognizer = NewRecognizer();
         var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
-        Assert.Equal(Path.Combine(manualFolder, "llama-server.exe"), path);
+        Assert.Equal(Path.Combine(manualFolder, LlamaServerPathResolver.ExecutableName), path);
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public sealed class LlamaCppSpeechRecognizerPathResolutionTests : IDisposable
         var recognizer = NewRecognizer();
         var path = await recognizer.GetServerPathAsync(CancellationToken.None);
 
-        Assert.Equal(Path.Combine(manualFolder, "llama-server.exe"), path);
+        Assert.Equal(Path.Combine(manualFolder, LlamaServerPathResolver.ExecutableName), path);
     }
 
     [Fact]

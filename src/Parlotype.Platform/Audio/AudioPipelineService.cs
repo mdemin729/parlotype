@@ -927,9 +927,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
     private async Task CacheUtteranceCeilingAsync(CancellationToken ct)
     {
         var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine, ct);
-        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var se)
-            ? se
-            : SpeechEngine.Parakeet;
+        var engine = SpeechEngineDefaults.Parse(engineStr);
 
         var maxUtteranceSeconds = SpeechEngineLimits.MaxUtteranceSeconds(engine);
         _maxUtteranceSamples = maxUtteranceSeconds * SampleRate;
@@ -1013,9 +1011,7 @@ public sealed class AudioPipelineService : IAudioPipeline, IAudioLevelProvider
         // Speech cleanup last: whether the English-only model runs depends on
         // the language settings read above (ADR-075).
         var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine, ct);
-        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var se)
-            ? se
-            : SpeechEngine.Parakeet;
+        var engine = SpeechEngineDefaults.Parse(engineStr);
 
         var cleanup = _cleanup is null ? null : await SpeechCleanupSettings.LoadAsync(_settings, ct);
         var cleanupOn = cleanup is { Enabled: true };

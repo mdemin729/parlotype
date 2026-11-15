@@ -209,3 +209,30 @@ Used real Latvian Windows 10/11 UI wording rather than literal translations for:
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Turēt: labais Ctrl`.**
 
 Side is now lowercase after the colon: `labais {0}` / `kreisais {0}`. `Conflict_AlreadyBoundFormat` quotes the gesture.
+
+## macOS terms (2026-11-14)
+
+The `_Mac` keys are the macOS wording of the key with the same name; they keep that key's
+translation and change only the OS-specific words. **macOS has no Latvian localization**, so
+the names a user has to find on screen stay in English exactly as macOS shows them, and only
+the prose around them is Latvian. Inside a `→` path they are bare, like the app's own
+*Iestatījumi → Lietotne → Startēšana*; a single English name inside a Latvian phrase is
+quoted `„…”` so the case ending can sit on the Latvian noun beside it.
+
+| Term | Latvian | Notes |
+|---|---|---|
+| menu bar | **izvēlņu josla** (*izvēlņu joslā*, *no izvēlņu joslas*) | Running prose, so a native word. Replaces *paziņojumu apgabals* in every `_Mac` key. |
+| System Settings | **System Settings** | Kept English. Button: *Atvērt System Settings*. Parlotype's own Settings stays **Iestatījumi**. |
+| Privacy & Security | **Privacy & Security** | Kept English. |
+| Accessibility | **Accessibility** | Kept English; in the dialog title *„Accessibility” atļauja*. |
+| Microphone (privacy pane) | **Microphone** | Kept English inside the path; the device in prose is *mikrofons*. |
+| General | **General** | Kept English. |
+| Login Items | **Login Items** | Kept English. |
+| Applications folder | **mape „Applications”** | |
+| log in (to macOS) | **pieteikšanās** / *kad piesakos macOS* | Same word as the Windows "sign in" keys. |
+| permission (macOS privacy) | **atļauja** | |
+| launch agent | **startēšanas aģents** | Built on the file's *startēt* / *Startēšana*, not *palaišana*. |
+| helper app | **palīglietotne** | |
+| this copy (of the app) | **šī kopija** | The Windows keys say *šī versija* ("this build"). |
+| Parlotype release | **Parlotype laidiens** | Same word as the Updates page (*laidienu saraksts*). |
+| Not now (button) | **Ne tagad** | |
