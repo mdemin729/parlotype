@@ -2,7 +2,7 @@
 title: "Tests that change the interface language must be [AvaloniaFact]"
 area: "avalonia"
 summary: "Headless tests share one dispatcher thread: change culture only in [AvaloniaFact], never await in such a test, and drain disposed fire-and-forget work."
-verified: 2026-11-11
+verified: 2026-11-15
 ---
 
 # Culture-changing tests need `[AvaloniaFact]`
@@ -61,6 +61,21 @@ private static async Task DisposeControllerAsync(TranscribeAutoHideController co
 
 The no-op is queued after whatever `Dispose()` scheduled, so awaiting it means all of that
 has run. `Dispose`/`Cancel` guarantees the work will stop, not that it has stopped.
+
+## Trap 4: `TestContext.Current` after a real wait
+
+Seen on the Windows CI runner while adding macOS support
+([ADR-077](../decisions/077-macos-support.md)); the same test passed on macOS 13 every time.
+An `[AvaloniaFact]` did `await Task.Delay(50, ...)`, then `Dispatcher.UIThread.RunJobs()`,
+then called a helper that read `TestContext.Current.CancellationToken`. That read threw
+`ObjectDisposedException: 'TestContext'`: after the wait, `TestContext.Current` was no
+longer this test's context. Why it differs by OS was not established. Other
+`[AvaloniaFact]` tests that read it after a wait, without `RunJobs()`, passed in the same run.
+
+- Read `TestContext.Current.CancellationToken` once, in the first line of the test, and
+  pass the token on.
+- Better, do not wait at all (Trap 2): with the mocks, `Dispatcher.UIThread.RunJobs()`
+  runs everything a view model posted, and the test stays on the dispatcher thread.
 
 ## Related xUnit traps
 
