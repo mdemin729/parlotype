@@ -12,8 +12,40 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-11-16
+
+### Highlights
+
+- **Dictate the way you talk, paste the way you write.** Turn on speech cleanup
+  and your English dictation loses its "um"s and false starts before it is
+  pasted, still without your words leaving your computer.
+- **Send feedback or a bug report straight from the tray menu.**
+- **Downloading the default speech model works again.**
+
 ### Added
 
+- **Speech cleanup, done on your computer.** Under **Settings → Speech engine →
+  Speech cleanup**, one switch rewrites what you dictated as clean written text
+  before it is pasted: filler words and false starts are removed, "Friday, no
+  wait, Thursday" becomes "Thursday", and numbers, dates and e-mail addresses
+  are written out properly. It works with every speech engine, is off unless
+  you turn it on, and uses a small local model (S1-mini, 462 MB), so no text
+  leaves your computer. Turning it on downloads the model and, if you don't
+  have one yet, a llama.cpp server, and asks before each download. Pick a
+  writing style from casual to formal, and whether spoken lists become bullet
+  points. On a desktop PC it adds well under a second.
+
+  Speech cleanup works with **English only**. When your settings say you are
+  dictating in another language it pauses by itself, and switching back to
+  English picks it up again without you touching the switch. With engines that
+  detect the language on their own, a dictation that clearly isn't English is
+  pasted as spoken. If cleanup fails, times out or the dictation is too long, you get
+  your words exactly as recognized — it never costs you the dictation.
+- **A speech cleanup icon on the dictation widget.** Once cleanup is set up, a
+  sparkle icon next to the close button shows whether it is on, and one click
+  turns it on or off. It turns amber when cleanup is paused for the language,
+  or when the last dictation was pasted as spoken, and its tooltip says why.
+  If you never set up cleanup, the widget looks exactly as before.
 - **Send feedback from the app.** Found a bug or have an idea? Choose **Send
   feedback…** in the tray menu or under **Settings → Help**, write your message,
   and press **Send**. You can add an email address if you would like a reply.
@@ -31,6 +63,13 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   list of llama.cpp server builds from GitHub. The page now says what Parlotype
   contacts on its own (only the update check) and what happens only when you
   ask for it, including feedback.
+- **The llama.cpp server page puts the officially released build first.**
+  llama.cpp publishes a new build every hour or two; the one its latest
+  versioned release points to is now listed at the top with the version as a
+  badge (for example `v1.0.0`), and speech cleanup installs that build rather
+  than whichever happened to be newest. "Update available" now appears only
+  when every build you have is older than the released one, instead of almost
+  all the time.
 
 ### Fixed
 
@@ -39,6 +78,40 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
   "not found" error after the files were replaced on Hugging Face. Parlotype now
   downloads the exact version of each model it was tested with, so a change on
   their side can no longer break it. Models you already have are not affected.
+- **The llama.cpp server page lists builds again.** Since late October its
+  "Available builds" list was empty, after llama.cpp changed how it labels its
+  releases, so no server build could be installed from the app.
+- **Hotkey descriptions read correctly in 19 languages.** Phrases such as "Hold
+  Right Ctrl" had the side word capitalised mid-sentence, and in Greek,
+  Lithuanian and Bulgarian in the wrong grammatical case. The "already in use"
+  warning was also reworded where it did not read as a sentence.
+- **Model download dialogs** showed their progress lines in English whatever
+  your interface language; they are translated now.
+
+<details>
+<summary>Under the hood</summary>
+
+- Speech cleanup runs S1-mini in its own `llama-server` process on a loopback
+  port, between the speech engine and the punctuation and profanity options
+  ([ADR-073](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/073-speech-cleanup-s1-mini.md)).
+  Whether it runs is decided from the engine and language settings first, and
+  only from the text when the engine auto-detects
+  ([ADR-075](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/075-language-aware-speech-cleanup.md)).
+- The llama.cpp build list makes one more request to `api.github.com` per
+  refresh to find upstream's released build, proven against the release's
+  pointer file
+  ([ADR-074](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/074-prefer-llama-cpp-release-build.md)).
+- Every model download names a fixed Hugging Face commit instead of a branch
+  ([ADR-076](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/076-pin-model-downloads-to-a-commit.md)).
+- Feedback is one POST to `parlotype.dev` per press of Send, with no retries
+  ([ADR-070](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/070-send-feedback-from-the-app.md)).
+  [Network requests](https://github.com/mdemin729/parlotype/blob/master/docs/network-requests.md)
+  now lists every request the app can make.
+- Agent instructions moved from `CLAUDE.md` to `AGENTS.md`, and the developer
+  knowledge base moved into `docs/`
+  ([ADR-072](https://github.com/mdemin729/parlotype/blob/master/docs/decisions/072-knowledge-base-in-docs.md)).
+
+</details>
 
 ## [0.6.0] — 2026-10-03
 
@@ -583,7 +656,8 @@ First public release.
 - Voice activity detection (Silero) so only speech is sent to the recognizer.
 - Optional GPU acceleration via Vulkan, or CUDA in the `-full` download.
 
-[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/mdemin729/parlotype/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.7.0
 [0.6.0]: https://github.com/mdemin729/parlotype/releases/tag/v0.6.0
 [0.5.2]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.2
 [0.5.1]: https://github.com/mdemin729/parlotype/releases/tag/v0.5.1
