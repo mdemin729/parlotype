@@ -18,5 +18,13 @@ public sealed class MockMicrophoneEnumerator : IMicrophoneEnumerator
 
     public void RaiseChanged() => DevicesChanged?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>Replaces the device list and announces it, as a hot-plug (or a late first enumeration) does.</summary>
+    public void SetDevices(params MicrophoneInfo[] devices)
+    {
+        _devices.Clear();
+        _devices.AddRange(devices);
+        RaiseChanged();
+    }
+
     public void Dispose() { }
 }

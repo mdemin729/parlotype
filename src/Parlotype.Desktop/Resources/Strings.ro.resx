@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Această fereastră mică, mereu deasupra celorlalte, este comanda ta de dictare. Butonul mare pornește și oprește înregistrarea; treci cu mouse-ul peste card pentru starea curentă. Trage bara de sus pentru a-l muta oriunde, iar butonul ✕ îl ascunde în zona de notificare. Motoarele care oferă o alegere a limbii afișează o bară de limbi în partea de jos.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Această fereastră mică, mereu deasupra celorlalte, este comanda ta de dictare. Butonul mare pornește și oprește înregistrarea; treci cu mouse-ul peste card pentru starea curentă. Trage bara de sus pentru a-l muta oriunde, iar butonul ✕ îl ascunde în bara de meniu. Motoarele care oferă o alegere a limbii afișează o bară de limbi în partea de jos.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Alege un motor de recunoaștere vocală</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype rulează în zona de notificare</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype rulează în bara de meniu</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Ascunderea sau închiderea widgetului nu închide Parlotype — acesta continuă să asculte comenzile tale rapide din zona de notificare. Dă clic pe pictograma din zona de notificare pentru a readuce widgetul. Pentru a ieși complet, dă clic dreapta pe pictogramă și alege Ieșire.
 
 Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării, Parlotype pornește odată cu Windows și așteaptă în zona de notificare — nu se deschide nicio fereastră. Poți dezactiva asta oricând din Setări → Aplicație → Pornire.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Ascunderea sau închiderea widgetului nu închide Parlotype — acesta continuă să asculte comenzile tale rapide din bara de meniu. Dă clic pe pictograma Parlotype de acolo și alege Deschide pentru a readuce widgetul. Pentru a ieși complet, alege Ieșire din același meniu.
+
+Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării, Parlotype pornește odată cu macOS și așteaptă în bara de meniu — nu se deschide nicio fereastră. Poți dezactiva asta oricând din Setări → Aplicație → Pornire.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Ești gata</value>
@@ -142,8 +156,16 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
     <value>Urmează Windows — în prezent: {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Urmează macOS — în prezent: {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Urmează Windows — netradusă încă, așa că se folosește engleza</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Urmează macOS — netradusă încă, așa că se folosește engleza</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Mediu</value>
@@ -172,6 +194,14 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Deschide setările</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Deschide Configurări sistem</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Nu acum</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Deschide</value>
@@ -268,6 +298,26 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Furnizorul cloud nu este configurat</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype are nevoie de acces la Accesibilitate</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS îți cere permisiunea înainte ca o aplicație să poată detecta o comandă rapidă globală sau să lipească text în alte aplicații. Deschide Configurări sistem → Intimitate și securitate → Accesibilitate și activează Parlotype. Comanda rapidă începe să funcționeze imediat — nu e nevoie de repornire.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Textul tău este în Clipboard — apasă Cmd+V ca să îl lipești.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Accesul la microfon este dezactivat</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS nu îi permite aplicației Parlotype să folosească microfonul. Deschide Configurări sistem → Intimitate și securitate → Microfon și activează Parlotype, apoi pornește din nou dictarea.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Transcrierea cloud a eșuat</value>
@@ -376,8 +426,16 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype ascultă comanda ta rapidă de dictare din zona de notificare, deci trebuie să ruleze înainte să poți dicta.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype ascultă comanda ta rapidă de dictare din bara de meniu, deci trebuie să ruleze înainte să poți dicta.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Pornește Parlotype la autentificarea în Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Pornește Parlotype la autentificarea în macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Nu porni Parlotype automat</value>
@@ -396,15 +454,27 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>O singură intrare în contul tău de utilizator (HKCU Run), care indică spre Parlotype. Fără serviciu, fără sarcină programată, fără drepturi de administrator, nimic la nivelul întregului sistem. O poți vedea și elimina chiar tu din Managerul de activități → Aplicații de pornire.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Un singur agent de lansare în contul tău de utilizator (~/Library/LaunchAgents), care indică spre Parlotype. Fără aplicație ajutătoare, fără drepturi de administrator, nimic la nivelul întregului sistem. Îl poți vedea și dezactiva chiar tu din Configurări sistem → General → Elemente de login.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Această versiune nu se poate porni singură la autentificare — nu a fost instalată din Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Această copie nu se poate porni singură la autentificare — mută mai întâi Parlotype în folderul Aplicații.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows are Parlotype dezactivat în Managerul de activități → Aplicații de pornire. Reactivează-l acolo pentru ca această setare să aibă efect.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype pornește odată cu Windows și așteaptă în zona de notificare — nu se deschide nicio fereastră.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype pornește odată cu macOS și așteaptă în bara de meniu — nu se deschide nicio fereastră.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype rulează doar atunci când îl pornești tu însuți.</value>
@@ -454,6 +524,10 @@ Pentru ca o comandă rapidă să funcționeze chiar din momentul autentificării
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Această versiune nu se poate actualiza singură — nu a fost instalată din Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Această copie nu se poate actualiza singură — nu a fost instalată dintr-o versiune oficială Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Se verifică actualizările…</value>

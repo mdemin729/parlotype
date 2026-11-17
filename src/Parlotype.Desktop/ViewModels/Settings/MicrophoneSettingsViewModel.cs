@@ -61,11 +61,22 @@ public partial class MicrophoneSettingsViewModel : SettingsSectionViewModelBase,
             AvailableMicrophones.Add(new MicrophoneDisplayItem(mic, SelectMicrophoneCommand));
     }
 
-    private void OnDevicesChanged(object? sender, EventArgs e)
+    private void OnDevicesChanged(object? sender, EventArgs e) =>
+        Dispatcher.UIThread.Post(() => _ = RefreshAfterDevicesChangedAsync());
+
+    private async Task RefreshAfterDevicesChangedAsync()
     {
-        Dispatcher.UIThread.Post(() =>
+        try
         {
-            var previousId = SelectedMicrophone?.Id;
+            // With nothing selected yet, "previous" is the saved choice. The
+            // list can be empty at startup and fill in a moment later: macOS
+            // reports devices only once CoreAudio is up, which may be after the
+            // user answers the microphone prompt (ADR-077). Falling straight to
+            // the first device there would overwrite the saved microphone on
+            // every launch.
+            var previousId = SelectedMicrophone?.Id
+                             ?? await _settings.GetAsync<string>(SettingsKeys.SelectedMicrophoneId);
+
             PopulateList();
             var match = AvailableMicrophones.FirstOrDefault(m => m.Info.Id == previousId)
                         ?? (AvailableMicrophones.Count > 0 ? AvailableMicrophones[0] : null);
@@ -78,7 +89,11 @@ public partial class MicrophoneSettingsViewModel : SettingsSectionViewModelBase,
             {
                 SelectedMicrophone = null;
             }
-        });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to refresh the microphone list");
+        }
     }
 
     private void ApplySelection(MicrophoneDisplayItem item)

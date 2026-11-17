@@ -1,3 +1,4 @@
+using System.Text;
 using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using Parlotype.Desktop.Resources;
@@ -26,20 +27,74 @@ namespace Parlotype.Desktop.ViewModels.Settings;
 /// format rather than a prefix because Spanish puts it after the key
 /// ("Ctrl derecho") where English puts it before ("Right Ctrl").
 /// </para>
+/// <para>
+/// What is printed on the keyboard depends on the keyboard: a Mac has Option
+/// where a PC has Alt, and Command where a PC has the Windows key. The names
+/// follow the operating system (ADR-077), which is one more reason they are
+/// built here and not taken from Core's invariant form, where the same two keys
+/// stay "Alt" and "Win" in every log on every machine.
+/// </para>
 /// </remarks>
 public static class HotkeyText
 {
+    /// <summary>
+    /// Whether keys are named as on an Apple keyboard. Follows the operating
+    /// system; settable so a test can read either naming on any machine.
+    /// </summary>
+    internal static bool UseMacKeyNames { get; set; } = OperatingSystem.IsMacOS();
+
     /// <summary>The gesture as the settings list shows it, e.g. "Hold Right Ctrl".</summary>
-    public static string Gesture(HotkeyGesture gesture) => gesture.Kind switch
+    public static string Gesture(HotkeyGesture gesture) => Gesture(gesture, UseMacKeyNames);
+
+    /// <summary>
+    /// <see cref="Gesture(HotkeyGesture)"/> with the keyboard naming chosen by
+    /// the caller, so both namings can be read on any machine without touching
+    /// process-wide state.
+    /// </summary>
+    internal static string Gesture(HotkeyGesture gesture, bool macKeyNames) => gesture.Kind switch
     {
         HotkeyGestureKind.HoldModifier =>
-            Strings.Format_Settings_Hotkeys_Gesture_HoldFormat(Modifier(gesture)),
+            Strings.Format_Settings_Hotkeys_Gesture_HoldFormat(Modifier(gesture, macKeyNames)),
         HotkeyGestureKind.DoubleTapModifier =>
-            Strings.Format_Settings_Hotkeys_Gesture_DoubleTapFormat(Modifier(gesture)),
+            Strings.Format_Settings_Hotkeys_Gesture_DoubleTapFormat(Modifier(gesture, macKeyNames)),
 
         // A chord is nothing but key names — "Ctrl+Alt+Space" reads the same in
-        // every language, so Core's invariant form is already right.
+        // every language, so Core's invariant form is already right wherever the
+        // keyboard uses those names.
+        _ when macKeyNames && gesture.Chord is { } chord => MacChord(chord),
         _ => gesture.DisplayString,
+    };
+
+    /// <summary>A chord with Apple key names, in the order Core's invariant form uses.</summary>
+    private static string MacChord(HotkeyBinding chord)
+    {
+        var text = new StringBuilder();
+
+        foreach (var (flag, key) in ChordModifierOrder)
+        {
+            if (chord.Modifiers.HasFlag(flag))
+                text.Append(KeyName(key, macKeyNames: true)).Append('+');
+        }
+
+        return text.Append(chord.Key).ToString();
+    }
+
+    private static readonly (HotkeyModifiers Flag, ModifierKey Key)[] ChordModifierOrder =
+    [
+        (HotkeyModifiers.Ctrl, ModifierKey.Ctrl),
+        (HotkeyModifiers.Alt, ModifierKey.Alt),
+        (HotkeyModifiers.Shift, ModifierKey.Shift),
+        (HotkeyModifiers.Meta, ModifierKey.Meta),
+    ];
+
+    /// <summary>The name printed on the key, on an Apple keyboard or a PC one.</summary>
+    private static string KeyName(ModifierKey key, bool macKeyNames) => key switch
+    {
+        ModifierKey.Ctrl => "Ctrl",
+        ModifierKey.Alt => macKeyNames ? "Option" : "Alt",
+        ModifierKey.Shift => "Shift",
+        ModifierKey.Meta => macKeyNames ? "Cmd" : "Win",
+        _ => key.ToString(),
     };
 
     /// <summary>The activation mode badge, e.g. "Push to talk".</summary>
@@ -80,9 +135,13 @@ public static class HotkeyText
     /// (ADR-064 amendment).
     /// </summary>
     /// <returns>Null when there is nothing to say.</returns>
-    public static string? Conflict(DictationHotkey candidate, HotkeyConflict conflict)
+    public static string? Conflict(DictationHotkey candidate, HotkeyConflict conflict) =>
+        Conflict(candidate, conflict, UseMacKeyNames);
+
+    /// <summary><see cref="Conflict(DictationHotkey, HotkeyConflict)"/> for a keyboard chosen by the caller.</summary>
+    internal static string? Conflict(DictationHotkey candidate, HotkeyConflict conflict, bool macKeyNames)
     {
-        var gesture = Gesture(candidate.Gesture);
+        var gesture = Gesture(candidate.Gesture, macKeyNames);
 
         return conflict.Reason switch
         {
@@ -96,6 +155,10 @@ public static class HotkeyText
 
             HotkeyConflictReason.ParameterHints =>
                 Strings.Format_Settings_Hotkeys_Conflict_ParameterHintsFormat(gesture),
+
+            // AltGr is a PC key. On a Mac, Ctrl+Option+letter types nothing, so
+            // there is no collision to warn about (ADR-077).
+            HotkeyConflictReason.AltGrCollision when macKeyNames => null,
 
             HotkeyConflictReason.AltGrCollision =>
                 Strings.Format_Settings_Hotkeys_Conflict_AltGrFormat(gesture),
@@ -141,16 +204,9 @@ public static class HotkeyText
             ? Strings.Settings_Hotkeys_Conflict_Mode_PushToTalk
             : Strings.Settings_Hotkeys_Conflict_Mode_Toggle;
 
-    private static string Modifier(HotkeyGesture gesture)
+    private static string Modifier(HotkeyGesture gesture, bool macKeyNames)
     {
-        var key = gesture.Modifier switch
-        {
-            ModifierKey.Ctrl => "Ctrl",
-            ModifierKey.Alt => "Alt",
-            ModifierKey.Shift => "Shift",
-            ModifierKey.Meta => "Win",
-            _ => gesture.Modifier.ToString(),
-        };
+        var key = KeyName(gesture.Modifier, macKeyNames);
 
         return gesture.Side switch
         {

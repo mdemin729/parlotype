@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Αυτό το μικρό παράθυρο, πάντα σε πρώτο πλάνο, είναι το χειριστήριο υπαγόρευσής σας. Το μεγάλο κουμπί ξεκινά και σταματά την εγγραφή· περάστε το ποντίκι πάνω από την κάρτα για να δείτε την τρέχουσα κατάσταση. Σύρετε τη λαβή στο επάνω μέρος για να το μετακινήσετε όπου θέλετε, και το κουμπί ✕ το αποκρύπτει στην περιοχή ειδοποιήσεων. Οι μηχανές που προσφέρουν επιλογή γλώσσας εμφανίζουν μια λωρίδα γλωσσών στο κάτω μέρος.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Αυτό το μικρό παράθυρο, πάντα σε πρώτο πλάνο, είναι το χειριστήριο υπαγόρευσής σας. Το μεγάλο κουμπί ξεκινά και σταματά την εγγραφή· περάστε το ποντίκι πάνω από την κάρτα για να δείτε την τρέχουσα κατάσταση. Σύρετε τη λαβή στο επάνω μέρος για να το μετακινήσετε όπου θέλετε, και το κουμπί ✕ το αποκρύπτει στη γραμμή μενού. Οι μηχανές που προσφέρουν επιλογή γλώσσας εμφανίζουν μια λωρίδα γλωσσών στο κάτω μέρος.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Επιλέξτε μηχανή ομιλίας</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Το Parlotype βρίσκεται στην περιοχή ειδοποιήσεων</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Το Parlotype βρίσκεται στη γραμμή μενού</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Η απόκρυψη ή το κλείσιμο του γραφικού στοιχείου δεν τερματίζει το Parlotype — συνεχίζει να παρακολουθεί τις συντομεύσεις σας από την περιοχή ειδοποιήσεων. Κάντε κλικ στο εικονίδιο της περιοχής ειδοποιήσεων για να επαναφέρετε το γραφικό στοιχείο. Για πλήρη έξοδο, κάντε δεξί κλικ στο εικονίδιο και επιλέξτε Έξοδος.
 
 Για να λειτουργεί η συντόμευσή σας από τη στιγμή που συνδέεστε, το Parlotype ξεκινά μαζί με τα Windows και περιμένει στην περιοχή ειδοποιήσεων — δεν ανοίγει κανένα παράθυρο. Απενεργοποιήστε το όποτε θέλετε από τις Ρυθμίσεις → Εφαρμογή → Εκκίνηση.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Η απόκρυψη ή το κλείσιμο του γραφικού στοιχείου δεν τερματίζει το Parlotype — συνεχίζει να παρακολουθεί τις συντομεύσεις σας από τη γραμμή μενού. Κάντε κλικ στο εικονίδιο του Parlotype εκεί και επιλέξτε Άνοιγμα για να επαναφέρετε το γραφικό στοιχείο. Για πλήρη έξοδο, επιλέξτε Έξοδος από το ίδιο μενού.
+
+Για να λειτουργεί η συντόμευσή σας από τη στιγμή που συνδέεστε, το Parlotype ξεκινά μαζί με το macOS και περιμένει στη γραμμή μενού — δεν ανοίγει κανένα παράθυρο. Απενεργοποιήστε το όποτε θέλετε από τις Ρυθμίσεις → Εφαρμογή → Εκκίνηση.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Είστε έτοιμοι</value>
@@ -142,8 +156,16 @@
     <value>Ακολουθεί τα Windows — τρέχουσα γλώσσα: {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Ακολουθεί το macOS — τρέχουσα γλώσσα: {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Ακολουθεί τα Windows — δεν έχει μεταφραστεί ακόμη, γι' αυτό χρησιμοποιούνται τα Αγγλικά</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Ακολουθεί το macOS — δεν έχει μεταφραστεί ακόμη, γι' αυτό χρησιμοποιούνται τα Αγγλικά</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Μεσαίος</value>
@@ -172,6 +194,14 @@
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Άνοιγμα ρυθμίσεων</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Άνοιγμα Ρυθμίσεων συστήματος</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Όχι τώρα</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Άνοιγμα</value>
@@ -268,6 +298,26 @@
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Δεν έχει ρυθμιστεί πάροχος cloud</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Το Parlotype χρειάζεται άδεια Προσβασιμότητας</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Το macOS ζητά την άδειά σας προτού μια εφαρμογή μπορέσει να ανιχνεύσει μια καθολική συντόμευση ή να επικολλήσει κείμενο σε άλλες εφαρμογές. Ανοίξτε τις Ρυθμίσεις συστήματος → Απόρρητο και ασφάλεια → Προσβασιμότητα και ενεργοποιήστε το Parlotype. Η συντόμευση αρχίζει να λειτουργεί αμέσως — δεν χρειάζεται επανεκκίνηση.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Το κείμενό σας βρίσκεται στο πρόχειρο — πατήστε Cmd+V για να το επικολλήσετε.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Η πρόσβαση στο μικρόφωνο είναι απενεργοποιημένη</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Το macOS δεν επιτρέπει στο Parlotype να χρησιμοποιήσει το μικρόφωνο. Ανοίξτε τις Ρυθμίσεις συστήματος → Απόρρητο και ασφάλεια → Μικρόφωνο και ενεργοποιήστε το Parlotype, και μετά ξεκινήστε ξανά την υπαγόρευση.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Η μεταγραφή cloud απέτυχε</value>
@@ -376,8 +426,16 @@
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Το Parlotype παρακολουθεί τη συντόμευση υπαγόρευσής σας από την περιοχή ειδοποιήσεων, γι' αυτό πρέπει να εκτελείται για να μπορείτε να υπαγορεύσετε.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Το Parlotype παρακολουθεί τη συντόμευση υπαγόρευσής σας από τη γραμμή μενού, γι' αυτό πρέπει να εκτελείται για να μπορείτε να υπαγορεύσετε.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Εκκίνηση του Parlotype κατά τη σύνδεση στα Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Εκκίνηση του Parlotype κατά τη σύνδεση στο macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Να μην εκκινείται αυτόματα το Parlotype</value>
@@ -396,15 +454,27 @@
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Μία μόνο καταχώριση κάτω από τον δικό σας λογαριασμό χρήστη (HKCU Run), που δείχνει στο Parlotype. Καμία υπηρεσία, καμία προγραμματισμένη εργασία, κανένα δικαίωμα διαχειριστή, τίποτα σε επίπεδο συστήματος. Μπορείτε να τη δείτε και να την αφαιρέσετε μόνοι σας από τη Διαχείριση εργασιών → Εφαρμογές εκκίνησης.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Ένας μόνο πράκτορας εκκίνησης κάτω από τον δικό σας λογαριασμό χρήστη (~/Library/LaunchAgents), που δείχνει στο Parlotype. Καμία βοηθητική εφαρμογή, κανένα δικαίωμα διαχειριστή, τίποτα σε επίπεδο συστήματος. Μπορείτε να τον δείτε και να τον απενεργοποιήσετε μόνοι σας από τις Ρυθμίσεις συστήματος → Γενικά → Στοιχεία σύνδεσης.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Αυτή η έκδοση δεν μπορεί να εκκινείται μόνη της κατά τη σύνδεση — δεν εγκαταστάθηκε από το Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Αυτό το αντίγραφο δεν μπορεί να εκκινείται μόνο του κατά τη σύνδεση — μετακινήστε πρώτα το Parlotype στον φάκελο Εφαρμογές.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Τα Windows έχουν απενεργοποιήσει το Parlotype στη Διαχείριση εργασιών → Εφαρμογές εκκίνησης. Ενεργοποιήστε το ξανά εκεί για να ισχύσει αυτή η ρύθμιση.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Το Parlotype ξεκινά μαζί με τα Windows και περιμένει στην περιοχή ειδοποιήσεων — δεν ανοίγει κανένα παράθυρο.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Το Parlotype ξεκινά μαζί με το macOS και περιμένει στη γραμμή μενού — δεν ανοίγει κανένα παράθυρο.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Το Parlotype εκτελείται μόνο όταν το ξεκινάτε εσείς.</value>
@@ -454,6 +524,10 @@
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Αυτή η έκδοση δεν μπορεί να ενημερωθεί μόνη της — δεν εγκαταστάθηκε από το Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Αυτό το αντίγραφο δεν μπορεί να ενημερωθεί μόνο του — δεν εγκαταστάθηκε από επίσημη έκδοση του Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Έλεγχος για ενημερώσεις…</value>

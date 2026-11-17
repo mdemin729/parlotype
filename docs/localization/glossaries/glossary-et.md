@@ -245,3 +245,23 @@ Used real Estonian Windows 10/11 UI wording rather than literal translations for
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Hoia all: parem Ctrl`.**
 
 Side is now lowercase after the colon: `parem {0}` / `vasak {0}`. `Conflict_AlreadyBoundFormat` quotes the gesture (`„{0}“ on juba seotud: {1}.`) so the sentence does not carry two colons.
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the platform nouns change. macOS has no Estonian localization, so the names of its own settings stay in English, exactly as the user sees them on screen; only the prose around them is Estonian.
+
+| English | Estonian | Notes |
+|---|---|---|
+| menu bar | **menüüriba** | Replaces *teavitusala* in every `_Mac` key: `menüüribal`, `menüüribalt`, `menüüribale`. |
+| System Settings | **System Settings** (English) | Button: `Ava System Settings`. |
+| Privacy & Security | **Privacy & Security** (English) | |
+| Accessibility | **Accessibility** (English) | The permission: `Accessibility-luba` (hyphen-prefix, only *luba* inflects). |
+| Microphone (settings pane) | **Microphone** (English) | The device itself is *mikrofon*. |
+| General → Login Items | **General → Login Items** (English) | |
+| Applications folder | **kaust Applications** | The native noun comes first, so the English name needs no case ending. |
+| log in | **sisse logima** (`kui login macOS-i sisse`, `sisselogimisel`) | Same verb the Windows keys use for "sign in". |
+| launch agent | **käivitusagent** | Always next to the path `~/Library/LaunchAgents`. |
+| this copy (of the app) | **see koopia** | The Windows keys say *see versioon* for "this build". |
+| Not now (button) | **Mitte praegu** | |
+
+`macOS` is an abbreviation-style name and takes its case ending after a hyphen: `macOS-i`, `macOS-iga` (`Parlotype'i` keeps the apostrophe). An English settings path never takes an ending: it goes after a colon or after *Ava*, joined with `→`, the way `Seaded → Rakendus → Käivitamine` already does. A switch in System Settings is *lülita sisse* / *lülita välja*.

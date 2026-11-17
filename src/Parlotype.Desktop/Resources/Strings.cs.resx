@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Toto malé okno, které zůstává vždy navrchu, je vaše ovládání diktování. Velké tlačítko spouští a zastavuje nahrávání; najetím na kartu zobrazíte aktuální stav. Přetažením úchytu nahoře widget přesunete kamkoli a tlačítko ✕ ho skryje do oznamovací oblasti. Moduly nabízející výběr jazyka zobrazují dole lištu jazyků.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Toto malé okno, které zůstává vždy navrchu, je vaše ovládání diktování. Velké tlačítko spouští a zastavuje nahrávání; najetím na kartu zobrazíte aktuální stav. Přetažením úchytu nahoře widget přesunete kamkoli a tlačítko ✕ ho skryje do řádku nabídek. Moduly nabízející výběr jazyka zobrazují dole lištu jazyků.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Zvolte hlasový modul</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype běží v oznamovací oblasti</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype běží v řádku nabídek</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Skrytí nebo zavření widgetu Parlotype neukončí – dál naslouchá vašim klávesovým zkratkám ze systémové oznamovací oblasti. Kliknutím na ikonu v oznamovací oblasti widget znovu zobrazíte. Chcete-li Parlotype úplně ukončit, klikněte na ikonu pravým tlačítkem a zvolte Ukončit.
 
 Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a čeká v oznamovací oblasti – žádné okno se přitom neotevře. Kdykoli to můžete vypnout v Nastavení → Aplikace → Po spuštění.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Skrytí nebo zavření widgetu Parlotype neukončí – dál naslouchá vašim klávesovým zkratkám z řádku nabídek. Widget znovu zobrazíte tak, že tam kliknete na ikonu Parlotype a zvolíte Otevřít. Chcete-li Parlotype úplně ukončit, zvolte ve stejné nabídce Ukončit.
+
+Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s macOS a čeká v řádku nabídek – žádné okno se přitom neotevře. Kdykoli to můžete vypnout v Nastavení → Aplikace → Po spuštění.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Vše je připraveno</value>
@@ -142,8 +156,16 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
     <value>Řídí se Windows – aktuálně {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Řídí se macOS – aktuálně {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Řídí se Windows – zatím nepřeloženo, používá se angličtina</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Řídí se macOS – zatím nepřeloženo, používá se angličtina</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Střední</value>
@@ -172,6 +194,14 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Otevřít nastavení</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Otevřít Nastavení systému</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Teď ne</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Otevřít</value>
@@ -268,6 +298,26 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Cloudový poskytovatel není nastaven</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype potřebuje oprávnění Zpřístupnění</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS žádá o vaše svolení, než aplikace smí rozpoznat globální klávesovou zkratku nebo psát text do jiných aplikací. Otevřete Nastavení systému → Soukromí a zabezpečení → Zpřístupnění a zapněte Parlotype. Zkratka začne fungovat hned poté – restart není potřeba.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Váš text je ve schránce — vložte ho stisknutím Cmd+V.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Přístup k mikrofonu je vypnutý</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS nedovoluje Parlotype používat mikrofon. Otevřete Nastavení systému → Soukromí a zabezpečení → Mikrofon a zapněte Parlotype, pak znovu spusťte diktování.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Přepis v cloudu se nezdařil</value>
@@ -376,8 +426,16 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype naslouchá vaší klávesové zkratce pro diktování ze systémové oznamovací oblasti, takže musí běžet ještě předtím, než začnete diktovat.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype naslouchá vaší klávesové zkratce pro diktování z řádku nabídek, takže musí běžet ještě předtím, než začnete diktovat.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Spustit Parlotype při přihlášení do Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Spustit Parlotype při přihlášení do macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Nespouštět Parlotype automaticky</value>
@@ -396,15 +454,27 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Jedna položka pod vaším vlastním uživatelským účtem (HKCU Run), odkazující na Parlotype. Žádná služba, žádná naplánovaná úloha, žádná oprávnění správce, nic celosystémového. Sami ji můžete zobrazit a odebrat ve Správci úloh → Po spuštění.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Jeden spouštěcí agent pod vaším vlastním uživatelským účtem (~/Library/LaunchAgents), odkazující na Parlotype. Žádná pomocná aplikace, žádná oprávnění správce, nic celosystémového. Sami ho můžete zobrazit a vypnout v Nastavení systému → Obecné → Aktivace položek a rozšíření při přihlášení.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Tato verze se nemůže spustit sama při přihlášení – nebyla nainstalována ze souboru Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Tato kopie se nemůže spustit sama při přihlášení – nejprve přesuňte Parlotype do složky Aplikace.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows má Parlotype vypnutý ve Správci úloh → Po spuštění. Aby toto nastavení fungovalo, povolte ho tam znovu.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype se spouští s Windows a čeká v oznamovací oblasti – žádné okno se přitom neotevře.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype se spouští s macOS a čeká v řádku nabídek – žádné okno se přitom neotevře.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype běží jen tehdy, když ho sami spustíte.</value>
@@ -454,6 +524,10 @@ Aby zkratka fungovala hned po přihlášení, Parlotype se spouští s Windows a
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Tato verze se nemůže aktualizovat sama – nebyla nainstalována ze souboru Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Tato kopie se nemůže aktualizovat sama – nebyla nainstalována z vydané verze Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Kontroluje se dostupnost aktualizací…</value>

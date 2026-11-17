@@ -169,3 +169,26 @@ Used the actual Polish Windows 10/11 UI wording rather than literal translations
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Domyślny (dosłowna transkrypcja)"** — verbatim/word-for-word rendered as *dosłowna (literal)*, paired with the already-established *transkrypcja* for transcription; no new terms introduced.
 - `Settings_SpeechCleanup_Title` ("Speech cleanup") → **"Redakcja tekstu"** — *redakcja* (editing) rather than *czyszczenie*, which reads as deleting data; used in every speech-cleanup string, including `Settings_LlamaCpp_Description`. "Writing style" → **"Styl tekstu"**, styles as masculine adjectives agreeing with *styl*: Swobodny / Półswobodny / Półformalny / Formalny. English "contractions" → *formy skrócone jak „I'm”*.
+
+## macOS terms
+
+The `_Mac` keys and the two permission dialogs use the names macOS itself shows in Polish
+(checked against Apple's pl-pl Mac User Guide), not literal translations. Each `_Mac`
+string is its Windows counterpart with only these terms swapped.
+
+| English | Polish | Notes |
+|---|---|---|
+| menu bar | **pasek menu** | Replaces *zasobnik systemowy* in every `_Mac` key: „na pasku menu”, „z paska menu”. |
+| System Settings | **Ustawienia systemowe** | Button: „Otwórz Ustawienia systemowe”. |
+| Privacy & Security | **Prywatność i ochrona** | Apple's wording, not *bezpieczeństwo*. |
+| Accessibility | **Dostępność** | Title: „Parlotype potrzebuje uprawnienia Dostępność”. |
+| Microphone | **Mikrofon** | |
+| General | **Ogólne** | |
+| Login Items | **Logowanie** | The macOS 13–14 name, matching the English. macOS 15 and later shows „Rzeczy i rozszerzenia otwierane podczas logowania”. |
+| Applications folder | **folder Aplikacje** | The Finder name. |
+| log in | **logowanie** / **po zalogowaniu** | „przy logowaniu do macOS”, same as the Windows strings. |
+| launch agent | **agent uruchamiania** | |
+| this copy | **ta kopia** | Replaces *ta kompilacja* in the two not-installed states. |
+
+Settings paths stay unquoted and in the nominative after „w”, as the Windows strings do:
+„w Ustawienia systemowe → Ogólne → Logowanie”.

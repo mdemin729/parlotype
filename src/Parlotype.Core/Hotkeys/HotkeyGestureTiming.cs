@@ -23,7 +23,8 @@ public static class HotkeyGestureTiming
     /// <para>
     /// This window only applies to Shift and Meta holds. A Ctrl or Alt hold
     /// turns every keystroke into a command — nothing typed under it can be
-    /// text — so those abort on any keypress, whenever it lands.
+    /// text — so those abort on any keypress, whenever it lands. On macOS the
+    /// roles are Ctrl and Command (command keys) versus Shift and Option.
     /// </para>
     /// </summary>
     public const int HoldAbortGraceMs = 300;

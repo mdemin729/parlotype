@@ -177,3 +177,24 @@ English source byte-for-byte.
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"Standard (wörtliche Transkription)"** — verbatim/word-for-word rendered as *wörtliche (literal/word-for-word)*, paired with the already-established *Transkription* for transcription; no new terms introduced.
 - **speech cleanup** (`Settings_SpeechCleanup_*`, a local model rewriting dictated text as clean written English) → **"Textaufbereitung"** — not *Bereinigung*, which Windows uses for deleting data (*Datenträgerbereinigung*). **writing style** → **"Schreibstil"**; the four styles are *Locker / Eher locker / Eher formell / Formell*. English contractions → **Kurzformen**.
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the OS
+terms swapped. macOS UI names are Apple's own German wording, not literal translations.
+
+| English | German | Notes |
+|---|---|---|
+| menu bar | **Menüleiste** | Replaces *Infobereich* in every `_Mac` key ("in der Menüleiste"). |
+| System Settings | **Systemeinstellungen** | Button: "Systemeinstellungen öffnen". Parlotype's own settings stay "Einstellungen". |
+| Privacy & Security | **Datenschutz & Sicherheit** | |
+| Accessibility | **Bedienungshilfen** | Not "Barrierefreiheit", which is Windows' word for it. |
+| Microphone | **Mikrofon** | |
+| General | **Allgemein** | |
+| Login Items | **Anmeldeobjekte** | |
+| Applications (folder) | **Programme** | Quoted as a folder name: Ordner „Programme“. |
+| log in / at login | **Anmeldung** / **anmelden** | Same word the Windows keys already use for *sign in*, so only the OS name changes ("bei der macOS-Anmeldung"). |
+| launch agent | **Launch-Agent** | Kept as a loanword next to the verbatim path `~/Library/LaunchAgents`. |
+| helper app | **Hilfsprogramm** | |
+| this copy (of the app) | **diese Kopie** | The Windows keys say "diese Version" for *this build*. |
+| Not now (button) | **Nicht jetzt** | macOS' own wording for this button. |

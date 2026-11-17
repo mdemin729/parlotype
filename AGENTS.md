@@ -6,11 +6,16 @@ Instructions for coding agents in this repository. Every statement here must sta
 
 Parlotype is a **local-by-default** voice-to-text tray app (.NET 10, Avalonia 12): a global
 hotkey starts the microphone and the recognized text is pasted into the focused window. In
-local mode audio never leaves the machine.
+local mode audio never leaves the machine. It runs on Windows and on macOS (Intel and Apple
+Silicon, [ADR-077](docs/decisions/077-macos-support.md)); the macOS build is not released
+yet and its dictation path has not been confirmed on a real machine
+(`plans/2026-11-14-macos-release-readiness/`).
 
 - Local engines: **Parakeet TDT v3 via sherpa-onnx (default**, CPU-only, 25 European
   languages, always auto-detected, [ADR-041](docs/decisions/041-parakeet-v3-sherpa-onnx.md)/[042](docs/decisions/042-parakeet-default-language-ux.md)),
   Whisper.net (~99 languages, translate-to-English) and Gemma 4 via a managed `llama-server`.
+  On macOS older than 14.4 Parakeet cannot load and the default is Whisper; read the
+  default through `SpeechEngineDefaults`, never as a literal.
 - Opt-in speech cleanup: after any engine, a local model (S1-mini via its own
   `llama-server` process, English only) rewrites the recognized text before it is pasted.
   Any failure pastes the raw text ([ADR-073](docs/decisions/073-speech-cleanup-s1-mini.md)).
@@ -18,7 +23,8 @@ local mode audio never leaves the machine.
   ([ADR-075](docs/decisions/075-language-aware-speech-cleanup.md)).
 - Opt-in cloud engines: OpenAI-compatible and xAI Grok, bring-your-own-key, never the
   default, with a persistent Cloud badge while active ([ADR-032](docs/decisions/032-online-speech-providers-positioning.md), [ADR-043](docs/decisions/043-cloud-speech-providers-v1.md)).
-  API keys go through `ISecretStore` (DPAPI), never into `settings.json`.
+  API keys go through `ISecretStore` (DPAPI on Windows, the login keychain on macOS), never
+  into `settings.json`.
 
 ## Commands
 
@@ -31,6 +37,7 @@ dotnet test src/Parlotype.Benchmark.Tests   # benchmark metrics and storage (xUn
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"
 dotnet run --project src/Parlotype.Desktop  # launch the app
 dotnet run -c Release --project src/Parlotype.MicroBenchmarks -- --filter *   # not part of dotnet test
+scripts/build-macos-app.sh                  # macOS only: artifacts/macos/<arch>/Parlotype.app
 ```
 
 The transcription-quality CLI (`run`, `sweep`, `list`, `compare`, `export`, `check`,
@@ -38,6 +45,10 @@ The transcription-quality CLI (`run`, `sweep`, `list`, `compare`, `export`, `che
 
 On Windows a build often fails with a file lock held by a `.NET Host` or `testhost` process
 from an earlier run. Kill that process by PID and rebuild before suspecting your change.
+
+On macOS, check anything that involves a permission prompt with the bundle, not with
+`dotnet run`: a process started from a terminal uses the terminal's microphone and
+Accessibility grants ([knowledge note](docs/knowledge/macos-app-bundle-and-privacy-identity.md)).
 
 ## GPU runtime
 
@@ -59,7 +70,10 @@ test projects reference what they test.
 
 - **Core**: contracts and pure domain logic. No platform packages, ever.
 - **Platform**: native libraries, P/Invoke and managed external processes (`llama-server`),
-  behind Core interfaces. Platform's DI registrations are in `PlatformServiceExtensions.cs`.
+  behind Core interfaces. Platform's DI registrations are in `PlatformServiceExtensions.cs`,
+  and that file is where a contract gets its Windows or its macOS implementation. macOS
+  system calls are plain P/Invoke (shared pieces in `MacOs/MacOsNative.cs`); do not add a
+  binding package for them.
 - **Desktop**: the Avalonia tray app and entry point. It registers its own services and view
   models in `App.axaml.cs`. Services are singletons in both.
 
@@ -91,11 +105,24 @@ subsystem; `overview.md` says which document covers what.
   in `ViewModels/`) instead of binding up through `$parent`.
 - **Threads.** Mutate `ObservableCollection`s and other UI state on
   `Dispatcher.UIThread`.
+- **Platform differences.** Do not write `OperatingSystem.IsMacOS()` in a view or a view
+  model to pick a string, a key name or a default. Copy that names Windows things gets a
+  `_Mac` sibling key (`localization` skill); key names come from `HotkeyText`; the default
+  hotkeys and engine come from `DictationHotkeyDefaults.ForCurrentPlatform` and
+  `SpeechEngineDefaults`. A capability that exists on one OS only is a Core interface with
+  a no-op on the other.
+- **CoreAudio (macOS).** Never make a CoreAudio call on the UI thread, and never from a
+  test: the first one in a process can block on the microphone prompt, and inside the test
+  host it does not return
+  ([knowledge note](docs/knowledge/coreaudio-first-call-can-block.md)).
 - **Tests.** Write tests for Core and Platform logic. `Parlotype.Desktop.Tests` is on xUnit
   v3 (`Avalonia.Headless.XUnit` 12 requires it; the others stay on v2): use `[AvaloniaFact]`
   for anything touching the dispatcher or the test hangs, take mocks from its `Mocks/`
   folder, and pass `TestContext.Current.CancellationToken` where an API takes a token
-  (analyzer xUnit1051).
+  (analyzer xUnit1051). The Desktop test assembly pins the Windows wording, key names and
+  defaults at load (`TestPlatformDefaults`) so a test asserts the same thing on every
+  machine; test the macOS flavour through the overloads that take it as an argument, never
+  by flipping a static.
 - **Benchmark output** goes through Spectre.Console, never `Console.WriteLine`.
 
 ## Localization

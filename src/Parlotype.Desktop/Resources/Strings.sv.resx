@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Det här lilla alltid-överst-fönstret är din kontroll för diktering. Den stora knappen startar och stoppar inspelningen. Håll muspekaren över kortet för att se aktuell status. Dra i greppremsan högst upp för att flytta widgeten vart som helst, och ✕-knappen döljer den till meddelandefältet. Motorer som erbjuder ett språkval visar en språkrad längst ned.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Det här lilla alltid-överst-fönstret är din kontroll för diktering. Den stora knappen startar och stoppar inspelningen. Håll muspekaren över kortet för att se aktuell status. Dra i greppremsan högst upp för att flytta widgeten vart som helst, och ✕-knappen döljer den till menyraden. Motorer som erbjuder ett språkval visar en språkrad längst ned.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Välj en talmotor</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype finns i meddelandefältet</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype finns i menyraden</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Att dölja eller stänga widgeten avslutar inte Parlotype – appen fortsätter att lyssna efter dina kortkommandon från meddelandefältet. Klicka på ikonen i meddelandefältet för att ta fram widgeten igen. Högerklicka på ikonen och välj Avsluta för att stänga Parlotype helt.
 
 För att kortkommandot ska fungera direkt när du loggar in startar Parlotype tillsammans med Windows och väntar i meddelandefältet – inget fönster öppnas. Du kan stänga av det när som helst under Inställningar → Program → Uppstart.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Att dölja eller stänga widgeten avslutar inte Parlotype – appen fortsätter att lyssna efter dina kortkommandon från menyraden. Klicka på Parlotype-ikonen där och välj Öppna för att ta fram widgeten igen. Välj Avsluta i samma meny för att stänga Parlotype helt.
+
+För att kortkommandot ska fungera direkt när du loggar in startar Parlotype tillsammans med macOS och väntar i menyraden – inget fönster öppnas. Du kan stänga av det när som helst under Inställningar → Program → Uppstart.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Nu är du redo</value>
@@ -142,8 +156,16 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
     <value>Följer Windows – för närvarande {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Följer macOS – för närvarande {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Följer Windows – ännu inte översatt, så engelska används</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Följer macOS – ännu inte översatt, så engelska används</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Medel</value>
@@ -172,6 +194,14 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Öppna inställningar</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Öppna Systeminställningar</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Inte nu</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Öppna</value>
@@ -268,6 +298,26 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Molnleverantör inte konfigurerad</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype behöver åtkomst till Hjälpmedel</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS ber om din tillåtelse innan en app kan känna av ett globalt kortkommando eller klistra in text i andra appar. Öppna Systeminställningar → Integritet och säkerhet → Hjälpmedel och slå på Parlotype. Kortkommandot börjar fungera så fort du gör det – ingen omstart behövs.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Din text finns i Urklipp – tryck på Cmd+V för att klistra in den.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Mikrofonåtkomst är avstängd</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS låter inte Parlotype använda mikrofonen. Öppna Systeminställningar → Integritet och säkerhet → Mikrofon och slå på Parlotype. Starta sedan dikteringen igen.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Molntranskriberingen misslyckades</value>
@@ -376,8 +426,16 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype lyssnar efter ditt kortkommando för diktering från meddelandefältet, så appen måste köras innan du kan diktera.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype lyssnar efter ditt kortkommando för diktering från menyraden, så appen måste köras innan du kan diktera.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Starta Parlotype när jag loggar in på Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Starta Parlotype när jag loggar in på macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Starta inte Parlotype automatiskt</value>
@@ -396,15 +454,27 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>En enda post under ditt eget användarkonto (HKCU Run) som pekar på Parlotype. Ingen tjänst, ingen schemalagd aktivitet, inga administratörsrättigheter, inget som gäller hela datorn. Du kan själv se och ta bort den i Aktivitetshanteraren → Starta.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>En enda launch agent under ditt eget användarkonto (~/Library/LaunchAgents) som pekar på Parlotype. Inget hjälpprogram, inga administratörsrättigheter, inget som gäller hela datorn. Du kan själv se och stänga av den i Systeminställningar → Allmänt → Startobjekt.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Den här versionen kan inte starta sig själv vid inloggning – den installerades inte från Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Den här kopian kan inte starta sig själv vid inloggning – flytta Parlotype till mappen Program först.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows har stängt av Parlotype i Aktivitetshanteraren → Starta. Aktivera det där igen för att den här inställningen ska börja gälla.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype startar med Windows och väntar i meddelandefältet – inget fönster öppnas.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype startar med macOS och väntar i menyraden – inget fönster öppnas.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype körs bara när du startar det själv.</value>
@@ -454,6 +524,10 @@ För att kortkommandot ska fungera direkt när du loggar in startar Parlotype ti
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Den här versionen kan inte uppdatera sig själv – den installerades inte från Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Den här kopian kan inte uppdatera sig själv – den installerades inte från en utgiven Parlotype-version.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Söker efter uppdateringar…</value>

@@ -64,7 +64,11 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
 
         Presets =
         [
-            new HotkeyPresetViewModel(DictationHotkey.Hold(ModifierKey.Ctrl, ModifierSide.Right), AddPresetCommand),
+            // A MacBook has no Right Ctrl; its right-hand modifiers are Command
+            // and Option (ADR-077).
+            new HotkeyPresetViewModel(
+                DictationHotkey.Hold(OperatingSystem.IsMacOS() ? ModifierKey.Meta : ModifierKey.Ctrl, ModifierSide.Right),
+                AddPresetCommand),
             new HotkeyPresetViewModel(DictationHotkey.Hold(ModifierKey.Alt, ModifierSide.Right), AddPresetCommand),
             new HotkeyPresetViewModel(DictationHotkey.DoubleTap(ModifierKey.Ctrl, ModifierSide.Either), AddPresetCommand),
             new HotkeyPresetViewModel(DictationHotkey.DoubleTap(ModifierKey.Shift, ModifierSide.Either), AddPresetCommand),
@@ -88,7 +92,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to load hotkey settings");
-            Reload(DictationHotkeyDefaults.All);
+            Reload(DictationHotkeyDefaults.ForCurrentPlatform);
         }
     }
 

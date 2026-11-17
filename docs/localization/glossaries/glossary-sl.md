@@ -304,3 +304,30 @@ translated value over 25 characters is byte-identical to the English source.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Pridržite desni Ctrl`.**
 
 Side is now `desni {0}` / `levi {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `„{0}“ je že dodeljeno načinu: {1}.`
+
+
+## macOS terms
+
+macOS has a Slovenian interface since macOS 15; these are the names it shows there (checked
+against Apple's Slovenian macOS User Guide). macOS 14 and earlier have no Slovenian
+localization and show the English names (System Settings → Privacy & Security →
+Accessibility, General → Login Items). The `_Mac` keys are the base key's translation with
+only these terms swapped.
+
+| English | Slovenian | Notes |
+|---|---|---|
+| menu bar | **menijska vrstica** | replaces *sistemska vrstica* in every `_Mac` key ("v menijski vrstici", "iz menijske vrstice") |
+| menu (of the menu-bar icon) | **meni** | Apple's Slovenian word ("meni Apple"); "v istem meniju" |
+| System Settings | **Nastavitve sistema** | `Common_OpenSystemSettings` → "Odpri Nastavitve sistema", the same wording macOS uses on its own permission alert; declined in prose ("v Nastavitvah sistema") |
+| Privacy & Security | **Zasebnost in varnost** | |
+| Accessibility | **Dostopnost** | the permission is "dovoljenje za Dostopnost" |
+| Microphone | **Mikrofon** | as a Settings pane name; lowercase *mikrofon* in prose |
+| General | **Splošno** | |
+| Login Items | **Elementi prijave in razširitve** | the pane's full name under *Splošno* (English: Login Items & Extensions) |
+| Applications (folder) | **mapa Aplikacije** | |
+| log in | **prijaviti se** / **prijava** | same word the Windows keys use for "sign in" |
+| launch agent | **zagonski agent** | the path `~/Library/LaunchAgents` beside it stays verbatim |
+| this copy (of the app) | **ta kopija** | the Windows keys say *ta različica* for "this build" |
+| a Parlotype release | **izdaja Parlotype** | *izdaja* is the established word for a release |
+| permission (macOS privacy) | **dovoljenje** | |
+| Not now (button) | **Ne zdaj** | |

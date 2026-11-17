@@ -14,18 +14,34 @@ namespace Parlotype.Platform.Hotkeys;
 /// </summary>
 public sealed class SharpHookHotkeyService : IGlobalHotkeyService
 {
+    /// <summary>How often to look again while the OS still withholds the hook (ADR-077).</summary>
+    private static readonly TimeSpan PermissionPollInterval = TimeSpan.FromSeconds(2);
+
     private readonly ISettingsService _settings;
+    private readonly ISystemPermissionService _permissions;
     private readonly ILogger<SharpHookHotkeyService> _logger;
+
+    /// <summary>Guards hook creation, which the caller and the permission poll both reach.</summary>
+    private readonly Lock _hookLock = new();
+
+    /// <summary>
+    /// Ticks while the hook is waiting for the user to grant macOS's
+    /// Accessibility permission, and installs it as soon as they do. Never
+    /// started on a platform that has no such gate.
+    /// </summary>
+    private readonly Timer _permissionTimer;
 
     /// <summary>Guards the matcher, which the hook thread and the timer both reach.</summary>
     private readonly Lock _matcherLock = new();
 
-    private readonly HotkeyGestureMatcher _matcher = new(DictationHotkeyDefaults.All);
+    private readonly HotkeyGestureMatcher _matcher = new(
+        DictationHotkeyDefaults.ForCurrentPlatform, macModifierSemantics: OperatingSystem.IsMacOS());
 
     /// <summary>Fires when a deferred hold has been held long enough to count as one.</summary>
     private readonly Timer _timeoutTimer;
 
     private SimpleGlobalHook? _hook;
+    private bool _started;
     private bool _disposed;
 
     public event EventHandler<DictationStartEventArgs>? DictationStartRequested;
@@ -38,27 +54,46 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         get { lock (_matcherLock) return _matcher.Bindings; }
     }
 
-    public SharpHookHotkeyService(ISettingsService settings, ILogger<SharpHookHotkeyService> logger)
+    public SharpHookHotkeyService(
+        ISettingsService settings,
+        ISystemPermissionService permissions,
+        ILogger<SharpHookHotkeyService> logger)
     {
         _settings = settings;
+        _permissions = permissions;
         _logger = logger;
         _timeoutTimer = new Timer(_ => OnTimeout(), null, Timeout.Infinite, Timeout.Infinite);
+        _permissionTimer = new Timer(_ => OnPermissionPoll(), null, Timeout.Infinite, Timeout.Infinite);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
-        if (_hook is not null)
+        if (_started)
             return;
 
         var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(_settings, cancellationToken);
         lock (_matcherLock)
             _matcher.UpdateBindings(bindings);
 
-        _hook = new SimpleGlobalHook(GlobalHookType.Keyboard, runAsyncOnBackgroundThread: true);
-        _hook.KeyPressed += OnKeyPressed;
-        _hook.KeyReleased += OnKeyReleased;
+        lock (_hookLock)
+        {
+            _started = true;
 
-        _ = _hook.RunAsync();
+            if (CanInstallHook())
+            {
+                InstallHook();
+            }
+            else
+            {
+                // macOS refuses to create a keyboard event tap for a process the
+                // user has not allowed under Accessibility (ADR-077). Granting it
+                // takes effect in the running process, so wait for it instead of
+                // asking for a restart; the desktop app explains what to do.
+                _logger.LogWarning(
+                    "Global hotkeys are unavailable until Accessibility access is granted — waiting for it");
+                _permissionTimer.Change(PermissionPollInterval, PermissionPollInterval);
+            }
+        }
 
         _logger.LogInformation(
             "Global hotkey listener started — bindings: {Bindings}",
@@ -68,8 +103,51 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         BindingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    private bool CanInstallHook() =>
+        _permissions.GetState(SystemPermission.Accessibility) == SystemPermissionState.Granted;
+
+    /// <summary>Must be called with <see cref="_hookLock"/> held.</summary>
+    private void InstallHook()
+    {
+        if (_hook is not null)
+            return;
+
+        var hook = new SimpleGlobalHook(GlobalHookType.Keyboard, runAsyncOnBackgroundThread: true);
+        hook.KeyPressed += OnKeyPressed;
+        hook.KeyReleased += OnKeyReleased;
+        _hook = hook;
+
+        // The task ends when the hook stops, and faults if it could not be
+        // installed. A silent failure here is a dead hotkey with nothing in the
+        // log to say why, so it is observed.
+        _ = hook.RunAsync().ContinueWith(
+            task => _logger.LogError(task.Exception, "The global keyboard hook stopped with an error"),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted,
+            TaskScheduler.Default);
+    }
+
+    private void OnPermissionPoll()
+    {
+        lock (_hookLock)
+        {
+            if (_disposed || !_started || _hook is not null || !CanInstallHook())
+                return;
+
+            _permissionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            InstallHook();
+            _logger.LogInformation("Accessibility access granted — global hotkeys are now active");
+        }
+    }
+
     public Task StopAsync(CancellationToken cancellationToken = default)
     {
+        lock (_hookLock)
+        {
+            _started = false;
+            _permissionTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+
         DisposeHook();
         _logger.LogInformation("Global hotkey listener stopped");
         return Task.CompletedTask;
@@ -102,6 +180,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
             return;
 
         _disposed = true;
+        _permissionTimer.Dispose();
         DisposeHook();
         _timeoutTimer.Dispose();
     }

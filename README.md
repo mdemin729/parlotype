@@ -12,7 +12,7 @@ Parlotype is a **local-by-default** voice-to-text desktop application: on-device
 - **Whisper.net** — On-device speech recognition (OpenAI Whisper), Vulkan / CPU
 - **llama.cpp (`llama-server`)** — sidecar for Gemma 4 speech recognition and for speech cleanup (S1-mini)
 - **Silero VAD** — Voice activity detection
-- **NAudio** — Windows audio capture (WASAPI)
+- **NAudio** — Windows audio capture (WASAPI); macOS captures through CoreAudio directly
 - **CommunityToolkit.Mvvm** — MVVM framework
 - **SharpHook** — Global hotkeys (hold / double-tap / chord gestures)
 - **ZLogger** — Structured logging
@@ -21,7 +21,15 @@ Parlotype is a **local-by-default** voice-to-text desktop application: on-device
 
 ## Platform Support
 
-Parlotype currently runs on **Windows** only. macOS and Linux support are planned for the future. Two features are explicitly Windows-only today: DPAPI encryption of cloud API keys (other platforms fall back to base64 with a logged warning) and keyboard-layout source detection (other platforms fall back to auto-detect).
+Parlotype runs on **Windows** and on **macOS** (Intel and Apple Silicon, [ADR-077](docs/decisions/077-macos-support.md)). Linux is planned.
+
+**macOS is new and not yet released.** There are no macOS downloads: you build the app bundle yourself (see [Build & Run](#build--run)). What has been checked so far is an Intel Mac on macOS 13: the app builds, passes its tests, starts as a menu bar app and asks for its permissions. Dictating end to end, and anything on Apple Silicon, has not been confirmed on a real machine yet.
+
+- **macOS version.** macOS 15 or later. Intel Macs on older systems also work (checked on macOS 13.7), with **Whisper as the default engine**: Parakeet needs macOS 14.4.
+- **Permissions.** macOS asks for two: **Microphone**, and **Accessibility** (System Settings → Privacy & Security), which is what lets an app see a global hotkey and paste into another app. The hotkey starts working as soon as Accessibility is switched on; no restart is needed.
+- **Hotkeys.** Hold **Right Command** to talk, or double-tap **Ctrl**. A MacBook has no Right Ctrl.
+- **API keys** are stored in the login keychain.
+- **Whisper runs on the CPU on Intel Macs.** Vulkan, the GPU runtime the app selects on Windows, does not exist on macOS.
 
 **GPU acceleration** applies to the **Whisper** engine and runs on **any** Vulkan-capable GPU (AMD, Intel, NVIDIA), with automatic CPU fallback if no compatible GPU is detected. CUDA was dropped in [ADR-049](docs/decisions/049-drop-whisper-cuda-runtime.md) — NVIDIA cards are still accelerated, via Vulkan. The active runtime can be changed under **Settings → Speech engine → Whisper runtime**. Parakeet is **CPU-only by design** (see [ADR-041](docs/decisions/041-parakeet-v3-sherpa-onnx.md)) and needs no GPU to be fast; Gemma 4 acceleration depends on the `llama-server` build you install.
 
@@ -189,9 +197,11 @@ Dictation has two genuinely different modes — holding a key for one sentence, 
 
 | Gesture | Mode | Why this one |
 |---------|------|--------------|
-| **Hold Right Ctrl** | Push-to-talk | The same physical key on every platform, and comfortable to hold. Left and right Ctrl are distinct keys to the hook, so all your normal Ctrl shortcuts keep working. |
+| **Hold Right Ctrl** | Push-to-talk | Comfortable to hold. Left and right Ctrl are distinct keys to the hook, so all your normal Ctrl shortcuts keep working. |
 | **Double-tap Ctrl** | Toggle | macOS Dictation's own default on external keyboards, and it collides with nothing on Windows or Linux. |
 | **Ctrl+Alt+Space** | Toggle | An explicit chord for anywhere bare-modifier detection isn't available. |
+
+On **macOS** the defaults are **hold Right Command** (push-to-talk) and **double-tap Ctrl** (toggle). MacBook keyboards have no Right Ctrl, and there is no default chord because Ctrl+Option+Space is the system's own input-source switch.
 
 **Esc cancels.** While recording, Escape stops and **discards** the take — nothing is transcribed and nothing is typed. It passes straight through to whatever app you're in the rest of the time.
 
@@ -222,9 +232,9 @@ The Transcribe window is a frameless always-on-top mini card (172 px wide, 88 px
 Findings from the [2026-07 security audit](docs/security/2026-07-11-security-audit.md) are addressed in [ADR-046](docs/decisions/046-security-hardening-batch.md):
 
 - **Transcripts are never logged** at any level — only lengths and counts. The rolling log file is capped at `Information`; the console keeps `Debug` for development.
-- **Dictated text stays out of clipboard history** — the clipboard injection path sets the Windows exclusion flags, so dictation never reaches Win+V history or cross-device Cloud Clipboard, and the original clipboard content is restored afterwards.
+- **Dictated text stays out of clipboard history** — the clipboard injection path sets the Windows exclusion flags, so dictation never reaches Win+V history or cross-device Cloud Clipboard, and the original clipboard content is restored afterwards. On macOS the pasted text carries the `org.nspasteboard` transient markers that clipboard managers honour.
 - **Model downloads are integrity-checked** — SHA-256 is computed while streaming and compared before the atomic move; a mismatch throws and the destination file is never touched. Catalog entries without a digest degrade to the previous behaviour with a warning rather than blocking the download.
-- **Cloud API keys live outside `settings.json`** — in `secrets.json`, encrypted with DPAPI (`CurrentUser` scope) on Windows, so settings backups, sync, or diagnostics never carry credentials. Undecryptable values are treated as absent and re-prompted. On non-Windows platforms they are base64-encoded with a logged warning (OS keychain support is a known gap).
+- **Cloud API keys live outside `settings.json`** — in `secrets.json`, encrypted with DPAPI (`CurrentUser` scope) on Windows, so settings backups, sync, or diagnostics never carry credentials. Undecryptable values are treated as absent and re-prompted. On macOS they are in the login keychain, under "Parlotype", and in no file at all.
 - **Cloud base URLs must be HTTPS** unless the host is loopback, enforced at recognizer initialization.
 - **`settings.json` and `secrets.json` are written atomically** (temp file + move), and the `llama-server` sidecar is spawned with an argument list rather than a quoted command line.
 - **The update check is the only request Parlotype makes on its own**; it is anonymous and can be switched off. Every other request follows a user action — opening Settings, a download, a cloud engine, or pressing *Send* in the feedback window. See [Updates](#updates) and [docs/network-requests.md](docs/network-requests.md).
@@ -235,6 +245,9 @@ User data lives under `%LOCALAPPDATA%\parlotype-data\`, deliberately **outside**
 install directory. The installer owns `%LOCALAPPDATA%\Parlotype` and erases it on
 uninstall, so nothing of yours is kept there — your models and settings survive updates
 and uninstalls alike ([ADR-053](docs/decisions/053-velopack-packaging-and-auto-update.md)).
+
+On macOS the same files are under `~/Library/Application Support/Parlotype/`, logs under
+`~/Library/Logs/Parlotype/`, and there is no `secrets.json`: API keys are in the keychain.
 
 | Path | Contents |
 |------|----------|
@@ -277,6 +290,15 @@ dotnet run --project src\Parlotype.Desktop
 ```
 
 The app starts minimized to the system tray. Click the tray icon for an Open / Settings / Exit menu, or use a [dictation hotkey](#dictation-hotkeys) — hold Right Ctrl, or double-tap Ctrl — to open the Transcribe window and start recording.
+
+**macOS.** The same two commands build and run it, but run that way the app borrows the terminal's microphone and Accessibility permissions instead of asking for its own. To get the real application, build the bundle:
+
+```bash
+scripts/build-macos-app.sh               # this Mac's architecture; --arch arm64 or x64 to choose
+open artifacts/macos/x64/Parlotype.app   # or artifacts/macos/arm64/…
+```
+
+It appears in the menu bar, not in the Dock. The bundle is signed ad hoc, which is enough for the Mac that built it; macOS treats each rebuild as a new app and asks for the permissions again.
 
 ### Visual inspector (Debug builds)
 

@@ -15,8 +15,8 @@ Related ADRs: [003](../decisions/003-audio-pipeline.md) (original design),
 
 ```mermaid
 flowchart LR
-    MIC["Microphone<br/>WASAPI via NAudio"]
-    CAP["WasapiAudioCaptureService<br/>resample to 16 kHz mono float"]
+    MIC["Microphone<br/>WASAPI (Windows) or CoreAudio (macOS)"]
+    CAP["IAudioCaptureService<br/>16 kHz mono float"]
     SEG["Segmenter<br/>Silero VAD via IVadService"]
     REC["ISpeechRecognizer<br/>DelegatingSpeechRecognizer"]
     CLEAN["ISpeechCleanupService<br/>opt-in, local model"]
@@ -54,13 +54,18 @@ flowchart LR
    and `TranscriptionResult.CleanupOutcome` says which. Last comes the shared text
    post-processor.
 5. **Injection.** `TranscribeViewModel` handles `TranscriptionAvailable` and calls
-   `ITextInjectionService`. The default `ClipboardTextInjectionService` saves the
-   clipboard text, sets the transcript with the Windows clipboard-history exclusion
-   formats, focuses the window `Win32TargetWindowTracker` last saw (the last
-   non-Parlotype foreground window), sends Ctrl+V, and restores the saved text
+   `ITextInjectionService`. The default implementation saves the clipboard text, sets
+   the transcript marked as not-for-history, focuses what `ITargetWindowTracker` last saw
+   in front (the last window or application that was not Parlotype), sends the paste
+   shortcut, and restores the saved text
    ([ADR-006](../decisions/006-text-injection-clipboard-vs-sharphook.md),
-   [ADR-046](../decisions/046-security-hardening-batch.md)). Only text is saved and
-   restored; see the [security audit](../security/2026-07-11-security-audit.md).
+   [ADR-046](../decisions/046-security-hardening-batch.md)). On Windows that is
+   `ClipboardTextInjectionService` with the clipboard-history exclusion formats,
+   `Win32TargetWindowTracker` and Ctrl+V; on macOS `MacOsClipboardTextInjectionService`
+   with the nspasteboard.org transient markers, `MacOsTargetWindowTracker` (an
+   application, not a window) and Cmd+V
+   ([ADR-077](../decisions/077-macos-support.md)). Only text is saved and restored; see
+   the [security audit](../security/2026-07-11-security-audit.md).
 
 **VAD settings are benchmark-tuned.** The `VadOptions` defaults (padding, minimum silence,
 the silence inserted between concatenated segments) were chosen by measuring WER

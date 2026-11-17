@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Din il-window żgħira li dejjem tibqa' fuq nett hija l-kontroll tad-dettatura tiegħek. Il-buttuna l-kbira tibda u twaqqaf ir-reġistrazzjoni; għaddi l-kursur fuq il-kard biex tara l-istatus attwali. Iġbed il-parti ta' fuq biex tiċaqlaqha kullimkien, u l-buttuna ✕ taħbiha fit-tray. Il-magni li joffru għażla tal-lingwa juru strixxa tal-lingwa tul in-naħa t'isfel.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Din il-window żgħira li dejjem tibqa' fuq nett hija l-kontroll tad-dettatura tiegħek. Il-buttuna l-kbira tibda u twaqqaf ir-reġistrazzjoni; għaddi l-kursur fuq il-kard biex tara l-istatus attwali. Iġbed il-parti ta' fuq biex tiċaqlaqha kullimkien, u l-buttuna ✕ taħbiha fil-bar tal-menu. Il-magni li joffru għażla tal-lingwa juru strixxa tal-lingwa tul in-naħa t'isfel.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Agħżel Magna tad-Diskors</value>
   </data>
@@ -60,8 +64,18 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype Tgħix fit-Tray</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype Tgħix fil-Bar tal-Menu</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Meta taħbi jew tagħlaq il-widget, Parlotype ma toħroġx — tibqa' tisma' għall-hotkeys tiegħek mit-tray tas-sistema. Ikklikkja l-ikona tat-tray biex terġa' ġġib lura l-widget. Biex toħroġ għal kollox, ikklikkja bil-lemin fuq l-ikona tat-tray u agħżel Oħroġ.  Biex il-hotkey tiegħek jaħdem mill-mument li tidħol, Parlotype tibda ma' Windows u tistenna fit-tray — l-ebda window ma tinfetaħ. Itfi dan meta trid fis-Settings → Applikazzjoni → Tnedija.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Meta taħbi jew tagħlaq il-widget, Parlotype ma toħroġx — tibqa' tisma' għall-hotkeys tiegħek mill-bar tal-menu. Ikklikkja l-ikona ta' Parlotype hemmhekk u agħżel Iftaħ biex terġa' ġġib lura l-widget. Biex toħroġ għal kollox, agħżel Oħroġ mill-istess menu.
+
+Biex il-hotkey tiegħek jaħdem mill-mument li tidħol, Parlotype tibda ma' macOS u tistenna fil-bar tal-menu — l-ebda window ma tinfetaħ. Itfi dan meta trid fis-Settings → Applikazzjoni → Tnedija.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Kollox Lest</value>
@@ -140,8 +154,16 @@
     <value>Isegwi lil Windows — bħalissa {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Isegwi lil macOS — bħalissa {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Isegwi lil Windows — għadha mhix tradotta, għalhekk jintuża l-Ingliż</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Isegwi lil macOS — għadha mhix tradotta, għalhekk jintuża l-Ingliż</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Medju</value>
@@ -170,6 +192,14 @@
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Iftaħ is-Settings</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Iftaħ is-System Settings</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Mhux issa</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Iftaħ</value>
@@ -266,6 +296,26 @@
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Fornitur tas-Sħaba Mhux Ikkonfigurat</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype teħtieġ aċċess għal Accessibility</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS titlob il-permess tiegħek qabel ma app tkun tista' tagħraf hotkey globali jew twaħħal test f'apps oħra. Iftaħ is-System Settings → Privacy &amp; Security → Accessibility u ixgħel lil Parlotype. Il-hotkey jibda jaħdem minnufih — m'hemmx bżonn ta' restart.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>It-test tiegħek jinsab fil-clipboard — agħfas Cmd+V biex twaħħlu.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>L-aċċess għall-mikrofonu huwa mitfi</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS mhix qed tħalli lil Parlotype tuża l-mikrofonu. Iftaħ is-System Settings → Privacy &amp; Security → Microphone u ixgħel lil Parlotype, imbagħad erġa' ibda d-dettatura.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>It-Traskrizzjoni bis-Sħaba Falliet</value>
@@ -374,8 +424,16 @@
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype tisma' għall-hotkey tad-dettatura tiegħek mit-tray tas-sistema, għalhekk trid tkun qed taħdem qabel ma tkun tista' tiddetta.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype tisma' għall-hotkey tad-dettatura tiegħek mill-bar tal-menu, għalhekk trid tkun qed taħdem qabel ma tkun tista' tiddetta.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Ibda Parlotype meta nidħol f'Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Ibda Parlotype meta nidħol f'macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Tibdiex Parlotype Awtomatikament</value>
@@ -394,15 +452,27 @@
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Entrata waħda taħt il-kont tal-utent tiegħek stess (HKCU Run), li tindika lejn Parlotype. L-ebda servizz, l-ebda xogħol skedat, l-ebda dritt ta' amministratur, xejn fil-livell tal-magna kollha. Tista' taraha u tneħħiha int stess fit-Task Manager → Startup apps.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Aġent tat-tnedija wieħed taħt il-kont tal-utent tiegħek stess (~/Library/LaunchAgents), li jindika lejn Parlotype. L-ebda app awżiljarja, l-ebda dritt ta' amministratur, xejn fil-livell tal-magna kollha. Tista' tarah u titfih int stess fis-System Settings → General → Login Items.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Din il-verżjoni ma tistax tibda waħedha mad-dħul — ma ġietx installata minn Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Din il-kopja ma tistax tibda waħedha mad-dħul — l-ewwel ċaqlaq lil Parlotype għall-fowlder Applications.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows għandha Parlotype mitfija fit-Task Manager → Startup apps. Erġa' qabbadha hemm biex dan is-setting jibda jaħdem.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype tibda ma' Windows u tistenna fit-tray — l-ebda window ma tinfetaħ.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype tibda ma' macOS u tistenna fil-bar tal-menu — l-ebda window ma tinfetaħ.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype taħdem biss meta tibdiha int stess.</value>
@@ -452,6 +522,10 @@
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Din il-verżjoni ma tistax taġġorna lilha nnifisha — ma ġietx installata minn Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Din il-kopja ma tistax taġġorna lilha nnifisha — ma ġietx installata minn ħarġa ta' Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Qed Tiċċekkja għal Aġġornamenti…</value>

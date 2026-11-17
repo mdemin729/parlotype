@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Esta pequena janela sempre visível é o seu controlo de ditado. O botão grande inicia e para a gravação; passe o cursor sobre o cartão para ver o estado atual. Arraste a barra superior para o mover para qualquer lugar, e o botão ✕ oculta-o na área de notificação. Os motores que oferecem escolha de idioma mostram uma barra de idioma na parte inferior.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Esta pequena janela sempre visível é o seu controlo de ditado. O botão grande inicia e para a gravação; passe o cursor sobre o cartão para ver o estado atual. Arraste a barra superior para o mover para qualquer lugar, e o botão ✕ oculta-o na barra de menus. Os motores que oferecem escolha de idioma mostram uma barra de idioma na parte inferior.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Escolha um motor de voz</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>O Parlotype vive na área de notificação</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>O Parlotype vive na barra de menus</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Ocultar ou fechar o widget não fecha o Parlotype — este continua a aguardar os seus atalhos a partir da área de notificação. Clique no ícone da área de notificação para trazer o widget de volta. Para sair por completo, clique com o botão direito no ícone e escolha Sair.
 
 Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotype arranca com o Windows e aguarda na área de notificação — não abre nenhuma janela. Pode desativar isto a qualquer momento em Definições → Aplicação → Arranque.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Ocultar ou fechar o widget não fecha o Parlotype — este continua a aguardar os seus atalhos a partir da barra de menus. Clique aí no ícone do Parlotype e escolha Abrir para trazer o widget de volta. Para sair por completo, escolha Sair no mesmo menu.
+
+Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotype arranca com o macOS e aguarda na barra de menus — não abre nenhuma janela. Pode desativar isto a qualquer momento em Definições → Aplicação → Arranque.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Está tudo pronto</value>
@@ -142,8 +156,16 @@ Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotyp
     <value>Segue o Windows — atualmente {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Segue o macOS — atualmente {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Segue o Windows — ainda não traduzido, por isso é utilizado o inglês</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Segue o macOS — ainda não traduzido, por isso é utilizado o inglês</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Médio</value>
@@ -172,6 +194,14 @@ Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotyp
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Abrir definições</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Abrir Definições do Sistema</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Agora não</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Abrir</value>
@@ -268,6 +298,26 @@ Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotyp
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Fornecedor na nuvem não configurado</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>O Parlotype precisa de acesso à Acessibilidade</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>O macOS pede autorização antes de uma aplicação poder detetar um atalho global ou colar texto em outras aplicações. Abra Definições do Sistema → Privacidade e segurança → Acessibilidade e ative o Parlotype. O atalho começa a funcionar assim que o fizer — não é necessário reiniciar.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>O seu texto está na área de transferência — prima Cmd+V para o colar.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>O acesso ao microfone está desativado</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>O macOS não permite que o Parlotype utilize o microfone. Abra Definições do Sistema → Privacidade e segurança → Microfone e ative o Parlotype; depois, inicie o ditado novamente.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Falha na transcrição na nuvem</value>
@@ -376,8 +426,16 @@ Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotyp
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>O Parlotype aguarda o atalho de ditado a partir da área de notificação, por isso tem de estar em execução antes de se poder ditar.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>O Parlotype aguarda o atalho de ditado a partir da barra de menus, por isso tem de estar em execução antes de se poder ditar.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Iniciar o Parlotype ao iniciar sessão no Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Iniciar o Parlotype ao iniciar sessão no macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Não iniciar o Parlotype automaticamente</value>
@@ -396,15 +454,27 @@ Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotyp
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Uma única entrada na própria conta de utilizador (HKCU Run), a apontar para o Parlotype. Sem serviço, sem tarefa agendada, sem direitos de administrador, nada ao nível de todo o sistema. Essa entrada pode ser vista e removida em Gestor de Tarefas → Aplicações de arranque.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Um único agente de arranque na própria conta de utilizador (~/Library/LaunchAgents), a apontar para o Parlotype. Sem aplicação auxiliar, sem direitos de administrador, nada ao nível de todo o sistema. Esse agente pode ser visto e desativado em Definições do Sistema → Geral → Início de sessão.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Esta compilação não se pode iniciar automaticamente ao iniciar sessão — não foi instalada a partir do Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Esta cópia não se pode iniciar automaticamente ao iniciar sessão — mova primeiro o Parlotype para a pasta Aplicações.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>O Windows tem o Parlotype desativado em Gestor de Tarefas → Aplicações de arranque. Reative-o aí para que esta definição produza efeito.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>O Parlotype inicia com o Windows e aguarda na área de notificação — não abre nenhuma janela.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>O Parlotype inicia com o macOS e aguarda na barra de menus — não abre nenhuma janela.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>O Parlotype só é executado quando for iniciado manualmente.</value>
@@ -454,6 +524,10 @@ Para que o seu atalho funcione desde o momento em que inicia sessão, o Parlotyp
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Esta compilação não se pode atualizar sozinha — não foi instalada a partir do Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Esta cópia não se pode atualizar sozinha — não foi instalada a partir de uma versão publicada do Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>A verificar atualizações…</value>

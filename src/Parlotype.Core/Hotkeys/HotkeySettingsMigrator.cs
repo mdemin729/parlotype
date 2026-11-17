@@ -52,11 +52,11 @@ public static class HotkeySettingsMigrator
         var key = await settings.GetAsync<string>(SettingsKeys.HotkeyKey, ct).ConfigureAwait(false);
 
         if (!Enum.TryParse<HotkeyModifiers>(modifiersStr, out var modifiers) || string.IsNullOrWhiteSpace(key))
-            return DictationHotkeyDefaults.All;
+            return DictationHotkeyDefaults.ForCurrentPlatform;
 
         var legacyChord = new HotkeyBinding(modifiers, key);
         if (!legacyChord.IsValid || legacyChord == LegacyDefaultChord)
-            return DictationHotkeyDefaults.All;
+            return DictationHotkeyDefaults.ForCurrentPlatform;
 
         // The user deliberately chose this chord, so it stays their only binding.
         // Silently adding the new gesture defaults would hand them global

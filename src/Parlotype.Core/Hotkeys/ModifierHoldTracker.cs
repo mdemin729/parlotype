@@ -30,15 +30,23 @@ internal sealed class ModifierHoldTracker
     /// </summary>
     private readonly bool _deferStart;
 
+    /// <summary>
+    /// Which modifiers produce commands and which compose text differs on
+    /// macOS, where Command is the shortcut key and Option types characters
+    /// (ADR-077). See <see cref="IsCommandModifierHold"/>.
+    /// </summary>
+    private readonly bool _macModifierSemantics;
+
     private bool _holding;
     private bool _startEmitted;
     private bool _aborted;
     private long _holdStartMs;
 
-    public ModifierHoldTracker(HotkeyGesture gesture, bool deferStart)
+    public ModifierHoldTracker(HotkeyGesture gesture, bool deferStart, bool macModifierSemantics = false)
     {
         _gesture = gesture;
         _deferStart = deferStart;
+        _macModifierSemantics = macModifierSemantics;
     }
 
     /// <summary>Absolute time at which <see cref="ProcessTimeout"/> should be called, if any.</summary>
@@ -131,11 +139,18 @@ internal sealed class ModifierHoldTracker
     /// target app as text, so a keypress at any point during the hold — not
     /// just inside <see cref="HotkeyGestureTiming.HoldAbortGraceMs"/> — means
     /// the user is driving their application, and the dictation is discarded.
-    /// Shift composes text and Meta is not a shipped gesture, so both keep the
-    /// grace window.
+    /// Shift composes text and Meta is not a shipped gesture there, so both
+    /// keep the grace window.
+    /// <para>
+    /// On macOS the roles are different: Command is the shortcut modifier, so a
+    /// Meta hold aborts on any keypress (it is the default push-to-talk key
+    /// there), while Option types characters such as é and ø and keeps the
+    /// grace window like Shift (ADR-077).
+    /// </para>
     /// </summary>
-    private bool IsCommandModifierHold =>
-        _gesture.Modifier is ModifierKey.Ctrl or ModifierKey.Alt;
+    private bool IsCommandModifierHold => _macModifierSemantics
+        ? _gesture.Modifier is ModifierKey.Ctrl or ModifierKey.Meta
+        : _gesture.Modifier is ModifierKey.Ctrl or ModifierKey.Alt;
 
     private bool IsOwnModifier(in HotkeyKeyEvent e) =>
         e.Modifier == _gesture.Modifier && _gesture.MatchesSide(e.Side);

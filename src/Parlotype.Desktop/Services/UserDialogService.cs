@@ -47,12 +47,32 @@ public sealed class UserDialogService : IUserDialogService
         };
 
         var owner = GetOwnerWindow();
-        var result = owner is not null
+        var result = owner is { IsVisible: true }
             ? await dialog.ShowDialog<bool?>(owner)
-            : await dialog.ShowDialog<bool?>(dialog);
+            : await ShowWithoutOwnerAsync(dialog);
 
         // Closing the window without choosing counts as a cancel.
         return result == true;
+    }
+
+    /// <summary>
+    /// Shows the dialog on its own. Parlotype starts with no window at all, so
+    /// a question asked during startup — the macOS Accessibility prompt
+    /// (ADR-077) — has nothing to be modal to. Kept on top and activated,
+    /// because a tray app is not the active application and its new window
+    /// would otherwise open behind whatever the user is looking at.
+    /// </summary>
+    private static Task<bool?> ShowWithoutOwnerAsync(ConfirmationDialog dialog)
+    {
+        var completion = new TaskCompletionSource<bool?>();
+        dialog.Closed += (_, _) => completion.TrySetResult(dialog.Result);
+
+        dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        dialog.Topmost = true;
+        dialog.Show();
+        dialog.Activate();
+
+        return completion.Task;
     }
 
     private static Window? GetOwnerWindow()

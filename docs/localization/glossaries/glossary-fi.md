@@ -253,3 +253,23 @@ Used real Finnish Windows 10/11 UI wording rather than literal translations for:
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Pidä pohjassa: oikea Ctrl`.**
 
 Side is now lowercase after the colon: `oikea {0}` / `vasen {0}`. `Conflict_AlreadyBoundFormat` quotes the gesture (`”{0}” on jo sidottu {1}.`).
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the platform nouns change. macOS UI names are the ones Finnish macOS itself shows.
+
+| English | Finnish | Notes |
+|---|---|---|
+| menu bar | **valikkorivi** | Replaces *ilmaisinalue* in every `_Mac` key: `valikkorivillä`, `valikkoriviltä`, `valikkoriville`. |
+| System Settings | **Järjestelmäasetukset** | Button: `Avaa Järjestelmäasetukset`. |
+| Privacy & Security | **Tietosuoja ja suojaus** | |
+| Accessibility | **Käyttöapu** | The permission: `Käyttöapu-lupa` (compound, only *lupa* inflects). |
+| Microphone | **Mikrofoni** | |
+| General → Login Items | **Yleiset → Kirjautumiskohteet** | |
+| Applications folder | **Apit-kansio** | Current Finnish macOS name; older releases showed *Ohjelmat*. |
+| log in | **kirjautua** (`kun kirjaudun macOS:ään`, `kirjautumisen yhteydessä`) | Same verb the Windows keys use for "sign in". |
+| launch agent | **käynnistysagentti** | Always next to the path `~/Library/LaunchAgents`. |
+| this copy (of the app) | **tämä kopio** | The Windows keys say *tämä versio* for "this build". |
+| Not now (button) | **Ei nyt** | |
+
+`macOS` takes its case ending after a colon: `macOS:n`, `macOS:ää`, `macOS:ään`. A switch in System Settings is *kytke päälle* / *kytke pois päältä*. Settings paths stay in the nominative after *kohdassa* or *Avaa*, joined with `→`.

@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Šis mažas visada matomas langas yra jūsų diktavimo valdymo pultas. Didelis mygtukas pradeda ir sustabdo įrašymą; užveskite pelę ant kortelės, kad matytumėte dabartinę būseną. Vilkite viršuje esančią juostelę, kad perkeltumėte langą bet kur, o mygtukas ✕ paslepia jį į pranešimų sritį. Varikliai, siūlantys kalbos pasirinkimą, apačioje rodo kalbų juostą.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Šis mažas visada matomas langas yra jūsų diktavimo valdymo pultas. Didelis mygtukas pradeda ir sustabdo įrašymą; užveskite pelę ant kortelės, kad matytumėte dabartinę būseną. Vilkite viršuje esančią juostelę, kad perkeltumėte langą bet kur, o mygtukas ✕ paslepia jį į meniu juostą. Varikliai, siūlantys kalbos pasirinkimą, apačioje rodo kalbų juostą.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Pasirinkite kalbos atpažinimo variklį</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype gyvena pranešimų srityje</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype gyvena meniu juostoje</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Valdiklio paslėpimas ar uždarymas neuždaro Parlotype — programa toliau laukia jūsų sparčiųjų klavišų pranešimų srityje. Spustelėkite pranešimų srities piktogramą, kad vėl parodytumėte valdiklį. Norėdami visiškai išeiti, spustelėkite piktogramą dešiniuoju pelės klavišu ir pasirinkite Išeiti.
 
 Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kartu su Windows ir laukia pranešimų srityje — joks langas neatsidaro. Tai bet kada galite išjungti per Nustatymai → Programa → Paleistis.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Valdiklio paslėpimas ar uždarymas neuždaro Parlotype — programa toliau laukia jūsų sparčiųjų klavišų meniu juostoje. Spustelėkite ten esančią Parlotype piktogramą ir pasirinkite Atidaryti, kad vėl parodytumėte valdiklį. Norėdami visiškai išeiti, tame pačiame meniu pasirinkite Išeiti.
+
+Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kartu su macOS ir laukia meniu juostoje — joks langas neatsidaro. Tai bet kada galite išjungti per Nustatymai → Programa → Paleistis.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Viskas paruošta</value>
@@ -142,8 +156,16 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
     <value>Kaip nustatyta Windows — šiuo metu: {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Kaip nustatyta macOS — šiuo metu: {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Kaip nustatyta Windows — dar neišversta, todėl naudojama anglų kalba</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Kaip nustatyta macOS — dar neišversta, todėl naudojama anglų kalba</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Vidutinis</value>
@@ -172,6 +194,14 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Atidaryti nustatymus</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Atidaryti System Settings</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Ne dabar</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Atidaryti</value>
@@ -268,6 +298,26 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Debesijos teikėjas nesukonfigūruotas</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype reikia „Accessibility“ leidimo</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS prašo jūsų leidimo, kad programa galėtų aptikti visuotinį spartųjį klavišą arba įklijuoti tekstą į kitas programas. Atidarykite System Settings → Privacy &amp; Security → Accessibility ir įjunkite Parlotype. Spartusis klavišas pradės veikti iš karto — paleisti iš naujo nereikia.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Jūsų tekstas yra mainų srityje – paspauskite Cmd+V, kad jį įklijuotumėte.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Prieiga prie mikrofono išjungta</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS neleidžia Parlotype naudoti mikrofono. Atidarykite System Settings → Privacy &amp; Security → Microphone ir įjunkite Parlotype, tada vėl pradėkite diktuoti.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Debesijos transkribavimas nepavyko</value>
@@ -376,8 +426,16 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype savo diktavimo sparčiojo klavišo laukia pranešimų srityje, todėl prieš diktuojant programa turi veikti.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype savo diktavimo sparčiojo klavišo laukia meniu juostoje, todėl prieš diktuojant programa turi veikti.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Paleisti Parlotype prisijungus prie Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Paleisti Parlotype prisijungus prie macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Automatiškai Parlotype nepaleisti</value>
@@ -396,15 +454,27 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Vienas įrašas jūsų paties naudotojo paskyroje (HKCU Run), nukreiptas į Parlotype. Jokios paslaugos, jokios suplanuotos užduoties, jokių administratoriaus teisių, nieko viso įrenginio mastu. Jį galite pamatyti ir pašalinti patys per Užduočių tvarkytuvas → Paleisties programos.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Vienas paleidimo agentas jūsų paties naudotojo paskyroje (~/Library/LaunchAgents), nukreiptas į Parlotype. Jokios pagalbinės programos, jokių administratoriaus teisių, nieko viso įrenginio mastu. Jį galite pamatyti ir išjungti patys per System Settings → General → Login Items.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Ši versija negali pati pasileisti prisijungimo metu — ji nebuvo įdiegta iš Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Ši kopija negali pati pasileisti prisijungimo metu — pirmiausia perkelkite Parlotype į aplanką „Applications“.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows sistemoje Parlotype išjungtas per Užduočių tvarkytuvas → Paleisties programos. Iš naujo jį įjunkite ten, kad šis nustatymas veiktų.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype paleidžiama kartu su Windows ir laukia pranešimų srityje — joks langas neatsidaro.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype paleidžiama kartu su macOS ir laukia meniu juostoje — joks langas neatsidaro.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype veikia tik tada, kai ją paleidžiate patys.</value>
@@ -454,6 +524,10 @@ Kad spartusis klavišas veiktų nuo pat prisijungimo, Parlotype paleidžiama kar
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Ši versija negali pati atsinaujinti — ji nebuvo įdiegta iš Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Ši kopija negali pati atsinaujinti — ji nebuvo įdiegta iš oficialios Parlotype versijos.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Tikrinami naujiniai…</value>

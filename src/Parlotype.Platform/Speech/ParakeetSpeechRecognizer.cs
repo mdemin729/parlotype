@@ -51,6 +51,14 @@ public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
         if (IsReady)
             return;
 
+        // Fail with the reason rather than with the loader's DllNotFoundException
+        // (ADR-077). Unreachable by default: such a system starts on Whisper.
+        if (!SpeechEngineDefaults.IsParakeetAvailable)
+        {
+            throw new PlatformNotSupportedException(
+                "Parakeet needs macOS 14.4 or later: the ONNX Runtime it uses does not load on this version.");
+        }
+
         await _initLock.WaitAsync(cancellationToken);
         try
         {

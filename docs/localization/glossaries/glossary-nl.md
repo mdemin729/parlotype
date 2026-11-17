@@ -211,3 +211,24 @@ inside `Settings_Prompts_Help_BuiltInBody` are preserved verbatim, and no value 
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Houd rechter Ctrl ingedrukt`.**
 
 Side is now `rechter {0}` / `linker {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `“{0}” is al gekoppeld aan {1}.`
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the OS
+terms swapped. macOS UI names are Apple's own Dutch wording, not literal translations.
+
+| English | Dutch | Notes |
+|---|---|---|
+| menu bar | **menubalk** (de) | Replaces *systeemvak* in every `_Mac` key ("in de menubalk"). |
+| System Settings | **Systeeminstellingen** | Button: "Systeeminstellingen openen". Parlotype's own settings stay "Instellingen". |
+| Privacy & Security | **Privacy en beveiliging** | Apple writes "en", not "&". |
+| Accessibility | **Toegankelijkheid** | |
+| Microphone | **Microfoon** | |
+| General | **Algemeen** | |
+| Login Items | **Inlogonderdelen** | |
+| Applications (folder) | **Apps** | Quoted as a folder name: de map “Apps”. |
+| log in / at login | **inloggen** / **bij het inloggen** | macOS says "log in"; the Windows keys keep "aanmelden". |
+| launch agent | **launch agent** (de) | Kept as a loanword next to the verbatim path `~/Library/LaunchAgents`. |
+| helper app | **hulpprogramma** | |
+| this copy (of the app) | **dit exemplaar** | Apple's own Dutch wording; the Windows keys say "deze build". |
+| Not now (button) | **Niet nu** | |

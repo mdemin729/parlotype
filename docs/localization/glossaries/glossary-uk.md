@@ -194,3 +194,27 @@ mixed-script regex scan) beyond the intended never-translate identifiers.
 
 - `Settings_Prompts_BuiltInName` ("Default (verbatim transcription)", the built-in prompt's row label) → **"За замовчуванням (дослівне розпізнавання)"** — verbatim/word-for-word rendered as *дослівне (literal)*, paired with the already-established *розпізнавання* for transcription; no new terms introduced.
 - `Settings_SpeechCleanup_Title` ("Speech cleanup") → **"Редагування тексту"** — *редагування* (editing) rather than *очищення*, which reads as deleting data; used in every speech-cleanup string, including `Settings_LlamaCpp_Description`. "Writing style" → **"Стиль тексту"**, styles as masculine adjectives agreeing with *стиль*: Розмовний / Напіврозмовний / Напівофіційний / Офіційний. English "contractions" → *скорочення на кшталт «I'm»* (example added for clarity).
+
+## macOS terms
+
+The `_Mac` keys and the two permission dialogs use the names macOS itself shows in
+Ukrainian (checked against Apple's uk-ua Mac User Guide), not literal translations. Each
+`_Mac` string is its Windows counterpart with only these terms swapped.
+
+| English | Ukrainian | Notes |
+|---|---|---|
+| menu bar | **смуга меню** | Apple's term. Replaces *трей* in every `_Mac` key; takes **на**: «на смузі меню», «на смугу меню», «зі смуги меню». |
+| System Settings | **Системні параметри** | Button: «Відкрити Системні параметри». Not *Налаштування*, which stays Parlotype's own settings window. |
+| Privacy & Security | **Приватність і безпека** | |
+| Accessibility | **Доступність** | Title: «Parlotype потрібен дозвіл «Доступність»». |
+| Microphone | **Мікрофон** | |
+| General | **Загальні** | |
+| Login Items | **Елементи автозапуску** | The macOS 13–14 name, matching the English. macOS 15 and later shows «Автозапуск і розширення». |
+| Applications folder | **папка «Програми»** | The Finder name. Apple says *програма* for an app; Parlotype's prose keeps **застосунок**. |
+| log in | **вхід у систему** / **вхід в macOS** | Same wording as the Windows strings. |
+| launch agent | **агент запуску** | |
+| this copy | **ця копія** | Replaces *ця збірка* in the two not-installed states. |
+
+A Settings path that the sentence continues after is quoted whole («Системні параметри →
+Приватність і безпека → Доступність» і ввімкніть…); a path that ends the sentence is left
+unquoted, as the Windows strings do.

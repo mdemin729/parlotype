@@ -2,6 +2,7 @@
 status: accepted
 date: 2026-09-05
 last-amended: 2026-09-07
+amended-by: [077]
 ---
 
 # 064. UI Localization Foundation

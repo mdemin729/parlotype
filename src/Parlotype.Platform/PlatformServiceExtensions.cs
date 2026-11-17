@@ -9,6 +9,7 @@ using Parlotype.Core.Updates;
 using Parlotype.Platform.Audio;
 using Parlotype.Platform.Feedback;
 using Parlotype.Platform.Hotkeys;
+using Parlotype.Platform.MacOs;
 using Parlotype.Platform.Settings;
 using Parlotype.Platform.Speech;
 using Parlotype.Platform.LlamaServer;
@@ -24,7 +25,19 @@ public static class PlatformServiceExtensions
 {
     public static IServiceCollection AddPlatformServices(this IServiceCollection services)
     {
-        services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
+        // Capture and device enumeration are per-OS: WASAPI through NAudio on
+        // Windows, Audio Queue Services and the CoreAudio HAL on macOS (ADR-077).
+        if (OperatingSystem.IsMacOS())
+        {
+            services.AddSingleton<IAudioCaptureService, CoreAudioCaptureService>();
+            services.AddSingleton<IMicrophoneEnumerator, CoreAudioMicrophoneEnumerator>();
+        }
+        else
+        {
+            services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
+            services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
+        }
+
         services.AddSingleton<IVadService, SileroVadService>();
         // Both recognizers are registered as concrete singletons.
         // DelegatingSpeechRecognizer reads the SpeechEngine setting at
@@ -59,7 +72,6 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IAudioLevelProvider>(sp =>
             (AudioPipelineService)sp.GetRequiredService<IAudioPipeline>());
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
-        services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         // Single source of truth for every path the app writes to. Must resolve
         // outside the Velopack pack folder, which is wiped on uninstall (ADR-053).
         services.AddSingleton<IAppPaths>(AppPaths.Default);
@@ -72,7 +84,11 @@ public static class PlatformServiceExtensions
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         // API keys for the opt-in cloud providers live outside settings.json,
         // encrypted at rest where the OS supports it (ADR-032).
-        services.AddSingleton<ISecretStore, DpapiSecretStore>();
+        // DPAPI on Windows, the login keychain on macOS (ADR-077).
+        if (OperatingSystem.IsMacOS())
+            services.AddSingleton<ISecretStore, KeychainSecretStore>();
+        else
+            services.AddSingleton<ISecretStore, DpapiSecretStore>();
         // Deliberately separate from ISettingsService's settings.json — window
         // chrome state (position) changes far more often (every drag) and must
         // never share a file/lock with user-configured settings (ADR-040).
@@ -105,9 +121,23 @@ public static class PlatformServiceExtensions
             // Per-user HKCU Run key. Registers only for Velopack-installed
             // builds; opt-out lives at SettingsKeys.LaunchAtLogin (ADR-059).
             services.AddSingleton<ILaunchAtLoginService, WindowsRunKeyLaunchAtLoginService>();
+            services.AddSingleton<ISystemPermissionService, NoOpSystemPermissionService>();
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            // No Vulkan runtime ships for macOS and no NVIDIA driver exists there.
+            services.AddSingleton<INvidiaEnvironmentProvider, NoOpNvidiaEnvironmentProvider>();
+            services.AddSingleton<IVulkanEnvironmentProvider, NoOpVulkanEnvironmentProvider>();
+            services.AddSingleton<IKeyboardLayoutService, MacOsKeyboardLayoutService>();
+            // A launch agent, for copies that live in an Applications folder.
+            services.AddSingleton<ILaunchAtLoginService, MacOsLaunchAgentLaunchAtLoginService>();
+            // Accessibility gates the hotkey hook and the paste keystroke;
+            // Microphone gates capture (ADR-077).
+            services.AddSingleton<ISystemPermissionService, MacOsSystemPermissionService>();
         }
         else
         {
+            services.AddSingleton<ISystemPermissionService, NoOpSystemPermissionService>();
             services.AddSingleton<INvidiaEnvironmentProvider, NoOpNvidiaEnvironmentProvider>();
             services.AddSingleton<IVulkanEnvironmentProvider, NoOpVulkanEnvironmentProvider>();
             services.AddSingleton<IKeyboardLayoutService, NoOpKeyboardLayoutService>();

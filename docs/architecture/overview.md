@@ -7,9 +7,9 @@ way, the threading and lifecycle rules, and the flows that cross subsystems.
 
 | Document | Covers |
 |---|---|
-| [overview.md](overview.md) | Projects and dependency direction, speech engines, external processes, glossary |
+| [overview.md](overview.md) | Projects and dependency direction, speech engines, external processes, platforms, glossary |
 | [audio-pipeline.md](audio-pipeline.md) | Capture → VAD → recognizer → injection, the three-stage threading model, modes, shutdown and cancel |
-| [subsystems.md](subsystems.md) | Hotkeys, language and translation, Whisper runtime selection, Transcribe window lifetime, packaging, paths and updates, feedback, startup, single instance, development runs |
+| [subsystems.md](subsystems.md) | Hotkeys, language and translation, Whisper runtime selection, Transcribe window lifetime, packaging, paths and updates, feedback, startup, macOS permissions, single instance, development runs |
 | [llamacpp-subsystem.md](llamacpp-subsystem.md) | The managed `llama-server` sidecar used by Gemma 4 and by speech cleanup |
 
 Decisions are recorded as ADRs in [`../decisions/`](../decisions/); this folder links to
@@ -26,7 +26,7 @@ The solution file `Parlotype.slnx` holds eight projects.
 | Project | Role |
 |---|---|
 | `Parlotype.Core` | Contracts and pure domain logic. No platform packages; its only package reference is `Microsoft.Extensions.Logging.Abstractions`. |
-| `Parlotype.Platform` | Implementations of the Core contracts on real dependencies (NAudio, SileroVad, Whisper.net, sherpa-onnx, SharpHook, Velopack, DPAPI). Its DI registrations are in `PlatformServiceExtensions.cs`; Desktop adds its own in `App.axaml.cs`. |
+| `Parlotype.Platform` | Implementations of the Core contracts on real dependencies (NAudio, SileroVad, Whisper.net, sherpa-onnx, SharpHook, Velopack, DPAPI on Windows; CoreAudio, AppKit and the keychain on macOS). Its DI registrations are in `PlatformServiceExtensions.cs`, which is also where the per-OS choices are made; Desktop adds its own in `App.axaml.cs`. |
 | `Parlotype.Desktop` | The Avalonia 12 tray app and entry point. Wires DI, owns windows, view models and the settings UI. |
 | `Parlotype.Benchmark` | Console CLI that measures transcription quality (WER/CER/RTF) across engines and settings. See `src/Parlotype.Benchmark/README.md`. |
 | `Parlotype.MicroBenchmarks` | BenchmarkDotNet suites for allocation and latency of hot paths ([ADR-044](../decisions/044-microbenchmark-project.md)). Not run by `dotnet test`. |
@@ -73,7 +73,10 @@ Why this shape ([ADR-002](../decisions/002-solution-architecture.md)):
 All engines sit behind one `ISpeechRecognizer` contract. The registered singleton is
 `DelegatingSpeechRecognizer`. On each `InitializeAsync` it asks `SpeechRecognizerFactory`
 which engine `SettingsKeys.SpeechEngine` names and forwards every call to that recognizer.
-An unset or unparsable value means Parakeet ([ADR-042](../decisions/042-parakeet-default-language-ux.md)).
+An unset or unparsable value means `SpeechEngineDefaults.Default`: Parakeet
+([ADR-042](../decisions/042-parakeet-default-language-ux.md)), except on macOS older than
+14.4, where Parakeet's runtime cannot load and the default is Whisper
+([ADR-077](../decisions/077-macos-support.md)).
 Switching engines is an `UnloadAsync` → `InitializeAsync` cycle
 ([ADR-017](../decisions/017-whisper-model-hot-swap.md)); the pipeline above never knows
 which engine it is talking to.
@@ -95,7 +98,8 @@ Rules that hold across engines:
   update check, which the app makes on its own, every network request follows a user
   action; [`../network-requests.md`](../network-requests.md) lists them all.
 - **API keys never go in `settings.json`.** They live in `ISecretStore`
-  (`secrets.json`, DPAPI-encrypted per value on Windows). A cloud engine with no key fails
+  (`secrets.json`, DPAPI-encrypted per value, on Windows; the login keychain on macOS). A
+  cloud engine with no key fails
   initialization with `CloudProviderNotConfiguredException`, which the record-start flow
   turns into a dialog with "Open settings".
 - **Text post-processing happens once, in the pipeline**, for every engine, not inside
@@ -122,14 +126,38 @@ Rules that hold across engines:
 | sherpa-onnx natives | Parakeet inference | `ParakeetSpeechRecognizer` | [041](../decisions/041-parakeet-v3-sherpa-onnx.md) |
 | ONNX Runtime (via `SileroVad`) | Voice activity detection | `SileroVadService` | [008](../decisions/008-incremental-vad-processing.md), [050](../decisions/050-drop-onnx-runtime-gpu-providers.md) |
 | libuiohook (via SharpHook) | Global keyboard hook, key simulation | `SharpHookHotkeyService`, text injection | [001](../decisions/001-global-hotkey-sharphook.md), [020](../decisions/020-sharphook7-simple-global-hook.md) |
-| Win32 P/Invoke | Foreground window tracking, keyboard layout, Vulkan and NVIDIA probes, parent-process lookup | Platform services, each with a no-op on other OSes | [014](../decisions/014-nvidia-environment-detection.md), [022](../decisions/022-vulkan-gpu-acceleration.md), [036](../decisions/036-language-ux-rebuild.md), [062](../decisions/062-dev-parent-process-watchdog.md) |
+| Win32 P/Invoke | Clipboard, foreground window tracking, keyboard layout, Vulkan and NVIDIA probes, parent-process lookup | Windows Platform services | [014](../decisions/014-nvidia-environment-detection.md), [022](../decisions/022-vulkan-gpu-acceleration.md), [036](../decisions/036-language-ux-rebuild.md), [062](../decisions/062-dev-parent-process-watchdog.md) |
+| macOS frameworks by P/Invoke (AudioToolbox, CoreAudio, AppKit, Security, ApplicationServices, AVFoundation, Carbon) | Capture and device list, pasteboard, frontmost application, keychain, Accessibility and Microphone permissions, input-source language | macOS Platform services; shared calls in `MacOsNative` | [077](../decisions/077-macos-support.md) |
 
 `Directory.Build.targets` removes native files nothing loads (ONNX Runtime CUDA/TensorRT
 providers, natives for other platforms, native PDBs) from build and publish output
 ([ADR-050](../decisions/050-drop-onnx-runtime-gpu-providers.md),
 [ADR-051](../decisions/051-publish-only-target-rid-runtimes.md),
 [ADR-052](../decisions/052-drop-native-pdbs-from-publish.md)). If a native library fails
-to load only in an installed build, suspect those filters first.
+to load only in an installed build, suspect those filters first: the first macOS publish
+lost Whisper to one of them
+([`macos-native-library-os-floors`](../knowledge/macos-native-library-os-floors.md)).
+
+## Platforms
+
+Windows and macOS (Intel and Apple Silicon) are supported
+([ADR-077](../decisions/077-macos-support.md)). The difference between them is confined
+to three places:
+
+- **Which Platform class implements a Core contract.** Chosen in
+  `PlatformServiceExtensions.cs` (capture, device list, secrets, launch at sign-in,
+  keyboard layout, permissions) and, for the two services Desktop registers, in
+  `App.axaml.cs` (focus tracking, clipboard injection). A contract with nothing to do on
+  an OS gets a no-op there, so callers never branch.
+- **Defaults Core derives from the OS.** `DictationHotkeyDefaults.ForCurrentPlatform`
+  (no Right Ctrl on a MacBook) and `SpeechEngineDefaults.Default`. The gesture matcher
+  takes "which modifiers are command keys" as an argument for the same reason.
+- **What the interface calls things.** `HotkeyText` names keys as the keyboard prints
+  them, and `Localizer.Lookup` substitutes a key's `_Mac` sibling on macOS; see
+  [subsystems.md](subsystems.md#localization).
+
+Linux compiles and has data paths, and nothing else: no capture, clipboard, focus or
+secret-store implementation exists for it.
 
 ## Glossary
 
@@ -148,6 +176,7 @@ to load only in an installed build, suspect those filters first.
 | **BYOK** | Bring your own key: cloud engines use the user's own API key. |
 | **Sidecar** | A `llama-server` child process on `127.0.0.1`: one serves Gemma 4, another serves the speech cleanup model. |
 | **Speech cleanup** | The opt-in pass that rewrites recognized text as clean written text with a local model before it is pasted ([ADR-073](../decisions/073-speech-cleanup-s1-mini.md)). |
-| **Pack folder** | `%LOCALAPPDATA%\Parlotype`, owned by Velopack and deleted on uninstall. Nothing user-owned may live there ([ADR-053](../decisions/053-velopack-packaging-and-auto-update.md)). |
+| **Pack folder** | `%LOCALAPPDATA%\Parlotype`, owned by Velopack and deleted on uninstall. Nothing user-owned may live there ([ADR-053](../decisions/053-velopack-packaging-and-auto-update.md)). Windows only. |
+| **Mac variant** | A resource key ending in `_Mac` that replaces its base key on macOS, for copy that names Windows things ([ADR-077](../decisions/077-macos-support.md)). |
 | **GGML / GGUF** | Model file formats for whisper.cpp and llama.cpp. |
 | **WER / CER / RTF** | Benchmark metrics: word and character error rate, real-time factor. |

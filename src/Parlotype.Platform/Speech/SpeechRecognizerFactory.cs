@@ -32,9 +32,7 @@ public sealed class SpeechRecognizerFactory
     public async Task<ISpeechRecognizer> GetRecognizerAsync(CancellationToken cancellationToken = default)
     {
         var engineStr = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);
-        var engine = Enum.TryParse<SpeechEngine>(engineStr, ignoreCase: true, out var parsed)
-            ? parsed
-            : SpeechEngine.Parakeet;
+        var engine = SpeechEngineDefaults.Parse(engineStr);
 
         _logger.LogInformation("Resolved speech engine: {Engine}", engine);
 

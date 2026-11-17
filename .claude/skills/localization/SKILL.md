@@ -142,6 +142,35 @@ itself — `{0}-ajoympäristöä`, `{1}-moottorissa`. Only the native half infle
 English needs no change. Slavic languages cannot do this; Finnish resolved four keys with
 it.
 
+## Copy that names Windows things: `_Mac` variants
+
+Parlotype also runs on macOS (ADR-077), where the tray is the menu bar, Task Manager is
+System Settings, and nobody signs in to Windows. Most copy is the same on both and needs
+nothing. Where a string names something that exists on only one of them:
+
+- **Keep the key and its Windows wording. Add a sibling key with the suffix `_Mac`**
+  holding the macOS wording (`Onboarding_Tray_Title` / `Onboarding_Tray_Title_Mac`).
+- **Do not branch in markup or in a view model.** `Localizer.Lookup` returns the `_Mac`
+  sibling on macOS whenever one exists, and both `{loc:Tr}` and the generated `Strings`
+  accessor go through it. Keep asking for the base key.
+- A `_Mac` key is an ordinary key to every check: it needs a translation in every
+  language, through the same brief/import pipeline. Say so in its `<comment>` ("macOS
+  wording of X… start from your translation of that key and change only what differs"),
+  so the two variants keep one voice.
+- System UI names (System Settings, Privacy & Security, Login Items) must be what that
+  system shows in that language. Each glossary has a "macOS terms" table. Where macOS is
+  not localized into a language, the English name stays in the Settings path.
+- `MacPresentationTests` fails if a `_Mac` value in any language still says "Windows",
+  "Setup.exe", "HKCU" or "Task Manager", and if a variant has no base key.
+
+Do **not** reach for a placeholder instead ("starts with {0}"): it changes shipped English
+in every language to save one key, and still cannot say "tray" in one place and "menu
+bar" in another.
+
+One difference is handled without a variant: `llama-server.exe` is `llama-server` off
+Windows, and `Localizer.Lookup` rewrites the token. It works because file names are never
+translated, so keep it that way.
+
 ## Never split a sentence across markup
 
 A `TextBlock` built from several `<Run>`s with bound values between them cannot be
@@ -167,7 +196,9 @@ load-bearing, restructure the copy so the emphasised part is its own label.
 ## Keyboard key names stay; the words around them do not
 
 "Ctrl", "Alt", "Shift", "Win", "Space" are printed on the user's keyboard and Windows
-leaves them alone in every language. Only the prose around them is translated — and it
+leaves them alone in every language. On a Mac the same two keys are printed "Option" and
+"Cmd", and `HotkeyText` says so there; they are constants in code, not resources, and are
+not translated either. Only the prose around them is translated — and it
 must be a **format**, never a concatenation, because languages disagree about where the
 words go:
 

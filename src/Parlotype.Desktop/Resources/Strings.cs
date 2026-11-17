@@ -89,17 +89,38 @@ public static class Strings
     /// <summary>Close</summary>
     public static string Common_Close => Localizer.Lookup(nameof(Common_Close));
 
+    /// <summary>Not now</summary>
+    public static string Common_NotNow => Localizer.Lookup(nameof(Common_NotNow));
+
     /// <summary>OK</summary>
     public static string Common_Ok => Localizer.Lookup(nameof(Common_Ok));
 
     /// <summary>Open settings</summary>
     public static string Common_OpenSettings => Localizer.Lookup(nameof(Common_OpenSettings));
 
+    /// <summary>Open System Settings</summary>
+    public static string Common_OpenSystemSettings => Localizer.Lookup(nameof(Common_OpenSystemSettings));
+
+    /// <summary>macOS asks for your permission before an app can detect a global hotkey or paste text into other apps. Open System Se...</summary>
+    public static string Dialog_AccessibilityAccess_Body => Localizer.Lookup(nameof(Dialog_AccessibilityAccess_Body));
+
+    /// <summary>Your text is on the clipboard — press Cmd+V to paste it.</summary>
+    public static string Dialog_AccessibilityAccess_TextOnClipboard => Localizer.Lookup(nameof(Dialog_AccessibilityAccess_TextOnClipboard));
+
+    /// <summary>Parlotype needs Accessibility access</summary>
+    public static string Dialog_AccessibilityAccess_Title => Localizer.Lookup(nameof(Dialog_AccessibilityAccess_Title));
+
     /// <summary>Cloud provider not configured</summary>
     public static string Dialog_CloudNotConfigured_Title => Localizer.Lookup(nameof(Dialog_CloudNotConfigured_Title));
 
     /// <summary>Cloud transcription failed</summary>
     public static string Dialog_CloudTranscriptionFailed_Title => Localizer.Lookup(nameof(Dialog_CloudTranscriptionFailed_Title));
+
+    /// <summary>macOS is not letting Parlotype use the microphone. Open System Settings → Privacy &amp; Security → Microphone and swi...</summary>
+    public static string Dialog_MicrophoneAccess_Body => Localizer.Lookup(nameof(Dialog_MicrophoneAccess_Body));
+
+    /// <summary>Microphone access is switched off</summary>
+    public static string Dialog_MicrophoneAccess_Title => Localizer.Lookup(nameof(Dialog_MicrophoneAccess_Title));
 
     /// <summary>{0} / {1}</summary>
     public static string Feedback_CharacterCountFormat => Localizer.Lookup(nameof(Feedback_CharacterCountFormat));
@@ -488,8 +509,14 @@ public static class Strings
     /// <summary>Hiding or closing the widget does not quit Parlotype — it keeps listening for your hotkeys from the system tray. Clic...</summary>
     public static string Onboarding_Tray_Body => Localizer.Lookup(nameof(Onboarding_Tray_Body));
 
+    /// <summary>Hiding or closing the widget does not quit Parlotype — it keeps listening for your hotkeys from the menu bar. Click t...</summary>
+    public static string Onboarding_Tray_Body_Mac => Localizer.Lookup(nameof(Onboarding_Tray_Body_Mac));
+
     /// <summary>Parlotype lives in the tray</summary>
     public static string Onboarding_Tray_Title => Localizer.Lookup(nameof(Onboarding_Tray_Title));
+
+    /// <summary>Parlotype lives in the menu bar</summary>
+    public static string Onboarding_Tray_Title_Mac => Localizer.Lookup(nameof(Onboarding_Tray_Title_Mac));
 
     /// <summary>Parlotype turns speech into text anywhere on your computer: dictate into any app, and the recognized text is typed ri...</summary>
     public static string Onboarding_Welcome_Body => Localizer.Lookup(nameof(Onboarding_Welcome_Body));
@@ -499,6 +526,9 @@ public static class Strings
 
     /// <summary>This small always-on-top window is your dictation control. The big button starts and stops recording; hover the card ...</summary>
     public static string Onboarding_Widget_Body => Localizer.Lookup(nameof(Onboarding_Widget_Body));
+
+    /// <summary>This small always-on-top window is your dictation control. The big button starts and stops recording; hover the card ...</summary>
+    public static string Onboarding_Widget_Body_Mac => Localizer.Lookup(nameof(Onboarding_Widget_Body_Mac));
 
     /// <summary>The recording widget</summary>
     public static string Onboarding_Widget_Title => Localizer.Lookup(nameof(Onboarding_Widget_Title));
@@ -848,8 +878,17 @@ public static class Strings
     public static string Format_Settings_InterfaceLanguage_SystemDetailFormat(object? arg0) =>
         string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_InterfaceLanguage_SystemDetailFormat, arg0);
 
+    /// <summary>Follows macOS — currently {0}</summary>
+    public static string Settings_InterfaceLanguage_SystemDetailFormat_Mac => Localizer.Lookup(nameof(Settings_InterfaceLanguage_SystemDetailFormat_Mac));
+    /// <summary>Follows macOS — currently {0}</summary>
+    public static string Format_Settings_InterfaceLanguage_SystemDetailFormat_Mac(object? arg0) =>
+        string.Format(System.Globalization.CultureInfo.CurrentCulture, Settings_InterfaceLanguage_SystemDetailFormat_Mac, arg0);
+
     /// <summary>Follows Windows — not translated yet, so English is used</summary>
     public static string Settings_InterfaceLanguage_SystemDetailUnsupported => Localizer.Lookup(nameof(Settings_InterfaceLanguage_SystemDetailUnsupported));
+
+    /// <summary>Follows macOS — not translated yet, so English is used</summary>
+    public static string Settings_InterfaceLanguage_SystemDetailUnsupported_Mac => Localizer.Lookup(nameof(Settings_InterfaceLanguage_SystemDetailUnsupported_Mac));
 
     /// <summary>Interface language</summary>
     public static string Settings_InterfaceLanguage_Title => Localizer.Lookup(nameof(Settings_InterfaceLanguage_Title));
@@ -1301,6 +1340,9 @@ public static class Strings
     /// <summary>Parlotype listens for your dictation hotkey from the system tray, so it has to be running before you can dictate.</summary>
     public static string Settings_Startup_Description => Localizer.Lookup(nameof(Settings_Startup_Description));
 
+    /// <summary>Parlotype listens for your dictation hotkey from the menu bar, so it has to be running before you can dictate.</summary>
+    public static string Settings_Startup_Description_Mac => Localizer.Lookup(nameof(Settings_Startup_Description_Mac));
+
     /// <summary>Windows has Parlotype switched off in Task Manager → Startup apps. Re-enable it there to let this setting take effect.</summary>
     public static string Settings_Startup_State_BlockedByWindows => Localizer.Lookup(nameof(Settings_Startup_State_BlockedByWindows));
 
@@ -1310,8 +1352,14 @@ public static class Strings
     /// <summary>Parlotype starts with Windows and waits in the tray — no window opens.</summary>
     public static string Settings_Startup_State_Enabled => Localizer.Lookup(nameof(Settings_Startup_State_Enabled));
 
+    /// <summary>Parlotype starts with macOS and waits in the menu bar — no window opens.</summary>
+    public static string Settings_Startup_State_Enabled_Mac => Localizer.Lookup(nameof(Settings_Startup_State_Enabled_Mac));
+
     /// <summary>This build cannot start itself at sign-in — it was not installed from Setup.exe.</summary>
     public static string Settings_Startup_State_NotInstalled => Localizer.Lookup(nameof(Settings_Startup_State_NotInstalled));
+
+    /// <summary>This copy cannot start itself at login — move Parlotype to the Applications folder first.</summary>
+    public static string Settings_Startup_State_NotInstalled_Mac => Localizer.Lookup(nameof(Settings_Startup_State_NotInstalled_Mac));
 
     /// <summary>Startup</summary>
     public static string Settings_Startup_Title => Localizer.Lookup(nameof(Settings_Startup_Title));
@@ -1322,8 +1370,14 @@ public static class Strings
     /// <summary>Start Parlotype when I sign in to Windows</summary>
     public static string Settings_Startup_ToggleOn => Localizer.Lookup(nameof(Settings_Startup_ToggleOn));
 
+    /// <summary>Start Parlotype when I log in to macOS</summary>
+    public static string Settings_Startup_ToggleOn_Mac => Localizer.Lookup(nameof(Settings_Startup_ToggleOn_Mac));
+
     /// <summary>A single entry under your own user account (HKCU Run), pointing at Parlotype. No service, no scheduled task, no admin...</summary>
     public static string Settings_Startup_WhatChangesBody => Localizer.Lookup(nameof(Settings_Startup_WhatChangesBody));
+
+    /// <summary>A single launch agent under your own user account (~/Library/LaunchAgents), pointing at Parlotype. No helper app, no ...</summary>
+    public static string Settings_Startup_WhatChangesBody_Mac => Localizer.Lookup(nameof(Settings_Startup_WhatChangesBody_Mac));
 
     /// <summary>What this changes</summary>
     public static string Settings_Startup_WhatChangesHeading => Localizer.Lookup(nameof(Settings_Startup_WhatChangesHeading));
@@ -1402,6 +1456,9 @@ public static class Strings
 
     /// <summary>This build cannot update itself — it was not installed from Setup.exe.</summary>
     public static string Settings_Updates_Status_NotInstalled => Localizer.Lookup(nameof(Settings_Updates_Status_NotInstalled));
+
+    /// <summary>This copy cannot update itself — it was not installed from a Parlotype release.</summary>
+    public static string Settings_Updates_Status_NotInstalled_Mac => Localizer.Lookup(nameof(Settings_Updates_Status_NotInstalled_Mac));
 
     /// <summary>Version {0} is downloaded. It installs when you quit Parlotype.</summary>
     public static string Settings_Updates_Status_ReadyFormat => Localizer.Lookup(nameof(Settings_Updates_Status_ReadyFormat));
