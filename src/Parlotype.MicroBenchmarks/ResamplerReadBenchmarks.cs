@@ -55,6 +55,6 @@ public class ResamplerReadBenchmarks
     public int CaptureCallback()
     {
         _bufferedProvider.AddSamples(_srcBytes, 0, BytesPerCallback);
-        return _resampler.Read(_readBuffer, 0, ReadCount);
+        return _resampler.Read(_readBuffer.AsSpan(0, ReadCount));
     }
 }

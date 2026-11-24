@@ -24,7 +24,7 @@ This is not observable from the code and is intermittent — it depends entirely
 
 ## A background-thread global hook outlives a botched shutdown
 
-SharpHook's `SimpleGlobalHook` with `runAsyncOnBackgroundThread: true` runs on a
+SharpHook's `SimpleGlobalHook`, started with `RunAsync(GlobalHookType.Keyboard, true)`, runs on a
 `Thread { IsBackground = true }` (confirmed by decompiling `BasicGlobalHookBase.RunAsync`).
 That means:
 

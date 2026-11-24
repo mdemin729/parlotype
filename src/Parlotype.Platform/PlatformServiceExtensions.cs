@@ -24,7 +24,12 @@ public static class PlatformServiceExtensions
 {
     public static IServiceCollection AddPlatformServices(this IServiceCollection services)
     {
+        // WASAPI capture and device enumeration are the only implementations there are,
+        // so they are registered on every OS; NAudio 3 marks them Windows-only (CA1416).
+#pragma warning disable CA1416
         services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
+        services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
+#pragma warning restore CA1416
         services.AddSingleton<IVadService, SileroVadService>();
         // Both recognizers are registered as concrete singletons.
         // DelegatingSpeechRecognizer reads the SpeechEngine setting at
@@ -59,7 +64,6 @@ public static class PlatformServiceExtensions
         services.AddSingleton<IAudioLevelProvider>(sp =>
             (AudioPipelineService)sp.GetRequiredService<IAudioPipeline>());
         services.AddSingleton<IGlobalHotkeyService, SharpHookHotkeyService>();
-        services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
         // Single source of truth for every path the app writes to. Must resolve
         // outside the Velopack pack folder, which is wiped on uninstall (ADR-053).
         services.AddSingleton<IAppPaths>(AppPaths.Default);

@@ -84,7 +84,7 @@ reference and the call site:
 ```xml
 <!-- csproj -->
 <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-  <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" />
+  <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
 </ItemGroup>
 ```
 

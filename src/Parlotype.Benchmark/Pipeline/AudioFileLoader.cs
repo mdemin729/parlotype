@@ -143,7 +143,7 @@ public static class AudioFileLoader
         var samples = new List<float>();
         var buffer = new float[4096];
         int read;
-        while ((read = provider.Read(buffer, 0, buffer.Length)) > 0)
+        while ((read = provider.Read(buffer)) > 0)
         {
             samples.AddRange(buffer.AsSpan(0, read).ToArray());
         }

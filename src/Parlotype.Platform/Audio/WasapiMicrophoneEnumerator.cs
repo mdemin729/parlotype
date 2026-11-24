@@ -1,6 +1,6 @@
+using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
-using NAudio.CoreAudioApi.Interfaces;
 using Parlotype.Core.Audio;
 
 namespace Parlotype.Platform.Audio;
@@ -8,10 +8,12 @@ namespace Parlotype.Platform.Audio;
 /// <summary>
 /// Enumerates Windows audio capture devices via WASAPI and notifies on changes.
 /// </summary>
-public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator, IMMNotificationClient
+[SupportedOSPlatform("windows")]
+public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator
 {
     private readonly ILogger<WasapiMicrophoneEnumerator> _logger;
     private readonly MMDeviceEnumerator _enumerator;
+    private readonly MMDeviceNotificationClient _notifications;
     private bool _disposed;
 
     public event EventHandler? DevicesChanged;
@@ -20,7 +22,11 @@ public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator, IMMNotif
     {
         _logger = logger;
         _enumerator = new MMDeviceEnumerator();
-        _enumerator.RegisterEndpointNotificationCallback(this);
+        _notifications = _enumerator.CreateNotificationClient();
+        _notifications.DeviceAdded += OnDeviceAdded;
+        _notifications.DeviceRemoved += OnDeviceRemoved;
+        _notifications.DeviceStateChanged += OnDeviceStateChanged;
+        _notifications.DefaultDeviceChanged += OnDefaultDeviceChanged;
         _logger.LogInformation("Microphone enumerator initialized");
     }
 
@@ -67,46 +73,40 @@ public sealed class WasapiMicrophoneEnumerator : IMicrophoneEnumerator, IMMNotif
         }
     }
 
-    // IMMNotificationClient implementation — all raise DevicesChanged
-
-    void IMMNotificationClient.OnDeviceAdded(string pwstrDeviceId)
+    private void OnDeviceAdded(object? sender, DeviceNotificationEventArgs e)
     {
-        _logger.LogInformation("Device added: {DeviceId}", pwstrDeviceId);
+        _logger.LogInformation("Device added: {DeviceId}", e.DeviceId);
         DevicesChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    void IMMNotificationClient.OnDeviceRemoved(string deviceId)
+    private void OnDeviceRemoved(object? sender, DeviceNotificationEventArgs e)
     {
-        _logger.LogInformation("Device removed: {DeviceId}", deviceId);
+        _logger.LogInformation("Device removed: {DeviceId}", e.DeviceId);
         DevicesChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    void IMMNotificationClient.OnDeviceStateChanged(string deviceId, DeviceState newState)
+    private void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
     {
-        _logger.LogInformation("Device state changed: {DeviceId} → {NewState}", deviceId, newState);
+        _logger.LogInformation("Device state changed: {DeviceId} → {NewState}", e.DeviceId, e.NewState);
         DevicesChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    void IMMNotificationClient.OnDefaultDeviceChanged(DataFlow flow, Role role, string defaultDeviceId)
+    private void OnDefaultDeviceChanged(object? sender, DefaultDeviceChangedEventArgs e)
     {
-        if (flow == DataFlow.Capture)
+        if (e.Flow == DataFlow.Capture)
         {
-            _logger.LogInformation("Default capture device changed: {DeviceId}", defaultDeviceId);
+            _logger.LogInformation("Default capture device changed: {DeviceId}", e.DeviceId);
             DevicesChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    void IMMNotificationClient.OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key)
-    {
-        // Ignore property changes — they're too frequent and not relevant
-    }
-
+    // PropertyValueChanged is deliberately not subscribed: too frequent and not relevant.
     public void Dispose()
     {
         if (_disposed)
             return;
 
         _disposed = true;
-        _enumerator.UnregisterEndpointNotificationCallback(this);
+        _notifications.Dispose();
     }
 }
