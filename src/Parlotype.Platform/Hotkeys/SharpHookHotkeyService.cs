@@ -3,6 +3,7 @@ using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using SharpHook;
 using SharpHook.Data;
+using SharpHook.Providers;
 
 namespace Parlotype.Platform.Hotkeys;
 
@@ -54,11 +55,11 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         lock (_matcherLock)
             _matcher.UpdateBindings(bindings);
 
-        _hook = new SimpleGlobalHook(GlobalHookType.Keyboard, runAsyncOnBackgroundThread: true);
+        _hook = new SimpleGlobalHook(UioHookProvider.Instance);
         _hook.KeyPressed += OnKeyPressed;
         _hook.KeyReleased += OnKeyReleased;
 
-        _ = _hook.RunAsync();
+        _ = _hook.RunAsync(GlobalHookType.Keyboard, true);
 
         _logger.LogInformation(
             "Global hotkey listener started — bindings: {Bindings}",

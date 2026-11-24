@@ -595,7 +595,7 @@ checkCommand.SetAction(async parseResult =>
     if (!File.Exists(dbPath))
     {
         AnsiConsole.MarkupLine($"[red]No benchmark database found at {Markup.Escape(dbPath)}.[/]");
-        parseResult.Configuration.Output.Write("FAIL: No benchmark database found.\n");
+        parseResult.InvocationConfiguration.Output.Write("FAIL: No benchmark database found.\n");
         Environment.ExitCode = 1;
         return;
     }
@@ -842,8 +842,7 @@ rootCommand.Add(exportCommand);
 rootCommand.Add(checkCommand);
 rootCommand.Add(sweepCommand);
 
-var configuration = new CommandLineConfiguration(rootCommand);
-return await configuration.InvokeAsync(args);
+return await rootCommand.Parse(args).InvokeAsync();
 
 /// <summary>Finds a JSON result file that contains the given run ID in its filename.</summary>
 static string? FindJsonByRunId(string directory, string runId)

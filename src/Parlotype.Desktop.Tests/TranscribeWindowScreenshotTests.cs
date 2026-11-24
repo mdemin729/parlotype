@@ -90,7 +90,7 @@ public class TranscribeWindowScreenshotTests : IClassFixture<TranscribeScreensho
             return string.Empty;
 
         using var ms = new MemoryStream();
-        bitmap.Save(ms);
+        bitmap.Save(ms, Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
         return Convert.ToBase64String(ms.ToArray());
     }
 
