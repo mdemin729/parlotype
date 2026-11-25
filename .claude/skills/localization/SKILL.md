@@ -144,7 +144,7 @@ it.
 
 ## Copy that names Windows things: `_Mac` variants
 
-Parlotype also runs on macOS (ADR-077), where the tray is the menu bar, Task Manager is
+Parlotype also runs on macOS (ADR-078), where the tray is the menu bar, Task Manager is
 System Settings, and nobody signs in to Windows. Most copy is the same on both and needs
 nothing. Where a string names something that exists on only one of them:
 

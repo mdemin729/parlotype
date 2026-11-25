@@ -7,7 +7,7 @@ namespace Parlotype.Platform.Audio;
 
 /// <summary>
 /// Enumerates macOS input devices through the CoreAudio hardware-abstraction
-/// layer and notifies when the set or the default changes (ADR-077).
+/// layer and notifies when the set or the default changes (ADR-078).
 /// </summary>
 /// <remarks>
 /// A device's <see cref="MicrophoneInfo.Id"/> is its CoreAudio UID, not its

@@ -21,7 +21,7 @@ Parlotype is a **local-by-default** voice-to-text desktop application: on-device
 
 ## Platform Support
 
-Parlotype runs on **Windows** and on **macOS** (Intel and Apple Silicon, [ADR-077](docs/decisions/077-macos-support.md)). Linux is planned.
+Parlotype runs on **Windows** and on **macOS** (Intel and Apple Silicon, [ADR-078](docs/decisions/078-macos-support.md)). Linux is planned.
 
 **macOS is new and not yet released.** There are no macOS downloads: you build the app bundle yourself (see [Build & Run](#build--run)). What has been checked so far is an Intel Mac on macOS 13: the app builds, passes its tests, starts as a menu bar app and asks for its permissions. Dictating end to end, and anything on Apple Silicon, has not been confirmed on a real machine yet.
 

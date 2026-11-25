@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Entitlements for a Developer ID build under the hardened runtime (ADR-077).
+  Entitlements for a Developer ID build under the hardened runtime (ADR-078).
   An ad-hoc signed local build does not use them.
 
   allow-jit / allow-unsigned-executable-memory: the .NET runtime compiles code

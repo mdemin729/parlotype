@@ -7,7 +7,7 @@ using Xunit;
 namespace Parlotype.Tests;
 
 /// <summary>
-/// The decisions around a macOS paste (ADR-077), with the pasteboard and the
+/// The decisions around a macOS paste (ADR-078), with the pasteboard and the
 /// keystroke replaced by fakes: a test must not overwrite the developer's
 /// clipboard or type Cmd+V into whatever window is in front. macOS-only; every
 /// test no-ops elsewhere, because the class is.

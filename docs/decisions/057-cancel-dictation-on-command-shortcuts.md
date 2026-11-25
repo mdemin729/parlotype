@@ -2,7 +2,7 @@
 status: accepted
 date: 2026-08-04
 amends: [047]
-amended-by: [077]
+amended-by: [078]
 ---
 
 # 057. Cancel Dictation on Command Shortcuts, and Make Cancel a Real Abort

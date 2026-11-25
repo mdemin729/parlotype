@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <!--
-    ONNX Runtime for Intel Macs on macOS older than 14.4 (ADR-077).
+    ONNX Runtime for Intel Macs on macOS older than 14.4 (ADR-078).
 
     Silero VAD loads whatever native "onnxruntime" the process can find. On every platform
     that is the copy sherpa-onnx ships (SileroVad's own dependency, OnnxRuntime.Gpu, has no

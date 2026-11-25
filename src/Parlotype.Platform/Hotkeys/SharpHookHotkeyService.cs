@@ -14,7 +14,7 @@ namespace Parlotype.Platform.Hotkeys;
 /// </summary>
 public sealed class SharpHookHotkeyService : IGlobalHotkeyService
 {
-    /// <summary>How often to look again while the OS still withholds the hook (ADR-077).</summary>
+    /// <summary>How often to look again while the OS still withholds the hook (ADR-078).</summary>
     private static readonly TimeSpan PermissionPollInterval = TimeSpan.FromSeconds(2);
 
     private readonly ISettingsService _settings;
@@ -86,7 +86,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
             else
             {
                 // macOS refuses to create a keyboard event tap for a process the
-                // user has not allowed under Accessibility (ADR-077). Granting it
+                // user has not allowed under Accessibility (ADR-078). Granting it
                 // takes effect in the running process, so wait for it instead of
                 // asking for a restart; the desktop app explains what to do.
                 _logger.LogWarning(

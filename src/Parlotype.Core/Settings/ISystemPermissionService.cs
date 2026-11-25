@@ -32,7 +32,7 @@ public enum SystemPermissionState
 
 /// <summary>
 /// Reads and requests the privacy grants the operating system gates Parlotype's
-/// core functions behind (ADR-077).
+/// core functions behind (ADR-078).
 /// </summary>
 /// <remarks>
 /// macOS is the only platform with such gates today. Everywhere else the

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Builds Parlotype.app for macOS (ADR-077): publishes the desktop app
+# Builds Parlotype.app for macOS (ADR-078): publishes the desktop app
 # self-contained for one architecture, wraps it in an application bundle and
 # signs it.
 #

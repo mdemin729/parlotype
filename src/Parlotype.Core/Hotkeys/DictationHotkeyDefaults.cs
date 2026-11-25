@@ -43,7 +43,7 @@ public static class DictationHotkeyDefaults
     /// Push-to-talk on macOS. MacBook keyboards have no Right Ctrl, so the
     /// shared default would be a key most Mac users cannot press. Right Command
     /// is on every Apple keyboard and almost never used on its own, and left
-    /// Command keeps every shortcut (ADR-077).
+    /// Command keeps every shortcut (ADR-078).
     /// </summary>
     public static DictationHotkey MacPushToTalk { get; } =
         DictationHotkey.Hold(ModifierKey.Meta, ModifierSide.Right);

@@ -6,7 +6,7 @@ using Parlotype.Core.Settings;
 namespace Parlotype.Platform.MacOs;
 
 /// <summary>
-/// The two macOS privacy grants Parlotype depends on (ADR-077): Accessibility,
+/// The two macOS privacy grants Parlotype depends on (ADR-078): Accessibility,
 /// without which the global hotkey hook cannot be installed and Cmd+V cannot be
 /// posted, and Microphone.
 /// </summary>

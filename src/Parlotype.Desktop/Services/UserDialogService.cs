@@ -58,7 +58,7 @@ public sealed class UserDialogService : IUserDialogService
     /// <summary>
     /// Shows the dialog on its own. Parlotype starts with no window at all, so
     /// a question asked during startup — the macOS Accessibility prompt
-    /// (ADR-077) — has nothing to be modal to. Kept on top and activated,
+    /// (ADR-078) — has nothing to be modal to. Kept on top and activated,
     /// because a tray app is not the active application and its new window
     /// would otherwise open behind whatever the user is looking at.
     /// </summary>

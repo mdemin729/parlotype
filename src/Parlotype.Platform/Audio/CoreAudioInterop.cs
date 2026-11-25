@@ -7,7 +7,7 @@ namespace Parlotype.Platform.Audio;
 /// <summary>
 /// P/Invoke surface for macOS audio: the Audio Queue Services used to record,
 /// and the CoreAudio hardware-abstraction layer used to list input devices
-/// (ADR-077).
+/// (ADR-078).
 /// </summary>
 [SupportedOSPlatform("macos")]
 internal static class CoreAudioInterop

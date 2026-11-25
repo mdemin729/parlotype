@@ -17,7 +17,7 @@ public sealed class SileroVadService : IVadService
     {
         _logger = logger;
 
-        // Before the first ONNX Runtime call (ADR-077): the native library is
+        // Before the first ONNX Runtime call (ADR-078): the native library is
         // resolved once, on first use, and cannot be redirected afterwards.
         LegacyOnnxRuntime.EnsureConfigured(logger);
     }

@@ -10,7 +10,7 @@ namespace Parlotype.Platform.Audio;
 
 /// <summary>
 /// macOS audio capture through Audio Queue Services, delivering 16 kHz mono
-/// float samples (ADR-077).
+/// float samples (ADR-078).
 /// </summary>
 /// <remarks>
 /// <para>

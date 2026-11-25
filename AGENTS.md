@@ -7,7 +7,7 @@ Instructions for coding agents in this repository. Every statement here must sta
 Parlotype is a **local-by-default** voice-to-text tray app (.NET 10, Avalonia 12): a global
 hotkey starts the microphone and the recognized text is pasted into the focused window. In
 local mode audio never leaves the machine. It runs on Windows and on macOS (Intel and Apple
-Silicon, [ADR-077](docs/decisions/077-macos-support.md)); the macOS build is not released
+Silicon, [ADR-078](docs/decisions/078-macos-support.md)); the macOS build is not released
 yet and its dictation path has not been confirmed on a real machine
 (`plans/2026-11-14-macos-release-readiness/`).
 

@@ -202,7 +202,7 @@ public sealed class LlamaServerInstallerTests : IDisposable
     {
         // Upstream's macOS and Linux tarballs wrap everything in llama-b{N}/ and
         // link the shared libraries to each other; the install has to end up
-        // with the server binary at its root, like the Windows zip (ADR-077).
+        // with the server binary at its root, like the Windows zip (ADR-078).
         var tarball = BuildTarGz(
             "llama-b9198",
             files: [("llama-server", "SERVER"), ("libllama.1.0.0.dylib", "LIB")],

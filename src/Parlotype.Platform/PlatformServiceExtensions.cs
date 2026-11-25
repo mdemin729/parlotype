@@ -26,7 +26,7 @@ public static class PlatformServiceExtensions
     public static IServiceCollection AddPlatformServices(this IServiceCollection services)
     {
         // Capture and device enumeration are per-OS: WASAPI through NAudio on
-        // Windows, Audio Queue Services and the CoreAudio HAL on macOS (ADR-077).
+        // Windows, Audio Queue Services and the CoreAudio HAL on macOS (ADR-078).
         if (OperatingSystem.IsMacOS())
         {
             services.AddSingleton<IAudioCaptureService, CoreAudioCaptureService>();
@@ -84,7 +84,7 @@ public static class PlatformServiceExtensions
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         // API keys for the opt-in cloud providers live outside settings.json,
         // encrypted at rest where the OS supports it (ADR-032).
-        // DPAPI on Windows, the login keychain on macOS (ADR-077).
+        // DPAPI on Windows, the login keychain on macOS (ADR-078).
         if (OperatingSystem.IsMacOS())
             services.AddSingleton<ISecretStore, KeychainSecretStore>();
         else
@@ -132,7 +132,7 @@ public static class PlatformServiceExtensions
             // A launch agent, for copies that live in an Applications folder.
             services.AddSingleton<ILaunchAtLoginService, MacOsLaunchAgentLaunchAtLoginService>();
             // Accessibility gates the hotkey hook and the paste keystroke;
-            // Microphone gates capture (ADR-077).
+            // Microphone gates capture (ADR-078).
             services.AddSingleton<ISystemPermissionService, MacOsSystemPermissionService>();
         }
         else

@@ -8,7 +8,7 @@ verified: 2026-11-14
 # The first CoreAudio call in a process can block
 
 Observed on macOS 13.7 (Intel, built-in audio through `AppleHDA`) while porting Parlotype
-([ADR-077](../decisions/077-macos-support.md)). Not derivable from Apple's documentation,
+([ADR-078](../decisions/078-macos-support.md)). Not derivable from Apple's documentation,
 which describes the microphone prompt as something that appears when recording starts.
 
 ## What happens

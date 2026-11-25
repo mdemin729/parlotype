@@ -71,7 +71,7 @@ public partial class MicrophoneSettingsViewModel : SettingsSectionViewModelBase,
             // With nothing selected yet, "previous" is the saved choice. The
             // list can be empty at startup and fill in a moment later: macOS
             // reports devices only once CoreAudio is up, which may be after the
-            // user answers the microphone prompt (ADR-077). Falling straight to
+            // user answers the microphone prompt (ADR-078). Falling straight to
             // the first device there would overwrite the saved microphone on
             // every launch.
             var previousId = SelectedMicrophone?.Id

@@ -9,7 +9,7 @@ started:
 
 ## Problem
 
-[ADR-077](../../docs/decisions/077-macos-support.md) added the macOS platform layer and it
+[ADR-078](../../docs/decisions/078-macos-support.md) added the macOS platform layer and it
 was checked as far as one Intel Mac on macOS 13.7 and no person at the keyboard could take
 it: the app builds, passes its tests, starts as a menu bar app and waits for its two
 permissions. Everything behind those permissions is unverified, nothing has run on Apple

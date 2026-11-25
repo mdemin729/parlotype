@@ -8,7 +8,7 @@ verified: 2026-11-14
 # macOS version floors of the bundled native libraries
 
 Measured on the packages Parlotype pins, on an Intel Mac running macOS 13.7
-([ADR-077](../decisions/077-macos-support.md)). Re-measure when a package is bumped.
+([ADR-078](../decisions/078-macos-support.md)). Re-measure when a package is bumped.
 
 ## What each library needs
 

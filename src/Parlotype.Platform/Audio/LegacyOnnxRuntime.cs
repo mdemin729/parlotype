@@ -7,7 +7,7 @@ namespace Parlotype.Platform.Audio;
 
 /// <summary>
 /// Points the managed ONNX Runtime at an older native build on Intel Macs
-/// whose macOS cannot load the one sherpa-onnx ships (ADR-077).
+/// whose macOS cannot load the one sherpa-onnx ships (ADR-078).
 /// </summary>
 /// <remarks>
 /// <para>

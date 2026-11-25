@@ -4,7 +4,7 @@ using Parlotype.Core.Settings;
 
 namespace Parlotype.Platform.MacOs;
 
-/// <summary><see cref="ISystemPermissionService"/> over macOS's privacy database (ADR-077).</summary>
+/// <summary><see cref="ISystemPermissionService"/> over macOS's privacy database (ADR-078).</summary>
 [SupportedOSPlatform("macos")]
 public sealed class MacOsSystemPermissionService : ISystemPermissionService
 {

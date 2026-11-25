@@ -65,7 +65,7 @@ has run. `Dispose`/`Cancel` guarantees the work will stop, not that it has stopp
 ## Trap 4: `TestContext.Current` after a real wait
 
 Seen on the Windows CI runner while adding macOS support
-([ADR-077](../decisions/077-macos-support.md)); the same test passed on macOS 13 every time.
+([ADR-078](../decisions/078-macos-support.md)); the same test passed on macOS 13 every time.
 An `[AvaloniaFact]` did `await Task.Delay(50, ...)`, then `Dispatcher.UIThread.RunJobs()`,
 then called a helper that read `TestContext.Current.CancellationToken`. That read threw
 `ObjectDisposedException: 'TestContext'`: after the wait, `TestContext.Current` was no

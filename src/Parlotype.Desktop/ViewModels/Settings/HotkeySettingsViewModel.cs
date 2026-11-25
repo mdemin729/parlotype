@@ -65,7 +65,7 @@ public partial class HotkeySettingsViewModel : SettingsSectionViewModelBase
         Presets =
         [
             // A MacBook has no Right Ctrl; its right-hand modifiers are Command
-            // and Option (ADR-077).
+            // and Option (ADR-078).
             new HotkeyPresetViewModel(
                 DictationHotkey.Hold(OperatingSystem.IsMacOS() ? ModifierKey.Meta : ModifierKey.Ctrl, ModifierSide.Right),
                 AddPresetCommand),

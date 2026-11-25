@@ -9,7 +9,7 @@ namespace Parlotype.Core.Speech;
 /// older than 14.4: the ONNX Runtime that sherpa-onnx ships for macOS links
 /// against a CoreML class (<c>MLComputePlan</c>) that first appeared in 14.4, so
 /// the library does not load at all on an older system. Those Macs start on
-/// Whisper instead, whose natives do load there (ADR-077).
+/// Whisper instead, whose natives do load there (ADR-078).
 /// </para>
 /// <para>
 /// Every reader of <see cref="Settings.SettingsKeys.SpeechEngine"/> resolves an

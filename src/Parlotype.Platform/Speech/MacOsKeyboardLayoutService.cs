@@ -7,7 +7,7 @@ using Parlotype.Platform.MacOs;
 namespace Parlotype.Platform.Speech;
 
 /// <summary>
-/// macOS keyboard-layout detection through Text Input Sources (ADR-077): the
+/// macOS keyboard-layout detection through Text Input Sources (ADR-078): the
 /// language of the input source the user is typing with right now.
 /// </summary>
 /// <remarks>

@@ -14,7 +14,7 @@ using Xunit;
 namespace Parlotype.Tests;
 
 /// <summary>
-/// The platform-independent rules behind macOS support (ADR-077). Everything
+/// The platform-independent rules behind macOS support (ADR-078). Everything
 /// here runs on any OS: the decisions take the platform as an argument, so the
 /// macOS answer is checked on Windows CI and the Windows answer on a Mac.
 /// </summary>
@@ -218,7 +218,7 @@ public class MacOsRulesTests
 }
 
 /// <summary>
-/// Exercises the real macOS interop (ADR-077). macOS-only; every test no-ops
+/// Exercises the real macOS interop (ADR-078). macOS-only; every test no-ops
 /// elsewhere, matching <c>WindowsRunKeyLaunchAtLoginServiceTests</c>. Nothing
 /// here needs a privacy grant or shows a prompt: no microphone is opened and no
 /// key is posted.

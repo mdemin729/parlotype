@@ -34,7 +34,7 @@ Users configure a list of gestures, not one chord
   Right Ctrl (push-to-talk), double-tap Ctrl (toggle), Ctrl+Alt+Space (toggle). macOS:
   hold Right Command (push-to-talk) and double-tap Ctrl (toggle); a MacBook has no Right
   Ctrl, and Ctrl+Option+Space is the system's input-source switch
-  ([ADR-077](../decisions/077-macos-support.md)). Escape cancels and is not configurable.
+  ([ADR-078](../decisions/078-macos-support.md)). Escape cancels and is not configurable.
 - **Recognition is pure Core logic.** `HotkeyGestureMatcher` turns timestamped key events
   into Start / Stop / Cancel plus a suppression decision, so all gesture timing is
   testable without a keyboard. Thresholds are in `HotkeyGestureTiming`. A tap counts only
@@ -63,7 +63,7 @@ Users configure a list of gestures, not one chord
   the roles are different: Ctrl and Command are the command modifiers, and Option, which
   types characters there, keeps the grace window like Shift. The matcher is told which
   set applies, so both are tested on any machine
-  ([ADR-077](../decisions/077-macos-support.md)). Toggle
+  ([ADR-078](../decisions/078-macos-support.md)). Toggle
   dictation is unaffected: Ctrl+S during it saves the file and keeps recording. The
   shortcut itself still reaches the target app.
 - **Hold-scoped sessions.** A gesture that ends on key release starts the pipeline in
@@ -235,7 +235,7 @@ stateDiagram-v2
   user can see and delete them in Keychain Access. The keychain ties an item to the
   signature of the app that stored it, so a development build, re-signed on every
   compile, is asked for permission to read what the previous build wrote
-  ([ADR-077](../decisions/077-macos-support.md)).
+  ([ADR-078](../decisions/078-macos-support.md)).
 - **Readers are defensive.** Settings values are parsed with `TryParse` and a default, so
   a malformed file cannot crash startup, and an unknown enum value degrades to the default
   (for example, an unknown engine means Parakeet).
@@ -353,7 +353,7 @@ Installed builds start at sign-in, on by default
 - `LaunchAtLoginCoordinator` owns the default-on policy: an absent preference means on, so
   upgrades adopt it too. It writes only when preference and OS state differ. `App`
   reconciles once at startup, off the UI thread, and the first-run tour discloses it.
-- **macOS** ([ADR-077](../decisions/077-macos-support.md)).
+- **macOS** ([ADR-078](../decisions/078-macos-support.md)).
   `MacOsLaunchAgentLaunchAtLoginService` writes a property list with `RunAtLoad` to
   `~/Library/LaunchAgents`; `launchd` picks it up at the next login, and it is listed
   under System Settings → General → Login Items. Only a copy in `/Applications` or
@@ -364,7 +364,7 @@ Installed builds start at sign-in, on by default
 ## macOS permissions
 
 macOS gates two things behind per-application grants, and neither fails loudly when it is
-missing ([ADR-077](../decisions/077-macos-support.md)). `ISystemPermissionService` reads
+missing ([ADR-078](../decisions/078-macos-support.md)). `ISystemPermissionService` reads
 and requests them; on other platforms it is a no-op that answers "granted".
 
 - **Accessibility** is needed to install the keyboard hook and to post Cmd+V. Without it
@@ -422,7 +422,7 @@ what stays English) live in the `localization` skill
   tray, Task Manager, `Setup.exe`) keeps its key, and a sibling key ending in `_Mac`
   holds the macOS wording. `Localizer.Lookup`, which both `{loc:Tr}` and the generated
   `Strings` accessor go through, returns the sibling on macOS when one exists, so no view
-  or view model branches on the OS ([ADR-077](../decisions/077-macos-support.md)).
+  or view model branches on the OS ([ADR-078](../decisions/078-macos-support.md)).
 - `CurrentUICulture` follows the chosen interface language; `CurrentCulture` does not, so
   dates and numbers keep following the user's Windows regional settings.
 

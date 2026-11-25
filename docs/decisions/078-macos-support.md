@@ -4,7 +4,7 @@ date: 2026-11-14
 amends: [042, 043, 047, 051, 057, 059, 064]
 ---
 
-# 077. macOS support
+# 078. macOS support
 
 ## Context
 

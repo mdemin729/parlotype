@@ -7,7 +7,7 @@ namespace Parlotype.Platform.Startup;
 
 /// <summary>
 /// <see cref="ILaunchAtLoginService"/> for macOS, backed by a per-user launch
-/// agent (ADR-077). The macOS counterpart of
+/// agent (ADR-078). The macOS counterpart of
 /// <see cref="WindowsRunKeyLaunchAtLoginService"/>.
 /// </summary>
 /// <remarks>

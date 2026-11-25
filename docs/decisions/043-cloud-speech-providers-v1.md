@@ -1,7 +1,7 @@
 ---
 status: accepted
 date: 2026-07-09
-amended-by: [046, 077]
+amended-by: [046, 078]
 last-amended: 2026-07-10
 ---
 

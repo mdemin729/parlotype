@@ -221,7 +221,7 @@ public class TranscribeViewModelTests
         Assert.Equal("hello world", injector.InjectedTexts[0]);
     }
 
-    // ----- macOS privacy gates (ADR-077) ------------------------------------
+    // ----- macOS privacy gates (ADR-078) ------------------------------------
 
     /// <summary>
     /// The first real test of the macOS port: dictation recognized the speech,

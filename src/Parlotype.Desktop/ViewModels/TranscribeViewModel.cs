@@ -708,7 +708,7 @@ public partial class TranscribeViewModel : ViewModelBase
         {
             // Must precede the generic catch — this derives from
             // InvalidOperationException. The operating system refused the
-            // microphone (macOS privacy settings, ADR-077): nothing in Parlotype
+            // microphone (macOS privacy settings, ADR-078): nothing in Parlotype
             // can fix that, so reset like the generic path and point the user at
             // the one place that can.
             _logger.LogWarning(ex, "Microphone access denied by the operating system");
@@ -933,7 +933,7 @@ public partial class TranscribeViewModel : ViewModelBase
             // Not an error to log and move on from: the dictation worked, the
             // operating system refused the paste, and the text is waiting on the
             // clipboard. Without telling the user, that reads as "nothing
-            // happened" (ADR-077). Fire-and-forget so the busy counter below
+            // happened" (ADR-078). Fire-and-forget so the busy counter below
             // does not stay up for as long as the dialog is open.
             _logger.LogWarning("Pasting was not permitted — the text was left on the clipboard");
             _ = ShowPasteNotPermittedDialogAsync();
@@ -954,7 +954,7 @@ public partial class TranscribeViewModel : ViewModelBase
 
     /// <summary>
     /// Tells the user their text is on the clipboard and why it was not pasted,
-    /// and offers the way to the Accessibility switch (macOS, ADR-077). No-op
+    /// and offers the way to the Accessibility switch (macOS, ADR-078). No-op
     /// without a dialog service (design mode / tests that don't care).
     /// </summary>
     private async Task ShowPasteNotPermittedDialogAsync()

@@ -9,7 +9,7 @@ namespace Parlotype.Platform.Settings;
 
 /// <summary>
 /// <see cref="ISecretStore"/> backed by the user's macOS login keychain
-/// (ADR-077). The macOS counterpart of <see cref="DpapiSecretStore"/>.
+/// (ADR-078). The macOS counterpart of <see cref="DpapiSecretStore"/>.
 /// </summary>
 /// <remarks>
 /// <para>

@@ -8,7 +8,7 @@ using Xunit;
 namespace Parlotype.Desktop.Tests;
 
 /// <summary>
-/// What the app says on a Mac (ADR-077): Apple key names, and the macOS wording
+/// What the app says on a Mac (ADR-078): Apple key names, and the macOS wording
 /// of the copy that names Windows things. Read through the overloads that take
 /// the flavour as an argument, so nothing process-wide changes under the tests
 /// running beside these (see <see cref="TestPlatformDefaults"/>).

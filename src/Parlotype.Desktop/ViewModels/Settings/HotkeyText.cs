@@ -30,7 +30,7 @@ namespace Parlotype.Desktop.ViewModels.Settings;
 /// <para>
 /// What is printed on the keyboard depends on the keyboard: a Mac has Option
 /// where a PC has Alt, and Command where a PC has the Windows key. The names
-/// follow the operating system (ADR-077), which is one more reason they are
+/// follow the operating system (ADR-078), which is one more reason they are
 /// built here and not taken from Core's invariant form, where the same two keys
 /// stay "Alt" and "Win" in every log on every machine.
 /// </para>
@@ -157,7 +157,7 @@ public static class HotkeyText
                 Strings.Format_Settings_Hotkeys_Conflict_ParameterHintsFormat(gesture),
 
             // AltGr is a PC key. On a Mac, Ctrl+Option+letter types nothing, so
-            // there is no collision to warn about (ADR-077).
+            // there is no collision to warn about (ADR-078).
             HotkeyConflictReason.AltGrCollision when macKeyNames => null,
 
             HotkeyConflictReason.AltGrCollision =>

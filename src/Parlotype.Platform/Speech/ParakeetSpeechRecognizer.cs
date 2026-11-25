@@ -52,7 +52,7 @@ public sealed class ParakeetSpeechRecognizer : ISpeechRecognizer
             return;
 
         // Fail with the reason rather than with the loader's DllNotFoundException
-        // (ADR-077). Unreachable by default: such a system starts on Whisper.
+        // (ADR-078). Unreachable by default: such a system starts on Whisper.
         if (!SpeechEngineDefaults.IsParakeetAvailable)
         {
             throw new PlatformNotSupportedException(

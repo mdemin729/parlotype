@@ -1,7 +1,7 @@
 ---
 status: accepted
 date: 2026-08-08
-amended-by: [077]
+amended-by: [078]
 ---
 
 # 059. Launch at sign-in, on by default

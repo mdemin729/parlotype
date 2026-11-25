@@ -11,7 +11,7 @@ namespace Parlotype.Platform.TextInjection;
 /// <summary>
 /// Injects text on macOS via pasteboard-with-restore: saves the current
 /// pasteboard text, sets the transcribed text, simulates Cmd+V, then restores
-/// the original content (ADR-077). The macOS counterpart of
+/// the original content (ADR-078). The macOS counterpart of
 /// <see cref="ClipboardTextInjectionService"/>.
 /// </summary>
 /// <remarks>

@@ -64,7 +64,7 @@ flowchart LR
    `Win32TargetWindowTracker` and Ctrl+V; on macOS `MacOsClipboardTextInjectionService`
    with the nspasteboard.org transient markers, `MacOsTargetWindowTracker` (an
    application, not a window) and Cmd+V
-   ([ADR-077](../decisions/077-macos-support.md)). Only text is saved and restored; see
+   ([ADR-078](../decisions/078-macos-support.md)). Only text is saved and restored; see
    the [security audit](../security/2026-07-11-security-audit.md).
 
 **VAD settings are benchmark-tuned.** The `VadOptions` defaults (padding, minimum silence,

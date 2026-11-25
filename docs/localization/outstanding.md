@@ -17,7 +17,7 @@ once the work landed; git history keeps them.
 - **Drive the running app by hand in three languages.** The headless renders cover layout
   and the tests cover live switching, but nobody has clicked through the real app.
 
-- **macOS strings (ADR-077): review against a real localized Mac.** The seventeen keys
+- **macOS strings (ADR-078): review against a real localized Mac.** The seventeen keys
   added for macOS name system UI (System Settings, Privacy & Security, Accessibility,
   Login Items, the Applications folder, the menu bar). The names came from Apple's
   localized user guides and, for Czech, Slovak and Croatian, from the system resources of

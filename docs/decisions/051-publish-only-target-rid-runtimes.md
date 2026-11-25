@@ -1,7 +1,7 @@
 ---
 status: accepted
 date: 2026-07-31
-amended-by: [077]
+amended-by: [078]
 ---
 
 # 051. Publish Only the Target RID's Whisper Native Libraries

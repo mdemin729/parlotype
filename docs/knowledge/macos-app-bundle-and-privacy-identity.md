@@ -7,7 +7,7 @@ verified: 2026-11-14
 
 # macOS app bundle: signing and privacy identity
 
-Learned building `Parlotype.app` ([ADR-077](../decisions/077-macos-support.md),
+Learned building `Parlotype.app` ([ADR-078](../decisions/078-macos-support.md),
 `scripts/build-macos-app.sh`).
 
 ## Signing a self-contained .NET app

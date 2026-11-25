@@ -126,7 +126,7 @@ public sealed class SpeechRecognizerFactoryTests
         var recognizer = await factory.GetRecognizerAsync();
 
         // Parakeet wherever it can run; Whisper on macOS older than 14.4, where
-        // its ONNX Runtime does not load (ADR-077).
+        // its ONNX Runtime does not load (ADR-078).
         if (SpeechEngineDefaults.Default == SpeechEngine.Parakeet)
             Assert.IsType<ParakeetSpeechRecognizer>(recognizer);
         else

@@ -4,7 +4,7 @@ namespace Parlotype.Core.Audio;
 /// The operating system refused access to the microphone, so no capture was
 /// started. Distinct from "no microphone" or a device error because the remedy
 /// is different: only the user can lift it, in the system's privacy settings
-/// (ADR-077).
+/// (ADR-078).
 /// </summary>
 public sealed class MicrophoneAccessDeniedException : InvalidOperationException
 {

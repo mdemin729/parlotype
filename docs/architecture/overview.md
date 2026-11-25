@@ -76,7 +76,7 @@ which engine `SettingsKeys.SpeechEngine` names and forwards every call to that r
 An unset or unparsable value means `SpeechEngineDefaults.Default`: Parakeet
 ([ADR-042](../decisions/042-parakeet-default-language-ux.md)), except on macOS older than
 14.4, where Parakeet's runtime cannot load and the default is Whisper
-([ADR-077](../decisions/077-macos-support.md)).
+([ADR-078](../decisions/078-macos-support.md)).
 Switching engines is an `UnloadAsync` → `InitializeAsync` cycle
 ([ADR-017](../decisions/017-whisper-model-hot-swap.md)); the pipeline above never knows
 which engine it is talking to.
@@ -127,7 +127,7 @@ Rules that hold across engines:
 | ONNX Runtime (via `SileroVad`) | Voice activity detection | `SileroVadService` | [008](../decisions/008-incremental-vad-processing.md), [050](../decisions/050-drop-onnx-runtime-gpu-providers.md) |
 | libuiohook (via SharpHook) | Global keyboard hook, key simulation | `SharpHookHotkeyService`, text injection | [001](../decisions/001-global-hotkey-sharphook.md), [020](../decisions/020-sharphook7-simple-global-hook.md) |
 | Win32 P/Invoke | Clipboard, foreground window tracking, keyboard layout, Vulkan and NVIDIA probes, parent-process lookup | Windows Platform services | [014](../decisions/014-nvidia-environment-detection.md), [022](../decisions/022-vulkan-gpu-acceleration.md), [036](../decisions/036-language-ux-rebuild.md), [062](../decisions/062-dev-parent-process-watchdog.md) |
-| macOS frameworks by P/Invoke (AudioToolbox, CoreAudio, AppKit, Security, ApplicationServices, AVFoundation, Carbon) | Capture and device list, pasteboard, frontmost application, keychain, Accessibility and Microphone permissions, input-source language | macOS Platform services; shared calls in `MacOsNative` | [077](../decisions/077-macos-support.md) |
+| macOS frameworks by P/Invoke (AudioToolbox, CoreAudio, AppKit, Security, ApplicationServices, AVFoundation, Carbon) | Capture and device list, pasteboard, frontmost application, keychain, Accessibility and Microphone permissions, input-source language | macOS Platform services; shared calls in `MacOsNative` | [078](../decisions/078-macos-support.md) |
 
 `Directory.Build.targets` removes native files nothing loads (ONNX Runtime CUDA/TensorRT
 providers, natives for other platforms, native PDBs) from build and publish output
@@ -141,7 +141,7 @@ lost Whisper to one of them
 ## Platforms
 
 Windows and macOS (Intel and Apple Silicon) are supported
-([ADR-077](../decisions/077-macos-support.md)). The difference between them is confined
+([ADR-078](../decisions/078-macos-support.md)). The difference between them is confined
 to three places:
 
 - **Which Platform class implements a Core contract.** Chosen in
@@ -177,6 +177,6 @@ secret-store implementation exists for it.
 | **Sidecar** | A `llama-server` child process on `127.0.0.1`: one serves Gemma 4, another serves the speech cleanup model. |
 | **Speech cleanup** | The opt-in pass that rewrites recognized text as clean written text with a local model before it is pasted ([ADR-073](../decisions/073-speech-cleanup-s1-mini.md)). |
 | **Pack folder** | `%LOCALAPPDATA%\Parlotype`, owned by Velopack and deleted on uninstall. Nothing user-owned may live there ([ADR-053](../decisions/053-velopack-packaging-and-auto-update.md)). Windows only. |
-| **Mac variant** | A resource key ending in `_Mac` that replaces its base key on macOS, for copy that names Windows things ([ADR-077](../decisions/077-macos-support.md)). |
+| **Mac variant** | A resource key ending in `_Mac` that replaces its base key on macOS, for copy that names Windows things ([ADR-078](../decisions/078-macos-support.md)). |
 | **GGML / GGUF** | Model file formats for whisper.cpp and llama.cpp. |
 | **WER / CER / RTF** | Benchmark metrics: word and character error rate, real-time factor. |

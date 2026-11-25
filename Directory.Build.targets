@@ -59,7 +59,7 @@
     RuntimeIdentifier is osx-x64 and osx-arm64. Compared as they are, no folder matches a
     macOS publish and the filter removes all of them, the right one included, leaving an
     app that cannot load Whisper. The RID is therefore translated before the comparison
-    (ADR-077).
+    (ADR-078).
 
     Publish only: `bin/` output is left exactly as it was, so dev builds and tests are
     unaffected. See ADR-051.
@@ -100,7 +100,7 @@
     on to whoever references it, which only the publish list can filter.
 
     The managed Microsoft.ML.OnnxRuntime.dll stays: its file name does not start with
-    "onnxruntime". See ADR-077.
+    "onnxruntime". See ADR-078.
   -->
   <Target Name="RemoveWindowsOnnxRuntimeFromForeignBuild"
           BeforeTargets="AssignTargetPaths"
@@ -129,13 +129,13 @@
 
     Parlotype.Platform copies Microsoft's ONNX Runtime 1.18.1 for osx-x64 into
     onnxruntime-legacy/ so voice activity detection works on Intel Macs whose macOS is
-    older than 14.4 (ADR-077). The item is declared in a class library, which is built
+    older than 14.4 (ADR-078). The item is declared in a class library, which is built
     without a RuntimeIdentifier even when the app is published for one, so it cannot be
     conditioned on the target there: on a Mac build machine it reaches every publish.
     Nothing but an osx-x64 process can load it, so it goes from all the others (28 MB).
 
     Publish only: `bin/` output is left as it was, where the file is what lets an Intel
-    Mac on an old macOS run the tests. See ADR-077.
+    Mac on an old macOS run the tests. See ADR-078.
   -->
   <Target Name="RemoveLegacyOnnxRuntimeFromPublish"
           AfterTargets="ComputeResolvedFilesToPublishList"

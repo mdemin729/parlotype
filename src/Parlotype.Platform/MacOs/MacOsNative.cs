@@ -5,7 +5,7 @@ namespace Parlotype.Platform.MacOs;
 
 /// <summary>
 /// The CoreFoundation and Objective-C runtime calls every macOS service in
-/// Platform shares (ADR-077).
+/// Platform shares (ADR-078).
 /// </summary>
 /// <remarks>
 /// <para>

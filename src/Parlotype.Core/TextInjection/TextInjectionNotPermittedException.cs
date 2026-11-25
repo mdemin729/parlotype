@@ -3,7 +3,7 @@ namespace Parlotype.Core.TextInjection;
 /// <summary>
 /// The operating system would not let Parlotype put the recognized text into
 /// the target application: on macOS, the Accessibility permission is missing,
-/// so the paste keystroke is refused (ADR-077).
+/// so the paste keystroke is refused (ADR-078).
 /// </summary>
 /// <remarks>
 /// Distinct from an ordinary injection failure because the dictation is not

@@ -3,7 +3,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Parlotype.Tests" />
     <!-- Only to pin the two OS-dependent defaults (engine, hotkeys) for the UI
-         tests, so they assert the same thing on every machine (ADR-077). -->
+         tests, so they assert the same thing on every machine (ADR-078). -->
     <InternalsVisibleTo Include="Parlotype.Desktop.Tests" />
   </ItemGroup>
 

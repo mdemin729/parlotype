@@ -155,7 +155,7 @@ public class App : Application
 
         // The Accessibility question first, then the first-run onboarding tour
         // (ADR-056): the tour asks the user to try their hotkey, which on macOS
-        // cannot work until the permission is granted (ADR-077). Fire-and-forget
+        // cannot work until the permission is granted (ADR-078). Fire-and-forget
         // like its neighbours; both catch their own failures — neither may stop
         // the app from starting.
         _ = RunFirstWindowsAsync(_services);
@@ -216,7 +216,7 @@ public class App : Application
 
     /// <summary>
     /// macOS only in effect: explains why Parlotype needs the Accessibility
-    /// permission and takes the user to the switch (ADR-077). Everywhere else
+    /// permission and takes the user to the switch (ADR-078). Everywhere else
     /// the permission reads as granted and this returns at once.
     /// </summary>
     /// <remarks>
@@ -432,7 +432,7 @@ public class App : Application
         // is resolved, so the dialog service is what consumers see.
         services.AddSingleton<ILlamaServerInstaller, LlamaServerInstallDialogService>();
 
-        // Focus tracking and the clipboard are per-OS (ADR-077): windows and the
+        // Focus tracking and the clipboard are per-OS (ADR-078): windows and the
         // Win32 clipboard on Windows, the frontmost application and NSPasteboard
         // on macOS. Simulated typing goes through SharpHook on both.
         if (OperatingSystem.IsMacOS())

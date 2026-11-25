@@ -7,7 +7,7 @@ namespace Parlotype.Platform.TextInjection;
 
 /// <summary>
 /// Tracks the frontmost macOS application so focus can be handed back to it
-/// before text is pasted (ADR-077).
+/// before text is pasted (ADR-078).
 /// </summary>
 /// <remarks>
 /// <para>

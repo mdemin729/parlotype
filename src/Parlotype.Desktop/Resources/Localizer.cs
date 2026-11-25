@@ -123,7 +123,7 @@ public sealed class Localizer
     /// behaviour ADR-056 established): a stale resx should show an obviously wrong
     /// label, never take the window down.
     /// <para>
-    /// <b>Platform wording (ADR-077).</b> Most copy is the same on every
+    /// <b>Platform wording (ADR-078).</b> Most copy is the same on every
     /// operating system. Where it is not — "tray" against "menu bar", Task
     /// Manager against System Settings — the neutral key keeps its Windows
     /// wording and a sibling key ending in <see cref="MacVariantSuffix"/> holds

@@ -45,7 +45,7 @@ public class MicrophoneSettingsViewModelTests
 
     /// <summary>
     /// macOS reports no devices until CoreAudio is up, which can be after the
-    /// user answers the microphone prompt (ADR-077). When the list then arrives,
+    /// user answers the microphone prompt (ADR-078). When the list then arrives,
     /// the saved microphone has to win over "the first one in the list".
     /// </summary>
     /// <remarks>

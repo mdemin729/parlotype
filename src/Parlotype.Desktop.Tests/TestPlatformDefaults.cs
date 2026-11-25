@@ -9,7 +9,7 @@ namespace Parlotype.Desktop.Tests;
 /// <summary>
 /// Pins everything the app derives from the operating system — wording, key
 /// names, default hotkeys, default engine — to the Windows flavour for the
-/// whole test assembly (ADR-077).
+/// whole test assembly (ADR-078).
 /// </summary>
 /// <remarks>
 /// <para>

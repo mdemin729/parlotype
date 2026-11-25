@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Template for Parlotype.app (ADR-077). scripts/build-macos-app.sh fills in
+  Template for Parlotype.app (ADR-078). scripts/build-macos-app.sh fills in
   __VERSION__ and __MIN_MACOS__; nothing else varies between builds.
 
   CFBundleIdentifier is permanent, like the Velopack pack id: macOS files the

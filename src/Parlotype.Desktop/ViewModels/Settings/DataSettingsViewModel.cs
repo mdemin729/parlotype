@@ -80,7 +80,7 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
     /// <summary>
     /// Whether "delete my data on uninstall" means anything here. Only Windows
     /// has an uninstaller that runs our hook; on macOS and Linux removing the
-    /// app is deleting it, and the recorded choice would never be read (ADR-077).
+    /// app is deleting it, and the recorded choice would never be read (ADR-078).
     /// </summary>
     public bool HasUninstallChoice { get; } = OperatingSystem.IsWindows();
 

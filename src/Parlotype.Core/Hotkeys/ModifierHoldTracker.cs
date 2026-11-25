@@ -33,7 +33,7 @@ internal sealed class ModifierHoldTracker
     /// <summary>
     /// Which modifiers produce commands and which compose text differs on
     /// macOS, where Command is the shortcut key and Option types characters
-    /// (ADR-077). See <see cref="IsCommandModifierHold"/>.
+    /// (ADR-078). See <see cref="IsCommandModifierHold"/>.
     /// </summary>
     private readonly bool _macModifierSemantics;
 
@@ -145,7 +145,7 @@ internal sealed class ModifierHoldTracker
     /// On macOS the roles are different: Command is the shortcut modifier, so a
     /// Meta hold aborts on any keypress (it is the default push-to-talk key
     /// there), while Option types characters such as é and ø and keeps the
-    /// grace window like Shift (ADR-077).
+    /// grace window like Shift (ADR-078).
     /// </para>
     /// </summary>
     private bool IsCommandModifierHold => _macModifierSemantics

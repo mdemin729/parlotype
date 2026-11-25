@@ -235,7 +235,7 @@ suspect those filters first.
 
 ## macOS: not released yet
 
-macOS is supported in the code ([ADR-077](decisions/077-macos-support.md)) but **the
+macOS is supported in the code ([ADR-078](decisions/078-macos-support.md)) but **the
 release workflow has no macOS row**, so a tag publishes Windows only. What exists today is
 a local build:
 
