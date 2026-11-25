@@ -13,6 +13,7 @@ using Parlotype.Core.TextInjection;
 using Parlotype.Core.TextProcessing;
 using Parlotype.Core.Updates;
 using Parlotype.Desktop.Onboarding;
+using Parlotype.Desktop.Resources;
 using Parlotype.Desktop.Services;
 using Parlotype.Desktop.ViewModels;
 using Parlotype.Desktop.ViewModels.Onboarding;
@@ -139,10 +140,25 @@ public class App : Application
         _ = Task.Run(() => _parentProcessExitWatcher.Start(
             () => Dispatcher.UIThread.Post(() => desktop.Shutdown())));
 
-        // First-run onboarding tour (ADR-056). Fire-and-forget like its
-        // neighbours; the service catches its own failures — a broken tour
-        // must never stop the app from starting.
-        _ = _services.GetRequiredService<IOnboardingService>().MaybeShowOnFirstRunAsync();
+        // macOS: clicking the app in Finder or Launchpad while it is already
+        // running does not start a second process the single-instance guard
+        // could hand over from — the system sends the running one a "reopen"
+        // instead. Same meaning as a relaunch on Windows: show the widget.
+        if (this.TryGetFeature<IActivatableLifetime>() is { } activatable)
+        {
+            activatable.Activated += (_, e) =>
+            {
+                if (e.Kind == ActivationKind.Reopen)
+                    windowManager.ShowTranscribe();
+            };
+        }
+
+        // The Accessibility question first, then the first-run onboarding tour
+        // (ADR-056): the tour asks the user to try their hotkey, which on macOS
+        // cannot work until the permission is granted (ADR-078). Fire-and-forget
+        // like its neighbours; both catch their own failures — neither may stop
+        // the app from starting.
+        _ = RunFirstWindowsAsync(_services);
 
         // Bring the sign-in registration in line with the stored preference —
         // default-on, so a fresh install and an upgrade both pick it up here
@@ -191,6 +207,56 @@ public class App : Application
         IApplicationLifetime? lifetime,
         bool isDesignMode) =>
         isDesignMode ? null : lifetime as IClassicDesktopStyleApplicationLifetime;
+
+    private static async Task RunFirstWindowsAsync(IServiceProvider provider)
+    {
+        await PromptForAccessibilityAsync(provider);
+        await provider.GetRequiredService<IOnboardingService>().MaybeShowOnFirstRunAsync();
+    }
+
+    /// <summary>
+    /// macOS only in effect: explains why Parlotype needs the Accessibility
+    /// permission and takes the user to the switch (ADR-078). Everywhere else
+    /// the permission reads as granted and this returns at once.
+    /// </summary>
+    /// <remarks>
+    /// Asked on every launch until it is granted, because without it neither the
+    /// hotkey nor the paste works and the app would sit in the menu bar doing
+    /// nothing with no explanation. Nothing needs restarting afterwards: the
+    /// hotkey service is already waiting and installs its hook the moment the
+    /// switch is flipped.
+    /// </remarks>
+    private static async Task PromptForAccessibilityAsync(IServiceProvider provider)
+    {
+        var logger = provider.GetRequiredService<ILogger<App>>();
+        try
+        {
+            var permissions = provider.GetRequiredService<ISystemPermissionService>();
+            if (permissions.GetState(SystemPermission.Accessibility) == SystemPermissionState.Granted)
+                return;
+
+            logger.LogInformation("Accessibility access is not granted — asking the user");
+
+            var open = await provider.GetRequiredService<IUserDialogService>().ShowConfirmationAsync(
+                Strings.Dialog_AccessibilityAccess_Title,
+                Strings.Dialog_AccessibilityAccess_Body,
+                confirmText: Strings.Common_OpenSystemSettings,
+                cancelText: Strings.Common_NotNow);
+
+            if (!open)
+                return;
+
+            // The request is what adds Parlotype to the Accessibility list, so
+            // the user only has to flip a switch instead of finding the app with
+            // the "+" button; opening the pane is what puts that list on screen.
+            await permissions.RequestAsync(SystemPermission.Accessibility);
+            permissions.OpenSettings(SystemPermission.Accessibility);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not ask for Accessibility access");
+        }
+    }
 
     private static async Task StartUpdateCheckerAsync(IServiceProvider provider)
     {
@@ -366,9 +432,18 @@ public class App : Application
         // is resolved, so the dialog service is what consumers see.
         services.AddSingleton<ILlamaServerInstaller, LlamaServerInstallDialogService>();
 
-        services.AddSingleton<ITargetWindowTracker, Win32TargetWindowTracker>();
+        // Focus tracking and the clipboard are per-OS (ADR-078): windows and the
+        // Win32 clipboard on Windows, the frontmost application and NSPasteboard
+        // on macOS. Simulated typing goes through SharpHook on both.
+        if (OperatingSystem.IsMacOS())
+            services.AddSingleton<ITargetWindowTracker, MacOsTargetWindowTracker>();
+        else
+            services.AddSingleton<ITargetWindowTracker, Win32TargetWindowTracker>();
+
         if (Program.TextInjectionMode == TextInjectionMode.SharpHook)
             services.AddSingleton<ITextInjectionService, SharpHookTextInjectionService>();
+        else if (OperatingSystem.IsMacOS())
+            services.AddSingleton<ITextInjectionService, MacOsClipboardTextInjectionService>();
         else
             services.AddSingleton<ITextInjectionService, ClipboardTextInjectionService>();
 

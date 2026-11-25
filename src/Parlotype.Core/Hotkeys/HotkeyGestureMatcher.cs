@@ -46,8 +46,18 @@ public sealed class HotkeyGestureMatcher
     /// <summary>True when <see cref="_heldChordKey"/> belongs to a push-to-talk chord, which stops on release.</summary>
     private bool _heldChordIsPushToTalk;
 
-    public HotkeyGestureMatcher(IReadOnlyList<DictationHotkey> bindings)
-        => UpdateBindings(bindings);
+    /// <summary>See <see cref="ModifierHoldTracker"/>: which held modifiers count as command keys.</summary>
+    private readonly bool _macModifierSemantics;
+
+    /// <param name="bindings">The gestures to listen for.</param>
+    /// <param name="macModifierSemantics">True on macOS, where Command (not Alt) is the
+    /// modifier that turns every keystroke into a command. Passed in rather than read from
+    /// the OS so the rule is testable anywhere.</param>
+    public HotkeyGestureMatcher(IReadOnlyList<DictationHotkey> bindings, bool macModifierSemantics = false)
+    {
+        _macModifierSemantics = macModifierSemantics;
+        UpdateBindings(bindings);
+    }
 
     public IReadOnlyList<DictationHotkey> Bindings { get; private set; } = [];
 
@@ -73,7 +83,7 @@ public sealed class HotkeyGestureMatcher
             {
                 case HotkeyGestureKind.HoldModifier:
                     var contested = doubleTapGestures.Any(g => g.SharesModifierKeyWith(binding.Gesture));
-                    _holds.Add((binding, new ModifierHoldTracker(binding.Gesture, deferStart: contested)));
+                    _holds.Add((binding, new ModifierHoldTracker(binding.Gesture, deferStart: contested, _macModifierSemantics)));
                     break;
 
                 case HotkeyGestureKind.DoubleTapModifier:

@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Dit kleine, altijd-op-de-voorgrond venster is je dicteerbediening. De grote knop start en stopt de opname; beweeg je muis over de kaart om de huidige status te zien. Sleep de greepstrook bovenaan om de widget te verplaatsen en gebruik de ✕-knop om hem naar het systeemvak te verbergen. Engines met een taalkeuze tonen een taalstrook onderaan.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Dit kleine, altijd-op-de-voorgrond venster is je dicteerbediening. De grote knop start en stopt de opname; beweeg je muis over de kaart om de huidige status te zien. Sleep de greepstrook bovenaan om de widget te verplaatsen en gebruik de ✕-knop om hem naar de menubalk te verbergen. Engines met een taalkeuze tonen een taalstrook onderaan.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Kies een spraakengine</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype leeft in het systeemvak</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype leeft in de menubalk</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Het verbergen of sluiten van de widget sluit Parlotype niet af — het blijft luisteren naar je sneltoetsen vanuit het systeemvak. Klik op het systeemvakpictogram om de widget terug te halen. Om volledig af te sluiten, klik je met de rechtermuisknop op het pictogram en kies je Afsluiten.
 
 Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype samen met Windows en wacht het in het systeemvak — er opent geen venster. Zet dit op elk moment uit bij Instellingen → Toepassing → Opstarten.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Het verbergen of sluiten van de widget sluit Parlotype niet af — het blijft luisteren naar je sneltoetsen vanuit de menubalk. Klik daar op het Parlotype-pictogram en kies Openen om de widget terug te halen. Om volledig af te sluiten, kies je Afsluiten in hetzelfde menu.
+
+Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype samen met macOS en wacht het in de menubalk — er opent geen venster. Zet dit op elk moment uit bij Instellingen → Toepassing → Opstarten.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Je bent helemaal klaar</value>
@@ -142,8 +156,16 @@ Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype same
     <value>Volgt Windows — momenteel {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Volgt macOS — momenteel {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Volgt Windows — nog niet vertaald, dus Engels wordt gebruikt</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Volgt macOS — nog niet vertaald, dus Engels wordt gebruikt</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Gemiddeld</value>
@@ -172,6 +194,14 @@ Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype same
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Instellingen openen</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Systeeminstellingen openen</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Niet nu</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Openen</value>
@@ -268,6 +298,26 @@ Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype same
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Cloud-aanbieder niet geconfigureerd</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype heeft toegang tot Toegankelijkheid nodig</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS vraagt je toestemming voordat een app een globale sneltoets kan detecteren of tekst in andere apps kan plakken. Open Systeeminstellingen → Privacy en beveiliging → Toegankelijkheid en zet Parlotype aan. De sneltoets werkt zodra je dat doet — geen herstart nodig.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Je tekst staat op het klembord – druk op Cmd+V om hem te plakken.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Microfoontoegang staat uit</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS laat Parlotype de microfoon niet gebruiken. Open Systeeminstellingen → Privacy en beveiliging → Microfoon, zet Parlotype aan en begin daarna opnieuw met dicteren.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Cloud-transcriptie mislukt</value>
@@ -376,8 +426,16 @@ Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype same
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype luistert vanuit het systeemvak naar je dictee-sneltoets, dus het moet actief zijn voordat je kunt dicteren.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype luistert vanuit de menubalk naar je dictee-sneltoets, dus het moet actief zijn voordat je kunt dicteren.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Parlotype starten wanneer ik me aanmeld bij Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype starten wanneer ik inlog bij macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Parlotype niet automatisch starten</value>
@@ -396,15 +454,27 @@ Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype same
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Eén item onder je eigen gebruikersaccount (HKCU Run), dat naar Parlotype verwijst. Geen service, geen geplande taak, geen beheerdersrechten, niets voor het hele systeem. Je kunt het zelf bekijken en verwijderen via Taakbeheer → Opstartapps.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Eén launch agent onder je eigen gebruikersaccount (~/Library/LaunchAgents), die naar Parlotype verwijst. Geen hulpprogramma, geen beheerdersrechten, niets voor het hele systeem. Je kunt hem zelf bekijken en uitzetten via Systeeminstellingen → Algemeen → Inlogonderdelen.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Deze build kan zichzelf niet starten bij aanmelding — hij is niet geïnstalleerd via Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Dit exemplaar kan zichzelf niet starten bij het inloggen — verplaats Parlotype eerst naar de map “Apps”.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows heeft Parlotype uitgeschakeld in Taakbeheer → Opstartapps. Schakel het daar weer in om deze instelling effect te laten hebben.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype start samen met Windows en wacht in het systeemvak — er opent geen venster.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype start samen met macOS en wacht in de menubalk — er opent geen venster.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype draait alleen wanneer je het zelf start.</value>
@@ -454,6 +524,10 @@ Zodat je sneltoets al werkt vanaf het moment dat je inlogt, start Parlotype same
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Deze build kan zichzelf niet bijwerken — hij is niet geïnstalleerd via Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Dit exemplaar kan zichzelf niet bijwerken — het is niet geïnstalleerd vanuit een Parlotype-release.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Controleren op updates…</value>

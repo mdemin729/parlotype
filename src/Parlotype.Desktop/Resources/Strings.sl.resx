@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>To majhno okno, ki je vedno na vrhu, je vaše upravljanje narekovanja. Veliki gumb začne in ustavi snemanje; z miško postojte nad kartico, da vidite trenutno stanje. Povlecite ročico na vrhu, da okno premaknete kamor koli, gumb ✕ pa ga skrije v sistemsko vrstico. Mehanizmi, ki ponujajo izbiro jezika, prikažejo jezikovni trak na dnu.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>To majhno okno, ki je vedno na vrhu, je vaše upravljanje narekovanja. Veliki gumb začne in ustavi snemanje; z miško postojte nad kartico, da vidite trenutno stanje. Povlecite ročico na vrhu, da okno premaknete kamor koli, gumb ✕ pa ga skrije v menijsko vrstico. Mehanizmi, ki ponujajo izbiro jezika, prikažejo jezikovni trak na dnu.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Izberite govorni mehanizem</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype je v sistemski vrstici</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype je v menijski vrstici</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Skritje ali zapiranje pripomočka ne zapre Parlotype – ta še naprej posluša vaše bližnjice iz sistemske vrstice. Kliknite ikono v sistemski vrstici, da pripomoček znova prikažete. Če želite Parlotype popolnoma zapreti, z desno tipko miške kliknite ikono v sistemski vrstici in izberite Izhod.
 
 Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in čaka v sistemski vrstici – nobeno okno se ne odpre. To lahko kadar koli izklopite v Nastavitve → Aplikacija → Zagon.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Skritje ali zapiranje pripomočka ne zapre Parlotype – ta še naprej posluša vaše bližnjice iz menijske vrstice. Tam kliknite ikono Parlotype in izberite Odpri, da pripomoček znova prikažete. Če želite Parlotype popolnoma zapreti, v istem meniju izberite Izhod.
+
+Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z macOS in čaka v menijski vrstici – nobeno okno se ne odpre. To lahko kadar koli izklopite v Nastavitve → Aplikacija → Zagon.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Pripravljeni ste</value>
@@ -142,8 +156,16 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
     <value>Sledi Windows – trenutno {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Sledi macOS – trenutno {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Sledi Windows – še ni prevedeno, zato je uporabljena angleščina</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Sledi macOS – še ni prevedeno, zato je uporabljena angleščina</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Srednje</value>
@@ -172,6 +194,14 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Odpri nastavitve</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Odpri Nastavitve sistema</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Ne zdaj</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Odpri</value>
@@ -268,6 +298,26 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Oblačni ponudnik ni nastavljen</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype potrebuje dovoljenje za Dostopnost</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS vas prosi za dovoljenje, preden lahko aplikacija zazna globalno bližnjico ali vtipka besedilo v druge aplikacije. Odprite Nastavitve sistema → Zasebnost in varnost → Dostopnost in vklopite Parlotype. Bližnjica začne delovati takoj, ko to storite – ponovni zagon ni potreben.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Vaše besedilo je v odložišču — pritisnite Cmd+V, da ga prilepite.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Dostop do mikrofona je izklopljen</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS aplikaciji Parlotype ne dovoli uporabe mikrofona. Odprite Nastavitve sistema → Zasebnost in varnost → Mikrofon in vklopite Parlotype, nato znova začnite narekovati.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Prepis v oblaku ni uspel</value>
@@ -376,8 +426,16 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype posluša vašo bližnjico za narekovanje iz sistemske vrstice, zato mora teči, preden lahko narekujete.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype posluša vašo bližnjico za narekovanje iz menijske vrstice, zato mora teči, preden lahko narekujete.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Zaženi Parlotype ob prijavi v Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Zaženi Parlotype ob prijavi v macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Ne zaganjaj Parlotype samodejno</value>
@@ -396,15 +454,27 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>En sam vnos pod vašim uporabniškim računom (HKCU Run), ki kaže na Parlotype. Brez storitve, brez načrtovanega opravila, brez skrbniških pravic, nič, kar bi veljalo za celoten računalnik. Vnos si lahko ogledate in odstranite tudi sami v Upravitelju opravil → Zagon.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>En sam zagonski agent pod vašim uporabniškim računom (~/Library/LaunchAgents), ki kaže na Parlotype. Brez pomožne aplikacije, brez skrbniških pravic, nič, kar bi veljalo za celoten računalnik. Agenta si lahko ogledate in izklopite tudi sami v Nastavitvah sistema → Splošno → Elementi prijave in razširitve.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Ta različica se ob prijavi ne more zagnati sama – ni bila nameščena s Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Ta kopija se ob prijavi ne more zagnati sama – najprej premaknite Parlotype v mapo Aplikacije.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows ima Parlotype izklopljen v Upravitelju opravil → Zagon. Za uveljavitev te nastavitve ga tam znova omogočite.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype se zažene skupaj z Windows in čaka v sistemski vrstici – nobeno okno se ne odpre.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype se zažene skupaj z macOS in čaka v menijski vrstici – nobeno okno se ne odpre.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype se zažene samo, kadar ga zaženete sami.</value>
@@ -454,6 +524,10 @@ Da bližnjica deluje takoj po prijavi, se Parlotype zažene skupaj z Windows in 
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Ta različica se ne more posodobiti sama – ni bila nameščena s Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Ta kopija se ne more posodobiti sama – ni bila nameščena iz izdaje Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Preverjanje posodobitev...</value>

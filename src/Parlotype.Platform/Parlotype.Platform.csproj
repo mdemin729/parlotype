@@ -28,4 +28,33 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="11.0.0" />
   </ItemGroup>
 
+  <!--
+    ONNX Runtime for Intel Macs on macOS older than 14.4 (ADR-078).
+
+    Silero VAD loads whatever native "onnxruntime" the process can find. On every platform
+    that is the copy sherpa-onnx ships (SileroVad's own dependency, OnnxRuntime.Gpu, has no
+    macOS natives at all). But sherpa-onnx's macOS build links against a CoreML class that
+    first appeared in macOS 14.4 and does not load on anything older, which leaves such a
+    Mac with no voice activity detection and therefore no dictation with any engine.
+
+    Microsoft's own 1.18.1 build, the version SileroVad was written against, runs on
+    macOS 11 and later. It is copied to a folder of its own, never to the path NuGet's
+    native-asset probing uses, so it cannot shadow sherpa-onnx's copy: LegacyOnnxRuntime
+    loads it by path, and only on a system where the other one cannot load.
+
+    The package contributes nothing else (ExcludeAssets="all"), is not passed on to
+    referencing projects (PrivateAssets="all"), and is not restored at all off macOS.
+    Intel only: every Apple Silicon Mac can run a macOS that needs no fallback.
+    Directory.Build.targets drops the file from publishes for any other runtime.
+  -->
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.18.1"
+                      ExcludeAssets="all" PrivateAssets="all" GeneratePathProperty="true" />
+    <None Include="$(PkgMicrosoft_ML_OnnxRuntime)/runtimes/osx-x64/native/libonnxruntime.dylib"
+          Condition="'$(PkgMicrosoft_ML_OnnxRuntime)' != ''"
+          Link="onnxruntime-legacy/osx-x64/libonnxruntime.dylib"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
+
 </Project>

@@ -223,3 +223,23 @@ Side is now lowercase after the colon: `jobb {0}` / `bal {0}`. `Conflict_Already
 ## Speech cleanup (2026-11-13)
 
 - Speech cleanup (Settings page, `Settings_SpeechCleanup_*`) → **Szövegtisztítás** — tidying the dictated text, never deleting. Toggle: *Szövegtisztítás bekapcsolva / kikapcsolva*. Writing style → **Írásstílus** (Laza / Félig laza / Félig hivatalos / Hivatalos); English contractions → **összevont alakok**.
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the platform nouns change. macOS UI names are the ones Hungarian macOS itself shows.
+
+| English | Hungarian | Notes |
+|---|---|---|
+| menu bar | **menüsor** | Replaces *értesítési terület* in every `_Mac` key, with the same surface cases: `a menüsoron`, `a menüsorról`, `a menüsorra`. |
+| System Settings | **Rendszerbeállítások** | Button: `Rendszerbeállítások megnyitása`. |
+| Privacy & Security | **Adatvédelem és biztonság** | |
+| Accessibility | **Kisegítő lehetőségek** | Title: `A Parlotype-nak hozzáférés kell a Kisegítő lehetőségekhez`. |
+| Microphone | **Mikrofon** | Access to it: `mikrofon-hozzáférés`. |
+| General → Login Items | **Általános → Bejelentkezési elemek** | |
+| Applications folder | **Alkalmazások mappa** | The case ending lands on *mappa*: `az Alkalmazások mappába`. |
+| log in | **bejelentkezik** (`amikor bejelentkezem`, `bejelentkezéskor`) | Same verb the Windows keys use for "sign in". |
+| launch agent | **indítási ügynök** | A coinage; always next to the path `~/Library/LaunchAgents`. |
+| this copy (of the app) | **ez a példány** | The Windows keys say *ez a verzió* for "this build". |
+| Not now (button) | **Most nem** | |
+
+`macOS` takes no suffix of its own: whether it would be `-sel` or `-szel` depends on how the reader pronounces the letters, so a case ending goes on a native noun after it (`a macOS rendszerrel`, `a macOS rendszerbe`, `a macOS nyelvét`). A switch in System Settings is *kapcsold be* / *kapcsold ki*. Settings paths are joined with `→` and take *részt* or *alatt* after the last element.

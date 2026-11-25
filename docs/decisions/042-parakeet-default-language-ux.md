@@ -3,6 +3,7 @@ status: accepted
 date: 2026-07-07
 amends: [036, 040, 041]
 deciders: [Maksim]
+amended-by: [078]
 ---
 
 # 042. Parakeet as Default Engine & Capability-Driven Language UI Visibility

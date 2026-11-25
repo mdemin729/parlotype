@@ -207,3 +207,27 @@ Used the actual Slovak Windows 10/11 UI wording rather than literal translations
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Podržte pravý Ctrl`.**
 
 Side is now `pravý {0}` / `ľavý {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `„{0}“ je už priradené k režimu: {1}.`
+
+
+## macOS terms
+
+Used the names Slovak macOS itself shows (checked against the system's own Slovak resources
+and Apple's Slovak macOS User Guide), the same way the Windows keys use the Slovak Windows
+names. The `_Mac` keys are the base key's translation with only these terms swapped.
+
+| English | Slovak | Notes |
+|---|---|---|
+| menu bar | **lišta** | Apple's Slovak name for the menu bar; replaces *systémová lišta* in every `_Mac` key ("v lište", "do lišty", "z lišty") |
+| menu (of the menu-bar icon) | **menu** | Apple's Slovak word ("menu Apple"); "v tom istom menu" |
+| System Settings | **Systémové nastavenia** | `Common_OpenSystemSettings` → "Otvoriť Systémové nastavenia"; declined in prose ("v Systémových nastaveniach") |
+| Privacy & Security | **Súkromie a bezpečnosť** | |
+| Accessibility | **Prístupnosť** | the permission is "oprávnenie Prístupnosť" |
+| Microphone | **Mikrofón** | as a Settings pane name; lowercase *mikrofón* in prose |
+| General | **Všeobecné** | |
+| Login Items | **Položky a rozšírenia spúšťané pri prihlásení** | the pane's name under *Všeobecné* since macOS 15 (English: Login Items & Extensions); macOS 13 and 14 call it **Prihlásenie** |
+| Applications (folder) | **priečinok Aplikácie** | |
+| log in | **prihlásiť sa** / **prihlásenie** | same word the Windows keys use for "sign in" |
+| launch agent | **spúšťací agent** | the path `~/Library/LaunchAgents` beside it stays verbatim |
+| this copy (of the app) | **táto kópia** | the Windows keys say *toto zostavenie* for "this build" |
+| a Parlotype release | **vydanie Parlotype** | *vydanie* is the established word for a release |
+| Not now (button) | **Teraz nie** | |

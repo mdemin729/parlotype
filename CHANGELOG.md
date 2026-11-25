@@ -12,6 +12,17 @@ and Parlotype follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+
+- **Parlotype for Mac (early, build it yourself).** Parlotype now runs on macOS,
+  on Intel and Apple Silicon Macs. It lives in the menu bar, and by default you
+  hold **Right Command** to talk or double-tap **Ctrl** for hands-free. macOS
+  asks for two permissions, Microphone and Accessibility; the second is what
+  lets an app notice a hotkey and paste into another app, and the hotkey starts
+  working as soon as you switch it on. API keys are kept in your keychain.
+  There is no Mac download yet: for now the app is built from source, and
+  dictation on a Mac has not been through a full real-world test.
+
 ## [0.7.0] — 2026-11-16
 
 ### Highlights

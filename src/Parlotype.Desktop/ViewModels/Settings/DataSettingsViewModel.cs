@@ -77,6 +77,13 @@ public partial class DataSettingsViewModel : SettingsSectionViewModelBase
         _ = InitializeAsync();
     }
 
+    /// <summary>
+    /// Whether "delete my data on uninstall" means anything here. Only Windows
+    /// has an uninstaller that runs our hook; on macOS and Linux removing the
+    /// app is deleting it, and the recorded choice would never be read (ADR-078).
+    /// </summary>
+    public bool HasUninstallChoice { get; } = OperatingSystem.IsWindows();
+
     private async Task InitializeAsync()
     {
         var saved = await _settings.GetAsync<string>(SettingsKeys.UninstallRemovesUserData);

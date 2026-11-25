@@ -266,3 +266,30 @@ English word standing next to them.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Задръжте десния Ctrl`.**
 
 Side is now `десния {0}` / `левия {0}` (definite masculine, object of the imperative), lowercase; it was `Десен {0}`. `Conflict_AlreadyBoundFormat` quotes the imperative gesture and names the mode with a noun — `Комбинацията „{0}“ вече е обвързана с режим {1}.` — because an imperative cannot be the subject, and `с {1}` broke on `задържане` (needs `със`).
+
+## macOS terms
+
+macOS has no Bulgarian interface: Apple's own bg-bg Mac User Guide prints the System
+Settings path in English inside a Bulgarian page frame. A Bulgarian speaker therefore sees
+English labels on their Mac, so **the names of macOS settings and folders stay in English**
+and only the prose around them is translated. Each `_Mac` string is its Windows counterpart
+with only these terms swapped.
+
+| English | Bulgarian | Notes |
+|---|---|---|
+| menu bar | **лента с менюта** (definite: **лентата с менюта**) | Not an on-screen label, so it is translated. Replaces *трей* in every `_Mac` key: „в лентата с менюта“, „от лентата с менюта“. |
+| System Settings | **System Settings** | English. Button: „Отвори System Settings“ (button carve-out, 2sg imperative). |
+| Privacy & Security | **Privacy & Security** | English. |
+| Accessibility | **Accessibility** | English. Title: „Parlotype има нужда от достъп до Accessibility“. |
+| Microphone (settings pane) | **Microphone** | English inside the path only; in prose it is *микрофон*. |
+| General | **General** | English. |
+| Login Items | **Login Items** | English. macOS 15 and later shows "Login Items & Extensions". |
+| Applications folder | **папката Applications** | English folder name, Bulgarian noun in front. |
+| log in | **влизане** / **влезете в системата** | „при влизане в macOS“, same as the Windows strings. |
+| launch agent | **агент за стартиране** | Translated; the `~/Library/LaunchAgents` path beside it carries the English name. |
+| this copy | **това копие** | Neuter, so *само*, *инсталирано*. Replaces *тази версия* in the two not-installed states. |
+
+"Paste text into other apps" in `Dialog_AccessibilityAccess_Body` uses **напечатва**, the
+one verb this file has for text reaching another app. "A Parlotype release" is **публикувана
+версия на Parlotype**, keeping *версия* (the word `Settings_Updates_NetworkAutomaticBody`
+uses for a release) and adding *публикувана* so it does not read as "some version".

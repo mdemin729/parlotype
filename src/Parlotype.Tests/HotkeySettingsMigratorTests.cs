@@ -29,7 +29,7 @@ public class HotkeySettingsMigratorTests
 
         var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(settings);
 
-        Assert.Equal(DictationHotkeyDefaults.All, bindings);
+        Assert.Equal(DictationHotkeyDefaults.ForCurrentPlatform, bindings);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class HotkeySettingsMigratorTests
         await HotkeySettingsMigrator.LoadOrMigrateAsync(settings);
 
         var stored = await settings.GetAsync<List<string>>(SettingsKeys.HotkeyBindings);
-        Assert.Equal(HotkeyBindingCodec.EncodeAll(DictationHotkeyDefaults.All), stored);
+        Assert.Equal(HotkeyBindingCodec.EncodeAll(DictationHotkeyDefaults.ForCurrentPlatform), stored);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class HotkeySettingsMigratorTests
 
         var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(settings);
 
-        Assert.Equal(DictationHotkeyDefaults.All, bindings);
+        Assert.Equal(DictationHotkeyDefaults.ForCurrentPlatform, bindings);
     }
 
     [Fact]
@@ -166,7 +166,7 @@ public class HotkeySettingsMigratorTests
 
         var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(settings);
 
-        Assert.Equal(DictationHotkeyDefaults.All, bindings);
+        Assert.Equal(DictationHotkeyDefaults.ForCurrentPlatform, bindings);
     }
 
     [Fact]
@@ -178,6 +178,6 @@ public class HotkeySettingsMigratorTests
 
         var bindings = await HotkeySettingsMigrator.LoadOrMigrateAsync(settings);
 
-        Assert.Equal(DictationHotkeyDefaults.All, bindings);
+        Assert.Equal(DictationHotkeyDefaults.ForCurrentPlatform, bindings);
     }
 }

@@ -267,3 +267,24 @@ Side is now `{0} tal-lemin` / `{0} tax-xellug` — the word after the hyphen is 
 ## Speech cleanup (2026-11-13)
 
 - Speech cleanup (Settings page, `Settings_SpeechCleanup_*`) → **Tindif tad-dettatura** (masculine; toggle *mixgħul / mitfi*) — built on the established *dettatura*. Writing style → **Stil tal-kitba** (Każwali / Semi-każwali / Semi-formali / Formali); English contractions → **kontrazzjonijiet**. New strings use sentence case per the brief, unlike some older Title Case toggles.
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the platform nouns change. macOS has no Maltese localization, so the names of its own settings stay in English, exactly as the user sees them on screen; only the prose around them is Maltese.
+
+| English | Maltese | Notes |
+|---|---|---|
+| menu bar | **il-bar tal-menu** (masculine) | Replaces *tray* in every `_Mac` key: `fil-bar tal-menu`, `mill-bar tal-menu`. Same pattern as *bar tal-għodda* for a toolbar. |
+| System Settings | **System Settings** (English) | Takes the article like *Settings* does: `Iftaħ is-System Settings`, `fis-System Settings`. |
+| Privacy & Security | **Privacy & Security** (English) | |
+| Accessibility | **Accessibility** (English) | `aċċess għal Accessibility`: bare *għal*, no article on the English name. |
+| Microphone (settings pane) | **Microphone** (English) | The device itself is *mikrofonu*. |
+| General → Login Items | **General → Login Items** (English) | |
+| Applications folder | **il-fowlder Applications** | The article lands on *fowlder*; the English name follows it bare. |
+| log in | **daħal** (`meta nidħol f'macOS`, `mad-dħul`) | Same verb the Windows keys use for "sign in". |
+| launch agent | **aġent tat-tnedija** (masculine) | Built on *tnedija*, the word already used for Startup. Always next to the path `~/Library/LaunchAgents`. |
+| helper app | **app awżiljarja** | |
+| this copy (of the app) | **din il-kopja** | The Windows keys say *din il-verżjoni* for "this build". |
+| Not now (button) | **Mhux issa** | |
+
+`macOS` is feminine and takes no article, like `Windows`: `ma' macOS`, `f'macOS`, `lil macOS`, `macOS titlob`. In a settings path only the first element takes the article, the rest follow after `→`, as in `fit-Task Manager → Startup apps`. A switch in System Settings is *ixgħel* / *itfi*. `Onboarding_Tray_Title_Mac` is in Title Case because it sits among the Title Case headings of the tour; the new dialog titles and buttons are in sentence case.

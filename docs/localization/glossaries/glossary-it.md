@@ -154,3 +154,23 @@ gender differently, this format would need to change.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Tieni premuto Ctrl destro`.**
 
 Side unchanged. `Conflict_AlreadyBoundFormat` is now `«{0}» è già assegnato alla modalità «{1}».` — the imperative gesture is quoted, and `assegnato a tieni premuto` / `a attiva/disattiva` did not parse.
+
+## macOS terms
+
+The `*_Mac` keys are the macOS wording of the key with the same name; they start from that translation and change only the OS-specific words. macOS UI names are the ones macOS shows in Italian, checked against Apple's it-IT support pages.
+
+| English | Italian | Notes |
+|---|---|---|
+| menu bar | **barra dei menu** | Replaces *area di notifica* in every `_Mac` key. |
+| System Settings | **Impostazioni di Sistema** | The macOS app; Parlotype's own settings stay *Impostazioni*. Button: "Apri Impostazioni di Sistema". |
+| Privacy & Security | **Privacy e Sicurezza** | Capitalized as Apple writes it. |
+| Accessibility | **Accessibilità** | |
+| Microphone | **Microfono** | |
+| General | **Generali** | |
+| Login Items | **Elementi login** | macOS 15 and later label the pane "Elementi login ed estensioni"; the shorter name mirrors the English. |
+| Applications folder | **cartella Applicazioni** | |
+| log in | **accedere** | Same verb as the Windows "sign in" strings ("quando accedo a macOS", "all'accesso"). macOS itself says *login* ("Elementi login"); *accedere* was kept so both variants read alike. |
+| launch agent | **agente di avvio** | Apple's documentation writes "agent di avvio"; `~/Library/LaunchAgents` stays verbatim. |
+| switch (an app) on | **attivare** | "attiva Parlotype", as macOS says "Attiva o disattiva…". |
+| this copy (of the app) | **questa copia** | The Windows strings say *questa build*. |
+| Not now | **Non ora** | |

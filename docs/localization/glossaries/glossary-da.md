@@ -153,3 +153,24 @@ not surface in this batch.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Hold højre Ctrl nede`.**
 
 Side is now `højre {0}` / `venstre {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture and names the mode: `»{0}« er allerede tildelt tilstanden »{1}«.` (an imperative cannot be the subject; `tildelt hold for at tale` did not parse).
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the OS
+terms swapped. macOS UI names are Apple's own Danish wording, not literal translations.
+
+| English | Danish | Notes |
+|---|---|---|
+| menu bar | **menulinjen** | Replaces *bakken* / *systembakken* in every `_Mac` key ("i menulinjen"). |
+| System Settings | **Systemindstillinger** | Button: "Åbn Systemindstillinger". Parlotype's own settings stay "Indstillinger". |
+| Privacy & Security | **Anonymitet & sikkerhed** | Apple's wording — not "Privatliv". |
+| Accessibility | **Tilgængelighed** | |
+| Microphone | **Mikrofon** | |
+| General | **Generelt** | |
+| Login Items | **Log ind-emner** | |
+| Applications (folder) | **Programmer** | Written as "mappen Programmer", unquoted like the Windows names ("fanen Startprogrammer"). |
+| log in / at login | **logge ind** / **ved log ind** | macOS says "log ind"; the Windows keys keep "logge på" / "ved logon". |
+| launch agent | **launch agent** (en) | Kept as a loanword next to the verbatim path `~/Library/LaunchAgents`. |
+| helper app | **hjælpeprogram** (et) | |
+| this copy (of the app) | **denne kopi** | The Windows keys say "denne build". |
+| Not now (button) | **Ikke nu** | |

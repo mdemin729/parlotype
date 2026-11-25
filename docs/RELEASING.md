@@ -233,6 +233,39 @@ suspect those filters first.
 
 ---
 
+## macOS: not released yet
+
+macOS is supported in the code ([ADR-078](decisions/078-macos-support.md)) but **the
+release workflow has no macOS row**, so a tag publishes Windows only. What exists today is
+a local build:
+
+```bash
+scripts/build-macos-app.sh --arch x64 --version 1.2.0     # or --arch arm64
+open artifacts/macos/x64/Parlotype.app
+```
+
+It publishes self-contained, assembles `Parlotype.app` from `packaging/macos/Info.plist`
+and signs it ad hoc. That bundle runs on the Mac that built it and nowhere else without a
+Gatekeeper override.
+
+Before macOS can ship, in this order
+(`plans/2026-11-14-macos-release-readiness/task.md` has the detail):
+
+1. Someone dictates with it on a real Mac, on both architectures. Nothing behind the two
+   permission prompts has been watched working.
+2. A Developer ID certificate and notarization. `--sign "Developer ID Application: …"`
+   signs with the hardened runtime and `packaging/macos/Parlotype.entitlements`;
+   notarizing and stapling are not scripted.
+3. `osx-x64` and `osx-arm64` rows in `release.yml`. The workflow comment says adding a
+   platform is adding a row; for macOS it is also an `.icns` instead of the `.ico`, an
+   `--plist`, and signing steps that are not Azure's.
+4. Velopack on macOS: the pack, the update feed on its own channel, and an actual update
+   from one version to the next.
+
+**The bundle identifier `dev.parlotype.Parlotype` is permanent**, like the pack id. macOS
+files the Microphone and Accessibility grants, the keychain items and the login item
+under it.
+
 ## Rolling back a bad release
 
 Velopack serves whatever the feed advertises, so rolling back means changing what

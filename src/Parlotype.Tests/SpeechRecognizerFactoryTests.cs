@@ -118,13 +118,18 @@ public sealed class SpeechRecognizerFactoryTests
     }
 
     [Fact]
-    public async Task GetRecognizerAsync_UnknownEngine_FallsBackToParakeet()
+    public async Task GetRecognizerAsync_UnknownEngine_FallsBackToTheDefaultEngine()
     {
         var (factory, settings) = Create();
         await settings.SetAsync(SettingsKeys.SpeechEngine, "NotARealEngine");
 
         var recognizer = await factory.GetRecognizerAsync();
 
-        Assert.IsType<ParakeetSpeechRecognizer>(recognizer);
+        // Parakeet wherever it can run; Whisper on macOS older than 14.4, where
+        // its ONNX Runtime does not load (ADR-078).
+        if (SpeechEngineDefaults.Default == SpeechEngine.Parakeet)
+            Assert.IsType<ParakeetSpeechRecognizer>(recognizer);
+        else
+            Assert.IsType<WhisperSpeechRecognizer>(recognizer);
     }
 }

@@ -207,3 +207,30 @@ Used real Lithuanian Windows 10/11 UI wording rather than literal translations f
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Laikykite dešinįjį Ctrl`.**
 
 Side is now **accusative**, lowercase: `dešinįjį {0}` / `kairįjį {0}` — both gesture verbs are imperatives governing the accusative. The earlier note that `{0}` stays a bare nominative object applied to the key name only, never to the side adjective. `Conflict_AlreadyBoundFormat` quotes the imperative gesture.
+
+## macOS terms (2026-11-14)
+
+The `_Mac` keys are the macOS wording of the key with the same name; they keep that key's
+translation and change only the OS-specific words. **macOS has no Lithuanian localization**,
+so the names a user has to find on screen stay in English exactly as macOS shows them, and
+only the prose around them is Lithuanian. Inside a `→` path they are bare, like the app's own
+*Nustatymai → Programa → Paleistis*; a single English name inside a Lithuanian phrase is
+quoted `„…“` so the case ending can sit on the Lithuanian noun beside it.
+
+| Term | Lithuanian | Notes |
+|---|---|---|
+| menu bar | **meniu juosta** (*meniu juostoje*, *į meniu juostą*) | Running prose, so a native word. Replaces *pranešimų sritis* in every `_Mac` key. |
+| System Settings | **System Settings** | Kept English. Button: *Atidaryti System Settings*. Parlotype's own Settings stays **Nustatymai**. |
+| Privacy & Security | **Privacy & Security** | Kept English. |
+| Accessibility | **Accessibility** | Kept English; in the dialog title *„Accessibility“ leidimas*. |
+| Microphone (privacy pane) | **Microphone** | Kept English inside the path; the device in prose is *mikrofonas*. |
+| General | **General** | Kept English. |
+| Login Items | **Login Items** | Kept English. |
+| Applications folder | **aplankas „Applications“** | |
+| log in (to macOS) | **prisijungimas** / *prisijungus prie macOS* | Same word as the Windows "sign in" keys. |
+| permission (macOS privacy) | **leidimas** | Never used for "release" here, which is *versija*. |
+| launch agent | **paleidimo agentas** | |
+| helper app | **pagalbinė programa** | |
+| this copy (of the app) | **ši kopija** | The Windows keys say *ši versija* ("this build"). |
+| Parlotype release | **oficiali Parlotype versija** | *oficiali* separates a published release from a local build. |
+| Not now (button) | **Ne dabar** | |

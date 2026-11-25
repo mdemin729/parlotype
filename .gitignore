@@ -89,3 +89,6 @@ datasets/__pycache__/
 # this to .git/info/exclude, which is per-clone and never pushed; here it covers
 # a fresh clone too.
 .claude/worktrees/
+
+# Local packaging output (scripts/build-macos-app.sh)
+artifacts/

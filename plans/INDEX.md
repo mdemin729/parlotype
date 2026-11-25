@@ -13,3 +13,4 @@ deleted from this folder in the same change that completes it; its decision live
 
 | Plan | Created | Description |
 |------|---------|-------------|
+| [2026-11-14-macos-release-readiness](2026-11-14-macos-release-readiness/) | 2026-11-14 | Verify the macOS port (ADR-078) on real Intel and Apple Silicon Macs, then sign, notarize and add it to the release pipeline. |

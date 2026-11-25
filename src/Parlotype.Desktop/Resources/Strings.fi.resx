@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Tämä pieni, aina päällimmäisenä pysyvä ikkuna on sanelun ohjain. Iso painike käynnistää ja pysäyttää nauhoituksen; vie hiiri kortin päälle nähdäksesi nykyisen tilan. Vedä yläreunan kahvasta siirtääksesi ikkunan minne haluat, ja ✕-painike piilottaa sen ilmaisinalueelle. Moottorit, jotka tarjoavat kielivalinnan, näyttävät kielipalkin alareunassa.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Tämä pieni, aina päällimmäisenä pysyvä ikkuna on sanelun ohjain. Iso painike käynnistää ja pysäyttää nauhoituksen; vie hiiri kortin päälle nähdäksesi nykyisen tilan. Vedä yläreunan kahvasta siirtääksesi ikkunan minne haluat, ja ✕-painike piilottaa sen valikkoriville. Moottorit, jotka tarjoavat kielivalinnan, näyttävät kielipalkin alareunassa.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Valitse tunnistusmoottori</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype toimii ilmaisinalueella</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype toimii valikkorivillä</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Vimpaimen piilottaminen tai sulkeminen ei sammuta Parlotypea — se jää kuuntelemaan pikanäppäimiäsi ilmaisinalueelta. Tuo vimpain takaisin napsauttamalla ilmaisinalueen kuvaketta. Sulkeaksesi Parlotypen kokonaan, napsauta ilmaisinalueen kuvaketta hiiren oikealla painikkeella ja valitse Lopeta.
 
 Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnistyy Windowsin mukana ja odottaa ilmaisinalueella — mitään ikkunaa ei avaudu. Voit poistaa tämän käytöstä milloin tahansa kohdassa Asetukset → Sovellus → Käynnistys.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Vimpaimen piilottaminen tai sulkeminen ei sammuta Parlotypea — se jää kuuntelemaan pikanäppäimiäsi valikkoriviltä. Tuo vimpain takaisin napsauttamalla siellä Parlotype-kuvaketta ja valitsemalla Avaa. Sulkeaksesi Parlotypen kokonaan, valitse samasta valikosta Lopeta.
+
+Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnistyy macOS:n mukana ja odottaa valikkorivillä — mitään ikkunaa ei avaudu. Voit poistaa tämän käytöstä milloin tahansa kohdassa Asetukset → Sovellus → Käynnistys.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Olet valmis</value>
@@ -142,8 +156,16 @@ Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnist
     <value>Noudattaa Windowsia — tällä hetkellä {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Noudattaa macOS:ää — tällä hetkellä {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Noudattaa Windowsia — ei vielä käännetty, joten käytössä on englanti</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Noudattaa macOS:ää — ei vielä käännetty, joten käytössä on englanti</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Keskipitkä</value>
@@ -172,6 +194,14 @@ Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnist
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Avaa asetukset</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Avaa Järjestelmäasetukset</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Ei nyt</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Avaa</value>
@@ -268,6 +298,26 @@ Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnist
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Pilvipalveluntarjoajaa ei ole määritetty</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype tarvitsee Käyttöapu-luvan</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS pyytää lupaasi, ennen kuin sovellus voi tunnistaa järjestelmänlaajuisen pikanäppäimen tai liittää tekstiä muihin sovelluksiin. Avaa Järjestelmäasetukset → Tietosuoja ja suojaus → Käyttöapu ja kytke Parlotype päälle. Pikanäppäin alkaa toimia heti sen jälkeen — uudelleenkäynnistystä ei tarvita.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Tekstisi on leikepöydällä – liitä se painamalla Cmd+V.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Mikrofonin käyttöoikeus on pois päältä</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS ei anna Parlotypen käyttää mikrofonia. Avaa Järjestelmäasetukset → Tietosuoja ja suojaus → Mikrofoni ja kytke Parlotype päälle, ja aloita sitten sanelu uudelleen.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Pilvilitterointi epäonnistui</value>
@@ -376,8 +426,16 @@ Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnist
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype kuuntelee sanelun pikanäppäintäsi ilmaisinalueelta, joten sen täytyy olla käynnissä, jotta voit sanella.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype kuuntelee sanelun pikanäppäintäsi valikkoriviltä, joten sen täytyy olla käynnissä, jotta voit sanella.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Käynnistä Parlotype, kun kirjaudun Windowsiin</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Käynnistä Parlotype, kun kirjaudun macOS:ään</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Älä käynnistä Parlotypea automaattisesti</value>
@@ -396,15 +454,27 @@ Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnist
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Yksi merkintä omassa käyttäjätilissäsi (HKCU Run), joka osoittaa Parlotypeen. Ei palvelua, ei ajastettua tehtävää, ei järjestelmänvalvojan oikeuksia, ei mitään koko koneen laajuista. Voit nähdä ja poistaa sen itse kohdassa Tehtävienhallinta → Käynnistys.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Yksi käynnistysagentti omassa käyttäjätilissäsi (~/Library/LaunchAgents), joka osoittaa Parlotypeen. Ei apusovellusta, ei järjestelmänvalvojan oikeuksia, ei mitään koko koneen laajuista. Voit nähdä sen ja kytkeä sen pois päältä itse kohdassa Järjestelmäasetukset → Yleiset → Kirjautumiskohteet.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Tämä versio ei voi käynnistyä itse kirjautumisen yhteydessä — sitä ei asennettu Setup.exe-tiedostosta.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Tämä kopio ei voi käynnistyä itse kirjautumisen yhteydessä — siirrä Parlotype ensin Apit-kansioon.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows on kytkenyt Parlotypen pois käytöstä kohdassa Tehtävienhallinta → Käynnistys. Ota se sieltä uudelleen käyttöön, jotta tämä asetus tulee voimaan.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype käynnistyy Windowsin mukana ja odottaa ilmaisinalueella — mitään ikkunaa ei avaudu.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype käynnistyy macOS:n mukana ja odottaa valikkorivillä — mitään ikkunaa ei avaudu.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype toimii vain, kun käynnistät sen itse.</value>
@@ -454,6 +524,10 @@ Jotta pikanäppäimesi toimii heti kirjautumisesta lähtien, Parlotype käynnist
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Tämä versio ei voi päivittää itseään — sitä ei asennettu Setup.exe-tiedostosta.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Tämä kopio ei voi päivittää itseään — sitä ei asennettu Parlotype-julkaisusta.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Tarkistetaan päivityksiä…</value>

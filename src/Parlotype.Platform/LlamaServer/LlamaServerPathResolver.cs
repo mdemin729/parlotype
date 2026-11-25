@@ -10,7 +10,13 @@ namespace Parlotype.Platform.LlamaServer;
 /// </summary>
 internal static class LlamaServerPathResolver
 {
-    public const string ExecutableName = "llama-server.exe";
+    /// <summary>
+    /// The server binary's file name on this operating system: upstream ships
+    /// <c>llama-server.exe</c> for Windows and a bare <c>llama-server</c>
+    /// everywhere else.
+    /// </summary>
+    public static string ExecutableName { get; } =
+        OperatingSystem.IsWindows() ? "llama-server.exe" : "llama-server";
 
     /// <summary>
     /// Returns the absolute path to the executable, or <c>null</c> when no server

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements for a Developer ID build under the hardened runtime (ADR-078).
+  An ad-hoc signed local build does not use them.
+
+  allow-jit / allow-unsigned-executable-memory: the .NET runtime compiles code
+  at run time.
+  disable-library-validation: llama-server and the native speech libraries are
+  not signed by our team.
+  device.audio-input: the hardened runtime blocks the microphone without it,
+  whatever the user answered in the privacy prompt.
+-->
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>

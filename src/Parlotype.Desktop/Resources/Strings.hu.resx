@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Ez a kicsi, mindig legfelül lévő ablak a diktálás vezérlője. A nagy gomb indítja és állítja le a felvételt; vidd az egeret a kártya fölé az aktuális állapot megtekintéséhez. Húzd a felső fogantyúcsíkot a mozgatáshoz, a ✕ gomb pedig az értesítési területre rejti. A nyelvválasztást kínáló motorok egy nyelvsávot jelenítenek meg alul.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Ez a kicsi, mindig legfelül lévő ablak a diktálás vezérlője. A nagy gomb indítja és állítja le a felvételt; vidd az egeret a kártya fölé az aktuális állapot megtekintéséhez. Húzd a felső fogantyúcsíkot a mozgatáshoz, a ✕ gomb pedig a menüsorra rejti. A nyelvválasztást kínáló motorok egy nyelvsávot jelenítenek meg alul.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Válassz beszédfelismerő motort</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>A Parlotype az értesítési területen fut</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>A Parlotype a menüsoron fut</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>A widget elrejtése vagy bezárása nem lépteti ki a Parlotype-ot — továbbra is figyeli a billentyűparancsaidat az értesítési területről. Kattints az ikonra a widget visszahozásához. A teljes kilépéshez kattints jobb gombbal az ikonra, és válaszd a Kilépés parancsot.
 
 Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlotype elindul a Windowsszal, és az értesítési területen vár — nem nyílik meg ablak. Ezt bármikor kikapcsolhatod a Beállítások → Alkalmazás → Indítás alatt.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>A widget elrejtése vagy bezárása nem lépteti ki a Parlotype-ot — továbbra is figyeli a billentyűparancsaidat a menüsorról. Kattints ott a Parlotype ikonjára, és válaszd a Megnyitás parancsot a widget visszahozásához. A teljes kilépéshez válaszd ugyanebben a menüben a Kilépés parancsot.
+
+Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlotype elindul a macOS rendszerrel, és a menüsoron vár — nem nyílik meg ablak. Ezt bármikor kikapcsolhatod a Beállítások → Alkalmazás → Indítás alatt.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Készen állsz</value>
@@ -142,8 +156,16 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
     <value>A Windows nyelvét követi — jelenleg: {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>A macOS nyelvét követi — jelenleg: {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>A Windows nyelvét követi — ez még nincs lefordítva, ezért angolul jelenik meg</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>A macOS nyelvét követi — ez még nincs lefordítva, ezért angolul jelenik meg</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Közepes</value>
@@ -172,6 +194,14 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Beállítások megnyitása</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Rendszerbeállítások megnyitása</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Most nem</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Megnyitás</value>
@@ -268,6 +298,26 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>A felhőszolgáltató nincs beállítva</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>A Parlotype-nak hozzáférés kell a Kisegítő lehetőségekhez</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>A macOS az engedélyedet kéri, mielőtt egy alkalmazás globális billentyűparancsot észlelhetne, vagy szöveget illeszthetne be más alkalmazásokba. Nyisd meg a Rendszerbeállítások → Adatvédelem és biztonság → Kisegítő lehetőségek részt, és kapcsold be a Parlotype-ot. A billentyűparancs azonnal működni kezd — nem kell újraindítani.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>A szöveged a vágólapon van – a beillesztéshez nyomd meg a Cmd+V billentyűket.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>A mikrofon-hozzáférés ki van kapcsolva</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>A macOS nem engedi, hogy a Parlotype használja a mikrofont. Nyisd meg a Rendszerbeállítások → Adatvédelem és biztonság → Mikrofon részt, kapcsold be a Parlotype-ot, majd indítsd újra a diktálást.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>A felhőalapú átirat sikertelen volt</value>
@@ -376,8 +426,16 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>A Parlotype az értesítési területről figyeli a diktálási billentyűparancsot, ezért futnia kell, mielőtt diktálhatnál.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>A Parlotype a menüsorról figyeli a diktálási billentyűparancsot, ezért futnia kell, mielőtt diktálhatnál.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>A Parlotype induljon el, amikor bejelentkezem a Windowsba</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>A Parlotype induljon el, amikor bejelentkezem a macOS rendszerbe</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Ne induljon el automatikusan a Parlotype</value>
@@ -396,15 +454,27 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Egyetlen bejegyzés a saját felhasználói fiókodban (HKCU Run), amely a Parlotype-ra mutat. Nincs szolgáltatás, nincs ütemezett feladat, nincs rendszergazdai jogosultság, semmi gépszintű. Saját magad is megtekintheted és eltávolíthatod a Feladatkezelő → Indítás fülön.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Egyetlen indítási ügynök a saját felhasználói fiókodban (~/Library/LaunchAgents), amely a Parlotype-ra mutat. Nincs segédalkalmazás, nincs rendszergazdai jogosultság, semmi gépszintű. Saját magad is megtekintheted és kikapcsolhatod a Rendszerbeállítások → Általános → Bejelentkezési elemek alatt.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Ez a verzió nem tudja önmagát bejelentkezéskor elindítani — nem a Setup.exe-ből lett telepítve.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Ez a példány nem tudja önmagát bejelentkezéskor elindítani — előbb helyezd át a Parlotype-ot az Alkalmazások mappába.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>A Windows kikapcsolta a Parlotype-ot a Feladatkezelő → Indítás fülön. Kapcsold be újra ott, hogy ez a beállítás érvénybe léphessen.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>A Parlotype elindul a Windowsszal, és az értesítési területen vár — nem nyílik meg ablak.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>A Parlotype elindul a macOS rendszerrel, és a menüsoron vár — nem nyílik meg ablak.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>A Parlotype csak akkor fut, ha te magad indítod el.</value>
@@ -454,6 +524,10 @@ Hogy a billentyűparancsod a bejelentkezés pillanatától működjön, a Parlot
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Ez a verzió nem tud magától frissülni — nem a Setup.exe-ből lett telepítve.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Ez a példány nem tud magától frissülni — nem egy Parlotype-kiadásból lett telepítve.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Frissítések keresése…</value>

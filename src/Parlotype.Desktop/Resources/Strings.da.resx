@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Dette lille altid-øverst-vindue er din dikteringsstyring. Den store knap starter og stopper optagelsen; hold musen over kortet for at se den aktuelle status. Træk i gribestrimlen øverst for at flytte det, hvor du vil, og ✕-knappen skjuler det i bakken. Motorer, der tilbyder et sprogvalg, viser en sprogstrimmel langs bunden.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Dette lille altid-øverst-vindue er din dikteringsstyring. Den store knap starter og stopper optagelsen; hold musen over kortet for at se den aktuelle status. Træk i gribestrimlen øverst for at flytte det, hvor du vil, og ✕-knappen skjuler det i menulinjen. Motorer, der tilbyder et sprogvalg, viser en sprogstrimmel langs bunden.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Vælg en talemotor</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype ligger i bakken</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype ligger i menulinjen</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Hvis du skjuler eller lukker widgetten, afslutter det ikke Parlotype — den bliver ved med at lytte efter dine genvejstaster fra systembakken. Klik på bakkeikonet for at få widgetten tilbage. For at afslutte helt skal du højreklikke på bakkeikonet og vælge Afslut.
 
 For at din genvejstast virker, lige så snart du logger på, starter Parlotype sammen med Windows og venter i bakken — der åbnes intet vindue. Slå det fra når som helst under Indstillinger → Program → Opstart.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Hvis du skjuler eller lukker widgetten, afslutter det ikke Parlotype — den bliver ved med at lytte efter dine genvejstaster fra menulinjen. Klik på Parlotype-ikonet dér, og vælg Åbn for at få widgetten tilbage. For at afslutte helt skal du vælge Afslut i samme menu.
+
+For at din genvejstast virker, lige så snart du logger ind, starter Parlotype sammen med macOS og venter i menulinjen — der åbnes intet vindue. Slå det fra når som helst under Indstillinger → Program → Opstart.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Du er klar</value>
@@ -142,8 +156,16 @@ For at din genvejstast virker, lige så snart du logger på, starter Parlotype s
     <value>Følger Windows — i øjeblikket {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Følger macOS — i øjeblikket {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Følger Windows — ikke oversat endnu, så engelsk bruges</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Følger macOS — ikke oversat endnu, så engelsk bruges</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Mellem</value>
@@ -172,6 +194,14 @@ For at din genvejstast virker, lige så snart du logger på, starter Parlotype s
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Åbn indstillinger</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Åbn Systemindstillinger</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Ikke nu</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Åbn</value>
@@ -268,6 +298,26 @@ For at din genvejstast virker, lige så snart du logger på, starter Parlotype s
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Skyudbyder ikke konfigureret</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype skal have adgang til Tilgængelighed</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS beder om din tilladelse, før en app kan registrere en global genvejstast eller indsætte tekst i andre apps. Åbn Systemindstillinger → Anonymitet &amp; sikkerhed → Tilgængelighed, og slå Parlotype til. Genvejstasten virker, så snart du gør det — ingen genstart nødvendig.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Din tekst ligger i udklipsholderen – tryk på Cmd+V for at indsætte den.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Mikrofonadgang er slået fra</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS lader ikke Parlotype bruge mikrofonen. Åbn Systemindstillinger → Anonymitet &amp; sikkerhed → Mikrofon, slå Parlotype til, og start så dikteringen igen.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Sky-transskribering mislykkedes</value>
@@ -376,8 +426,16 @@ For at din genvejstast virker, lige så snart du logger på, starter Parlotype s
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype lytter efter din genvejstast til diktering fra systembakken, så den skal køre, før du kan diktere.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype lytter efter din genvejstast til diktering fra menulinjen, så den skal køre, før du kan diktere.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Start Parlotype, når jeg logger på Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Start Parlotype, når jeg logger ind på macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Start ikke Parlotype automatisk</value>
@@ -396,15 +454,27 @@ For at din genvejstast virker, lige så snart du logger på, starter Parlotype s
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Én enkelt post under din egen brugerkonto (HKCU Run), der peger på Parlotype. Ingen tjeneste, ingen planlagt opgave, ingen administratorrettigheder, intet der gælder hele maskinen. Du kan selv se og fjerne den i Jobliste → Startprogrammer.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Én enkelt launch agent under din egen brugerkonto (~/Library/LaunchAgents), der peger på Parlotype. Intet hjælpeprogram, ingen administratorrettigheder, intet der gælder hele maskinen. Du kan selv se den og slå den fra i Systemindstillinger → Generelt → Log ind-emner.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Denne build kan ikke starte sig selv ved logon — den blev ikke installeret fra Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Denne kopi kan ikke starte sig selv ved log ind — flyt først Parlotype til mappen Programmer.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows har slået Parlotype fra i Jobliste → Startprogrammer. Aktiver den der igen, så denne indstilling får virkning.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype starter sammen med Windows og venter i bakken — der åbnes intet vindue.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype starter sammen med macOS og venter i menulinjen — der åbnes intet vindue.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype kører kun, når du selv starter den.</value>
@@ -454,6 +524,10 @@ For at din genvejstast virker, lige så snart du logger på, starter Parlotype s
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Denne build kan ikke opdatere sig selv — den blev ikke installeret fra Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Denne kopi kan ikke opdatere sig selv — den blev ikke installeret fra en Parlotype-udgivelse.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Tjekker for opdateringer…</value>

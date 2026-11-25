@@ -56,6 +56,7 @@ public partial class TranscribeViewModel : ViewModelBase
     private readonly LanguageRelationshipViewModel? _relationship;
     private readonly ISettingsService? _settings;
     private readonly IUserDialogService? _dialogService;
+    private readonly ISystemPermissionService? _permissions;
     private readonly SpeechCleanupStateViewModel? _cleanupState;
     private readonly ILogger<TranscribeViewModel> _logger;
     private readonly object _activeEngineLock = new();
@@ -218,9 +219,7 @@ public partial class TranscribeViewModel : ViewModelBase
         // Direct property set (no dispatcher hop) — the same pattern every other
         // VM's fire-and-forget InitializeAsync uses for [ObservableProperty] fields.
         var saved = await _settings.GetAsync<string>(SettingsKeys.SpeechEngine);
-        var savedEngine = Enum.TryParse<SpeechEngine>(saved, ignoreCase: true, out var parsed)
-            ? parsed
-            : SpeechEngine.Parakeet;
+        var savedEngine = SpeechEngineDefaults.Parse(saved);
 
         lock (_activeEngineLock)
         {
@@ -316,9 +315,11 @@ public partial class TranscribeViewModel : ViewModelBase
         ISettingsService? settings = null,
         IUserDialogService? dialogService = null,
         ILogger<TranscribeViewModel>? logger = null,
-        SpeechCleanupStateViewModel? cleanupState = null)
+        SpeechCleanupStateViewModel? cleanupState = null,
+        ISystemPermissionService? permissions = null)
     {
         _windowManager = windowManager;
+        _permissions = permissions;
         _pipeline = pipeline;
         _textInjectionService = textInjectionService;
         _audioLevelProvider = audioLevelProvider;
@@ -703,6 +704,25 @@ public partial class TranscribeViewModel : ViewModelBase
             // push-to-talk key release hang until the dialog is dismissed.
             _ = ShowCloudProviderConfigDialogAsync(ex);
         }
+        catch (MicrophoneAccessDeniedException ex)
+        {
+            // Must precede the generic catch — this derives from
+            // InvalidOperationException. The operating system refused the
+            // microphone (macOS privacy settings, ADR-078): nothing in Parlotype
+            // can fix that, so reset like the generic path and point the user at
+            // the one place that can.
+            _logger.LogWarning(ex, "Microphone access denied by the operating system");
+            pipeline.TranscriptionAvailable -= OnTranscriptionAvailable;
+            pipeline.TranscriptionFailed -= OnTranscriptionFailed;
+            if (_audioLevelProvider is not null)
+                _audioLevelProvider.LevelChanged -= OnAudioLevelChanged;
+            IsRecording = false;
+            RecordingState = RecordingState.Disabled;
+            SetStatus(StatusKind.Ready);
+
+            // Fire-and-forget for the same reason as the cloud dialog above.
+            _ = ShowMicrophoneAccessDialogAsync();
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to start recording");
@@ -713,6 +733,33 @@ public partial class TranscribeViewModel : ViewModelBase
             IsRecording = false;
             RecordingState = RecordingState.Disabled;
             SetStatus(StatusKind.Ready);
+        }
+    }
+
+    /// <summary>
+    /// Tells the user the operating system is blocking the microphone and, on
+    /// confirmation, opens the system's privacy settings on the right pane.
+    /// No-op without a dialog service (design mode / tests).
+    /// </summary>
+    private async Task ShowMicrophoneAccessDialogAsync()
+    {
+        if (_dialogService is null)
+            return;
+
+        try
+        {
+            var openSettings = await _dialogService.ShowConfirmationAsync(
+                Strings.Dialog_MicrophoneAccess_Title,
+                Strings.Dialog_MicrophoneAccess_Body,
+                confirmText: Strings.Common_OpenSystemSettings,
+                cancelText: Strings.Common_Cancel);
+
+            if (openSettings)
+                _permissions?.OpenSettings(SystemPermission.Microphone);
+        }
+        catch (Exception dialogEx)
+        {
+            _logger.LogError(dialogEx, "Failed to show the microphone access dialog");
         }
     }
 
@@ -881,6 +928,16 @@ public partial class TranscribeViewModel : ViewModelBase
         {
             await _textInjectionService.InjectTextAsync(e.Result.Text);
         }
+        catch (TextInjectionNotPermittedException)
+        {
+            // Not an error to log and move on from: the dictation worked, the
+            // operating system refused the paste, and the text is waiting on the
+            // clipboard. Without telling the user, that reads as "nothing
+            // happened" (ADR-078). Fire-and-forget so the busy counter below
+            // does not stay up for as long as the dialog is open.
+            _logger.LogWarning("Pasting was not permitted — the text was left on the clipboard");
+            _ = ShowPasteNotPermittedDialogAsync();
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to inject transcribed text");
@@ -889,6 +946,44 @@ public partial class TranscribeViewModel : ViewModelBase
         {
             Interlocked.Decrement(ref _injectionsInFlight);
             NotifyBusyChanged();
+        }
+    }
+
+    /// <summary>1 while the dialog below is open, so a second utterance does not stack another.</summary>
+    private int _pasteNotPermittedDialogOpen;
+
+    /// <summary>
+    /// Tells the user their text is on the clipboard and why it was not pasted,
+    /// and offers the way to the Accessibility switch (macOS, ADR-078). No-op
+    /// without a dialog service (design mode / tests that don't care).
+    /// </summary>
+    private async Task ShowPasteNotPermittedDialogAsync()
+    {
+        if (_dialogService is null || Interlocked.Exchange(ref _pasteNotPermittedDialogOpen, 1) == 1)
+            return;
+
+        try
+        {
+            var openSettings = await _dialogService.ShowConfirmationAsync(
+                Strings.Dialog_AccessibilityAccess_Title,
+                Strings.Dialog_AccessibilityAccess_TextOnClipboard + "\n\n" + Strings.Dialog_AccessibilityAccess_Body,
+                confirmText: Strings.Common_OpenSystemSettings,
+                cancelText: Strings.Common_NotNow);
+
+            if (openSettings && _permissions is not null)
+            {
+                // The request is what puts Parlotype in the Accessibility list.
+                await _permissions.RequestAsync(SystemPermission.Accessibility);
+                _permissions.OpenSettings(SystemPermission.Accessibility);
+            }
+        }
+        catch (Exception dialogEx)
+        {
+            _logger.LogError(dialogEx, "Failed to show the paste-not-permitted dialog");
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _pasteNotPermittedDialogOpen, 0);
         }
     }
 

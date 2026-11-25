@@ -191,3 +191,25 @@ verbatim, and no value over 25 characters matches the English source byte-for-by
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Håll höger Ctrl`.**
 
 Side is now `höger {0}` / `vänster {0}`, lowercase. `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `”{0}” är redan kopplat till {1}.`
+
+## macOS terms
+
+The `_Mac` keys are the macOS wording of an existing key: same sentence, only the OS
+terms swapped. macOS UI names are Apple's own Swedish wording, not literal translations.
+
+| English | Swedish | Notes |
+|---|---|---|
+| menu bar | **menyraden** | Replaces *meddelandefältet* in every `_Mac` key ("i menyraden"). |
+| System Settings | **Systeminställningar** | Button: "Öppna Systeminställningar". Parlotype's own settings stay "Inställningar". |
+| Privacy & Security | **Integritet och säkerhet** | Apple writes "och", not "&". |
+| Accessibility | **Hjälpmedel** | Not "Tillgänglighet". |
+| Microphone | **Mikrofon** | |
+| General | **Allmänt** | |
+| Login Items | **Startobjekt** | |
+| Applications (folder) | **Program** | Written as "mappen Program", unquoted like the Windows names ("fliken Starta"). |
+| log in / at login | **logga in** / **vid inloggning** | Same wording the Windows keys already use; only the OS name changes. |
+| launch agent | **launch agent** (en) | Kept as a loanword next to the verbatim path `~/Library/LaunchAgents`. |
+| helper app | **hjälpprogram** (ett) | |
+| this copy (of the app) | **den här kopian** | The Windows keys say "den här versionen" for *this build*. |
+| a Parlotype release | **en utgiven Parlotype-version** | Follows *Parlotype-versioner* / *utgivningsfilen* on the Updates page. |
+| Not now (button) | **Inte nu** | |

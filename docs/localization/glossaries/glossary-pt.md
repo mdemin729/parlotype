@@ -156,3 +156,23 @@ translated from description rather than a screenshot.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Manter Ctrl direito premido`.**
 
 Side unchanged. `Conflict_AlreadyBoundFormat` is now `{0} já está associado ao modo {1}.` — `associado a alternância` needed `à`.
+
+## macOS terms
+
+The `*_Mac` keys are the macOS wording of the key with the same name; they start from that translation and change only the OS-specific words. macOS UI names are the ones macOS shows in **European Portuguese** (the default this file already made), checked against Apple's pt-PT support pages; the Brazilian macOS name is noted for a future `pt-BR` split.
+
+| English | Portuguese | Brazilian macOS / notes |
+|---|---|---|
+| menu bar | **barra de menus** | Same in pt-BR. Replaces *área de notificação* in every `_Mac` key. |
+| System Settings | **Definições do Sistema** | pt-BR: Ajustes do Sistema. Parlotype's own settings stay *Definições*. Button: "Abrir Definições do Sistema". |
+| Privacy & Security | **Privacidade e segurança** | pt-BR: Privacidade e Segurança. |
+| Accessibility | **Acessibilidade** | Same in pt-BR. |
+| Microphone | **Microfone** | Same in pt-BR. |
+| General | **Geral** | Same in pt-BR. |
+| Login Items | **Início de sessão** | pt-BR: Itens de Início. macOS 15 and later label the pane "Início de sessão e extensões"; the shorter name mirrors the English. |
+| Applications folder | **pasta Aplicações** | pt-BR: pasta Aplicativos. |
+| log in | **iniciar sessão** | Same verb as the Windows "sign in" strings. |
+| launch agent | **agente de arranque** | Apple's pt-PT documentation leaves "launch agent" in English; translated here with the established *arranque*, next to the verbatim `~/Library/LaunchAgents`. |
+| switch (an app) on | **ativar** | "ative o Parlotype". |
+| this copy (of the app) | **esta cópia** | The Windows strings say *esta compilação* ("this build"). |
+| Not now | **Agora não** | |

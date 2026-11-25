@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template for Parlotype.app (ADR-078). scripts/build-macos-app.sh fills in
+  __VERSION__ and __MIN_MACOS__; nothing else varies between builds.
+
+  CFBundleIdentifier is permanent, like the Velopack pack id: macOS files the
+  Accessibility and Microphone grants, the keychain items and the login item
+  under it, so changing it makes every user grant everything again.
+-->
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Parlotype</string>
+    <key>CFBundleDisplayName</key>
+    <string>Parlotype</string>
+    <key>CFBundleIdentifier</key>
+    <string>dev.parlotype.Parlotype</string>
+    <key>CFBundleExecutable</key>
+    <string>Parlotype</string>
+    <key>CFBundleIconFile</key>
+    <string>Parlotype</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>__VERSION__</string>
+    <key>CFBundleVersion</key>
+    <string>__VERSION__</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>__MIN_MACOS__</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+    <!-- A menu bar app: no Dock icon, no application menu. -->
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <!-- Shown by macOS in its own microphone prompt. Without it the system
+         terminates the app the moment it opens the microphone. -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Parlotype listens to the microphone only while you dictate, and turns what you say into text on this Mac.</string>
+</dict>
+</plist>

@@ -232,3 +232,30 @@ no translated value over 25 characters is byte-identical to the English source.
 `Settings_Hotkeys_Modifier_LeftFormat` / `RightFormat` are substituted into `Gesture_HoldFormat` / `Gesture_DoubleTapFormat`, so the side is a *mid-phrase* word: lowercase, in the case the gesture verb governs. Rendered result for the default hotkey: **`Drži desni Ctrl`.**
 
 Side is now `desni {0}` / `lijevi {0}`, lowercase (accusative = nominative for masculine inanimate). `Conflict_AlreadyBoundFormat` quotes the imperative gesture: `„{0}” je već dodijeljeno načinu rada: {1}.`
+
+
+## macOS terms
+
+Used the names Croatian macOS itself shows (checked against the system's own Croatian
+resources and Apple's Croatian macOS User Guide), the same way the Windows keys use the
+Croatian Windows names. The `_Mac` keys are the base key's translation with only these
+terms swapped.
+
+| English | Croatian | Notes |
+|---|---|---|
+| menu bar | **traka s izbornicima** | replaces *područje obavijesti* in every `_Mac` key ("u traci s izbornicima", "iz trake s izbornicima") |
+| menu (of the menu-bar icon) | **izbornik** | "u istom izborniku" |
+| System Settings | **Postavke sustava** | `Common_OpenSystemSettings` → "Otvori Postavke sustava"; left in the nominative inside a `→` path, like "u Postavke → Aplikacija → Pokretanje" |
+| Privacy & Security | **Privatnost i sigurnost** | |
+| Accessibility | **Pristupačnost** | the permission is "dopuštenje za Pristupačnost" |
+| Microphone | **Mikrofon** | as a Settings pane name; lowercase *mikrofon* in prose |
+| General | **Općenito** | |
+| Login Items | **Stavke za prijavu** | the pane's name on macOS 13 and 14; since macOS 15 it is "Stavke za prijavu i ekstenzije", which still starts with these words (the English shortens "Login Items & Extensions" the same way) |
+| Applications (folder) | **mapa Aplikacije** | |
+| log in | **prijaviti se** / **prijava** | same word the Windows keys use for "sign in" |
+| macOS (in a sentence) | **sustav macOS** | never declined ("zajedno sa sustavom macOS"), unlike "s Windowsom"; bare "macOS" where no case ending is needed ("Prati macOS", "pri prijavi u macOS") |
+| launch agent | **agent za pokretanje** | the path `~/Library/LaunchAgents` beside it stays verbatim |
+| this copy (of the app) | **ova kopija** | the Windows keys say *ova inačica* for "this build" |
+| a Parlotype release | **Parlotype izdanje** | *izdanje* is the established word for a release |
+| permission (macOS privacy) | **dopuštenje** | |
+| Not now (button) | **Ne sada** | |

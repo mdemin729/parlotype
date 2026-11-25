@@ -2,6 +2,7 @@ using Avalonia.Headless.XUnit;
 using Parlotype.Core.Audio;
 using Parlotype.Core.Settings;
 using Parlotype.Core.Speech;
+using Parlotype.Core.TextInjection;
 using Parlotype.Desktop.Tests.Mocks;
 using Parlotype.Desktop.ViewModels;
 using Xunit;
@@ -218,6 +219,100 @@ public class TranscribeViewModelTests
 
         Assert.Single(injector.InjectedTexts);
         Assert.Equal("hello world", injector.InjectedTexts[0]);
+    }
+
+    // ----- macOS privacy gates (ADR-078) ------------------------------------
+
+    /// <summary>
+    /// The first real test of the macOS port: dictation recognized the speech,
+    /// the paste was refused for want of the Accessibility permission, and
+    /// nothing on screen said so. The text is on the clipboard by then, and the
+    /// user has to be told both things.
+    /// </summary>
+    [AvaloniaFact]
+    public async Task PasteNotPermitted_TellsTheUser_AndOffersTheSystemSetting()
+    {
+        var pipeline = new MockAudioPipeline();
+        var injector = new MockTextInjectionService { ThrowOnInject = new TextInjectionNotPermittedException() };
+        var dialog = new MockUserDialogService { ConfirmationResult = true };
+        var permissions = new MockSystemPermissionService();
+        var vm = new TranscribeViewModel(
+            new MockWindowManager(), pipeline, injector, dialogService: dialog, permissions: permissions);
+
+        await vm.StartRecordingAsync();
+        pipeline.RaiseTranscriptionAvailable("hello world");
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, dialog.ShowConfirmationCount);
+        Assert.Equal("Parlotype needs Accessibility access", dialog.LastTitle);
+        Assert.StartsWith("Your text is on the clipboard", dialog.LastMessage);
+        Assert.Contains("Accessibility", dialog.LastMessage);
+        Assert.Equal("Open System Settings", dialog.LastConfirmText);
+        Assert.Equal([SystemPermission.Accessibility], permissions.Requested);
+        Assert.Equal([SystemPermission.Accessibility], permissions.SettingsOpened);
+    }
+
+    [AvaloniaFact]
+    public async Task PasteNotPermitted_Declined_OpensNothing()
+    {
+        var pipeline = new MockAudioPipeline();
+        var injector = new MockTextInjectionService { ThrowOnInject = new TextInjectionNotPermittedException() };
+        var dialog = new MockUserDialogService { ConfirmationResult = false };
+        var permissions = new MockSystemPermissionService();
+        var vm = new TranscribeViewModel(
+            new MockWindowManager(), pipeline, injector, dialogService: dialog, permissions: permissions);
+
+        await vm.StartRecordingAsync();
+        pipeline.RaiseTranscriptionAvailable("hello world");
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, dialog.ShowConfirmationCount);
+        Assert.Empty(permissions.SettingsOpened);
+    }
+
+    [AvaloniaFact]
+    public async Task PasteNotPermitted_DoesNotStackADialogPerUtterance()
+    {
+        var pipeline = new MockAudioPipeline();
+        var injector = new MockTextInjectionService { ThrowOnInject = new TextInjectionNotPermittedException() };
+        var dialog = new MockUserDialogService { Gate = new TaskCompletionSource() };
+        var vm = new TranscribeViewModel(
+            new MockWindowManager(), pipeline, injector, dialogService: dialog,
+            permissions: new MockSystemPermissionService());
+
+        await vm.StartRecordingAsync();
+        pipeline.RaiseTranscriptionAvailable("first sentence");
+        pipeline.RaiseTranscriptionAvailable("second sentence");
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, dialog.ShowConfirmationCount);
+
+        // Once it is dismissed, the next refused paste may explain itself again.
+        dialog.Gate.SetResult();
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        pipeline.RaiseTranscriptionAvailable("third sentence");
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, dialog.ShowConfirmationCount);
+    }
+
+    [AvaloniaFact]
+    public async Task MicrophoneDenied_ResetsTheWidget_AndOffersTheSystemSetting()
+    {
+        var pipeline = new MockAudioPipeline { ThrowOnStart = new MicrophoneAccessDeniedException() };
+        var dialog = new MockUserDialogService { ConfirmationResult = true };
+        var permissions = new MockSystemPermissionService();
+        var vm = new TranscribeViewModel(
+            new MockWindowManager(), pipeline, dialogService: dialog, permissions: permissions);
+
+        await vm.StartRecordingAsync();
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+
+        Assert.False(vm.IsRecording);
+        Assert.Equal(RecordingState.Disabled, vm.RecordingState);
+        Assert.Equal(1, dialog.ShowConfirmationCount);
+        Assert.Equal("Microphone access is switched off", dialog.LastTitle);
+        Assert.Equal([SystemPermission.Microphone], permissions.SettingsOpened);
     }
 
     [AvaloniaFact]

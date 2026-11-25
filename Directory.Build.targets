@@ -55,6 +55,12 @@
     Restricting it to a known RID list (rather than "anything that isn't our RID") keeps the
     filter from touching runtimes/ paths owned by any other package.
 
+    Whisper.net names its macOS folders macos-x64 and macos-arm64, where the SDK's
+    RuntimeIdentifier is osx-x64 and osx-arm64. Compared as they are, no folder matches a
+    macOS publish and the filter removes all of them, the right one included, leaving an
+    app that cannot load Whisper. The RID is therefore translated before the comparison
+    (ADR-078).
+
     Publish only: `bin/` output is left exactly as it was, so dev builds and tests are
     unaffected. See ADR-051.
   -->
@@ -67,12 +73,77 @@
           AfterTargets="ComputeResolvedFilesToPublishList"
           Condition="'$(RuntimeIdentifier)' != ''">
     <PropertyGroup>
-      <_ForeignWhisperRuntimeRids>$(WhisperRuntimeRidDirectories.Replace(';$(RuntimeIdentifier);', ';'))</_ForeignWhisperRuntimeRids>
+      <_WhisperRuntimeRid>$(RuntimeIdentifier.Replace('osx-', 'macos-'))</_WhisperRuntimeRid>
+      <_ForeignWhisperRuntimeRids>$(WhisperRuntimeRidDirectories.Replace(';$(_WhisperRuntimeRid);', ';'))</_ForeignWhisperRuntimeRids>
     </PropertyGroup>
     <ItemGroup>
       <_ForeignRuntimeAssetToPublish Include="@(ResolvedFileToPublish)"
           Condition="$(_ForeignWhisperRuntimeRids.Contains(';$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('%(RelativePath)'))));'))" />
       <ResolvedFileToPublish Remove="@(_ForeignRuntimeAssetToPublish)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Drop the Windows ONNX Runtime from publishes for other operating systems.
+
+    SileroVad's dependency chain ends in Microsoft.ML.OnnxRuntime.Gpu.Windows, whose
+    .targets copy onnxruntime.dll and onnxruntime_providers_shared.dll into the output
+    whatever is being built: its only platform check is on the processor, not the OS. On
+    Windows they are replaced by sherpa-onnx's newer copies (ADR-050). In a macOS or Linux
+    publish they are 11 MB of Windows code nothing can load, and a file that a macOS
+    bundle then has to carry a signature for.
+
+    Two places, because the files arrive two ways. The app project gets its own copy
+    items from the package, which for an arm64 target name a win-arm64 folder the package
+    does not contain, so the build fails outright unless they are withdrawn before the
+    copy. Parlotype.Platform is built without a RuntimeIdentifier and passes its x64 pair
+    on to whoever references it, which only the publish list can filter.
+
+    The managed Microsoft.ML.OnnxRuntime.dll stays: its file name does not start with
+    "onnxruntime". See ADR-078.
+  -->
+  <Target Name="RemoveWindowsOnnxRuntimeFromForeignBuild"
+          BeforeTargets="AssignTargetPaths"
+          Condition="'$(RuntimeIdentifier)' != '' and !$(RuntimeIdentifier.StartsWith('win'))">
+    <ItemGroup>
+      <_WindowsOnnxRuntimeToCopy Include="@(None)"
+          Condition="$([System.String]::Copy('%(Filename)').StartsWith('onnxruntime'))
+                     and ('%(Extension)' == '.dll' or '%(Extension)' == '.lib')" />
+      <None Remove="@(_WindowsOnnxRuntimeToCopy)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveWindowsOnnxRuntimeFromForeignPublish"
+          AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(RuntimeIdentifier)' != '' and !$(RuntimeIdentifier.StartsWith('win'))">
+    <ItemGroup>
+      <_WindowsOnnxRuntimeToPublish Include="@(ResolvedFileToPublish)"
+          Condition="$([System.String]::Copy('%(Filename)').StartsWith('onnxruntime'))
+                     and ('%(Extension)' == '.dll' or '%(Extension)' == '.lib')" />
+      <ResolvedFileToPublish Remove="@(_WindowsOnnxRuntimeToPublish)" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Drop the macOS 13 ONNX Runtime fallback from every publish that is not for Intel Macs.
+
+    Parlotype.Platform copies Microsoft's ONNX Runtime 1.18.1 for osx-x64 into
+    onnxruntime-legacy/ so voice activity detection works on Intel Macs whose macOS is
+    older than 14.4 (ADR-078). The item is declared in a class library, which is built
+    without a RuntimeIdentifier even when the app is published for one, so it cannot be
+    conditioned on the target there: on a Mac build machine it reaches every publish.
+    Nothing but an osx-x64 process can load it, so it goes from all the others (28 MB).
+
+    Publish only: `bin/` output is left as it was, where the file is what lets an Intel
+    Mac on an old macOS run the tests. See ADR-078.
+  -->
+  <Target Name="RemoveLegacyOnnxRuntimeFromPublish"
+          AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(RuntimeIdentifier)' != '' and '$(RuntimeIdentifier)' != 'osx-x64'">
+    <ItemGroup>
+      <_LegacyOnnxRuntimeToPublish Include="@(ResolvedFileToPublish)"
+          Condition="$([System.String]::Copy('%(RelativePath)').Replace('\', '/').Contains('onnxruntime-legacy/'))" />
+      <ResolvedFileToPublish Remove="@(_LegacyOnnxRuntimeToPublish)" />
     </ItemGroup>
   </Target>
 

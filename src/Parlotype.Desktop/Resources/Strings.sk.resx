@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>Toto malé okno, ktoré je vždy navrchu, je ovládanie diktovania. Veľké tlačidlo spúšťa a zastavuje nahrávanie; prejdením myšou nad kartou zobrazíte aktuálny stav. Presuňte úchyt navrchu a widget premiestnite kamkoľvek, tlačidlo ✕ ho skryje do systémovej lišty. Motory, ktoré ponúkajú výber jazyka, zobrazujú v spodnej časti jazykový pruh.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>Toto malé okno, ktoré je vždy navrchu, je ovládanie diktovania. Veľké tlačidlo spúšťa a zastavuje nahrávanie; prejdením myšou nad kartou zobrazíte aktuálny stav. Presuňte úchyt navrchu a widget premiestnite kamkoľvek, tlačidlo ✕ ho skryje do lišty. Motory, ktoré ponúkajú výber jazyka, zobrazujú v spodnej časti jazykový pruh.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Vyberte rozpoznávací motor</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype žije v systémovej lište</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype žije v lište</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Skrytie alebo zatvorenie widgetu Parlotype neukončí — naďalej počúva vaše klávesové skratky zo systémovej lišty. Kliknutím na ikonu v lište widget znova zobrazíte. Ak chcete Parlotype úplne ukončiť, kliknite na ikonu v lište pravým tlačidlom a vyberte Skončiť.
 
 Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa spolu s Windows a čaká v systémovej lište — neotvorí sa žiadne okno. Kedykoľvek to môžete vypnúť v Nastavenia → Aplikácia → Spustenie.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Skrytie alebo zatvorenie widgetu Parlotype neukončí — naďalej počúva vaše klávesové skratky z lišty. Widget znova zobrazíte tak, že tam kliknete na ikonu Parlotype a vyberiete Otvoriť. Ak chcete Parlotype úplne ukončiť, vyberte v tom istom menu Skončiť.
+
+Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa spolu s macOS a čaká v lište — neotvorí sa žiadne okno. Kedykoľvek to môžete vypnúť v Nastavenia → Aplikácia → Spustenie.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Ste pripravení</value>
@@ -142,8 +156,16 @@ Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa 
     <value>Podľa systému Windows — aktuálne {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Podľa systému macOS — aktuálne {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Podľa systému Windows — zatiaľ nepreložené, používa sa angličtina</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Podľa systému macOS — zatiaľ nepreložené, používa sa angličtina</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Stredný</value>
@@ -172,6 +194,14 @@ Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa 
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Otvoriť nastavenia</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Otvoriť Systémové nastavenia</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Teraz nie</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Otvoriť</value>
@@ -268,6 +298,26 @@ Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa 
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Cloudový poskytovateľ nie je nastavený</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype potrebuje oprávnenie Prístupnosť</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS žiada o váš súhlas, skôr než aplikácia môže rozpoznať globálnu klávesovú skratku alebo písať text do iných aplikácií. Otvorte Systémové nastavenia → Súkromie a bezpečnosť → Prístupnosť a zapnite Parlotype. Klávesová skratka začne fungovať hneď potom — reštart nie je potrebný.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Váš text je v schránke — vložte ho stlačením Cmd+V.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Prístup k mikrofónu je vypnutý</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS nedovoľuje aplikácii Parlotype používať mikrofón. Otvorte Systémové nastavenia → Súkromie a bezpečnosť → Mikrofón a zapnite Parlotype, potom znova spustite diktovanie.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Prepis v cloude zlyhal</value>
@@ -376,8 +426,16 @@ Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa 
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype počúva vašu klávesovú skratku na diktovanie zo systémovej lišty, takže musí bežať skôr, než môžete diktovať.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype počúva vašu klávesovú skratku na diktovanie z lišty, takže musí bežať skôr, než môžete diktovať.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Spustiť Parlotype pri prihlásení do Windows</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Spustiť Parlotype pri prihlásení do macOS</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Nespúšťať Parlotype automaticky</value>
@@ -396,15 +454,27 @@ Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa 
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Jeden záznam vo vašom používateľskom účte (HKCU Run), ktorý odkazuje na Parlotype. Žiadna služba, žiadna naplánovaná úloha, žiadne správcovské oprávnenia, nič platné pre celé zariadenie. Môžete si ho pozrieť a odstrániť v Správcovi úloh → Po spustení.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Jeden spúšťací agent vo vašom používateľskom účte (~/Library/LaunchAgents), ktorý odkazuje na Parlotype. Žiadna pomocná aplikácia, žiadne správcovské oprávnenia, nič platné pre celé zariadenie. Môžete si ho pozrieť a vypnúť v Systémových nastaveniach → Všeobecné → Položky a rozšírenia spúšťané pri prihlásení.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Toto zostavenie sa nemôže samo spustiť pri prihlásení — nebolo nainštalované zo Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>Táto kópia sa nemôže sama spustiť pri prihlásení — najprv presuňte Parlotype do priečinka Aplikácie.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows má Parlotype vypnuté v Správcovi úloh → Po spustení. Znova to tam povoľte, aby toto nastavenie začalo platiť.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype sa spúšťa spolu s Windows a čaká v systémovej lište — neotvorí sa žiadne okno.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype sa spúšťa spolu s macOS a čaká v lište — neotvorí sa žiadne okno.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype beží iba vtedy, keď ho sami spustíte.</value>
@@ -454,6 +524,10 @@ Aby klávesová skratka fungovala hneď po prihlásení, Parlotype sa spúšťa 
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>Toto zostavenie sa nemôže samo aktualizovať — nebolo nainštalované zo Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Táto kópia sa nemôže sama aktualizovať — nebola nainštalovaná z vydania Parlotype.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Kontrolujú sa aktualizácie…</value>

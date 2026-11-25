@@ -1,3 +1,4 @@
+using System.Formats.Tar;
 using System.IO.Compression;
 using System.Net;
 using System.Security.Cryptography;
@@ -197,11 +198,17 @@ public sealed class LlamaServerInstallerTests : IDisposable
     }
 
     [Fact]
-    public async Task Install_MacOsVariant_ThrowsNotSupported()
+    public async Task Install_MacOsVariant_UnpacksTheTarballFlat()
     {
-        var zip = BuildZip(("llama-server", "DATA"));
+        // Upstream's macOS and Linux tarballs wrap everything in llama-b{N}/ and
+        // link the shared libraries to each other; the install has to end up
+        // with the server binary at its root, like the Windows zip (ADR-078).
+        var tarball = BuildTarGz(
+            "llama-b9198",
+            files: [("llama-server", "SERVER"), ("libllama.1.0.0.dylib", "LIB")],
+            links: [("libllama.dylib", "libllama.1.0.0.dylib")]);
         var url = "https://example.test/llama-b9198-bin-macos-arm64.tar.gz";
-        _handler.Set(url, zip);
+        _handler.Set(url, tarball);
 
         var variant = new LlamaServerVariant(
             Build: "b9198",
@@ -209,17 +216,32 @@ public sealed class LlamaServerInstallerTests : IDisposable
             Os: LlamaServerOs.MacOs,
             Arch: LlamaServerArch.Arm64,
             AssetName: "llama-b9198-bin-macos-arm64.tar.gz",
-            Bytes: zip.Length,
+            Bytes: tarball.Length,
             DownloadUrl: url,
-            Sha256: null,
+            Sha256: Sha256(tarball),
             CompanionAssetName: null,
             CompanionDownloadUrl: null,
             CompanionBytes: null,
             CompanionSha256: null);
 
-        var installer = NewInstaller();
-        await Assert.ThrowsAsync<NotSupportedException>(
-            () => installer.InstallAsync(variant, progress: null));
+        var install = await NewInstaller().InstallAsync(variant, progress: null);
+
+        Assert.Equal("SERVER", File.ReadAllText(Path.Combine(install.AbsolutePath, "llama-server")));
+        Assert.Equal("LIB", File.ReadAllText(Path.Combine(install.AbsolutePath, "libllama.1.0.0.dylib")));
+        Assert.False(Directory.Exists(Path.Combine(install.AbsolutePath, "llama-b9198")));
+
+        // The executable bit and the library links are what a zip cannot carry.
+        // Windows has neither, so they are only checked where they exist.
+        if (!OperatingSystem.IsWindows())
+        {
+            var server = new FileInfo(Path.Combine(install.AbsolutePath, "llama-server"));
+            Assert.True(server.UnixFileMode.HasFlag(UnixFileMode.UserExecute));
+
+            var link = new FileInfo(Path.Combine(install.AbsolutePath, "libllama.dylib"));
+            Assert.Equal("libllama.1.0.0.dylib", link.LinkTarget);
+            Assert.Equal("LIB", File.ReadAllText(link.FullName));
+        }
+
         AssertStagingIsClean();
     }
 
@@ -377,6 +399,41 @@ public sealed class LlamaServerInstallerTests : IDisposable
             }
         }
         return ms.ToArray();
+    }
+
+    private static byte[] BuildTarGz(
+        string wrapperFolder,
+        (string Name, string Content)[] files,
+        (string Name, string Target)[] links)
+    {
+        using var buffer = new MemoryStream();
+        using (var gzip = new GZipStream(buffer, CompressionMode.Compress, leaveOpen: true))
+        using (var tar = new TarWriter(gzip, TarEntryFormat.Pax))
+        {
+            tar.WriteEntry(new PaxTarEntry(TarEntryType.Directory, wrapperFolder + "/")
+            {
+                Mode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute,
+            });
+
+            foreach (var (name, content) in files)
+            {
+                tar.WriteEntry(new PaxTarEntry(TarEntryType.RegularFile, $"{wrapperFolder}/{name}")
+                {
+                    Mode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute,
+                    DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content)),
+                });
+            }
+
+            foreach (var (name, target) in links)
+            {
+                tar.WriteEntry(new PaxTarEntry(TarEntryType.SymbolicLink, $"{wrapperFolder}/{name}")
+                {
+                    LinkName = target,
+                });
+            }
+        }
+
+        return buffer.ToArray();
     }
 
     private static string Sha256(byte[] bytes)

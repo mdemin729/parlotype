@@ -2,7 +2,7 @@
 status: accepted
 date: 2026-07-30
 amends: [001]
-amended-by: [057, 060]
+amended-by: [057, 060, 078]
 ---
 
 # 047. Multi-Binding Dictation Hotkeys (Hold, Double-Tap, Chord, Cancel)

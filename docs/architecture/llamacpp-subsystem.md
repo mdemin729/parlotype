@@ -41,10 +41,10 @@ dependency on speech. Both consumers use them unchanged.
 |-----------|---------|----------------|
 | `ILlamaServerCatalog` / `GitHubLlamaServerCatalog` | Core / Platform | Fetches release groups from GitHub, parses asset names, pairs CUDA-Windows variants with their cudart companion, filters to current OS/arch, caches result + ETag on disk for 1 h. Lists the build upstream's newest versioned release names first, marked with that version (ADR-074). |
 | `ILlamaServerRegistry` / `JsonLlamaServerRegistry` | Core / Platform | Reads/writes `manifest.json` (managed installs). Resolves the active install by reading `LlamaCppActiveInstall` from `ISettingsService`. Manual mode returns a synthetic install pointing at `LlamaCppServerFolder`. |
-| `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. |
+| `ILlamaServerInstaller` / `LlamaServerInstaller` | Core / Platform | Downloads main + companion to a staging dir, SHA256-verifies, extracts, atomically renames into `{root}/{id}/`, updates the manifest. Windows assets are zips with the binary at the root; macOS and Linux assets are tarballs that wrap everything in `llama-b{N}/` and depend on the executable bit and on symlinks between the shared libraries, so they are unpacked with `TarFile` and lifted one level ([ADR-078](../decisions/078-macos-support.md)). |
 | `LlamaCppServerInfo` | Platform | Pure probe helper. Hits `/health` then `/props` to classify a port as `Connected`, `Loading`, `Disconnected`, `PortConflict`, or `Error`. Moved to `Parlotype.Platform.LlamaServer` in ADR-027. |
 | `ILlamaCppServerLifecycle` / `CompositeLlamaServerLifecycle` | Core / Platform | Stops running sidecars so the installer can replace their files. Each consumer implements the interface for its own process; DI hands the installer a composite over both (ADR-073). |
-| `LlamaServerPathResolver` | Platform | The one rule for which `llama-server.exe` to launch: a managed active install, else the manual folder, else none. Used by both consumers. |
+| `LlamaServerPathResolver` | Platform | The one rule for which `llama-server.exe` (`llama-server` off Windows) to launch: a managed active install, else the manual folder, else none. Used by both consumers. |
 | `LlamaServerProcess` | Platform | One spawned server: start with an argument list, poll `/health`, stop. Used by the cleanup consumer; the Gemma 4 recognizer predates it and keeps its own copy of this logic. |
 | `LlamaServerVariantPicker` | Core | Picks a CPU build for features that install a server on the user's behalf: the released build's when the catalog marks one, otherwise the newest. |
 | `StreamingFileDownloader` | Platform (`Speech` namespace, shared) | HTTP → temp → atomic-move helper with SHA-256 verification. Used by the Whisper, Parakeet and Gemma 4 model download services and the installer. |
@@ -485,6 +485,10 @@ flowchart TD
       ggml-cuda.dll
       cudart64_12.dll             # cudart companion zip merged into the same folder
 ```
+
+On macOS the root is `~/Library/Application Support/Parlotype/llama-servers/`, an install is
+named like `b12383-macos-cpu-x64`, and it holds `llama-server` with its `.dylib` files and
+the links between them.
 
 ### Manifest schema (`manifest.json`)
 

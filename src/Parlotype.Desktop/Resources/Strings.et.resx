@@ -39,6 +39,10 @@
   <data name="Onboarding_Widget_Body" xml:space="preserve">
     <value>See väike, alati pealmisena püsiv aken on sinu dikteerimise juhtpaneel. Suur nupp alustab ja lõpetab salvestamise; liigu hiirega kaardi kohale, et näha praegust olekut. Lohista ülal olevat käepideriba, et akent liigutada, ja ✕-nupp peidab selle teavitusalasse. Keelevaliku võimalusega mootorid näitavad allservas keeleriba.</value>
   </data>
+  <data name="Onboarding_Widget_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Widget_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Menu bar" is the strip at the top of the Mac screen — use the name macOS itself uses in this language.</comment>
+    <value>See väike, alati pealmisena püsiv aken on sinu dikteerimise juhtpaneel. Suur nupp alustab ja lõpetab salvestamise; liigu hiirega kaardi kohale, et näha praegust olekut. Lohista ülal olevat käepideriba, et akent liigutada, ja ✕-nupp peidab selle menüüribale. Keelevaliku võimalusega mootorid näitavad allservas keeleriba.</value>
+  </data>
   <data name="Onboarding_Engine_Title" xml:space="preserve">
     <value>Vali kõnetuvastusmootor</value>
   </data>
@@ -60,10 +64,20 @@
   <data name="Onboarding_Tray_Title" xml:space="preserve">
     <value>Parlotype elab teavitusalas</value>
   </data>
+  <data name="Onboarding_Tray_Title_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Title, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype elab menüüribal</value>
+  </data>
   <data name="Onboarding_Tray_Body" xml:space="preserve">
     <value>Vidina peitmine või sulgemine ei sulge Parlotype'i — see jätkab sinu kiirklahvide kuulamist teavitusalast. Klõpsa teavitusala ikoonil, et vidin tagasi tuua. Täielikuks väljumiseks tee ikoonil paremklõps ja vali Välju.
 
 Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos Windowsiga ja jääb teavitusalasse ootama — ühtegi akent ei ava. Lülita see igal ajal välja: Seaded → Rakendus → Käivitamine.</value>
+  </data>
+  <data name="Onboarding_Tray_Body_Mac" xml:space="preserve">
+    <comment>macOS wording of Onboarding_Tray_Body, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Open" and "Exit" are the menu items Tray_Open and Tray_Exit — use exactly your translations of those.</comment>
+    <value>Vidina peitmine või sulgemine ei sulge Parlotype'i — see jätkab sinu kiirklahvide kuulamist menüüribalt. Klõpsa seal Parlotype'i ikoonil ja vali Ava, et vidin tagasi tuua. Täielikuks väljumiseks vali samast menüüst Välju.
+
+Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos macOS-iga ja jääb menüüribale ootama — ühtegi akent ei ava. Lülita see igal ajal välja: Seaded → Rakendus → Käivitamine.</value>
   </data>
   <data name="Onboarding_Recap_Title" xml:space="preserve">
     <value>Kõik on valmis</value>
@@ -142,8 +156,16 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
     <value>Järgib Windowsi seadeid — praegu {0}</value>
     <comment>{0} is the language name in its own language, e.g. "Русский".</comment>
   </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailFormat_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailFormat, shown instead of it on a Mac. Start from your translation of that key and change only what differs. {0} is a language name.</comment>
+    <value>Järgib macOS-i seadeid — praegu {0}</value>
+  </data>
   <data name="Settings_InterfaceLanguage_SystemDetailUnsupported" xml:space="preserve">
     <value>Järgib Windowsi seadeid — pole veel tõlgitud, seega kasutatakse inglise keelt</value>
+  </data>
+  <data name="Settings_InterfaceLanguage_SystemDetailUnsupported_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_InterfaceLanguage_SystemDetailUnsupported, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Järgib macOS-i seadeid — pole veel tõlgitud, seega kasutatakse inglise keelt</value>
   </data>
   <data name="Settings_SilenceTimeout_Wait_Medium" xml:space="preserve">
     <value>Keskmine</value>
@@ -172,6 +194,14 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
   </data>
   <data name="Common_OpenSettings" xml:space="preserve">
     <value>Ava seaded</value>
+  </data>
+  <data name="Common_OpenSystemSettings" xml:space="preserve">
+    <comment>Button. "System Settings" is the macOS app — use the name macOS itself uses in this language. Keep it short.</comment>
+    <value>Ava System Settings</value>
+  </data>
+  <data name="Common_NotNow" xml:space="preserve">
+    <comment>Button that dismisses a dialog without acting. Keep it short.</comment>
+    <value>Mitte praegu</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>Ava</value>
@@ -268,6 +298,26 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
   </data>
   <data name="Dialog_CloudNotConfigured_Title" xml:space="preserve">
     <value>Pilveteenuse pakkuja pole seadistatud</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only. "Accessibility" is the name of a macOS privacy setting — use the wording macOS itself uses in this language.</comment>
+    <value>Parlotype vajab Accessibility-luba</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Accessibility" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS küsib sinu luba, enne kui rakendus saab tuvastada globaalset kiirklahvi või kleepida teksti teistesse rakendustesse. Ava System Settings → Privacy &amp; Security → Accessibility ja lülita Parlotype sisse. Kiirklahv hakkab tööle kohe pärast seda — taaskäivitada pole vaja.</value>
+  </data>
+  <data name="Dialog_AccessibilityAccess_TextOnClipboard" xml:space="preserve">
+    <comment>macOS only. First paragraph of the Accessibility dialog when a dictation was recognized but could not be pasted. "Cmd+V" is a key name — never translated.</comment>
+    <value>Sinu tekst on lõikelaual – kleepimiseks vajuta Cmd+V.</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Title" xml:space="preserve">
+    <comment>Dialog title, macOS only.</comment>
+    <value>Juurdepääs mikrofonile on välja lülitatud</value>
+  </data>
+  <data name="Dialog_MicrophoneAccess_Body" xml:space="preserve">
+    <comment>macOS only. "System Settings", "Privacy &amp; Security" and "Microphone" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>macOS ei luba Parlotype'il mikrofoni kasutada. Ava System Settings → Privacy &amp; Security → Microphone ja lülita Parlotype sisse, seejärel alusta dikteerimist uuesti.</value>
   </data>
   <data name="Dialog_CloudTranscriptionFailed_Title" xml:space="preserve">
     <value>Pilves transkribeerimine ebaõnnestus</value>
@@ -376,8 +426,16 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
   <data name="Settings_Startup_Description" xml:space="preserve">
     <value>Parlotype kuulab sinu dikteerimise kiirklahvi teavitusalast, seega peab see enne dikteerimist juba töötama.</value>
   </data>
+  <data name="Settings_Startup_Description_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_Description, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype kuulab sinu dikteerimise kiirklahvi menüüribalt, seega peab see enne dikteerimist juba töötama.</value>
+  </data>
   <data name="Settings_Startup_ToggleOn" xml:space="preserve">
     <value>Käivita Parlotype, kui login Windowsisse sisse</value>
+  </data>
+  <data name="Settings_Startup_ToggleOn_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_ToggleOn, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Käivita Parlotype, kui login macOS-i sisse</value>
   </data>
   <data name="Settings_Startup_ToggleOff" xml:space="preserve">
     <value>Ära käivita Parlotype'i automaatselt</value>
@@ -396,15 +454,27 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
     <comment>"HKCU Run" is a registry path — never translated.</comment>
     <value>Üks kirje sinu enda kasutajakonto all (HKCU Run), mis viitab Parlotype'ile. Ei mingit teenust, ajastatud toimingut ega administraatoriõigusi — mitte midagi, mis mõjutaks kogu arvutit. Näed ja saad selle ise eemaldada: Tegumihaldur → Käivitamine.</value>
   </data>
+  <data name="Settings_Startup_WhatChangesBody_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_WhatChangesBody, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "~/Library/LaunchAgents" is a folder path — never translated. "System Settings", "General" and "Login Items" name real macOS UI — use the wording macOS itself uses in this language.</comment>
+    <value>Üks käivitusagent sinu enda kasutajakonto all (~/Library/LaunchAgents), mis viitab Parlotype'ile. Ei mingit abirakendust ega administraatoriõigusi — mitte midagi, mis mõjutaks kogu arvutit. Näed seda ja saad selle ise välja lülitada: System Settings → General → Login Items.</value>
+  </data>
   <data name="Settings_Startup_State_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>See versioon ei saa ennast sisselogimisel käivitada — seda ei paigaldatud failiga Setup.exe.</value>
+  </data>
+  <data name="Settings_Startup_State_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs. "Applications" is the macOS folder — use the name macOS shows for it in this language.</comment>
+    <value>See koopia ei saa ennast sisselogimisel käivitada — teisalda Parlotype esmalt kausta Applications.</value>
   </data>
   <data name="Settings_Startup_State_BlockedByWindows" xml:space="preserve">
     <value>Windows on Parlotype'i vahekaardil Tegumihaldur → Käivitamine välja lülitanud. Luba see uuesti, et see seade jõustuks.</value>
   </data>
   <data name="Settings_Startup_State_Enabled" xml:space="preserve">
     <value>Parlotype käivitub koos Windowsiga ja jääb teavitusalasse ootama — ühtegi akent ei ava.</value>
+  </data>
+  <data name="Settings_Startup_State_Enabled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Startup_State_Enabled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>Parlotype käivitub koos macOS-iga ja jääb menüüribale ootama — ühtegi akent ei ava.</value>
   </data>
   <data name="Settings_Startup_State_Disabled" xml:space="preserve">
     <value>Parlotype töötab ainult siis, kui sa selle ise käivitad.</value>
@@ -454,6 +524,10 @@ Et sinu kiirklahv töötaks juba sisselogimise hetkest, käivitub Parlotype koos
   <data name="Settings_Updates_Status_NotInstalled" xml:space="preserve">
     <comment>"Setup.exe" is a file name — never translated.</comment>
     <value>See versioon ei saa ennast uuendada — seda ei paigaldatud failiga Setup.exe.</value>
+  </data>
+  <data name="Settings_Updates_Status_NotInstalled_Mac" xml:space="preserve">
+    <comment>macOS wording of Settings_Updates_Status_NotInstalled, shown instead of it on a Mac. Start from your translation of that key and change only what differs.</comment>
+    <value>See koopia ei saa ennast uuendada — seda ei paigaldatud Parlotype'i väljalaskest.</value>
   </data>
   <data name="Settings_Updates_Status_Checking" xml:space="preserve">
     <value>Uuenduste kontrollimine…</value>
