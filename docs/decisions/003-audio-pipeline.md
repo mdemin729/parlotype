@@ -1,7 +1,7 @@
 ---
 status: accepted
 date: 2026-02-17
-amended-by: [045]
+amended-by: [045, 077]
 ---
 
 # 003. Audio Pipeline

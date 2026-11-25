@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Parlotype.Core.TextInjection;
 using SharpHook;
 using SharpHook.Data;
+using SharpHook.Simulation;
 
 namespace Parlotype.Platform.TextInjection;
 
@@ -9,11 +10,11 @@ namespace Parlotype.Platform.TextInjection;
 /// Injects text using SharpHook's <see cref="EventSimulator.SimulateTextEntry"/> which
 /// simulates Unicode character input via the OS input system.
 /// </summary>
-public sealed class SharpHookTextInjectionService : ITextInjectionService
+public sealed class SharpHookTextInjectionService : ITextInjectionService, IDisposable
 {
     private readonly ITargetWindowTracker _windowTracker;
     private readonly ILogger<SharpHookTextInjectionService> _logger;
-    private readonly EventSimulator _simulator = new();
+    private readonly EventSimulator _simulator = EventSimulator.Create("Parlotype");
 
     public SharpHookTextInjectionService(
         ITargetWindowTracker windowTracker,
@@ -43,4 +44,6 @@ public sealed class SharpHookTextInjectionService : ITextInjectionService
 
         _logger.LogDebug("Injected {Length} characters via SharpHook", text.Length);
     }
+
+    public void Dispose() => _simulator.Dispose();
 }

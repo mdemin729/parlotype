@@ -1,11 +1,15 @@
 ---
 title: "sherpa-onnx Quirks"
 area: "speech-engines"
-summary: "The sherpa-onnx 1.13.3 NuGet is CPU-only, its config types use public fields, and Parakeet crashes past 400 s per Decode and degrades past ~60 s."
+summary: "The sherpa-onnx NuGet is CPU-only, its config types use public fields, and Parakeet crashes past 400 s per Decode and degrades past ~60 s."
 verified: 2026-11-11
 ---
 
-# sherpa-onnx 1.13.3 Quirks
+# sherpa-onnx Quirks
+
+Measured on 1.13.3. The app is on 2.0.3 since
+[ADR-077](../decisions/077-dependency-refresh-naudio3-sharphook8-sherpa2.md); only section 1 was
+re-checked there.
 
 Facts learned during the Parakeet TDT v3 spike ([ADR-041](../decisions/041-parakeet-v3-sherpa-onnx.md),
 `docs/research/2026-07-06-parakeet-v3-engine/`) that are not derivable from our code.
@@ -20,7 +24,7 @@ from source with `-DSHERPA_ONNX_ENABLE_GPU=ON` and CUDA 11.8/12.x
 `config.ModelConfig.Provider = "cuda"` on the stock package does not work.
 
 The sherpa native package also **wins the `onnxruntime.dll` race**: it drops its
-own newer build (16 MB, ORT 1.2x) into the output folder, overwriting the 1.18.1
+own newer build (ORT 1.24.4 in 1.13.3, 1.28.2 in 2.0.3) into the output folder, overwriting the 1.18.1
 one that `Microsoft.ML.OnnxRuntime.Gpu` puts there via SileroVad. Worth knowing
 before reasoning about which ONNX Runtime is actually loaded at runtime — see
 [ADR-050](../decisions/050-drop-onnx-runtime-gpu-providers.md).

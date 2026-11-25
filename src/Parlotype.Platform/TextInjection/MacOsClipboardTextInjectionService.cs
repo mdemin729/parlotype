@@ -5,6 +5,7 @@ using Parlotype.Core.TextInjection;
 using Parlotype.Platform.MacOs;
 using SharpHook;
 using SharpHook.Data;
+using SharpHook.Simulation;
 
 namespace Parlotype.Platform.TextInjection;
 
@@ -27,7 +28,7 @@ namespace Parlotype.Platform.TextInjection;
 /// </para>
 /// </remarks>
 [SupportedOSPlatform("macos")]
-public sealed class MacOsClipboardTextInjectionService : ITextInjectionService
+public sealed class MacOsClipboardTextInjectionService : ITextInjectionService, IDisposable
 {
     /// <summary><c>NSPasteboardTypeString</c>.</summary>
     private const string PlainTextType = "public.utf8-plain-text";
@@ -145,7 +146,9 @@ public sealed class MacOsClipboardTextInjectionService : ITextInjectionService
             text.Length);
     }
 
-    private readonly EventSimulator _simulator = new();
+    private readonly EventSimulator _simulator = EventSimulator.Create("Parlotype");
+
+    public void Dispose() => _simulator.Dispose();
 
     /// <summary>Posts Cmd+V. False when macOS refused any part of it.</summary>
     private bool PostCommandV()

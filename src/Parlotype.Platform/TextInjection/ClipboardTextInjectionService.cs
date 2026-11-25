@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Parlotype.Core.TextInjection;
 using SharpHook;
 using SharpHook.Data;
+using SharpHook.Simulation;
 
 namespace Parlotype.Platform.TextInjection;
 
@@ -10,11 +11,11 @@ namespace Parlotype.Platform.TextInjection;
 /// Injects text via clipboard-with-restore: saves the current clipboard,
 /// sets the transcribed text, simulates Ctrl+V, then restores the original content.
 /// </summary>
-public sealed class ClipboardTextInjectionService : ITextInjectionService
+public sealed class ClipboardTextInjectionService : ITextInjectionService, IDisposable
 {
     private readonly ITargetWindowTracker _windowTracker;
     private readonly ILogger<ClipboardTextInjectionService> _logger;
-    private readonly EventSimulator _simulator = new();
+    private readonly EventSimulator _simulator = EventSimulator.Create("Parlotype");
 
     public ClipboardTextInjectionService(
         ITargetWindowTracker windowTracker,
@@ -264,4 +265,6 @@ public sealed class ClipboardTextInjectionService : ITextInjectionService
 
     [DllImport("kernel32.dll")]
     private static extern nint GlobalFree(nint hMem);
+
+    public void Dispose() => _simulator.Dispose();
 }

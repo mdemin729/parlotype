@@ -34,8 +34,12 @@ public static class PlatformServiceExtensions
         }
         else
         {
+            // NAudio 3 marks WASAPI Windows-only (CA1416). It is still what every
+            // platform other than macOS gets, as before.
+#pragma warning disable CA1416
             services.AddSingleton<IAudioCaptureService, WasapiAudioCaptureService>();
             services.AddSingleton<IMicrophoneEnumerator, WasapiMicrophoneEnumerator>();
+#pragma warning restore CA1416
         }
 
         services.AddSingleton<IVadService, SileroVadService>();

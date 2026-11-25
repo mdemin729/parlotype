@@ -47,7 +47,7 @@ public class WaveformViewTests
                 using var bitmap = window.CaptureRenderedFrame();
                 Assert.NotNull(bitmap);
                 if (output is not null)
-                    bitmap.Save(Path.Combine(output, $"{(dark ? "dark" : "light")}-{frame:D3}.png"));
+                    bitmap.Save(Path.Combine(output, $"{(dark ? "dark" : "light")}-{frame:D3}.png"), Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
             }
         }
         finally

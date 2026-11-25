@@ -1,14 +1,18 @@
 ---
 title: "NAudio / WASAPI capture allocation traps"
 area: "audio"
-summary: "NAudio's resampler allocates per Read in proportion to the requested count, and BytesRecorded counts native-format bytes; request ~2x the expected output."
-verified: 2026-11-11
+summary: "NAudio's resampler allocates per Read in proportion to the requested count, and the capture buffer length counts native-format bytes; request ~2x the expected output."
+verified: 2026-11-23
 ---
 
 # NAudio / WASAPI capture allocation traps
 
 Measured with NAudio 2.2.1 while working on
-[ADR-045](../decisions/045-audio-pipeline-allocation-threading.md).
+[ADR-045](../decisions/045-audio-pipeline-allocation-threading.md). The proportionality still
+holds on NAudio 3.3.0, where `WasapiRecorder` calls back once per WASAPI packet (~10 ms)
+instead of every ~60 ms: a 1024-sample floor on the request cost 6.8 MB/s on a live
+microphone, 2× the expected output costs 1.9 MB/s, the same as before the upgrade
+([ADR-077](../decisions/077-dependency-refresh-naudio3-sharphook8-sherpa2.md)).
 
 ## Resampler: the Read-request size drives per-call allocation
 
@@ -29,7 +33,7 @@ consume everything available.
 
 Two traps this creates:
 
-1. **Never pass `BytesRecorded` (or anything derived from input size) as the read count.**
+1. **Never pass the captured byte count (or anything derived from input size) as the read count.**
    Output after 48 kHz stereo → 16 kHz mono is ~24× smaller. This was the dominant allocator
    during recording, dwarfing the capture buffer itself.
 2. **Never pass `rentedArray.Length` as the read count.** `ArrayPool.Rent` rounds up to a
@@ -41,9 +45,9 @@ Reproducible in-repo: `ResamplerReadBenchmarks` in `Parlotype.MicroBenchmarks`.
 
 ## Capture buffer sizing
 
-- `WaveInEventArgs.BytesRecorded` counts **bytes of the device-native format** (WASAPI
+- The captured buffer length (`WaveInEventArgs.BytesRecorded` in NAudio 2, the span passed to`n  `WasapiRecorder.DataAvailable` in NAudio 3) counts **bytes of the device-native format** (WASAPI
   shared mode is typically IEEE-float32 stereo 48 kHz ≈ 384,000 B/s). Using it as a *float
-  count* allocates 4× the byte size: 76.8–153.6 KB per 50–100 ms callback, over the
+  count* allocated 4× the byte size: 76.8–153.6 KB per 50–100 ms NAudio 2 callback, over the
   85,000-byte LOH threshold, so ~1.5 MB/s of Gen2-collected garbage for the whole recording.
   Measured: 15.4 MB per 10 s of simulated capture vs 0 B pooled (`CaptureBufferBenchmarks`).
 - NAudio raises `DataAvailable` **sequentially from its capture thread**, so a rented or

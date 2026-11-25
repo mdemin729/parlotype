@@ -3,6 +3,7 @@ using Parlotype.Core.Hotkeys;
 using Parlotype.Core.Settings;
 using SharpHook;
 using SharpHook.Data;
+using SharpHook.Providers;
 
 namespace Parlotype.Platform.Hotkeys;
 
@@ -112,7 +113,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         if (_hook is not null)
             return;
 
-        var hook = new SimpleGlobalHook(GlobalHookType.Keyboard, runAsyncOnBackgroundThread: true);
+        var hook = new SimpleGlobalHook(UioHookProvider.Instance);
         hook.KeyPressed += OnKeyPressed;
         hook.KeyReleased += OnKeyReleased;
         _hook = hook;
@@ -120,7 +121,7 @@ public sealed class SharpHookHotkeyService : IGlobalHotkeyService
         // The task ends when the hook stops, and faults if it could not be
         // installed. A silent failure here is a dead hotkey with nothing in the
         // log to say why, so it is observed.
-        _ = hook.RunAsync().ContinueWith(
+        _ = hook.RunAsync(GlobalHookType.Keyboard, true).ContinueWith(
             task => _logger.LogError(task.Exception, "The global keyboard hook stopped with an error"),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted,

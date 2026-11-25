@@ -218,8 +218,7 @@ public sealed class WhisperSpeechRecognizer : ISpeechRecognizer
 
                 if (options.BeamSize > 1)
                 {
-                    var beamStrategy = (BeamSearchSamplingStrategyBuilder)builder.WithBeamSearchSamplingStrategy();
-                    beamStrategy.WithBeamSize(options.BeamSize);
+                    builder.WithBeamSearchSamplingStrategy(beam => beam.WithBeamSize(options.BeamSize));
                 }
                 else
                 {

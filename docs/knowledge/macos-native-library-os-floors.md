@@ -1,14 +1,42 @@
 ---
 title: "macOS version floors of the bundled native libraries"
 area: "macos"
-summary: "sherpa-onnx's ONNX Runtime needs macOS 14.4, Whisper.net declares 15.0 but loads on 13, .NET 10 supports 15+ but runs from 12, and three publish filters written for Windows break a macOS publish."
-verified: 2026-11-14
+summary: "sherpa-onnx 1.13.3's ONNX Runtime needed macOS 14.4; 2.0.3's loads on 13 and runs Parakeet there. Whisper.net declares 15.0 but loads on 13, .NET 10 supports 15+ but runs from 12, and three publish filters written for Windows break a macOS publish."
+verified: 2026-11-24
 ---
 
 # macOS version floors of the bundled native libraries
 
 Measured on the packages Parlotype pins, on an Intel Mac running macOS 13.7
 ([ADR-078](../decisions/078-macos-support.md)). Re-measure when a package is bumped.
+
+## After the dependency refresh (2026-11-24)
+
+[ADR-077](../decisions/077-dependency-refresh-naudio3-sharphook8-sherpa2.md) moved
+sherpa-onnx from 1.13.3 to 2.0.3, and that changes the one row everything else here was
+built around:
+
+| Library | Package | Declares (`minos`) | Actually needs |
+|---|---|---|---|
+| `libonnxruntime.dylib` (x64) | `org.k2fsa.sherpa.onnx.runtime.osx-x64` 2.0.3 | 10.15 | **Loads on 13.7.** `MLComputePlan` is still imported, but as a weak symbol. |
+| `libonnxruntime.dylib` (arm64) | `…osx-arm64` 2.0.3 | 11.0 | the same weak import; not run |
+| `libsherpa-onnx-c-api.dylib` | same | 10.15 | links `@rpath/libonnxruntime.dylib`, no version in the name any more |
+| `libwhisper.dylib` | `Whisper.net.Runtime` 1.9.1 | 15.0 | unchanged: still loads on 13.7 |
+| `libuiohook.dylib` | `SharpHook` 8.0.3 | 10.15 (x64), 11.0 (arm64) | |
+
+Checked by running it, not only by reading the headers: through sherpa-onnx 2.0.3 with the
+app's own configuration, Parakeet TDT v3 loaded on macOS 13.7.8 (Intel, i7-7820HQ) in
+4.5 s and transcribed a 6.0 s Russian clip in 0.54 s, correctly, three times.
+
+**The code has not caught up with this.** `SpeechEngineDefaults.IsParakeetAvailable` still
+says Parakeet needs macOS 14.4, and `LegacyOnnxRuntime` still loads Microsoft's 1.18.1 for
+the VAD below it. Both were right for 1.13.3 and are now more cautious than they need to
+be; nothing is broken by them. Whether to lift them is an open decision, because it also
+bears on which Macs are supported.
+
+## As measured for sherpa-onnx 1.13.3 (2026-11-14)
+
+What the rest of this note, ADR-078 and the workarounds in the code were written against.
 
 ## What each library needs
 

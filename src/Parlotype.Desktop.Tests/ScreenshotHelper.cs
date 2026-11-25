@@ -62,7 +62,7 @@ public static class ScreenshotHelper
         }
 
         using var ms = new MemoryStream();
-        bitmap.Save(ms);
+        bitmap.Save(ms, PngBitmapEncoderOptions.Default);
         var base64 = Convert.ToBase64String(ms.ToArray());
 
         window.Close();

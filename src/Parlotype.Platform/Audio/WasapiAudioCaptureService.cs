@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -8,12 +9,13 @@ using Parlotype.Core.Audio;
 namespace Parlotype.Platform.Audio;
 
 /// <summary>Windows audio capture using WASAPI via NAudio, resampled to 16 kHz mono 16-bit PCM.</summary>
+[SupportedOSPlatform("windows")]
 public sealed class WasapiAudioCaptureService : IAudioCaptureService
 {
     private static readonly AudioFormat TargetFormat = AudioFormat.Whisper;
 
     private readonly ILogger<WasapiAudioCaptureService> _logger;
-    private WasapiCapture? _capture;
+    private WasapiRecorder? _capture;
     private BufferedWaveProvider? _bufferedProvider;
     private ISampleProvider? _resampler;
     private int _nativeBlockAlign = 1;
@@ -57,7 +59,14 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
             mmDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
         }
 
-        _capture = new WasapiCapture(mmDevice);
+        // Shared mode, polling, 100 ms buffer: what the obsolete WasapiCapture(MMDevice)
+        // constructor implied. Unlike it, the recorder calls back once per WASAPI packet
+        // (~10 ms), see ADR-077.
+        _capture = new WasapiRecorderBuilder()
+            .WithDevice(mmDevice)
+            .WithPollingSync()
+            .WithBufferLength(100)
+            .Build();
         _logger.LogInformation("Starting audio capture on device: {DeviceName}", mmDevice.FriendlyName);
         _capture.DataAvailable += OnCaptureDataAvailable;
         _capture.RecordingStopped += OnRecordingStopped;
@@ -101,12 +110,13 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
         return Task.CompletedTask;
     }
 
-    private void OnCaptureDataAvailable(object? sender, WaveInEventArgs e)
+    private void OnCaptureDataAvailable(
+        ReadOnlySpan<byte> buffer, AudioClientBufferFlags flags, long devicePosition, long qpcPosition)
     {
-        if (e.BytesRecorded == 0 || _bufferedProvider is null || _resampler is null)
+        if (buffer.IsEmpty || _bufferedProvider is null || _resampler is null)
             return;
 
-        _bufferedProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
+        _bufferedProvider.AddSamples(buffer);
 
         // Request only ~2× the expected 16 kHz mono output for this callback.
         // The NAudio resampler chain allocates internally in proportion to the
@@ -117,9 +127,12 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
         // deterministic (input frames × rate ratio), so the 2× slack means a
         // single read consumes everything the resampler has; any filter-latency
         // remainder simply arrives with the next callback ~10 ms later.
-        int nativeFrames = e.BytesRecorded / _nativeBlockAlign;
+        int nativeFrames = buffer.Length / _nativeBlockAlign;
         int expectedSamples = (int)((long)nativeFrames * TargetFormat.SampleRate / _nativeSampleRate);
-        int requestSamples = Math.Max(expectedSamples * 2, 1024);
+        // The floor stays small on purpose: NAudio 3's WasapiRecorder raises one callback per
+        // WASAPI packet (~10 ms, 160 output samples), so a 1024-sample floor would more than
+        // triple the request, and with it the allocation, on every callback.
+        int requestSamples = Math.Max(expectedSamples * 2, 64);
 
         // Rented, not allocated; subscribers must copy during the event
         // (see AudioDataEventArgs.Buffer), so the buffer is returned right after.
@@ -129,7 +142,7 @@ public sealed class WasapiAudioCaptureService : IAudioCaptureService
             // Pass requestSamples, not floatBuffer.Length — the pool rounds the
             // buffer up to a power of two, and a bigger request directly
             // multiplies the resampler's internal allocations.
-            int samplesRead = _resampler.Read(floatBuffer, 0, requestSamples);
+            int samplesRead = _resampler.Read(floatBuffer.AsSpan(0, requestSamples));
 
             if (samplesRead <= 0)
                 return;
